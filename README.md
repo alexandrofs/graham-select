@@ -45,3 +45,46 @@ O diagrama acima mostra a arquitetura geral do **Graham Select**, incluindo os p
    ```bash
    git clone https://github.com/SEU_USUARIO/GrahamSelect.git
    cd graham-select
+   ```
+2. **Configuração do Frontend**
+
+Navegue até o diretório do frontend e instale as dependências:
+
+   ```bash
+   cd frontend
+   flutter pub get
+   flutter run
+   ```
+3. **Configuração da API**
+
+Navegue até o diretório da API e execute:
+
+   ```bash
+   cd api
+   ./mvnw spring-boot:run
+   ```
+4. **Configuração do Kafka**
+
+Siga as instruções na documentação do Kafka para configurar o Kafka localmente.
+
+5. **Configuração do Banco de Dados**
+
+Certifique-se de que o MySQL esteja em execução e configure o banco de dados conforme necessário.
+
+##Contribuindo
+
+Contribuições são bem-vindas! Siga os seguintes passos para contribuir:
+
+1. Faça um fork do repositório.
+2. Crie uma branch para suas modificações (git checkout -b feature/nova-funcionalidade).
+3. Faça commit das suas alterações (git commit -am 'Adiciona nova funcionalidade').
+4. Faça um push para a branch (git push origin feature/nova-funcionalidade).
+5. Abra um Pull Request.
+
+##Licença
+
+Este projeto está licenciado sob a MIT License.
+
+##Contato
+
+Para perguntas ou sugestões, entre em contato com afssistemas@gmail.com.
