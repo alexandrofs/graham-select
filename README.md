@@ -1,6 +1,6 @@
 # Graham Select
 
-**Graham Select** é um aplicativo para identificar as 10 empresas mais baratas usando a regra de Benjamin Graham. O sistema realiza a análise de dados financeiros para determinar quais empresas estão subvalorizadas, proporcionando insights valiosos para investidores.
+**Graham Select** é um aplicativo para identificar as 20 empresas mais baratas usando a regra de Benjamin Graham. O sistema realiza a análise de dados financeiros para determinar quais empresas estão subvalorizadas, proporcionando insights valiosos para investidores.
 
 ## Visão Geral
 
@@ -43,7 +43,7 @@ O diagrama acima mostra a arquitetura geral do **Graham Select**, incluindo os p
 1. **Clone o Repositório**
 
    ```bash
-   git clone https://github.com/SEU_USUARIO/GrahamSelect.git
+   git clone https://github.com/alexandrofs/graham-select.git
    cd graham-select
    ```
 2. **Configuração do Frontend**
