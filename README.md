@@ -1,10 +1,10 @@
-# GrahamSelect
+# Graham Select
 
-**GrahamSelect** é um aplicativo para identificar as 10 empresas mais baratas usando a regra de Benjamin Graham. O sistema realiza a análise de dados financeiros para determinar quais empresas estão subvalorizadas, proporcionando insights valiosos para investidores.
+**Graham Select** é um aplicativo para identificar as 10 empresas mais baratas usando a regra de Benjamin Graham. O sistema realiza a análise de dados financeiros para determinar quais empresas estão subvalorizadas, proporcionando insights valiosos para investidores.
 
 ## Visão Geral
 
-O **GrahamSelect** é composto por diversos serviços que trabalham juntos para processar e analisar dados financeiros. O sistema utiliza uma arquitetura baseada em microserviços, com um frontend interativo, uma API para processamento de dados, e serviços especializados para ingestão e análise de dados financeiros.
+O **Graham Select** é composto por diversos serviços que trabalham juntos para processar e analisar dados financeiros. O sistema utiliza uma arquitetura baseada em microserviços, com um frontend interativo, uma API para processamento de dados, e serviços especializados para ingestão e análise de dados financeiros.
 
 ### Funcionalidades
 
@@ -20,7 +20,7 @@ O **GrahamSelect** é composto por diversos serviços que trabalham juntos para 
 
 ![Diagrama C4](caminho/para/seu/diagrama.png)
 
-O diagrama acima mostra a arquitetura geral do **GrahamSelect**, incluindo os principais componentes e suas interações.
+O diagrama acima mostra a arquitetura geral do **Graham Select**, incluindo os principais componentes e suas interações.
 
 ## Tecnologias Utilizadas
 
@@ -44,4 +44,4 @@ O diagrama acima mostra a arquitetura geral do **GrahamSelect**, incluindo os pr
 
    ```bash
    git clone https://github.com/SEU_USUARIO/GrahamSelect.git
-   cd GrahamSelect
+   cd graham-select
