@@ -65,13 +65,13 @@ Navegue até o diretório da API e execute:
    ```
 4. **Configuração do Kafka**
 
-Siga as instruções na documentação do Kafka para configurar o Kafka localmente.
+   Siga as instruções na documentação do Kafka para configurar o Kafka localmente.
 
 5. **Configuração do Banco de Dados**
 
-Certifique-se de que o MySQL esteja em execução e configure o banco de dados conforme necessário.
+   Certifique-se de que o MySQL esteja em execução e configure o banco de dados conforme necessário.
 
-##Contribuindo
+## Contribuindo
 
 Contribuições são bem-vindas! Siga os seguintes passos para contribuir:
 
@@ -81,7 +81,7 @@ Contribuições são bem-vindas! Siga os seguintes passos para contribuir:
 4. Faça um push para a branch (git push origin feature/nova-funcionalidade).
 5. Abra um Pull Request.
 
-##Licença
+## Licença
 
 Este projeto está licenciado sob a MIT License.
 
