@@ -13,11 +13,13 @@ workspace {
             kafka = container "Kafka" {
                 description "Sistema de mensageria usado para a ingestão e processamento de dados"
                 technology "Apache Kafka"
+                tags "kafka"
             }
             
             database = container "Database" {
                 description "Armazena os dados financeiros e resultados do cálculo"
                 technology "MySql"
+                tags "database"
             }       
 
             apiApplication = container "API (Spring Boot)" {
@@ -109,12 +111,10 @@ workspace {
     views {
         systemContext softwareSystem {
             include *
-            autolayout lr
         }
 
         container softwareSystem {
             include *
-            autolayout lr
         }
 
         component apiApplication {
@@ -129,7 +129,15 @@ workspace {
         
         deployment * dev {
             include *
-            autolayout lr
+        }
+
+        styles {
+            element database {
+                shape Cylinder
+            }
+            element kafka {
+                shape Pipe
+            }
         }
 
 
