@@ -20,7 +20,7 @@ O **Graham Select** é composto por diversos serviços que trabalham juntos para
 
 ## Arquitetura
 
-![Diagrama C4](caminho/para/seu/diagrama.png)
+[Diagramas C4 Model](https://alexandrofs.github.io/graham-select)
 
 O diagrama acima mostra a arquitetura geral do **Graham Select**, incluindo os principais componentes e suas interações.
 
