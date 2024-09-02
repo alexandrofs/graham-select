@@ -65,12 +65,12 @@ workspace {
                 companyFinancialDataRepository1 = component "Repositório de dados financeiros empresas" {
                     description "Serviço de repositório de empresas"
                     technology "JPA"
-                    companyFinancialDataRepository1 -> database "Consulta tabela de dados de empresas"
+                    companyFinancialDataRepository1 -> database "Lê e grava na tabela de dados de empresas"
                 }                
                 companyRepository = component "Repositório de empresas" {
                     description "Serviço de repositório de empresas"
                     technology "JPA"
-                    companyRepository -> database "Consulta tabela de empresas"
+                    companyRepository -> database "Lê e grava na tabela de empresas"
                 }                
                 calculationService = component "Calculation Service" {
                     description "Realiza o cálculo de valor intrínseco das empresas"
@@ -90,12 +90,7 @@ workspace {
 
         user -> softwareSystem "Consulta e analisa as empresas mais baratas"
 
-
-
         user -> webApplication "Usa"
-        dataProcessor -> database "Armazena dados processados"
-
-        calculationService -> database "Lê e grava dados"
         
         dev = deploymentEnvironment "Dev" {
             deploymentNode "Kubernetes Cluster" {
