@@ -16,7 +16,7 @@ O **Graham Select** é composto por diversos serviços que trabalham juntos para
 - **Kafka**: Sistema de mensageria para comunicação entre serviços.
 - **Database (MySQL)**: Armazena dados financeiros e resultados dos cálculos.
 
-[Mais detalhes] (docs/visao-produto.md)
+[Mais detalhes](docs/visao-produto.md)
 
 ## Arquitetura
 
