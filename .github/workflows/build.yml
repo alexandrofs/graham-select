@@ -1,0 +1,20 @@
+name: ci-build
+run-name: Build id ${{ inputs.build_id }} by @${{ github.actor }}
+on:
+  push:
+    paths-ignore:
+      - 'frontend/**'
+      - 'docs/**'
+jobs:
+  build-job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '22'
+          distribution: 'temurin'
+      - name: Compile
+        run: mvn --batch-mode --update-snapshots compile
+      - name: Test
+        run: mvn --batch-mode test
