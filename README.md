@@ -85,7 +85,7 @@ Contribuições são bem-vindas! Siga os seguintes passos para contribuir:
 
 ## Licença
 
-Este projeto está licenciado sob a MIT License.
+Este projeto está licenciado sob a Apache 2.0 License.
 
 ## Contato
 
