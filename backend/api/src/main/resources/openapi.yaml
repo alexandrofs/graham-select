@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: Graham Select System - OpenAPI 3.0
+  version: 1.0.0
+  description: >-
+    Aplicativo para identificar as 20 empresas mais baratas usando a regra de
+    Benjamin Graham.
+  contact:
+    email: afssistemas@gmail.com
+    name: Alexandro Sousa
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://domain/api/v1
+tags:
+  - name: Financial Data
+    description: Dados financeiros das empresas
+paths:
+  /upload-financial-data:
+    post:
+      summary: Upload de arquivos de dados financeiros
+      description: Endpoint para enviar arquivos de dados financeiros para o sistema.
+      tags:
+        - Financial Data
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Arquivo CSV contendo dados financeiros das empresas.
+      responses:
+        '200':
+          description: Upload bem-sucedido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Arquivo carregado com sucesso."
+        '400':
+          description: Requisição inválida ou arquivo incorreto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erro ao processar o arquivo. Verifique o formato."
+        '500':
+          description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erro no servidor ao processar o upload."
+        default:
+          description: Erro inesperado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Erro inesperado. Entre em contato com o suporte."

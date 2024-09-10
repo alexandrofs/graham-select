@@ -1,0 +1,7 @@
+spring:
+  kafka:
+    consumer:
+      group-id: ${application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
