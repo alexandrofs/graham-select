@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: alexandrofs
+      changes:
+        - createTable:
+            tableName: company
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: ticker
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+
+        - addUniqueConstraint:
+            columnNames: ticker
+            tableName: company
+            constraintName: unique_ticker

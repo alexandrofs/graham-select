@@ -1,9 +1,11 @@
 package afsdigital.grahamselect.common.domain.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.UUID;
 
+@AllArgsConstructor
 @Getter
 public class Company {
 

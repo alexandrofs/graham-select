@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: yourname
+      changes:
+        - createTable:
+            tableName: company_intrinsic_value
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: company_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: calculation_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: intrinsic_value
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: company_intrinsic_value
+            baseColumnNames: company_id
+            constraintName: fk_company
+            referencedTableName: company
+            referencedColumnNames: id

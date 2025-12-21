@@ -8,12 +8,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MySQLContainer;
 
 import java.time.Duration;
 
 @SpringBootTest
 @EmbeddedKafka(topics = "some-topic", partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
 public class ValuationConsumerServiceContextTest {
+
+    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.28")
+            .withDatabaseName("grahamselect")
+            .withUsername("root")
+            .withPassword("password");
+
+    @DynamicPropertySource
+    static void configureTestContainers(DynamicPropertyRegistry registry) {
+        mysql.start();
+        registry.add("spring.datasource.url", mysql::getJdbcUrl);
+        registry.add("spring.datasource.username", mysql::getUsername);
+        registry.add("spring.datasource.password", mysql::getPassword);
+    }
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
