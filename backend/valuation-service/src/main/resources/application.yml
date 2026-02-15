@@ -12,3 +12,8 @@ spring:
         spring.json.trusted.packages: "afsdigital.grahamselect.*"
         spring.json.key.default.type: "afsdigital.grahamselect.common.domain.entities.FinancialDataKey"
         spring.json.value.default.type: "afsdigital.grahamselect.common.domain.entities.FinancialDataEvent"
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
