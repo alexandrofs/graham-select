@@ -5,16 +5,25 @@ import afsdigital.grahamselect.valuation.application.repository.IntrinsicValueRe
 import afsdigital.grahamselect.valuation.application.service.CompanyLookupService;
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;
 import afsdigital.grahamselect.valuation.application.usecase.CalculationIntrinsicValueUseCase;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.CompanyRepositoryImpl;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.IntrinsicValueRepositoryImpl;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {
-        "afsdigital.grahamselect.valuation.infrastructure",
-        "afsdigital.grahamselect.valuation.application"
-})
 public class ValuationServiceConfiguration {
+
+    @Bean
+    public CompanyRepository companyRepository(CompanyJpaRepository companyJpaRepository) {
+        return new CompanyRepositoryImpl(companyJpaRepository);
+    }
+
+    @Bean
+    public IntrinsicValueRepository intrinsicValueRepository(IntrinsicValueJpaRepository intrinsicValueJpaRepository) {
+        return new IntrinsicValueRepositoryImpl(intrinsicValueJpaRepository);
+    }
 
     @Bean
     public IntrinsicValueCalculatorService intrinsicValueCalculatorService() {
