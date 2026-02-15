@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4f6be8cf-09c5-4f64-9fcd-14ce4bb81cce" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/common/src/main/resources/db/changelog/01-create-company-table.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/common/src/main/resources/db/changelog/02-create-company-intrinsic-value-table.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/CompanyRepositoryImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/JpaConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/CompanyEntity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/repository/CompanyJpaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/valuation-service/src/main/resources/db/changelog/db.changelog-master.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/common/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/common/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/common/src/main/java/afsdigital/grahamselect/common/domain/entities/Company.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/common/src/main/java/afsdigital/grahamselect/common/domain/entities/Company.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/valuation-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/valuation-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/valuation-service/src/test/java/afsdigital/grahamselect/valuation/ValuationConsumerServiceContextTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/valuation-service/src/test/java/afsdigital/grahamselect/valuation/ValuationConsumerServiceContextTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;alexandrofs&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/alexandrofs/graham-select.git&quot;,
+    &quot;accountId&quot;: &quot;94e19b6e-7f8f-4677-9b42-f23a7e032805&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2lXbFfCiLuc6PMiJkb5swPxP8OY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "feature/armazenar-dados-processados",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/alexandrofs/Documents/projects/graham-select",
+    "settings.editor.selected.configurable": "com.android.studio.ml.bot.mainConfigurable"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-26cb7f24e5b0-intellij.indexing.shared.core-IU-253.29346.138" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4f6be8cf-09c5-4f64-9fcd-14ce4bb81cce" name="Changes" comment="" />
+      <created>1725329266027</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1725329266027</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>

@@ -1,10 +1,14 @@
 spring:
+  application:
+    name: valuation-consumer-service
   kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: localhost:9092
     consumer:
-      group-id: ${application.name}
+      group-id: valuation-consumer-group
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "afsdigital.grahamselect.*"
+        spring.json.key.default.type: "afsdigital.grahamselect.common.domain.entities.FinancialDataKey"
+        spring.json.value.default.type: "afsdigital.grahamselect.common.domain.entities.FinancialDataEvent"
