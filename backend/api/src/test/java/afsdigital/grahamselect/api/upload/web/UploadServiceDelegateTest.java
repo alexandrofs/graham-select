@@ -1,5 +1,7 @@
 package afsdigital.grahamselect.api.upload.web;
 
+import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
+
 import afsdigital.grahamselect.common.domain.entities.FinancialDataEvent;
 import afsdigital.grahamselect.common.domain.entities.FinancialDataKey;
 import afsdigital.grahamselect.common.domain.entities.TopicConstants;
@@ -9,7 +11,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
@@ -25,10 +26,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.io.IOException;
 import java.time.Duration;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 @EmbeddedKafka(topics = TopicConstants.FINANCIAL_DATA_TOPIC, partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
-public class UploadServiceDelegateTest {
+@AutoConfigureMockMvc
+public class UploadServiceDelegateTest extends BaseRepositoryIT {
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -45,16 +45,19 @@ public class UploadServiceDelegateTest {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
 
-        MockMultipartFile multipartFile = new MockMultipartFile("file", new ClassPathResource("test-financial-data.csv").getInputStream());
+        MockMultipartFile multipartFile = new MockMultipartFile("file",
+                new ClassPathResource("test-financial-data.csv").getInputStream());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.POST, "/api/v1/upload-financial-data")
                 .file(multipartFile)).andExpect(MockMvcResultMatchers.status().is(200));
 
         kafkaTemplate.setConsumerFactory(defaultKafkaConsumerFactory);
-        ConsumerRecord<String, String> consumerRecord = kafkaTemplate.receive(TopicConstants.FINANCIAL_DATA_TOPIC, 0, 0, Duration.ofSeconds(1));
+        ConsumerRecord<String, String> consumerRecord = kafkaTemplate.receive(TopicConstants.FINANCIAL_DATA_TOPIC, 0, 0,
+                Duration.ofSeconds(1));
         assert consumerRecord != null;
         FinancialDataKey financialDataKey = objectMapper.readValue(consumerRecord.key(), FinancialDataKey.class);
-        FinancialDataEvent financialDataEvent = objectMapper.readValue(consumerRecord.value(), FinancialDataEvent.class);
+        FinancialDataEvent financialDataEvent = objectMapper.readValue(consumerRecord.value(),
+                FinancialDataEvent.class);
         Assertions.assertThat(financialDataKey.getTicker()).isEqualTo("AALR3");
         Assertions.assertThat(financialDataEvent.getTicker()).isEqualTo("AALR3");
 
