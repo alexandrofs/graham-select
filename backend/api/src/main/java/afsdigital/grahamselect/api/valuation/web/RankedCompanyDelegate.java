@@ -4,11 +4,13 @@ import afsdigital.grahamselect.api.RankedCompaniesApiDelegate;
 import afsdigital.grahamselect.model.RankedCompany;
 import afsdigital.grahamselect.valuation.application.usecase.GetRankedCompaniesUseCase;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RankedCompanyDelegate implements RankedCompaniesApiDelegate {
@@ -17,6 +19,7 @@ public class RankedCompanyDelegate implements RankedCompaniesApiDelegate {
 
     @Override
     public ResponseEntity<List<RankedCompany>> rankedCompaniesGet() {
+        log.info("Handling request to get ranked companies");
         List<RankedCompany> response = getRankedCompaniesUseCase.execute().stream()
                 .map(domain -> {
                     RankedCompany apiModel = new RankedCompany();
