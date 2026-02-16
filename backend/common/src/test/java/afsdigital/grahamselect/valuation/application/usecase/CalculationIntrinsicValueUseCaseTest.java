@@ -3,8 +3,7 @@ package afsdigital.grahamselect.valuation.application.usecase;
 import afsdigital.grahamselect.common.domain.entities.Company;
 import afsdigital.grahamselect.common.domain.entities.FinancialDataEvent;
 import afsdigital.grahamselect.valuation.application.dto.FinancialDataDto;
-import afsdigital.grahamselect.valuation.application.repository.IntrinsicValueRepository;
-import afsdigital.grahamselect.valuation.application.repository.StockPriceRepository;
+import afsdigital.grahamselect.valuation.application.repository.ValuationRepository;
 import afsdigital.grahamselect.valuation.application.service.CompanyLookupService;
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;
 import afsdigital.grahamselect.valuation.application.usecase.exceptions.InvalidFinancialDataEventException;
@@ -36,10 +35,7 @@ public class CalculationIntrinsicValueUseCaseTest {
     private CompanyLookupService companyLookupService;
 
     @Mock
-    private IntrinsicValueRepository intrinsicValueRepository;
-
-    @Mock
-    private StockPriceRepository stockPriceRepository;
+    private ValuationRepository valuationRepository;
 
     @InjectMocks
     private CalculationIntrinsicValueUseCase calculationIntrinsicValueUseCase;
@@ -64,16 +60,14 @@ public class CalculationIntrinsicValueUseCaseTest {
         calculationIntrinsicValueUseCase.process(financialDataEvent);
 
         ArgumentCaptor<IntrinsicValue> intrinsicValueCaptor = ArgumentCaptor.forClass(IntrinsicValue.class);
-        verify(intrinsicValueRepository).save(intrinsicValueCaptor.capture());
+        ArgumentCaptor<StockPrice> stockPriceCaptor = ArgumentCaptor.forClass(StockPrice.class);
+        verify(valuationRepository).saveValuationData(intrinsicValueCaptor.capture(), stockPriceCaptor.capture());
 
         IntrinsicValue savedIntrinsicValue = intrinsicValueCaptor.getValue();
         assertNotNull(savedIntrinsicValue);
         assertNotNull(savedIntrinsicValue.getCompanyId());
         assertEquals(LocalDate.of(2024, 1, 1), savedIntrinsicValue.getCalculationDate());
         assertEquals(BigDecimal.valueOf(100.0).round(new MathContext(2)), savedIntrinsicValue.getValue());
-
-        ArgumentCaptor<StockPrice> stockPriceCaptor = ArgumentCaptor.forClass(StockPrice.class);
-        verify(stockPriceRepository).save(stockPriceCaptor.capture());
 
         StockPrice savedStockPrice = stockPriceCaptor.getValue();
         assertEquals(company.getId(), savedStockPrice.getCompanyId());
