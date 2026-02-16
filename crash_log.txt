@@ -1,0 +1,40 @@
+Building flutter tool...
+Resolving dependencies...
+Downloading packages...
+Got dependencies.
+Unhandled exception:
+Error: Flutter failed to create a directory at "/Users/alexandrofs/.config/flutter".
+Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.
+
+#0      throwToolExit (package:flutter_tools/src/base/common.dart:34:3)
+#1      _throwFileSystemException (package:flutter_tools/src/base/error_handling_io.dart:828:3)
+#2      _handlePosixException (package:flutter_tools/src/base/error_handling_io.dart:737:3)
+#3      _runSync (package:flutter_tools/src/base/error_handling_io.dart:562:7)
+#4      ErrorHandlingDirectory.createSync (package:flutter_tools/src/base/error_handling_io.dart:398:12)
+#5      new Config._common (package:flutter_tools/src/base/config.dart:71:17)
+#6      new Config (package:flutter_tools/src/base/config.dart:37:19)
+#7      new _DefaultPersistentToolState (package:flutter_tools/src/persistent_tool_state.dart:56:18)
+#8      runInContext.<anonymous closure> (package:flutter_tools/src/context_runner.dart:294:34)
+#9      AppContext._generateIfNecessary.<anonymous closure> (package:flutter_tools/src/base/context.dart:108:42)
+#10     _LinkedHashMapMixin.putIfAbsent (dart:_compact_hash:675:23)
+#11     AppContext._generateIfNecessary (package:flutter_tools/src/base/context.dart:95:20)
+#12     AppContext.get (package:flutter_tools/src/base/context.dart:125:32)
+#13     PersistentToolState.instance (package:flutter_tools/src/persistent_tool_state.dart:26:55)
+#14     persistentToolState (package:flutter_tools/src/globals.dart:83:69)
+#15     _defaultBotDetector (package:flutter_tools/src/globals.dart:90:7)
+#16     _defaultBotDetector (package:flutter_tools/src/globals.dart)
+#17     botDetector (package:flutter_tools/src/globals.dart:85:62)
+#18     isRunningOnBot (package:flutter_tools/src/globals.dart:93:36)
+#19     runInContext.runnerWrapper (package:flutter_tools/src/context_runner.dart:77:34)
+#20     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:29)
+#21     _rootRun (dart:async/zone_root.dart:35:13)
+#22     _CustomZone.run (dart:async/zone.dart:726:19)
+#23     _runZoned (dart:async/zone_api.dart:166:6)
+#24     runZoned (dart:async/zone_api.dart:92:10)
+#25     AppContext.run (package:flutter_tools/src/base/context.dart:153:12)
+#26     runInContext (package:flutter_tools/src/context_runner.dart:83:18)
+#27     run (package:flutter_tools/runner.dart:54:10)
+#28     main (package:flutter_tools/executable.dart:103:16)
+#29     main (file:///Users/alexandrofs/development/flutter/packages/flutter_tools/bin/flutter_tools.dart:8:14)
+#30     _delayEntrypointInvocation.<anonymous closure> (dart:isolate-patch/isolate_patch.dart:312:33)
+#31     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:193:12)
