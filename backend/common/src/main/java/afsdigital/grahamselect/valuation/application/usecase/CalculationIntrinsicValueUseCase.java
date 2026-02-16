@@ -2,8 +2,7 @@ package afsdigital.grahamselect.valuation.application.usecase;
 
 import afsdigital.grahamselect.common.domain.entities.Company;
 import afsdigital.grahamselect.common.domain.entities.FinancialDataEvent;
-import afsdigital.grahamselect.valuation.application.repository.IntrinsicValueRepository;
-import afsdigital.grahamselect.valuation.application.repository.StockPriceRepository;
+import afsdigital.grahamselect.valuation.application.repository.ValuationRepository;
 import afsdigital.grahamselect.valuation.application.service.CompanyLookupService;
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;
 import afsdigital.grahamselect.valuation.application.dto.FinancialDataDto;
@@ -23,8 +22,7 @@ public class CalculationIntrinsicValueUseCase {
 
     private final IntrinsicValueCalculatorService valueCalculatorService;
     private final CompanyLookupService companyLookupService;
-    private final IntrinsicValueRepository intrinsicValueRepository;
-    private final StockPriceRepository stockPriceRepository;
+    private final ValuationRepository valuationRepository;
 
     public void process(FinancialDataEvent financialDataEvent) {
         validate(financialDataEvent);
@@ -50,8 +48,7 @@ public class CalculationIntrinsicValueUseCase {
                 .price(BigDecimal.valueOf(financialDataEvent.getPrice()))
                 .build();
 
-        intrinsicValueRepository.save(intrinsicValue);
-        stockPriceRepository.save(stockPrice);
+        valuationRepository.saveValuationData(intrinsicValue, stockPrice);
     }
 
     private void validate(FinancialDataEvent financialDataEvent) {

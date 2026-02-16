@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,10 +24,17 @@ public class RankCompaniesServiceTest {
     private RankCompaniesService rankCompaniesService;
 
     @Test
-    public void shouldReturnEmptyListWhenRankingIsPostponed() {
+    public void shouldReturnRankedCompanies() {
+        IntrinsicValue iv = IntrinsicValue.builder()
+                .companyId("VALE3")
+                .value(BigDecimal.valueOf(100.0))
+                .build();
+        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(iv));
+
         List<IntrinsicValue> result = rankCompaniesService.rankCompanies();
 
-        assertEquals(0, result.size());
-        verifyNoInteractions(rankingRepository);
+        assertEquals(1, result.size());
+        assertEquals("VALE3", result.get(0).getCompanyId());
+        verify(rankingRepository).findTop20BestRanked();
     }
 }
