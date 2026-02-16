@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: alexandrofs
+      changes:
+        - addColumn:
+            tableName: company_intrinsic_value
+            columns:
+              - column:
+                  name: price
+                  type: DECIMAL(19,2)

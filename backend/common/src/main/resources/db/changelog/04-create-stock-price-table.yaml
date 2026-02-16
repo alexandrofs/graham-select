@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: alexandrofs
+      changes:
+        - createTable:
+            tableName: stock_price
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: company_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: stock_price
+            baseColumnNames: company_id
+            constraintName: fk_stock_price_company
+            referencedTableName: company
+            referencedColumnNames: id

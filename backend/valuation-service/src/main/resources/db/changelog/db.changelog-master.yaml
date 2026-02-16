@@ -3,3 +3,9 @@ databaseChangeLog:
       file: db/changelog/01-create-company-table.yaml
   - include:
       file: db/changelog/02-create-company-intrinsic-value-table.yaml
+  - include:
+      file: db/changelog/03-add-price-to-intrinsic-value.yaml
+  - include:
+      file: db/changelog/04-create-stock-price-table.yaml
+  - include:
+      file: db/changelog/05-remove-price-from-intrinsic-value.yaml

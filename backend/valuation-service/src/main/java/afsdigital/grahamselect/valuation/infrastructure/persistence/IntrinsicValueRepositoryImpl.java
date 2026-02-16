@@ -28,8 +28,8 @@ public class IntrinsicValueRepositoryImpl implements IntrinsicValueRepository {
     }
 
     @Override
-    public List<IntrinsicValue> findTop20ByOrderByIntrinsicValueAsc() {
-        return intrinsicValueJpaRepository.findTop20ByOrderByIntrinsicValueAsc().stream()
+    public List<IntrinsicValue> findTop20BestRanked() {
+        return intrinsicValueJpaRepository.findTop20BestRanked().stream()
                 .map(entity -> IntrinsicValue.builder()
                         .companyId(entity.getCompanyId())
                         .calculationDate(entity.getCalculationDate())
