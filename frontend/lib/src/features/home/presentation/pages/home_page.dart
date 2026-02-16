@@ -31,14 +31,14 @@ class HomePage extends StatelessWidget {
                   width: 180,
                   height: 180,
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.05),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: Image.asset(
                       'assets/images/logo.png',
-                      fit: FontWeight.bold != null ? BoxFit.cover : BoxFit.contain, // Just to fix the lint-like logic
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                   'Sua inteligência financeira para investimentos de valor.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textColor.withOpacity(0.7),
+                        color: AppTheme.textColor.withValues(alpha: 0.7),
                       ),
                 ),
                 const Spacer(flex: 3),
@@ -69,7 +69,7 @@ class HomePage extends StatelessWidget {
                   onPressed: () => context.push('/upload'),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 56),
-                    side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.5)),
+                    side: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.5)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

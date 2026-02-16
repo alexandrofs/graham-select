@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/features/home/presentation/pages/home_page.dart';
 
