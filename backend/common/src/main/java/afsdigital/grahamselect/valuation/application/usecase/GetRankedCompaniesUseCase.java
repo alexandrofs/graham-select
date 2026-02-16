@@ -1,21 +1,17 @@
-package afsdigital.grahamselect.valuation.application.service;
+package afsdigital.grahamselect.valuation.application.usecase;
 
 import afsdigital.grahamselect.valuation.application.repository.RankingRepository;
 import afsdigital.grahamselect.valuation.domain.entities.RankedCompany;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
-public class RankCompaniesService {
+public class GetRankedCompaniesUseCase {
 
     private final RankingRepository rankingRepository;
 
-    public List<RankedCompany> rankCompanies() {
-        log.info("Fetching top 20 companies ranked by intrinsic value / price ratio");
+    public List<RankedCompany> execute() {
         return rankingRepository.findTop20BestRanked();
     }
-
 }

@@ -2,7 +2,7 @@ package afsdigital.grahamselect.api.valuation.infrastructure.persistence;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.RankingJpaRepository;
 import afsdigital.grahamselect.valuation.application.repository.RankingRepository;
-import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
+import afsdigital.grahamselect.valuation.domain.entities.RankedCompany;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -15,12 +15,14 @@ public class RankingRepositoryImpl implements RankingRepository {
     private final RankingJpaRepository rankingJpaRepository;
 
     @Override
-    public List<IntrinsicValue> findTop20BestRanked() {
+    public List<RankedCompany> findTop20BestRanked() {
         return rankingJpaRepository.findTop20BestRanked().stream()
-                .map(entity -> IntrinsicValue.builder()
-                        .companyId(entity.getCompanyId())
-                        .calculationDate(entity.getCalculationDate())
-                        .value(entity.getIntrinsicValue())
+                .map(entity -> RankedCompany.builder()
+                        .symbol(entity.getSymbol())
+                        .name(entity.getName())
+                        .intrinsicValue(entity.getIntrinsicValue())
+                        .currentPrice(entity.getCurrentPrice())
+                        .marginOfSafety(entity.getMarginOfSafety())
                         .build())
                 .toList();
     }

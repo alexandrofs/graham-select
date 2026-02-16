@@ -1,14 +1,15 @@
 package afsdigital.grahamselect.valuation.infrastructure.spring;
 
 import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
-import afsdigital.grahamselect.valuation.application.repository.IntrinsicValueRepository;
+import afsdigital.grahamselect.valuation.application.repository.ValuationRepository;
 import afsdigital.grahamselect.valuation.application.service.CompanyLookupService;
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;
 import afsdigital.grahamselect.valuation.application.usecase.CalculationIntrinsicValueUseCase;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.CompanyRepositoryImpl;
-import afsdigital.grahamselect.valuation.infrastructure.persistence.IntrinsicValueRepositoryImpl;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.ValuationRepositoryImpl;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,8 +22,10 @@ public class ValuationServiceConfiguration {
     }
 
     @Bean
-    public IntrinsicValueRepository intrinsicValueRepository(IntrinsicValueJpaRepository intrinsicValueJpaRepository) {
-        return new IntrinsicValueRepositoryImpl(intrinsicValueJpaRepository);
+    public ValuationRepository valuationRepository(
+            IntrinsicValueJpaRepository intrinsicValueJpaRepository,
+            StockPriceJpaRepository stockPriceJpaRepository) {
+        return new ValuationRepositoryImpl(intrinsicValueJpaRepository, stockPriceJpaRepository);
     }
 
     @Bean
@@ -39,10 +42,10 @@ public class ValuationServiceConfiguration {
     public CalculationIntrinsicValueUseCase calculationIntrinsicValueUseCase(
             IntrinsicValueCalculatorService intrinsicValueCalculatorService,
             CompanyLookupService companyLookupService,
-            IntrinsicValueRepository intrinsicValueRepository) {
+            ValuationRepository valuationRepository) {
         return new CalculationIntrinsicValueUseCase(
                 intrinsicValueCalculatorService,
                 companyLookupService,
-                intrinsicValueRepository);
+                valuationRepository);
     }
 }

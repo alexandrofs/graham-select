@@ -75,3 +75,54 @@ paths:
                   error:
                     type: string
                     example: "Erro inesperado. Entre em contato com o suporte."
+  /ranked-companies:
+    get:
+      summary: Consulta das empresas ranqueadas
+      description: Retorna as 20 empresas mais baratas com base no cálculo do valor intrínseco.
+      tags:
+        - Financial Data
+      responses:
+        '200':
+          description: Lista de empresas ranqueadas retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RankedCompany'
+        '500':
+          description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    RankedCompany:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: "PETR4"
+        name:
+          type: string
+          example: "Petrobras"
+        intrinsicValue:
+          type: number
+          format: double
+          example: 45.50
+        currentPrice:
+          type: number
+          format: double
+          example: 35.20
+        marginOfSafety:
+          type: number
+          format: double
+          example: 0.22
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Erro interno no servidor."

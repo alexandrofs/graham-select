@@ -1,7 +1,7 @@
 package afsdigital.grahamselect.valuation.application.service;
 
 import afsdigital.grahamselect.valuation.application.repository.RankingRepository;
-import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
+import afsdigital.grahamselect.valuation.domain.entities.RankedCompany;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,16 +25,16 @@ public class RankCompaniesServiceTest {
 
     @Test
     public void shouldReturnRankedCompanies() {
-        IntrinsicValue iv = IntrinsicValue.builder()
-                .companyId("VALE3")
-                .value(BigDecimal.valueOf(100.0))
+        RankedCompany company = RankedCompany.builder()
+                .symbol("VALE3")
+                .intrinsicValue(BigDecimal.valueOf(100.0))
                 .build();
-        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(iv));
+        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(company));
 
-        List<IntrinsicValue> result = rankCompaniesService.rankCompanies();
+        List<RankedCompany> result = rankCompaniesService.rankCompanies();
 
         assertEquals(1, result.size());
-        assertEquals("VALE3", result.get(0).getCompanyId());
+        assertEquals("VALE3", result.get(0).getSymbol());
         verify(rankingRepository).findTop20BestRanked();
     }
 }
