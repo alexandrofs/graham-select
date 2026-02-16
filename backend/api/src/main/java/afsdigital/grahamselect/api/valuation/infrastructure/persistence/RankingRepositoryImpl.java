@@ -4,10 +4,12 @@ import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repo
 import afsdigital.grahamselect.valuation.application.repository.RankingRepository;
 import afsdigital.grahamselect.valuation.domain.entities.RankedCompany;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class RankingRepositoryImpl implements RankingRepository {
@@ -16,6 +18,7 @@ public class RankingRepositoryImpl implements RankingRepository {
 
     @Override
     public List<RankedCompany> findTop20BestRanked() {
+        log.info("Querying top 20 ranked companies from database");
         return rankingJpaRepository.findTop20BestRanked().stream()
                 .map(entity -> RankedCompany.builder()
                         .symbol(entity.getSymbol())

@@ -2,7 +2,7 @@ package afsdigital.grahamselect.api.valuation.web;
 
 import afsdigital.grahamselect.api.RankedCompaniesApiDelegate;
 import afsdigital.grahamselect.model.RankedCompany;
-import afsdigital.grahamselect.valuation.application.service.RankCompaniesService;
+import afsdigital.grahamselect.valuation.application.usecase.GetRankedCompaniesUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,11 +13,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RankedCompanyDelegate implements RankedCompaniesApiDelegate {
 
-    private final RankCompaniesService rankCompaniesService;
+    private final GetRankedCompaniesUseCase getRankedCompaniesUseCase;
 
     @Override
     public ResponseEntity<List<RankedCompany>> rankedCompaniesGet() {
-        List<RankedCompany> response = rankCompaniesService.rankCompanies().stream()
+        List<RankedCompany> response = getRankedCompaniesUseCase.execute().stream()
                 .map(domain -> {
                     RankedCompany apiModel = new RankedCompany();
                     apiModel.setSymbol(domain.getSymbol());
