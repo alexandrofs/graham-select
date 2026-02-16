@@ -25,9 +25,9 @@ class AppTheme {
       ),
       textTheme: GoogleFonts.outfitTextTheme(
         ThemeData.dark().textTheme.apply(
-              bodyColor: textColor,
-              displayColor: textColor,
-            ),
+          bodyColor: textColor,
+          displayColor: textColor,
+        ),
       ),
       cardTheme: CardThemeData(
         color: surfaceColor,
@@ -45,10 +45,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
