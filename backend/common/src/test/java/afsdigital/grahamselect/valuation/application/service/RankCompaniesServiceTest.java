@@ -24,17 +24,10 @@ public class RankCompaniesServiceTest {
     private RankCompaniesService rankCompaniesService;
 
     @Test
-    public void shouldReturnRankedCompanies() {
-        List<IntrinsicValue> expectedRank = List.of(
-                IntrinsicValue.builder().companyId("1").value(new BigDecimal("10.00")).build(),
-                IntrinsicValue.builder().companyId("2").value(new BigDecimal("20.00")).build());
-
-        when(intrinsicValueRepository.findTop20BestRanked()).thenReturn(expectedRank);
-
+    public void shouldReturnEmptyListWhenRankingIsPostponed() {
         List<IntrinsicValue> result = rankCompaniesService.rankCompanies();
 
-        assertEquals(2, result.size());
-        assertEquals(expectedRank, result);
-        verify(intrinsicValueRepository, times(1)).findTop20BestRanked();
+        assertEquals(0, result.size());
+        verifyNoInteractions(intrinsicValueRepository);
     }
 }

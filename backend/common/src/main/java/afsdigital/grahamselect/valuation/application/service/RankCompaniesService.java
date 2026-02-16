@@ -14,8 +14,8 @@ public class RankCompaniesService {
     private final IntrinsicValueRepository intrinsicValueRepository;
 
     public List<IntrinsicValue> rankCompanies() {
-        log.info("Fetching top 20 companies ranked by intrinsic value / price ratio");
-        return intrinsicValueRepository.findTop20BestRanked();
+        log.info("Ranking logic postponed to API issue");
+        return List.of();
     }
 
 }
