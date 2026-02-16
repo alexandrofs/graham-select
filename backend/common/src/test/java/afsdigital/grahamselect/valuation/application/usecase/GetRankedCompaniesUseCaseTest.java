@@ -1,4 +1,4 @@
-package afsdigital.grahamselect.valuation.application.service;
+package afsdigital.grahamselect.valuation.application.usecase;
 
 import afsdigital.grahamselect.valuation.application.repository.RankingRepository;
 import afsdigital.grahamselect.valuation.domain.entities.RankedCompany;
@@ -12,16 +12,17 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class RankCompaniesServiceTest {
+public class GetRankedCompaniesUseCaseTest {
 
     @Mock
     private RankingRepository rankingRepository;
 
     @InjectMocks
-    private RankCompaniesService rankCompaniesService;
+    private GetRankedCompaniesUseCase getRankedCompaniesUseCase;
 
     @Test
     public void shouldReturnRankedCompanies() {
@@ -31,7 +32,7 @@ public class RankCompaniesServiceTest {
                 .build();
         when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(company));
 
-        List<RankedCompany> result = rankCompaniesService.rankCompanies();
+        List<RankedCompany> result = getRankedCompaniesUseCase.execute();
 
         assertEquals(1, result.size());
         assertEquals("VALE3", result.get(0).getSymbol());
