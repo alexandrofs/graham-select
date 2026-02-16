@@ -4,6 +4,10 @@ import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IntrinsicValueJpaRepository extends JpaRepository<IntrinsicValueEntity, String> {
+
+    List<IntrinsicValueEntity> findTop20ByOrderByIntrinsicValueAsc();
 }
