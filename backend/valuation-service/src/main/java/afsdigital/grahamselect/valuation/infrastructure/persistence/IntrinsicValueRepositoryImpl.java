@@ -7,6 +7,7 @@ import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.reposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -24,6 +25,17 @@ public class IntrinsicValueRepositoryImpl implements IntrinsicValueRepository {
                 .intrinsicValue(intrinsicValue.getValue())
                 .build();
         intrinsicValueJpaRepository.save(intrinsicValueEntity);
+    }
+
+    @Override
+    public List<IntrinsicValue> findTop20ByOrderByIntrinsicValueAsc() {
+        return intrinsicValueJpaRepository.findTop20ByOrderByIntrinsicValueAsc().stream()
+                .map(entity -> IntrinsicValue.builder()
+                        .companyId(entity.getCompanyId())
+                        .calculationDate(entity.getCalculationDate())
+                        .value(entity.getIntrinsicValue())
+                        .build())
+                .toList();
     }
 
 }
