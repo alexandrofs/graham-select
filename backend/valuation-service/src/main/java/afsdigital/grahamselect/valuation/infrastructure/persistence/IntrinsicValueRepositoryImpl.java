@@ -26,16 +26,4 @@ public class IntrinsicValueRepositoryImpl implements IntrinsicValueRepository {
                 .build();
         intrinsicValueJpaRepository.save(intrinsicValueEntity);
     }
-
-    @Override
-    public List<IntrinsicValue> findTop20BestRanked() {
-        return intrinsicValueJpaRepository.findTop20BestRanked().stream()
-                .map(entity -> IntrinsicValue.builder()
-                        .companyId(entity.getCompanyId())
-                        .calculationDate(entity.getCalculationDate())
-                        .value(entity.getIntrinsicValue())
-                        .build())
-                .toList();
-    }
-
 }

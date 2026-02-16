@@ -3,7 +3,6 @@ package afsdigital.grahamselect.valuation.infrastructure.persistence;
 import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.CompanyEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.IntrinsicValueEntity;
-import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.StockPriceEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -181,72 +179,6 @@ class IntrinsicValueRepositoryImplIT extends BaseRepositoryIT {
                                 .hasSize(1)
                                 .extracting(IntrinsicValueEntity::getIntrinsicValue)
                                 .contains(preciseValue);
-        }
-
-        @Test
-        void shouldReturnTop20BestRankedCompanies() {
-                // Arrange: Create calculations for 25 companies
-                // To test "latest", we'll add 2 calculations for some companies
-                IntStream.range(0, 25).forEach(i -> {
-                        CompanyEntity company = CompanyEntity.builder()
-                                        .id(UUID.randomUUID().toString())
-                                        .ticker("TICKER" + i)
-                                        .name("Company " + i)
-                                        .build();
-                        companyJpaRepository.save(company);
-
-                        IntrinsicValueEntity oldIv = IntrinsicValueEntity.builder()
-                                        .id(UUID.randomUUID().toString())
-                                        .companyId(company.getId())
-                                        .calculationDate(LocalDate.now().minusDays(10))
-                                        .intrinsicValue(BigDecimal.valueOf(1000)) // Very high ratio but old
-                                        .build();
-                        intrinsicValueJpaRepository.save(oldIv);
-
-                        // Save price to new table
-                        // Price = 10 for all companies
-                        stockPriceJpaRepository.save(StockPriceEntity.builder()
-                                        .id(UUID.randomUUID().toString())
-                                        .companyId(company.getId())
-                                        .priceDate(LocalDate.now())
-                                        .price(BigDecimal.valueOf(10))
-                                        .build());
-
-                        // Latest calculation
-                        // Ratio = (100-i) / 10.
-                        // i=0 -> 100/10=10 (best)
-                        // i=24 -> 76/10=7.6 (worst)
-                        IntrinsicValueEntity latestIv = IntrinsicValueEntity.builder()
-                                        .id(UUID.randomUUID().toString())
-                                        .companyId(company.getId())
-                                        .calculationDate(LocalDate.now())
-                                        .intrinsicValue(BigDecimal.valueOf(100 - i))
-                                        .build();
-                        intrinsicValueJpaRepository.save(latestIv);
-                });
-
-                // Act
-                List<IntrinsicValue> result = intrinsicValueRepository.findTop20BestRanked();
-
-                // Assert
-                assertThat(result).hasSize(20);
-
-                // The first should be TICKER0 (Ratio 10.0)
-                assertThat(result.get(0).getValue()).isEqualByComparingTo(BigDecimal.valueOf(100));
-
-                // The last (20th) should be TICKER19 (Ratio 8.1)
-                assertThat(result.get(19).getValue()).isEqualByComparingTo(BigDecimal.valueOf(81));
-
-                // Check that only latest dates were returned
-                assertThat(result).allMatch(iv -> iv.getCalculationDate().equals(LocalDate.now()));
-
-                // Check ordering by value descending (since price is fixed at 10 for all in
-                // this test)
-                for (int i = 0; i < result.size() - 1; i++) {
-                        BigDecimal val1 = result.get(i).getValue();
-                        BigDecimal val2 = result.get(i + 1).getValue();
-                        assertThat(val1).isGreaterThanOrEqualTo(val2);
-                }
         }
 
 }
