@@ -4,18 +4,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest
 public abstract class BaseRepositoryIT {
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.28")
-            .withDatabaseName("grahamselect_test")
-            .withUsername("root")
-            .withPassword("password");
+    static final MySQLContainer<?> mysql;
+
+    static {
+        mysql = new MySQLContainer<>("mysql:8.0.28")
+                .withDatabaseName("grahamselect_test")
+                .withUsername("root")
+                .withPassword("password");
+        mysql.start();
+    }
 
     @DynamicPropertySource
     static void configureTestContainers(DynamicPropertyRegistry registry) {
