@@ -13,10 +13,7 @@ class HomePage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.backgroundColor,
-              AppTheme.surfaceColor,
-            ],
+            colors: [AppTheme.backgroundColor, AppTheme.surfaceColor],
           ),
         ),
         child: SafeArea(
@@ -46,18 +43,18 @@ class HomePage extends StatelessWidget {
                 Text(
                   'Graham Select',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -1,
-                        color: Colors.white,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -1,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Sua inteligência financeira para investimentos de valor.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textColor.withValues(alpha: 0.7),
-                      ),
+                    color: AppTheme.textColor.withValues(alpha: 0.7),
+                  ),
                 ),
                 const Spacer(flex: 3),
                 ElevatedButton(
@@ -69,7 +66,9 @@ class HomePage extends StatelessWidget {
                   onPressed: () => context.push('/upload'),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 56),
-                    side: BorderSide(color: AppTheme.primaryColor.withValues(alpha: 0.5)),
+                    side: BorderSide(
+                      color: AppTheme.primaryColor.withValues(alpha: 0.5),
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
