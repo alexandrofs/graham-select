@@ -29,12 +29,12 @@ public class RankCompaniesServiceTest {
                 IntrinsicValue.builder().companyId("1").value(new BigDecimal("10.00")).build(),
                 IntrinsicValue.builder().companyId("2").value(new BigDecimal("20.00")).build());
 
-        when(intrinsicValueRepository.findTop20ByOrderByIntrinsicValueAsc()).thenReturn(expectedRank);
+        when(intrinsicValueRepository.findTop20BestRanked()).thenReturn(expectedRank);
 
         List<IntrinsicValue> result = rankCompaniesService.rankCompanies();
 
         assertEquals(2, result.size());
         assertEquals(expectedRank, result);
-        verify(intrinsicValueRepository, times(1)).findTop20ByOrderByIntrinsicValueAsc();
+        verify(intrinsicValueRepository, times(1)).findTop20BestRanked();
     }
 }

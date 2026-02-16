@@ -4,10 +4,12 @@ import afsdigital.grahamselect.common.domain.entities.Company;
 import afsdigital.grahamselect.common.domain.entities.FinancialDataEvent;
 import afsdigital.grahamselect.valuation.application.dto.FinancialDataDto;
 import afsdigital.grahamselect.valuation.application.repository.IntrinsicValueRepository;
+import afsdigital.grahamselect.valuation.application.repository.StockPriceRepository;
 import afsdigital.grahamselect.valuation.application.service.CompanyLookupService;
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;
 import afsdigital.grahamselect.valuation.application.usecase.exceptions.InvalidFinancialDataEventException;
 import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
+import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -36,6 +38,9 @@ public class CalculationIntrinsicValueUseCaseTest {
     @Mock
     private IntrinsicValueRepository intrinsicValueRepository;
 
+    @Mock
+    private StockPriceRepository stockPriceRepository;
+
     @InjectMocks
     private CalculationIntrinsicValueUseCase calculationIntrinsicValueUseCase;
 
@@ -46,6 +51,7 @@ public class CalculationIntrinsicValueUseCaseTest {
                 .ticker("AAPL")
                 .earningsPerShare(5.0)
                 .bookValuePerShare(20.0)
+                .price(150.0)
                 .resultDate(LocalDate.of(2024, 1, 1))
                 .build();
 
@@ -65,6 +71,13 @@ public class CalculationIntrinsicValueUseCaseTest {
         assertNotNull(savedIntrinsicValue.getCompanyId());
         assertEquals(LocalDate.of(2024, 1, 1), savedIntrinsicValue.getCalculationDate());
         assertEquals(BigDecimal.valueOf(100.0).round(new MathContext(2)), savedIntrinsicValue.getValue());
+
+        ArgumentCaptor<StockPrice> stockPriceCaptor = ArgumentCaptor.forClass(StockPrice.class);
+        verify(stockPriceRepository).save(stockPriceCaptor.capture());
+
+        StockPrice savedStockPrice = stockPriceCaptor.getValue();
+        assertEquals(company.getId(), savedStockPrice.getCompanyId());
+        assertEquals(BigDecimal.valueOf(150.0), savedStockPrice.getPrice());
     }
 
     @Test
@@ -72,8 +85,7 @@ public class CalculationIntrinsicValueUseCaseTest {
         // Act & Assert
         InvalidFinancialDataEventException exception = assertThrows(
                 InvalidFinancialDataEventException.class,
-                () -> calculationIntrinsicValueUseCase.process(null)
-        );
+                () -> calculationIntrinsicValueUseCase.process(null));
 
         assertEquals("Financial Data Event and Ticker cannot be null or empty.", exception.getMessage());
     }
@@ -85,8 +97,7 @@ public class CalculationIntrinsicValueUseCaseTest {
 
         InvalidFinancialDataEventException exception = assertThrows(
                 InvalidFinancialDataEventException.class,
-                () -> calculationIntrinsicValueUseCase.process(financialDataEvent)
-        );
+                () -> calculationIntrinsicValueUseCase.process(financialDataEvent));
 
         assertEquals("Financial Data Event and Ticker cannot be null or empty.", exception.getMessage());
     }
@@ -98,6 +109,7 @@ public class CalculationIntrinsicValueUseCaseTest {
                 .ticker("AAPL")
                 .earningsPerShare(5.0)
                 .bookValuePerShare(20.0)
+                .price(150.0)
                 .resultDate(LocalDate.of(2024, 1, 1))
                 .build();
 

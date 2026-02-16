@@ -7,6 +7,6 @@ public interface IntrinsicValueRepository {
 
     void save(IntrinsicValue intrinsicValue);
 
-    List<IntrinsicValue> findTop20ByOrderByIntrinsicValueAsc();
+    List<IntrinsicValue> findTop20BestRanked();
 
 }

@@ -3,8 +3,10 @@ package afsdigital.grahamselect.valuation.infrastructure.persistence;
 import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.CompanyEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.IntrinsicValueEntity;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.StockPriceEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +31,17 @@ class IntrinsicValueRepositoryImplIT extends BaseRepositoryIT {
         @Autowired
         private CompanyJpaRepository companyJpaRepository;
 
+        @Autowired
+        private StockPriceJpaRepository stockPriceJpaRepository;
+
         private String companyId;
 
         @BeforeEach
         void setUp() {
                 // Clean up data before each test
                 intrinsicValueJpaRepository.deleteAll();
+                stockPriceJpaRepository.deleteAll();
+                companyJpaRepository.deleteAll();
                 companyJpaRepository.deleteAll();
 
                 // Create a company for the test
@@ -177,8 +184,9 @@ class IntrinsicValueRepositoryImplIT extends BaseRepositoryIT {
         }
 
         @Test
-        void shouldReturnTop20CompaniesByIntrinsicValueAsc() {
-                // Arrange: Create 25 companies with different intrinsic values
+        void shouldReturnTop20BestRankedCompanies() {
+                // Arrange: Create calculations for 25 companies
+                // To test "latest", we'll add 2 calculations for some companies
                 IntStream.range(0, 25).forEach(i -> {
                         CompanyEntity company = CompanyEntity.builder()
                                         .id(UUID.randomUUID().toString())
@@ -187,29 +195,57 @@ class IntrinsicValueRepositoryImplIT extends BaseRepositoryIT {
                                         .build();
                         companyJpaRepository.save(company);
 
-                        IntrinsicValueEntity iv = IntrinsicValueEntity.builder()
+                        IntrinsicValueEntity oldIv = IntrinsicValueEntity.builder()
+                                        .id(UUID.randomUUID().toString())
+                                        .companyId(company.getId())
+                                        .calculationDate(LocalDate.now().minusDays(10))
+                                        .intrinsicValue(BigDecimal.valueOf(1000)) // Very high ratio but old
+                                        .build();
+                        intrinsicValueJpaRepository.save(oldIv);
+
+                        // Save price to new table
+                        // Price = 10 for all companies
+                        stockPriceJpaRepository.save(StockPriceEntity.builder()
+                                        .id(UUID.randomUUID().toString())
+                                        .companyId(company.getId())
+                                        .priceDate(LocalDate.now())
+                                        .price(BigDecimal.valueOf(10))
+                                        .build());
+
+                        // Latest calculation
+                        // Ratio = (100-i) / 10.
+                        // i=0 -> 100/10=10 (best)
+                        // i=24 -> 76/10=7.6 (worst)
+                        IntrinsicValueEntity latestIv = IntrinsicValueEntity.builder()
                                         .id(UUID.randomUUID().toString())
                                         .companyId(company.getId())
                                         .calculationDate(LocalDate.now())
-                                        .intrinsicValue(BigDecimal.valueOf(100 - i)) // Lower index = higher value, so
-                                                                                     // TICKER24 has lowest value
-                                                                                     // (100-24=76)
+                                        .intrinsicValue(BigDecimal.valueOf(100 - i))
                                         .build();
-                        intrinsicValueJpaRepository.save(iv);
+                        intrinsicValueJpaRepository.save(latestIv);
                 });
 
                 // Act
-                List<IntrinsicValue> result = intrinsicValueRepository.findTop20ByOrderByIntrinsicValueAsc();
+                List<IntrinsicValue> result = intrinsicValueRepository.findTop20BestRanked();
 
                 // Assert
                 assertThat(result).hasSize(20);
-                // The values should be from 76 to 95
-                assertThat(result.get(0).getValue()).isEqualByComparingTo(BigDecimal.valueOf(76));
-                assertThat(result.get(19).getValue()).isEqualByComparingTo(BigDecimal.valueOf(95));
 
-                // Check ordering
+                // The first should be TICKER0 (Ratio 10.0)
+                assertThat(result.get(0).getValue()).isEqualByComparingTo(BigDecimal.valueOf(100));
+
+                // The last (20th) should be TICKER19 (Ratio 8.1)
+                assertThat(result.get(19).getValue()).isEqualByComparingTo(BigDecimal.valueOf(81));
+
+                // Check that only latest dates were returned
+                assertThat(result).allMatch(iv -> iv.getCalculationDate().equals(LocalDate.now()));
+
+                // Check ordering by value descending (since price is fixed at 10 for all in
+                // this test)
                 for (int i = 0; i < result.size() - 1; i++) {
-                        assertThat(result.get(i).getValue()).isLessThanOrEqualTo(result.get(i + 1).getValue());
+                        BigDecimal val1 = result.get(i).getValue();
+                        BigDecimal val2 = result.get(i + 1).getValue();
+                        assertThat(val1).isGreaterThanOrEqualTo(val2);
                 }
         }
 

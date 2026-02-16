@@ -37,8 +37,7 @@ public class IntrinsicValueEntity {
     private BigDecimal intrinsicValue;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", referencedColumnName = "id", insertable = false, updatable = false,
-            foreignKey = @ForeignKey(name = "fk_company"))
+    @JoinColumn(name = "company_id", referencedColumnName = "id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_company"))
     private CompanyEntity company;
 
 }
