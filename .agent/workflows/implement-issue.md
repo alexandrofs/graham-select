@@ -17,6 +17,11 @@ Antes de escrever qualquer código, entenda o problema e planeje a solução.
 - [ ] **Aprovação**: Solicite revisão do plano ao usuário antes de começar a codificar.
 
 ## 2. Preparação do Ambiente
+- [ ] **Main**: Faça checkout da `main` (ou branch base).
+    ```bash
+    git checkout main
+    ```
+- [ ] **Main**: Faça pull e garanta que não há arquivos alterados e não commitados.
 - [ ] **Branch**: Crie uma branch descritiva a partir da `main` (ou branch base).
     ```bash
     git checkout -b feature/<nome-descritivo-da-issue>
