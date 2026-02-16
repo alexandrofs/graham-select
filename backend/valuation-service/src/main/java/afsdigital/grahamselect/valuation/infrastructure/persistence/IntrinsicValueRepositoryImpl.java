@@ -7,7 +7,6 @@ import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.reposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.UUID;
 
 @Component
