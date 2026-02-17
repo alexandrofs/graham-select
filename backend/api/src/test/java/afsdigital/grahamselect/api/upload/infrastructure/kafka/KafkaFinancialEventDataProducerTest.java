@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -30,8 +31,13 @@ public class KafkaFinancialEventDataProducerTest {
     @Test
     void send_WhenFinancialDataEventIsValid_ShouldSendEventToKafka() {
 
-        FinancialDataEvent financialDataEvent = FinancialDataEvent.builder().ticker("AAPL").resultDate(LocalDate.now()).build();
+        FinancialDataEvent financialDataEvent = FinancialDataEvent.builder().ticker("AAPL").resultDate(LocalDate.now())
+                .build();
         FinancialDataKey key = new FinancialDataKey("AAPL", LocalDate.now());
+
+        when(kafkaTemplate.send(anyString(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
         financialEventDataProducer.send(financialDataEvent);
         verify(kafkaTemplate, times(1)).send(TopicConstants.FINANCIAL_DATA_TOPIC, key, financialDataEvent);
 
@@ -60,4 +66,3 @@ public class KafkaFinancialEventDataProducerTest {
 
     }
 }
-
