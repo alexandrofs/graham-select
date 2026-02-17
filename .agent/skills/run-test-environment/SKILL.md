@@ -30,15 +30,16 @@ O backend é composto por dois serviços que devem ser iniciados separadamente.
 Este serviço fornece os endpoints REST para o frontend.
 ```bash
 cd backend/api
-mvn spring-boot:run
+mvn spring-boot:run -Dspring.profiles.active=local
 ```
 
 ### 2.2. Valuation Service
 Este serviço processa as mensagens do Kafka para cálculos de valuation.
 ```bash
 cd backend/valuation-service
-mvn spring-boot:run
+mvn spring-boot:run -Dspring.profiles.active=local
 ```
+
 
 ## Passo 3: Frontend (Flutter)
 Inicie a aplicação Flutter. Certifique-se de que um simulador ou dispositivo está conectado.
