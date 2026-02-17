@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../domain/entities/app_file.dart';
 
 class FileInfoCard extends StatelessWidget {
-  final File file;
+  final AppFile file;
   final VoidCallback onRemove;
 
   const FileInfoCard({super.key, required this.file, required this.onRemove});
@@ -17,10 +17,6 @@ class FileInfoCard extends StatelessWidget {
     }
   }
 
-  String _getFileName(String path) {
-    return path.split('/').last;
-  }
-
   IconData _getFileIcon(String fileName) {
     if (fileName.endsWith('.csv')) {
       return Icons.table_chart;
@@ -32,9 +28,6 @@ class FileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fileName = _getFileName(file.path);
-    final fileSize = file.lengthSync();
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -49,7 +42,7 @@ class FileInfoCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                _getFileIcon(fileName),
+                _getFileIcon(file.name),
                 color: Theme.of(context).colorScheme.primary,
                 size: 32,
               ),
@@ -60,7 +53,7 @@ class FileInfoCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    fileName,
+                    file.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -69,7 +62,7 @@ class FileInfoCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatFileSize(fileSize),
+                    _formatFileSize(file.size),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(
                         context,

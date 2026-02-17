@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:frontend/src/features/upload/domain/entities/app_file.dart';
 import 'package:frontend/src/features/upload/domain/usecases/upload_file_usecase.dart';
 import 'package:frontend/src/features/upload/domain/entities/upload_result.dart';
 import 'package:frontend/src/features/upload/domain/repositories/upload_repository.dart';
@@ -10,7 +11,7 @@ import 'package:frontend/src/features/upload/presentation/providers/upload_provi
 import 'upload_provider_test.mocks.dart';
 
 // Create a simpler test by mocking the repository instead of the use case
-@GenerateMocks([UploadRepository, File])
+@GenerateMocks([UploadRepository])
 void main() {
   late UploadProvider provider;
   late UploadFileUseCase useCase;
@@ -57,30 +58,18 @@ void main() {
   });
 
   group('UploadProvider with file validation', () {
-    test('should show error for file that does not exist', () async {
-      // Arrange
-      final mockFile = MockFile();
-      when(mockFile.path).thenReturn('/path/to/nonexistent.csv');
-      when(mockFile.exists()).thenAnswer((_) async => false);
-
-      // Mock pickFile to set the file (simulating file selection)
-      // Since we can't directly set selectedFile, we'll test validation through useCase
-      final result = await useCase(mockFile);
-
-      // Assert
-      expect(result.success, false);
-      expect(result.message, 'Arquivo não encontrado');
-    });
+    final testBytes = Uint8List.fromList([1, 2, 3]);
 
     test('should show error for invalid file extension', () async {
       // Arrange
-      final mockFile = MockFile();
-      when(mockFile.path).thenReturn('/path/to/file.txt');
-      when(mockFile.exists()).thenAnswer((_) async => true);
-      when(mockFile.length()).thenAnswer((_) async => 1024);
+      final file = AppFile(
+        name: 'file.txt',
+        bytes: testBytes,
+        size: testBytes.length,
+      );
 
       // Act
-      final result = await useCase(mockFile);
+      final result = await useCase(file);
 
       // Assert
       expect(result.success, false);
@@ -89,13 +78,14 @@ void main() {
 
     test('should show error for empty file', () async {
       // Arrange
-      final mockFile = MockFile();
-      when(mockFile.path).thenReturn('/path/to/empty.csv');
-      when(mockFile.exists()).thenAnswer((_) async => true);
-      when(mockFile.length()).thenAnswer((_) async => 0);
+      final file = AppFile(
+        name: 'empty.csv',
+        bytes: Uint8List(0),
+        size: 0,
+      );
 
       // Act
-      final result = await useCase(mockFile);
+      final result = await useCase(file);
 
       // Assert
       expect(result.success, false);
@@ -104,15 +94,14 @@ void main() {
 
     test('should show error for file larger than 10MB', () async {
       // Arrange
-      final mockFile = MockFile();
-      when(mockFile.path).thenReturn('/path/to/large.csv');
-      when(mockFile.exists()).thenAnswer((_) async => true);
-      when(
-        mockFile.length(),
-      ).thenAnswer((_) async => 11 * 1024 * 1024); // 11 MB
+      final file = AppFile(
+        name: 'large.csv',
+        bytes: testBytes,
+        size: 11 * 1024 * 1024, // 11 MB
+      );
 
       // Act
-      final result = await useCase(mockFile);
+      final result = await useCase(file);
 
       // Assert
       expect(result.success, false);
@@ -121,11 +110,13 @@ void main() {
 
     test('should succeed with valid CSV file', () async {
       // Arrange
-      final mockFile = MockFile();
-      when(mockFile.path).thenReturn('/path/to/valid.csv');
-      when(mockFile.exists()).thenAnswer((_) async => true);
-      when(mockFile.length()).thenAnswer((_) async => 1024);
-      when(mockRepository.uploadFile(mockFile)).thenAnswer(
+      final file = AppFile(
+        name: 'valid.csv',
+        bytes: testBytes,
+        size: testBytes.length,
+      );
+      
+      when(mockRepository.uploadFile(file)).thenAnswer(
         (_) async => const UploadResult(
           success: true,
           message: 'Upload successful',
@@ -134,21 +125,23 @@ void main() {
       );
 
       // Act
-      final result = await useCase(mockFile);
+      final result = await useCase(file);
 
       // Assert
       expect(result.success, true);
       expect(result.message, 'Upload successful');
-      verify(mockRepository.uploadFile(mockFile)).called(1);
+      verify(mockRepository.uploadFile(file)).called(1);
     });
 
     test('should handle repository errors', () async {
       // Arrange
-      final mockFile = MockFile();
-      when(mockFile.path).thenReturn('/path/to/valid.csv');
-      when(mockFile.exists()).thenAnswer((_) async => true);
-      when(mockFile.length()).thenAnswer((_) async => 1024);
-      when(mockRepository.uploadFile(mockFile)).thenAnswer(
+      final file = AppFile(
+        name: 'valid.csv',
+        bytes: testBytes,
+        size: testBytes.length,
+      );
+      
+      when(mockRepository.uploadFile(file)).thenAnswer(
         (_) async => const UploadResult(
           success: false,
           message: 'Server error',
@@ -157,7 +150,7 @@ void main() {
       );
 
       // Act
-      final result = await useCase(mockFile);
+      final result = await useCase(file);
 
       // Assert
       expect(result.success, false);

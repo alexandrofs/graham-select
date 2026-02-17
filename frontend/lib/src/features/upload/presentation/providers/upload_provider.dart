@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
+import '../../domain/entities/app_file.dart';
 import '../../domain/usecases/upload_file_usecase.dart';
 
 enum UploadState { idle, picking, validating, uploading, success, error }
@@ -9,14 +9,14 @@ class UploadProvider extends ChangeNotifier {
   final UploadFileUseCase uploadFileUseCase;
 
   UploadState _state = UploadState.idle;
-  File? _selectedFile;
+  AppFile? _selectedFile;
   String? _errorMessage;
   String? _successMessage;
 
   UploadProvider(this.uploadFileUseCase);
 
   UploadState get state => _state;
-  File? get selectedFile => _selectedFile;
+  AppFile? get selectedFile => _selectedFile;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
@@ -32,15 +32,21 @@ class UploadProvider extends ChangeNotifier {
         type: FileType.custom,
         allowedExtensions: ['csv', 'xls', 'xlsx'],
         allowMultiple: false,
+        withData: true, // Importante para Web!
       );
 
       if (result != null && result.files.isNotEmpty) {
-        final filePath = result.files.first.path;
-        if (filePath != null) {
-          _selectedFile = File(filePath);
+        final file = result.files.first;
+        if (file.bytes != null) {
+          _selectedFile = AppFile(
+            name: file.name,
+            bytes: file.bytes!,
+            size: file.size,
+          );
           _setState(UploadState.idle);
         } else {
-          _setState(UploadState.idle);
+          _errorMessage = 'Não foi possível ler os dados do arquivo.';
+          _setState(UploadState.error);
         }
       } else {
         // User canceled
