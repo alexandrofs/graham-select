@@ -46,7 +46,7 @@ jobs:
 
       - name: Build and push API image
         run: |
-          mvn spring-boot:build-image -pl backend/api -am \
+          mvn -Pnative spring-boot:build-image -pl backend/api -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest \
             -Dspring-boot.build-image.publish=true
 
@@ -58,6 +58,6 @@ jobs:
 
       - name: Build and push Valuation image
         run: |
-          mvn spring-boot:build-image -pl backend/valuation-service -am \
+          mvn -Pnative spring-boot:build-image -pl backend/valuation-service -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest \
             -Dspring-boot.build-image.publish=true
