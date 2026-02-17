@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../../domain/entities/app_file.dart';
 import '../models/upload_response_model.dart';
 
 class UploadRemoteDataSource {
@@ -12,13 +12,19 @@ class UploadRemoteDataSource {
     this.baseUrl = 'http://localhost:8080/api/v1',
   });
 
-  Future<UploadResponseModel> uploadFile(File file) async {
+  Future<UploadResponseModel> uploadFile(AppFile file) async {
     try {
       final uri = Uri.parse('$baseUrl/upload-financial-data');
       final request = http.MultipartRequest('POST', uri);
 
-      // Adicionar o arquivo como multipart
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      // Adicionar o arquivo como multipart usando os bytes
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          file.bytes,
+          filename: file.name,
+        ),
+      );
 
       // Enviar requisição
       final streamedResponse = await request.send();

@@ -1,4 +1,4 @@
-import 'dart:io';
+import '../../domain/entities/app_file.dart';
 import '../../domain/entities/upload_result.dart';
 import '../../domain/repositories/upload_repository.dart';
 import '../datasources/upload_remote_data_source.dart';
@@ -9,7 +9,7 @@ class UploadRepositoryImpl implements UploadRepository {
   const UploadRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<UploadResult> uploadFile(File file) async {
+  Future<UploadResult> uploadFile(AppFile file) async {
     try {
       final responseModel = await remoteDataSource.uploadFile(file);
       return responseModel.toEntity();

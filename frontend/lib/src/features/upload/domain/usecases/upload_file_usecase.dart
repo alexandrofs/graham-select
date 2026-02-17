@@ -1,4 +1,4 @@
-import 'dart:io';
+import '../entities/app_file.dart';
 import '../entities/upload_result.dart';
 import '../repositories/upload_repository.dart';
 
@@ -13,17 +13,17 @@ class UploadFileUseCase {
 
   const UploadFileUseCase(this.repository);
 
-  Future<UploadResult> call(File file) async {
-    // Validar se o arquivo existe
-    if (!await file.exists()) {
+  Future<UploadResult> call(AppFile file) async {
+    // Validar se o arquivo tem dados
+    if (file.bytes.isEmpty) {
       return const UploadResult(
         success: false,
-        message: 'Arquivo não encontrado',
+        message: 'O arquivo está vazio',
       );
     }
 
     // Validar extensão
-    final extension = _getFileExtension(file.path).toLowerCase();
+    final extension = _getFileExtension(file.name).toLowerCase();
     if (!allowedExtensions.contains(extension)) {
       return UploadResult(
         success: false,
@@ -33,14 +33,7 @@ class UploadFileUseCase {
     }
 
     // Validar tamanho
-    final fileSize = await file.length();
-    if (fileSize == 0) {
-      return const UploadResult(
-        success: false,
-        message: 'O arquivo está vazio',
-      );
-    }
-
+    final fileSize = file.size;
     if (fileSize > maxFileSize) {
       final fileSizeMB = (fileSize / (1024 * 1024)).toStringAsFixed(2);
       return UploadResult(

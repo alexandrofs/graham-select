@@ -1,6 +1,6 @@
-import 'dart:io';
+import '../entities/app_file.dart';
 import '../entities/upload_result.dart';
 
 abstract class UploadRepository {
-  Future<UploadResult> uploadFile(File file);
+  Future<UploadResult> uploadFile(AppFile file);
 }

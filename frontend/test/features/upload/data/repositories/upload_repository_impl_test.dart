@@ -1,26 +1,31 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:frontend/src/features/upload/domain/entities/app_file.dart';
 import 'package:frontend/src/features/upload/data/datasources/upload_remote_data_source.dart';
 import 'package:frontend/src/features/upload/data/repositories/upload_repository_impl.dart';
 import 'package:frontend/src/features/upload/data/models/upload_response_model.dart';
 
 import 'upload_repository_impl_test.mocks.dart';
 
-@GenerateMocks([UploadRemoteDataSource, File])
+@GenerateMocks([UploadRemoteDataSource])
 void main() {
   late UploadRepositoryImpl repository;
   late MockUploadRemoteDataSource mockDataSource;
-  late MockFile mockFile;
 
   setUp(() {
     mockDataSource = MockUploadRemoteDataSource();
     repository = UploadRepositoryImpl(mockDataSource);
-    mockFile = MockFile();
   });
 
   group('UploadRepositoryImpl', () {
+    final testAppFile = AppFile(
+      name: 'test.csv',
+      bytes: Uint8List.fromList([1, 2, 3]),
+      size: 3,
+    );
+
     test('should return success result when data source succeeds', () async {
       // Arrange
       const responseModel = UploadResponseModel(
@@ -28,17 +33,17 @@ void main() {
         statusCode: 200,
       );
       when(
-        mockDataSource.uploadFile(mockFile),
+        mockDataSource.uploadFile(testAppFile),
       ).thenAnswer((_) async => responseModel);
 
       // Act
-      final result = await repository.uploadFile(mockFile);
+      final result = await repository.uploadFile(testAppFile);
 
       // Assert
       expect(result.success, true);
       expect(result.message, 'Upload completed successfully');
       expect(result.statusCode, 200);
-      verify(mockDataSource.uploadFile(mockFile)).called(1);
+      verify(mockDataSource.uploadFile(testAppFile)).called(1);
     });
 
     test('should return error result when data source returns 400', () async {
@@ -48,11 +53,11 @@ void main() {
         statusCode: 400,
       );
       when(
-        mockDataSource.uploadFile(mockFile),
+        mockDataSource.uploadFile(testAppFile),
       ).thenAnswer((_) async => responseModel);
 
       // Act
-      final result = await repository.uploadFile(mockFile);
+      final result = await repository.uploadFile(testAppFile);
 
       // Assert
       expect(result.success, false);
@@ -67,11 +72,11 @@ void main() {
         statusCode: 500,
       );
       when(
-        mockDataSource.uploadFile(mockFile),
+        mockDataSource.uploadFile(testAppFile),
       ).thenAnswer((_) async => responseModel);
 
       // Act
-      final result = await repository.uploadFile(mockFile);
+      final result = await repository.uploadFile(testAppFile);
 
       // Assert
       expect(result.success, false);
@@ -82,11 +87,11 @@ void main() {
     test('should handle data source exceptions', () async {
       // Arrange
       when(
-        mockDataSource.uploadFile(mockFile),
+        mockDataSource.uploadFile(testAppFile),
       ).thenThrow(Exception('Network error'));
 
       // Act
-      final result = await repository.uploadFile(mockFile);
+      final result = await repository.uploadFile(testAppFile);
 
       // Assert
       expect(result.success, false);
