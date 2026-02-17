@@ -10,6 +10,17 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_NAME_API: ${{ github.repository }}-api
+  IMAGE_NAME_VALUATION: ${{ github.repository }}-valuation
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
