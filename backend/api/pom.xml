@@ -38,6 +38,7 @@
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <delegatePattern>true</delegatePattern>
+                                <useMainMethod>false</useMainMethod>
                             </configOptions>
                             <additionalProperties>
                                 <delegatePattern>true</delegatePattern>
@@ -59,6 +60,7 @@
                             <target>
                                 <!-- remove the unwanted generated testcases by the spring generator of openapi -->
                                 <delete dir="${project.build.directory}/generated-sources/openapi/src/test" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/org/openapitools/OpenApiGeneratorApplication.java" />
                             </target>
                         </configuration>
                     </execution>
