@@ -38,6 +38,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+
+      - name: Build and install dependencies
+        run: |
+          cd backend
+          mvn clean install -DskipTests
+
       - name: Extract metadata (tags, labels) for API
         id: meta-api
         uses: docker/metadata-action@v5
