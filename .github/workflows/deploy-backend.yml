@@ -27,7 +27,7 @@ jobs:
       - name: Set up JDK 22
         uses: actions/setup-java@v4
         with:
-          java-version: '22'
+          java-version: '21'
           distribution: 'liberica'
           cache: maven
 
@@ -46,7 +46,8 @@ jobs:
 
       - name: Build and push API image
         run: |
-          mvn -Pnative spring-boot:build-image -pl backend/api -am \
+          cd backend
+          mvn -Pnative spring-boot:build-image -pl api -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest \
             -Dspring-boot.build-image.publish=true
 
@@ -58,6 +59,7 @@ jobs:
 
       - name: Build and push Valuation image
         run: |
-          mvn -Pnative spring-boot:build-image -pl backend/valuation-service -am \
+          cd backend
+          mvn -Pnative spring-boot:build-image -pl valuation-service -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest \
             -Dspring-boot.build-image.publish=true
