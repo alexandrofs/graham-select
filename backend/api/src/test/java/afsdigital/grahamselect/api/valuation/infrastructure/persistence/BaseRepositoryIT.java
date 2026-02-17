@@ -23,7 +23,8 @@ public abstract class BaseRepositoryIT {
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);
         registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-        registry.add("spring.liquibase.enabled", () -> false);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
+        registry.add("spring.liquibase.enabled", () -> true);
+        registry.add("spring.liquibase.change-log", () -> "classpath:db/changelog/db.changelog-master.yaml");
     }
 }

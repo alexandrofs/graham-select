@@ -19,14 +19,25 @@ public class KafkaFinancialEventDataProducer implements FinancialEventDataProduc
     @Override
     public void send(FinancialDataEvent financialDataEvent) {
 
-        if (financialDataEvent == null || financialDataEvent.getTicker() == null || financialDataEvent.getResultDate() == null) {
+        if (financialDataEvent == null || financialDataEvent.getTicker() == null
+                || financialDataEvent.getResultDate() == null) {
             throw new IllegalArgumentException("FinancialDataEvent, ticker, or resultDate must not be null");
         }
 
         log.info("Sending financial data event for {}", financialDataEvent.getTicker());
 
-        kafkaTemplate.send(TopicConstants.FINANCIAL_DATA_TOPIC, new FinancialDataKey(financialDataEvent.getTicker(),
-                financialDataEvent.getResultDate()), financialDataEvent);
+        FinancialDataKey key = new FinancialDataKey(financialDataEvent.getTicker(), financialDataEvent.getResultDate());
+
+        kafkaTemplate.send(TopicConstants.FINANCIAL_DATA_TOPIC, key, financialDataEvent)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.info("Successfully sent message for ticker: {} with offset: {}",
+                                financialDataEvent.getTicker(), result.getRecordMetadata().offset());
+                    } else {
+                        log.error("Failed to send message for ticker: {}. Error: {}",
+                                financialDataEvent.getTicker(), ex.getMessage(), ex);
+                    }
+                });
     }
 
 }

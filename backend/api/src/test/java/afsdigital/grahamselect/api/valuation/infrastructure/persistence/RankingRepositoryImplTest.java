@@ -55,6 +55,7 @@ class RankingRepositoryImplTest extends BaseRepositoryIT {
             companyJpaRepository.save(CompanyEntity.builder()
                     .id(companyId)
                     .name("Company Name " + i)
+                    .ticker(companyId) // Ticker is now NOT NULL in DB
                     .build());
 
             // Latest price
