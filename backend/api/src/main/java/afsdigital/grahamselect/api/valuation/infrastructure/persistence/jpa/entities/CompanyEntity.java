@@ -18,6 +18,7 @@ public class CompanyEntity {
 
     @Id
     private String id;
+    private String ticker;
     private String name;
 
 }
