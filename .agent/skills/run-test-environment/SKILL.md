@@ -5,7 +5,7 @@ description: Instruções para subir o ambiente completo do Graham Select para t
 
 # Subindo o Ambiente de Testes do Graham Select
 
-Este guia descreve os passos necessários para iniciar toda a infraestrutura e os serviços do projeto Graham Select.
+Este guia descreve os passos necessários para iniciar toda a infraestrutura e os serviços do projeto Graham Select utilizando o script de inicialização automatizada.
 
 ## Pré-requisitos
 - Docker e Docker Compose instalados
@@ -13,50 +13,38 @@ Este guia descreve os passos necessários para iniciar toda a infraestrutura e o
 - Flutter SDK instalado
 - Portas 3306 (MySQL), 9092/9094 (Kafka), 8080 (API) e 8081 (Valuation Service) disponíveis
 
-## Passo 1: Infraestrutura (Docker)
-Inicie o banco de dados e o message broker:
-```bash
-docker-compose up -d
-```
-Verifique se os containers estão rodando:
-```bash
-docker ps
-```
+## Passo Único: Executar o Script de Inicialização
 
-## Passo 2: Backend (Serviços Spring Boot)
-O backend é composto por dois serviços que devem ser iniciados separadamente.
+O projeto possui um script centralizado que sobe a infraestrutura (Docker), instala dependências e inicia os serviços de backend e frontend em paralelo.
 
-### 2.1. API Service
-Este serviço fornece os endpoints REST para o frontend.
-```bash
-cd backend/api
-mvn spring-boot:run -Dspring.profiles.active=local
-```
+1. Certifique-se de que o script tem permissão de execução:
+   ```bash
+   chmod +x start-app.sh
+   ```
 
-### 2.2. Valuation Service
-Este serviço processa as mensagens do Kafka para cálculos de valuation.
-```bash
-cd backend/valuation-service
-mvn spring-boot:run -Dspring.profiles.active=local
-```
+2. Execute o script:
+   ```bash
+   ./start-app.sh
+   ```
 
+3. O script irá:
+   - Iniciar MySQL e Kafka via Docker Compose.
+   - Instalar o módulo `common`.
+   - Iniciar a **API** (Porta 8080).
+   - Iniciar o **Valuation Service** (Porta 8081).
+   - Iniciar o **Frontend** (Flutter Web na porta 3000).
 
-## Passo 3: Frontend (Flutter)
-Inicie a aplicação Flutter. Certifique-se de que um simulador ou dispositivo está conectado.
+## Monitoramento de Logs
 
-Para rodar no navegador (Chrome/Safari):
-```bash
-cd frontend
-flutter run -d chrome
-```
+Como os serviços rodam em background, você pode acompanhar os logs em arquivos separados:
+- **API**: `tail -f api.log`
+- **Valuation**: `tail -f valuation.log`
+- **Frontend**: `tail -f frontend.log`
 
-Para rodar em um dispositivo Android/iOS:
-```bash
-cd frontend
-flutter run
-```
+Para parar todos os serviços, pressione `CTRL+C` no terminal onde o script foi executado.
 
 ## Verificação de Saúde (Health Checks)
-- **API**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health) (se configurado)
+- **API**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
 - **MySQL**: `docker exec -it graham-select-mysql mysqladmin ping -h localhost -uroot -proot`
-- **Frontend**: A tela inicial deve carregar corretamente e permitir navegação.
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+
