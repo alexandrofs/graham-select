@@ -1,13 +1,17 @@
 package afsdigital.grahamselect.common.domain.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FinancialDataEvent {
 
     private LocalDate resultDate; //Data do resultado financeiro
