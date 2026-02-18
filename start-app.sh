@@ -29,6 +29,7 @@ echo -e "${GREEN}[3/4] Iniciando Serviços Backend e Frontend...${NC}"
 cleanup() {
     echo -e "\n${RED}Finalizando serviços...${NC}"
     kill $API_PID $VALUATION_PID $FRONT_PID
+    docker-compose down
     exit
 }
 

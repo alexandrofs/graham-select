@@ -36,6 +36,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify navigation occurred (placeholder page should be visible)
-    expect(find.text('Ranking Page - Em breve'), findsOneWidget);
+    expect(find.text('Top 20 Graham'), findsOneWidget);
   });
 }

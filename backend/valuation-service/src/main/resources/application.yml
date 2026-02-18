@@ -20,9 +20,11 @@ spring:
     consumer:
       group-id: valuation-consumer-group
       auto-offset-reset: earliest
-      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
+        spring.deserializer.key.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "afsdigital.grahamselect.*"
         spring.json.key.default.type: "afsdigital.grahamselect.common.domain.entities.FinancialDataKey"
         spring.json.value.default.type: "afsdigital.grahamselect.common.domain.entities.FinancialDataEvent"

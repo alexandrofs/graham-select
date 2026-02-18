@@ -10,6 +10,13 @@ import 'src/features/upload/domain/usecases/upload_file_usecase.dart';
 import 'src/features/upload/data/repositories/upload_repository_impl.dart';
 import 'src/features/upload/data/datasources/upload_remote_data_source.dart';
 
+// Ranking Feature Imports
+import 'src/features/ranking/data/datasources/ranking_remote_data_source.dart';
+import 'src/features/ranking/data/repositories/ranking_repository_impl.dart';
+import 'src/features/ranking/domain/usecases/get_ranking_usecase.dart';
+import 'src/features/ranking/presentation/providers/ranking_provider.dart';
+import 'src/features/ranking/presentation/pages/ranking_page.dart';
+
 void main() {
   runApp(const GrahamSelectApp());
 }
@@ -21,8 +28,7 @@ final _router = GoRouter(
     GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
     GoRoute(
       path: '/ranking',
-      builder: (context, state) =>
-          const Scaffold(body: Center(child: Text('Ranking Page - Em breve'))),
+      builder: (context, state) => const RankingPage(),
     ),
   ],
 );
@@ -32,15 +38,23 @@ class GrahamSelectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dependency injection
+    // Shared dependencies
     final httpClient = http.Client();
-    final remoteDataSource = UploadRemoteDataSource(client: httpClient);
-    final repository = UploadRepositoryImpl(remoteDataSource);
-    final uploadUseCase = UploadFileUseCase(repository);
+
+    // Upload Feature DI
+    final uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient);
+    final uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
+    final uploadUseCase = UploadFileUseCase(uploadRepository);
+
+    // Ranking Feature DI
+    final rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
+    final rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource);
+    final getRankingUseCase = GetRankingUseCase(rankingRepository);
 
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UploadProvider(uploadUseCase)),
+        ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
       ],
       child: MaterialApp.router(
         title: 'Graham Select',
