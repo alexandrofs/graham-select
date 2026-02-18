@@ -60,7 +60,10 @@ jobs:
           cd backend
           mvn -Pnative spring-boot:build-image -pl api -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest \
-            -Dspring-boot.build-image.publish=true
+            -Dspring-boot.build-image.publish=true \
+            -Dspring-boot.build-image.docker.publishRegistry.username=${{ github.actor }} \
+            -Dspring-boot.build-image.docker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
+            -Dspring-boot.build-image.docker.publishRegistry.url=${{ env.REGISTRY }}
 
       - name: Extract metadata (tags, labels) for Valuation
         id: meta-valuation
@@ -73,4 +76,7 @@ jobs:
           cd backend
           mvn -Pnative spring-boot:build-image -pl valuation-service -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest \
-            -Dspring-boot.build-image.publish=true
+            -Dspring-boot.build-image.publish=true \
+            -Dspring-boot.build-image.docker.publishRegistry.username=${{ github.actor }} \
+            -Dspring-boot.build-image.docker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
+            -Dspring-boot.build-image.docker.publishRegistry.url=${{ env.REGISTRY }}
