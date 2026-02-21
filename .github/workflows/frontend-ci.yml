@@ -86,4 +86,7 @@ jobs:
           pack build ghcr.io/${{ github.repository }}-frontend:latest \
             --path ./frontend/build/web \
             --builder paketobuildpacks/builder-jammy-base \
+            --buildpack paketo-buildpacks/web-servers \
+            --env BP_WEB_SERVER=nginx \
+            --env BP_WEB_SERVER_ENABLE_PUSH_STATE=true \
             --publish
