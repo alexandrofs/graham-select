@@ -68,6 +68,14 @@ jobs:
         working-directory: ./frontend
         run: flutter build web --release
 
+      - name: Prepare Web Build for Buildpack
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: ./frontend/build/web
+        run: |
+          mkdir public
+          cp -r ./* public/ 2>/dev/null || true
+          ls -A | grep -v public | xargs rm -rf
+
       - name: Setup pack CLI
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: buildpacks/github-actions/setup-pack@v5.7.0
