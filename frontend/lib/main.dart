@@ -17,6 +17,9 @@ import 'src/features/ranking/domain/usecases/get_ranking_usecase.dart';
 import 'src/features/ranking/presentation/providers/ranking_provider.dart';
 import 'src/features/ranking/presentation/pages/ranking_page.dart';
 
+// Docs Feature Imports
+import 'src/features/docs/presentation/pages/docs_screen.dart';
+
 void main() {
   runApp(const GrahamSelectApp());
 }
@@ -29,6 +32,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/ranking',
       builder: (context, state) => const RankingPage(),
+    ),
+    GoRoute(
+      path: '/docs',
+      builder: (context, state) => const DocsScreen(),
     ),
   ],
 );
