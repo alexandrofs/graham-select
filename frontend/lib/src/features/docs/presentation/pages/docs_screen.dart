@@ -14,6 +14,8 @@ class _DocsScreenState extends State<DocsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Documentação'),
@@ -21,31 +23,44 @@ class _DocsScreenState extends State<DocsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        actions: isMobile
+            ? [
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(context).openEndDrawer(),
+                  ),
+                ),
+              ]
+            : null,
       ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Sidebar para navegação (útil em Desktop/Web)
-          _buildSidebar(context),
-          // Área principal de conteúdo
-          Expanded(
-            child: _buildContentArea(context),
-          ),
-        ],
-      ),
+      endDrawer: isMobile ? Drawer(child: _buildSidebar(context, isMobile: true)) : null,
+      body: isMobile
+          ? _buildContentArea(context)
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Sidebar para navegação (útil em Desktop/Web)
+                _buildSidebar(context, isMobile: false),
+                // Área principal de conteúdo
+                Expanded(
+                  child: _buildContentArea(context),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildSidebar(BuildContext context) {
+  Widget _buildSidebar(BuildContext context, {bool isMobile = false}) {
     return Container(
       width: 250,
       color: AppTheme.surfaceColor,
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 16),
         children: [
-          _buildSidebarItem(context, 'Introdução', Icons.info_outline, 0),
-          _buildSidebarItem(context, 'Como fazer Upload', Icons.upload_file, 1),
-          _buildSidebarItem(context, 'Ranking de Empresas', Icons.leaderboard, 2),
+          _buildSidebarItem(context, 'Introdução', Icons.info_outline, 0, isMobile),
+          _buildSidebarItem(context, 'Como fazer Upload', Icons.upload_file, 1, isMobile),
+          _buildSidebarItem(context, 'Ranking de Empresas', Icons.leaderboard, 2, isMobile),
         ],
       ),
     );
@@ -55,7 +70,8 @@ class _DocsScreenState extends State<DocsScreen> {
     BuildContext context, 
     String title, 
     IconData icon, 
-    int index
+    int index,
+    bool isMobile,
   ) {
     final isSelected = _selectedIndex == index;
     return ListTile(
@@ -76,6 +92,9 @@ class _DocsScreenState extends State<DocsScreen> {
         setState(() {
           _selectedIndex = index;
         });
+        if (isMobile) {
+          Navigator.pop(context); // Fechar drawer ao selecionar
+        }
       },
     );
   }
