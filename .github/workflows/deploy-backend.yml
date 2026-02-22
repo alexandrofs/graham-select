@@ -55,15 +55,14 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}
 
-      - name: Build and push API image
+      - name: Build API image
         run: |
           cd backend
           mvn -Pnative spring-boot:build-image -pl api -am \
-            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest \
-            -Dspring-boot.build-image.publish=true \
-            -Dspring-boot.build-image.docker.publishRegistry.username=${{ github.actor }} \
-            -Dspring-boot.build-image.docker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
-            -Dspring-boot.build-image.docker.publishRegistry.url=${{ env.REGISTRY }}
+            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
+
+      - name: Push API image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
 
       - name: Extract metadata (tags, labels) for Valuation
         id: meta-valuation
@@ -71,12 +70,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}
 
-      - name: Build and push Valuation image
+      - name: Build Valuation image
         run: |
           cd backend
           mvn -Pnative spring-boot:build-image -pl valuation-service -am \
-            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest \
-            -Dspring-boot.build-image.publish=true \
-            -Dspring-boot.build-image.docker.publishRegistry.username=${{ github.actor }} \
-            -Dspring-boot.build-image.docker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
-            -Dspring-boot.build-image.docker.publishRegistry.url=${{ env.REGISTRY }}
+            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
+
+      - name: Push Valuation image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
