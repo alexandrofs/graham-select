@@ -56,9 +56,15 @@ class HomePage extends StatelessWidget {
                     color: AppTheme.textColor.withValues(alpha: 0.7),
                   ),
                 ),
-                const Spacer(flex: 3),
+                const Spacer(flex: 2),
                 ElevatedButton(
                   onPressed: () => context.push('/ranking'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   child: const Text('Ver Ranking de Empresas'),
                 ),
                 const SizedBox(height: 16),
@@ -74,6 +80,19 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   child: const Text('Fazer Upload de Dados'),
+                ),
+                const SizedBox(height: 16),
+                TextButton.icon(
+                  onPressed: () => context.push('/docs'),
+                  icon: const Icon(Icons.menu_book),
+                  label: const Text('Documentação do Sistema'),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    foregroundColor: AppTheme.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
                 const Spacer(),
               ],
