@@ -79,9 +79,9 @@ O sistema possui uma esteira contínua (CD) preparada para provedores serverless
 
 - **Serviços de Computação (Frontend, API e Valuation)**: [Render.com](https://render.com)
 - **Banco de Dados**: [TiDB Serverless](https://tidbcloud.com)
-- **Mensageria (Kafka)**: [Upstash](https://upstash.com)
+- **Mensageria (Kafka)**: [Aiven](https://aiven.io)
 
-[👉 Veja o Guia Completo de Infraestrutura e Automação (Render, TiDB, Upstash)](docs/deploy.md)
+[👉 Veja o Guia Completo de Infraestrutura e Automação (Render, TiDB, Aiven)](docs/deploy.md)
 
 ---
 

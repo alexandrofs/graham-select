@@ -6,7 +6,7 @@ Este documento descreve como realizar o deploy do **Graham Select** utilizando u
 
 - **Serviços de Computação (Frontend, API e Valuation)**: Render.com
 - **Banco de Dados**: TiDB Serverless (Compatível com MySQL)
-- **Mensageria**: Upstash Kafka
+- **Mensageria**: Aiven for Apache Kafka
 
 ---
 
@@ -25,18 +25,19 @@ O TiDB oferece um cluster serverless gratuito compatível com MySQL.
 
 > **Nota:** O banco de dados se chama `test` por padrão. Você pode usá-lo ou criar o `grahamselect`. O JPA/Hibernate na API criará as tabelas automaticamente.
 
-## 2. Mensageria (Upstash Kafka)
+## 2. Mensageria (Aiven for Apache Kafka)
 
-O Upstash fornece Kafka serverless gratuito (até 10.000 msgs/dia).
+A plataforma [Aiven](https://aiven.io) fornece um "Free Plan" excelente para desenvolvedores que inclui um cluster de Apache Kafka gratuito.
 
-1. Crie uma conta em [Upstash](https://upstash.com/).
-2. Vá em **Kafka** e crie um novo Cluster (ex: na região US-East).
-3. Após criar, role para a seção **REST API** ou **Details**. Você precisará das seguintes informações:
-   - **Endpoint** (Bootstrap Server)
-   - **Username**
-   - **Password**
-4. Você precisa formatar a string JAAS para o Spring Boot:
-   `org.apache.kafka.common.security.scram.ScramLoginModule required username="SEU_USER" password="SUE_PASSWORD";`
+1. Crie uma conta no consolo da [Aiven](https://console.aiven.io/).
+2. Clique em **Create service**, selecione **Apache Kafka**.
+3. Escolha o cloud provider e a região da sua preferência. Selecione o plano **Free** e clique em criar (pode levar alguns minutos).
+4. Vá para a aba **Overview** do seu serviço recém-criado.
+5. Copie o **Service URI**. Ele já vem no formato:
+   `kafka://<usuario>:<senha>@<host>:<porta>`
+6. Com essa URI, você extrai o **Bootstrap Server**, **Username** e **Password**.
+7. Formate a string JAAS para o Spring Boot:
+   `org.apache.kafka.common.security.plain.PlainLoginModule required username="SEU_USER" password="SUE_PASSWORD";`
 
 ## 3. Backend (Render.com)
 
