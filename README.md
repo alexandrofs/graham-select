@@ -73,6 +73,14 @@ O projeto está configurado para gerar imagens Docker nativas via Cloud Native B
 
 ---
 
+## 🚀 Deploy em Produção (PaaS Gratuito)
+
+O sistema possui uma esteira contínua (CD) preparada para provedores serverless.
+
+[👉 Veja o Guia Completo de Infraestrutura e Automação (Render, Vercel, TiDB, Upstash)](docs/deploy.md)
+
+---
+
 ## 📖 Documentação da API
 
 Os principais endpoints estão disponíveis via API REST:
