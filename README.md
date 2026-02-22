@@ -1,92 +1,100 @@
 # Graham Select
 
-**Graham Select** é um aplicativo para identificar as 20 empresas mais baratas usando a regra de Benjamin Graham. O sistema realiza a análise de dados financeiros para determinar quais empresas estão subvalorizadas, proporcionando insights valiosos para investidores.
+**Graham Select** é um aplicativo especializado em identificar as 20 empresas mais baratas da bolsa utilizando a metodologia de valor de **Benjamin Graham** (Fórmula do Valor Intrínseco).
 
-## Visão Geral
+O sistema automatiza o processamento de indicadores financeiros para determinar quais empresas estão subvalorizadas, fornecendo uma margem de segurança clara para o investidor.
 
-O **Graham Select** é composto por diversos serviços que trabalham juntos para processar e analisar dados financeiros. O sistema utiliza uma arquitetura baseada em microserviços, com um frontend interativo, uma API para processamento de dados, e serviços especializados para ingestão e análise de dados financeiros.
+## 🚀 Visão Geral e Arquitetura
 
-### Funcionalidades
+O projeto utiliza uma arquitetura de microserviços assíncronos para garantir escalabilidade e separação de responsabilidades.
 
-- **Frontend (Flutter)**: Interface gráfica para interação do usuário.
-- **API (Spring Boot)**: Exposição de APIs para consulta de dados e upload de arquivos.
-- **Upload Service**: Serviço para upload de arquivos e ingestão de dados no Kafka.
-- **Data Ingestion Service**: Consome dados do Kafka e os armazena no banco de dados.
-- **Calculation Service**: Calcula o valor intrínseco das empresas e armazena os resultados.
-- **Kafka**: Sistema de mensageria para comunicação entre serviços.
-- **Database (MySQL)**: Armazena dados financeiros e resultados dos cálculos.
+- **Frontend (Flutter Web)**: Interface moderna e interativa para upload de dados e visualização do ranking.
+- **API Service (Spring Boot)**: Ponto de entrada que gerencia o upload de arquivos e fornece os resultados processados.
+- **Valuation Service (Spring Boot)**: Motor de cálculo que consome eventos de dados financeiros e aplica a regra de Graham.
+- **Apache Kafka**: Broker de mensagens que desacopla o recebimento de dados (API) do processamento pesado (Valuation).
+- **MySQL**: Persistência de dados das empresas e resultados dos cálculos.
 
-[Mais detalhes](docs/visao-produto.md)
+[Mais detalhes na Visão do Produto](docs/visao-produto.md)
 
-## Arquitetura
+---
 
-[Diagramas C4 Model](https://alexandrofs.github.io/graham-select)
+## 🛠️ Tecnologias Utilizadas
 
-O diagrama acima mostra a arquitetura geral do **Graham Select**, incluindo os principais componentes e suas interações.
-
-## Tecnologias Utilizadas
-
-- **Frontend**: Flutter
-- **Backend**: Java, Spring Boot
+- **Linguagens**: Dart (Flutter), Java 21
+- **Frameworks**: Spring Boot 3, Flutter
 - **Mensageria**: Apache Kafka
 - **Banco de Dados**: MySQL
-- **Orquestração**: Kubernetes
+- **DevOps**: Docker, Buildpacks (Spring Native), GitHub Actions (CI/CD)
 
-## Instalação e Configuração
+---
+
+## 💻 Execução Local
+
+A forma mais simples de rodar todo o ecossistema (Infra + Backend + Frontend) é utilizando o script automatizado:
 
 ### Pré-requisitos
+- **Docker Desktop** instalado e rodando.
+- **Java 21** e **Flutter SDK** instalados.
 
-- Java 21 ou superior
-- Node.js e npm (para Flutter)
-- Docker e Kubernetes (para implantação)
-
-### Passos para Execução Local
-
+### Passo a Passo
 1. **Clone o Repositório**
-
    ```bash
    git clone https://github.com/alexandrofs/graham-select.git
    cd graham-select
    ```
-2. **Configuração do Frontend**
 
-Navegue até o diretório do frontend e instale as dependências:
-
+2. **Execute o Inicializador**
    ```bash
-   cd frontend
-   flutter pub get
-   flutter run
+   ./start-app.sh
    ```
-3. **Configuração da API**
+   *Este script irá:*
+   - Subir o MySQL e Kafka via Docker Compose.
+   - Compilar o módulo `common`.
+   - Iniciar a **API** na porta `8080`.
+   - Iniciar o **Valuation Service** na porta `8081`.
+   - Iniciar o **Frontend Web** na porta `3000`.
 
-Navegue até o diretório da API e execute:
+### Acesso aos Serviços
+- **Frontend Web**: [http://localhost:3000](http://localhost:3000)
+- **API Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- **CORS**: Configurado para aceitar requisições de `localhost:3000`.
 
-   ```bash
-   cd api
-   ./mvnw spring-boot:run
-   ```
-4. **Configuração do Kafka**
+---
 
-   Siga as instruções na documentação do Kafka para configurar o Kafka localmente.
+## 📦 Builds de Produção (Buildpacks)
 
-5. **Configuração do Banco de Dados**
+O projeto está configurado para gerar imagens Docker nativas via Cloud Native Buildpacks:
 
-   Certifique-se de que o MySQL esteja em execução e configure o banco de dados conforme necessário.
+```bash
+# No diretório backend
+./mvnw spring-boot:build-image -pl api
+./mvnw spring-boot:build-image -pl valuation-service
+```
 
-## Contribuindo
+---
 
-Contribuições são bem-vindas! Siga os seguintes passos para contribuir:
+## 📖 Documentação da API
 
-1. Faça um fork do repositório.
-2. Crie uma branch para suas modificações (git checkout -b feature/nova-funcionalidade).
-3. Faça commit das suas alterações (git commit -am 'Adiciona nova funcionalidade').
-4. Faça um push para a branch (git push origin feature/nova-funcionalidade).
-5. Abra um Pull Request.
+Os principais endpoints estão disponíveis via API REST:
 
-## Licença
+| Endpoint | Método | Descrição |
+| :--- | :--- | :--- |
+| `/api/v1/upload-financial-data` | `POST` | Faz o upload do arquivo CSV/XLS para processamento. |
+| `/api/v1/ranked-companies` | `GET` | Retorna o ranking das 20 empresas mais baratas. |
 
-Este projeto está licenciado sob a Apache 2.0 License.
+---
 
-## Contato
+## 🤝 Contribuindo
 
-Para perguntas ou sugestões, entre em contato com afssistemas@gmail.com.
+1. Faça um **fork** do repositório.
+2. Crie uma branch (`git checkout -b feature/minha-feature`).
+3. Commit suas mudanças (`git commit -m 'feat: minha nova feature'`).
+4. Push para a branch (`git push origin feature/minha-feature`).
+5. Abra um **Pull Request**.
+
+---
+
+## 📄 Licença e Contato
+
+- **Licença**: Apache 2.0
+- **Contato**: afssistemas@gmail.com
