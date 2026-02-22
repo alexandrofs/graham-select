@@ -9,6 +9,7 @@ on:
     branches: [ main, develop ]
     paths:
       - 'frontend/**'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -69,7 +70,7 @@ jobs:
         run: flutter build web --release
 
       - name: Prepare Web Build for Buildpack
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         working-directory: ./frontend/build/web
         run: |
           mkdir public
@@ -77,11 +78,11 @@ jobs:
           ls -A | grep -v public | xargs rm -rf
 
       - name: Setup pack CLI
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         uses: buildpacks/github-actions/setup-pack@v5.7.0
 
       - name: Login to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -89,7 +90,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish Image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         run: |
           pack build ghcr.io/${{ github.repository }}-frontend:latest \
             --path ./frontend/build/web \
