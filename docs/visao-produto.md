@@ -22,7 +22,8 @@
 - **Classificação das Empresas**: Apresentar as 20 empresas mais baratas com base nos cálculos realizados.
 - **Interface Gráfica**: Interface amigável desenvolvida em Flutter para permitir a fácil interação do usuário com o sistema.
 - **API RESTful**: Exposição de endpoints para a obtenção de dados e resultados via API.
-- **Mensageria com Kafka**: Utilização de Kafka para ingestão e processamento assíncrono dos dados financeiros.
+- **Mensageria com Kafka**: Utilização de Kafka para ingestão e processamento assíncrono dos dados financeiros, garantindo desacoplamento entre a recepção (API) e o processamento (Valuation).
+- **Containerização e Buildpacks**: Imagens Docker otimizadas geradas via Cloud Native Buildpacks para execução em ambientes de nuvem.
 
 ## 4. Personas
 
@@ -86,7 +87,7 @@
 
 ## 10. Roadmap
 
-- **MVP**: Lançamento com funcionalidades básicas de upload de dados, cálculo de valor intrínseco e exibição das 20 empresas mais baratas.
+- **MVP**: Lançamento com funcionalidades básicas de upload de dados, cálculo de valor intrínseco e exibição das 20 empresas mais baratas. Implementação de pipelines de CI e geração de imagens Docker nativas.
 - **Versão 1.1**: Integração com fontes de dados financeiras externas para automatizar o carregamento de dados.
 - **Versão 1.2**: Implementação de funcionalidades adicionais, como gráficos e comparações de empresas.
 - **Versão 2.0**: Expansão para incluir métricas adicionais de análise de valor e integração com plataformas de negociação.
