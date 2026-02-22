@@ -1,11 +1,10 @@
 # Implantação em Produção (PaaS Gratuito)
 
-Este documento descreve como realizar o deploy do **Graham Select** utilizando uma arquitetura Cloud-Native desacoplada, utilizando serviços que oferecem tiers gratuitos generosos (Serverless / PaaS).
+Este documento descreve como realizar o deploy do **Graham Select** utilizando uma arquitetura Cloud-Native desacoplada, centralizando nossos serviços na plataforma Render e containers GHCR.
 
-## Arquitetura de Produção
+## Arquitetura de Produção Consolidada
 
-- **Frontend**: Vercel
-- **Backend (API e Valuation)**: Render.com
+- **Serviços de Computação (Frontend, API e Valuation)**: Render.com
 - **Banco de Dados**: TiDB Serverless (Compatível com MySQL)
 - **Mensageria**: Upstash Kafka
 
@@ -69,28 +68,23 @@ Como nossas imagens no GHCR (`ghcr.io/alexandrofs/graham-select-api` e `valuatio
 4. Salve e faça o deploy.
 5. Vá em **Settings** -> **Deploy Hook** e copie a URL.
 
-### Passo 3.3: Configurar CD no GitHub Actions
-Para que o sistema atualize o backend automaticamente ao dar push na `main`:
+### Passo 3.3: Deploy do Frontend (Web)
+1. Crie um novo **Web Service**.
+2. Escolha **Deploy an existing image from a registry**.
+3. Image URL: `ghcr.io/alexandrofs/graham-select-frontend:latest`
+4. Selecione o plano **Free**.
+5. Em **Environment Variables**, adicione a URL base da sua API:
+   - `API_BASE_URL`: `https://sua-api.onrender.com` (Nota: Garanta que o App Flutter consiga ler essa ENV).
+6. Salve e faça o deploy. O Frontend rodará em um mini-servidor Nginx otimizado.
+7. Vá em **Settings** -> **Deploy Hook** e copie a URL.
 
-1. Vá no seu repositório no GitHub > **Settings** > **Secrets and variables** > **Actions**.
-2. Crie a secret `RENDER_API_DEPLOY_HOOK` e cole a URL do Hook da API.
-3. Crie a secret `RENDER_VALUATION_DEPLOY_HOOK` e cole a URL do Hook do Valuation.
+### Passo 3.4: Configurar Auto-Deploy via GitHub (CD)
+Para que as atualizações cheguem no Render automaticamente a cada push na `main`:
 
-A pipeline `.github/workflows/deploy-backend.yml` agora chamará esses hooks automaticamente!
+1. No repositório GitHub, vá em **Settings** > **Secrets and variables** > **Actions**.
+2. Adicione as 3 URLs de Deployment Hooks geradas no passo anterior como secrets:
+   - `RENDER_API_DEPLOY_HOOK`: URL do hook da API
+   - `RENDER_VALUATION_DEPLOY_HOOK`: URL do hook do Valuation
+   - `RENDER_FRONTEND_DEPLOY_HOOK`: URL do hook do Frontend
 
-## 4. Frontend (Vercel)
-
-A Vercel hospedará a o Frontend em Flutter Web de forma muito simples.
-
-1. Crie uma conta na [Vercel](https://vercel.com) associada ao seu GitHub.
-2. Clique em **Add New Project** e importe o repositório `graham-select`.
-3. Na seção **Build and Output Settings**:
-   - Framework Preset: **Other**
-   - Build Command: `flutter pub get && flutter build web --release`
-   - Output Directory: `build/web`
-   - Install Command: `git clone https://github.com/flutter/flutter.git -b stable ../flutter && export PATH="$PATH:`pwd`/../flutter/bin" && flutter doctor` (Este é um truque para a Vercel baixar o Flutter no build).
-4. Em **Environment Variables**, configure:
-   - `API_BASE_URL`: A URL pública da sua API no Render (ex: `https://graham-select-api.onrender.com`). *Nota: Certifique-se de que o frontend Flutter está lendo essa variável no código (via `--dart-define` ou arquivo de config).*
-5. Clique em **Deploy**.
-
-> Toda vez que você fizer push na `main`, a Vercel iniciará um novo build e fará o deploy automático.
+Pronto! Os scripts do GitHub Actions chamarão esses hooks via script na nuvem de forma orgânica.

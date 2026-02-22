@@ -80,23 +80,19 @@ jobs:
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
 
       - name: Trigger Render Deploy for API
-        env:
-          RENDER_API_DEPLOY_HOOK: ${{ secrets.RENDER_API_DEPLOY_HOOK }}
         run: |
-          if [ -n "$RENDER_API_DEPLOY_HOOK" ]; then
+          if [ -n "${{ secrets.RENDER_API_DEPLOY_HOOK }}" ]; then
             echo "Triggering Render deployment for API..."
-            curl -X POST "$RENDER_API_DEPLOY_HOOK"
+            curl -X POST "${{ secrets.RENDER_API_DEPLOY_HOOK }}"
           else
             echo "RENDER_API_DEPLOY_HOOK secret not found, skipping."
           fi
           
       - name: Trigger Render Deploy for Valuation
-        env:
-          RENDER_VALUATION_DEPLOY_HOOK: ${{ secrets.RENDER_VALUATION_DEPLOY_HOOK }}
         run: |
-          if [ -n "$RENDER_VALUATION_DEPLOY_HOOK" ]; then
+          if [ -n "${{ secrets.RENDER_VALUATION_DEPLOY_HOOK }}" ]; then
             echo "Triggering Render deployment for Valuation Service..."
-            curl -X POST "$RENDER_VALUATION_DEPLOY_HOOK"
+            curl -X POST "${{ secrets.RENDER_VALUATION_DEPLOY_HOOK }}"
           else
             echo "RENDER_VALUATION_DEPLOY_HOOK secret not found, skipping."
           fi
