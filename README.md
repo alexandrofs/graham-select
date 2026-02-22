@@ -75,9 +75,13 @@ O projeto está configurado para gerar imagens Docker nativas via Cloud Native B
 
 ## 🚀 Deploy em Produção (PaaS Gratuito)
 
-O sistema possui uma esteira contínua (CD) preparada para provedores serverless.
+O sistema possui uma esteira contínua (CD) preparada para provedores serverless Cloud-Native.
 
-[👉 Veja o Guia Completo de Infraestrutura e Automação (Render, Vercel, TiDB, Upstash)](docs/deploy.md)
+- **Serviços de Computação (Frontend, API e Valuation)**: [Render.com](https://render.com)
+- **Banco de Dados**: [TiDB Serverless](https://tidbcloud.com)
+- **Mensageria (Kafka)**: [Upstash](https://upstash.com)
+
+[👉 Veja o Guia Completo de Infraestrutura e Automação (Render, TiDB, Upstash)](docs/deploy.md)
 
 ---
 

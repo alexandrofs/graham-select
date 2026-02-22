@@ -99,3 +99,13 @@ jobs:
             --env BP_WEB_SERVER=nginx \
             --env BP_WEB_SERVER_ENABLE_PUSH_STATE=true \
             --publish
+
+      - name: Trigger Render Deploy for Frontend
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -n "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" ]; then
+            echo "Triggering Render deployment for Frontend..."
+            curl -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
+          else
+            echo "RENDER_FRONTEND_DEPLOY_HOOK secret not found, skipping."
+          fi
