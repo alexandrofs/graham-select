@@ -61,26 +61,47 @@ jobs:
           mvn -Pnative spring-boot:build-image -pl api -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
 
-      - name: Test API image locally
+      - name: Start infrastructure services
         run: |
           docker compose up -d
-          sleep 15
+          echo "Waiting for MySQL to be ready..."
+          for i in $(seq 1 60); do
+            if docker exec graham-select-mysql mysqladmin ping -h localhost -uroot -proot --silent 2>/dev/null; then
+              echo "MySQL is ready after ~${i}s"
+              break
+            fi
+            echo "  waiting... ($i/60)"
+            sleep 1
+          done
+          # Final verification
+          docker exec graham-select-mysql mysql -uroot -proot -e "SELECT 1" 2>/dev/null || (echo "MySQL failed to start" && exit 1)
+
+      - name: Test API image locally
+        run: |
           docker run -d --name test-api --network host \
             -e SPRING_PROFILES_ACTIVE=local \
-            -e SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/grahamselect?useSSL=false&allowPublicKeyRetrieval=true' \
+            -e SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/grahamselect?useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=10000&socketTimeout=30000' \
             -e SPRING_DATASOURCE_USERNAME=root \
             -e SPRING_DATASOURCE_PASSWORD=root \
+            -e SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=30000 \
             -e KAFKA_BOOTSTRAP_SERVERS='127.0.0.1:9094' \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
           
-          sleep 10
+          echo "Waiting for API to start..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1; then
+              echo "API is healthy after ~${i}0s"
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' test-api 2>/dev/null)" != "true" ]; then
+              echo "API container crashed during startup"
+              docker logs test-api
+              exit 1
+            fi
+            sleep 10
+          done
+          
           docker logs test-api
-          
-          if [ "$(docker inspect -f '{{.State.Running}}' test-api)" != "true" ]; then
-            echo "API container crashed during startup"
-            exit 1
-          fi
-          
           curl -f http://localhost:8080/actuator/health || (echo "Healthcheck failed" && exit 1)
           docker rm -f test-api
 
@@ -104,22 +125,30 @@ jobs:
           docker run -d --name test-valuation --network host \
             -e SPRING_PROFILES_ACTIVE=local \
             -e SERVER_PORT=8081 \
-            -e SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/grahamselect?useSSL=false&allowPublicKeyRetrieval=true' \
+            -e SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/grahamselect?useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=10000&socketTimeout=30000' \
             -e SPRING_DATASOURCE_USERNAME=root \
             -e SPRING_DATASOURCE_PASSWORD=root \
+            -e SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=30000 \
             -e KAFKA_BOOTSTRAP_SERVERS='127.0.0.1:9094' \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
             
-          sleep 10
+          echo "Waiting for Valuation to start..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8081/actuator/health > /dev/null 2>&1; then
+              echo "Valuation is healthy after ~${i}0s"
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' test-valuation 2>/dev/null)" != "true" ]; then
+              echo "Valuation container crashed during startup"
+              docker logs test-valuation
+              docker rm -f test-valuation
+              docker compose down
+              exit 1
+            fi
+            sleep 10
+          done
+          
           docker logs test-valuation
-          
-          if [ "$(docker inspect -f '{{.State.Running}}' test-valuation)" != "true" ]; then
-            echo "Valuation container crashed during startup"
-            docker rm -f test-valuation
-            docker compose down
-            exit 1
-          fi
-          
           curl -f http://localhost:8081/actuator/health || (echo "Healthcheck failed" && exit 1)
           docker rm -f test-valuation
           docker compose down
