@@ -7,9 +7,6 @@
   "resources": {
     "includes": [
       {
-        "condition": {
-          "typeReachable": "com.mysql.cj.protocol.ExportControlled"
-        },
         "pattern": "\\Qcom/mysql/cj/TlsSettings.properties\\E"
       }
     ]
