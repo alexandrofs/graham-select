@@ -61,6 +61,29 @@ jobs:
           mvn -Pnative spring-boot:build-image -pl api -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
 
+      - name: Test API image locally
+        run: |
+          docker compose up -d
+          sleep 15
+          docker run -d --name test-api --network host \
+            -e SPRING_PROFILES_ACTIVE=local \
+            -e SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/grahamselect?useSSL=false&allowPublicKeyRetrieval=true' \
+            -e SPRING_DATASOURCE_USERNAME=root \
+            -e SPRING_DATASOURCE_PASSWORD=root \
+            -e KAFKA_BOOTSTRAP_SERVERS='127.0.0.1:9094' \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
+          
+          sleep 10
+          docker logs test-api
+          
+          if [ "$(docker inspect -f '{{.State.Running}}' test-api)" != "true" ]; then
+            echo "API container crashed during startup"
+            exit 1
+          fi
+          
+          curl -f http://localhost:8080/actuator/health || (echo "Healthcheck failed" && exit 1)
+          docker rm -f test-api
+
       - name: Push API image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
 
@@ -75,6 +98,31 @@ jobs:
           cd backend
           mvn -Pnative spring-boot:build-image -pl valuation-service -am \
             -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
+
+      - name: Test Valuation image locally
+        run: |
+          docker run -d --name test-valuation --network host \
+            -e SPRING_PROFILES_ACTIVE=local \
+            -e SERVER_PORT=8081 \
+            -e SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/grahamselect?useSSL=false&allowPublicKeyRetrieval=true' \
+            -e SPRING_DATASOURCE_USERNAME=root \
+            -e SPRING_DATASOURCE_PASSWORD=root \
+            -e KAFKA_BOOTSTRAP_SERVERS='127.0.0.1:9094' \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
+            
+          sleep 10
+          docker logs test-valuation
+          
+          if [ "$(docker inspect -f '{{.State.Running}}' test-valuation)" != "true" ]; then
+            echo "Valuation container crashed during startup"
+            docker rm -f test-valuation
+            docker compose down
+            exit 1
+          fi
+          
+          curl -f http://localhost:8081/actuator/health || (echo "Healthcheck failed" && exit 1)
+          docker rm -f test-valuation
+          docker compose down
 
       - name: Push Valuation image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_VALUATION }}:latest
