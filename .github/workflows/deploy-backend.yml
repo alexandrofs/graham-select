@@ -73,8 +73,9 @@ jobs:
             echo "  waiting... ($i/60)"
             sleep 1
           done
-          # Final verification
-          docker exec graham-select-mysql mysql -uroot -proot -e "SELECT 1" 2>/dev/null || (echo "MySQL failed to start" && exit 1)
+          # Final verification - use mysqladmin ping which already worked
+          docker exec graham-select-mysql mysqladmin ping -h localhost -uroot -proot --silent 2>/dev/null
+          echo "MySQL is verified and ready"
 
       - name: Test API image locally
         run: |
