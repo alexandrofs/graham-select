@@ -7,7 +7,8 @@ import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 @SpringBootApplication
 @RegisterReflectionForBinding({
         liquibase.configuration.LiquibaseConfiguration.class,
-        liquibase.logging.core.LogServiceFactory.class
+        liquibase.logging.core.LogServiceFactory.class,
+        liquibase.configuration.ConfiguredValueModifierFactory.class
 })
 public class ApiServiceApplication {
 
