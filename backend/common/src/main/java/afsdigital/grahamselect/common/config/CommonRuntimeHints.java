@@ -34,6 +34,11 @@ public class CommonRuntimeHints implements RuntimeHintsRegistrar {
                                 MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 
                 // Register Liquibase Configuration
+                hints.reflection().registerType(TypeReference.of("liquibase.ui.LoggerUIService"),
+                                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+                hints.reflection().registerType(TypeReference.of("liquibase.ui.ConsoleUIService"),
+                                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+
                 // Note: Liquibase metadata is loaded globally from
                 // resources/META-INF/native-image/org.liquibase/liquibase-core
         }
