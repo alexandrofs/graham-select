@@ -41,5 +41,8 @@ public class CommonRuntimeHints implements RuntimeHintsRegistrar {
 
                 // Note: Liquibase metadata is loaded globally from
                 // resources/META-INF/native-image/org.liquibase/liquibase-core
+
+                // Register MySQL Resource Bundles
+                hints.resources().registerResourceBundle("com.mysql.cj.LocalizedErrorMessages");
         }
 }
