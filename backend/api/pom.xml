@@ -90,6 +90,17 @@
                             </image>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.11.4</version>
+                        <configuration>
+                            <mainClass>afsdigital.grahamselect.api.ApiServiceApplication</mainClass>
+                            <buildArgs>
+                                <buildArg>--initialize-at-run-time=com.mysql.cj.jdbc.AbandonedConnectionCleanupThread</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

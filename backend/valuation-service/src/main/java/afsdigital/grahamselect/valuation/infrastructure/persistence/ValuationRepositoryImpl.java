@@ -8,12 +8,10 @@ import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@Repository
 @RequiredArgsConstructor
 public class ValuationRepositoryImpl implements ValuationRepository {
 
