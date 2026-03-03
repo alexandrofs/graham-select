@@ -74,16 +74,16 @@ Como nossas imagens no GHCR (`ghcr.io/alexandrofs/graham-select-api` e `valuatio
 2. Escolha **Deploy an existing image from a registry**.
 3. Image URL: `ghcr.io/alexandrofs/graham-select-frontend:latest`
 4. Selecione o plano **Free**.
-5. Em **Environment Variables**, adicione a URL base da sua API:
-   - `API_BASE_URL`: `https://sua-api.onrender.com` (Nota: Garanta que o App Flutter consiga ler essa ENV).
-6. Salve e faça o deploy. O Frontend rodará em um mini-servidor Nginx otimizado.
-7. Vá em **Settings** -> **Deploy Hook** e copie a URL.
+5. Salve e faça o deploy. O Frontend rodará em um mini-servidor Nginx otimizado.
+6. Vá em **Settings** -> **Deploy Hook** e copie a URL.
 
 ### Passo 3.4: Configurar Auto-Deploy via GitHub (CD)
-Para que as atualizações cheguem no Render automaticamente a cada push na `main`:
+Para que as atualizações cheguem no Render automaticamente a cada push na `main`, além de passar a chave para o frontend conectar com a API:
 
 1. No repositório GitHub, vá em **Settings** > **Secrets and variables** > **Actions**.
-2. Adicione as 3 URLs de Deployment Hooks geradas no passo anterior como secrets:
+2. Na aba **Variables**, adicione a URL base da sua API:
+   - `API_BASE_URL`: `https://sua-api.onrender.com/api/v1` (Esta URL será injetada no frontend durante o build no GitHub Actions).
+3. Na aba **Secrets**, adicione as 3 URLs de Deployment Hooks geradas nos passos anteriores:
    - `RENDER_API_DEPLOY_HOOK`: URL do hook da API
    - `RENDER_VALUATION_DEPLOY_HOOK`: URL do hook do Valuation
    - `RENDER_FRONTEND_DEPLOY_HOOK`: URL do hook do Frontend

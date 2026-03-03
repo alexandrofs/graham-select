@@ -67,7 +67,13 @@ jobs:
       
       - name: Build Web
         working-directory: ./frontend
-        run: flutter build web --release
+        run: |
+          if [ -n "${{ vars.API_BASE_URL }}" ]; then
+            flutter build web --release --dart-define=API_BASE_URL="${{ vars.API_BASE_URL }}"
+          else
+            flutter build web --release
+          fi
+
 
       - name: Prepare Web Build for Buildpack
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'

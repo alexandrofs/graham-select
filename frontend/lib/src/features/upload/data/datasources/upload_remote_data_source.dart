@@ -9,7 +9,7 @@ class UploadRemoteDataSource {
 
   const UploadRemoteDataSource({
     required this.client,
-    this.baseUrl = 'http://localhost:8080/api/v1',
+    this.baseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8080/api/v1'),
   });
 
   Future<UploadResponseModel> uploadFile(AppFile file) async {
