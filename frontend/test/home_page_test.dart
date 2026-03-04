@@ -11,15 +11,15 @@ void main() {
     // Verify that the title is displayed
     expect(find.text('Graham Select'), findsOneWidget);
 
-    // Verify that the subtitle is displayed
+    // Verify that the hero copy is displayed
     expect(
-      find.text('Sua inteligência financeira para investimentos de valor.'),
+      find.text('Invista com a metodologia de Benjamin Graham'),
       findsOneWidget,
     );
 
     // Verify that the buttons are present
-    expect(find.text('Ver Ranking de Empresas'), findsOneWidget);
-    expect(find.text('Fazer Upload de Dados'), findsOneWidget);
+    expect(find.text('Ver ranking agora'), findsOneWidget);
+    expect(find.text('Entender metodologia'), findsOneWidget);
   });
 
   testWidgets('Navigation buttons should be tappable', (
@@ -27,15 +27,16 @@ void main() {
   ) async {
     await tester.pumpWidget(const GrahamSelectApp());
 
-    // Find the "Ver Ranking" button
-    final rankingButton = find.text('Ver Ranking de Empresas');
+    // Find the "Ver ranking agora" button
+    final rankingButton = find.text('Ver ranking agora');
     expect(rankingButton, findsOneWidget);
 
-    // Tap the button
+    // Scroll if needed and tap
+    await tester.ensureVisible(rankingButton);
     await tester.tap(rankingButton);
     await tester.pumpAndSettle();
 
-    // Verify navigation occurred (placeholder page should be visible)
+    // Verify navigation occurred (ranking page should be visible)
     expect(find.text('Top 20 Graham'), findsOneWidget);
   });
 }

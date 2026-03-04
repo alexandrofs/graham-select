@@ -71,9 +71,18 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   _HeroSection(key: heroKey, padding: horizontalPadding),
                   _HowItWorksSection(padding: horizontalPadding),
-                  _MethodologySection(key: methodologyKey, padding: horizontalPadding),
-                  _DifferentialsSection(key: resourcesKey, padding: horizontalPadding),
-                  _RankingPreviewSection(key: rankingKey, padding: horizontalPadding),
+                  _MethodologySection(
+                    key: methodologyKey,
+                    padding: horizontalPadding,
+                  ),
+                  _DifferentialsSection(
+                    key: resourcesKey,
+                    padding: horizontalPadding,
+                  ),
+                  _RankingPreviewSection(
+                    key: rankingKey,
+                    padding: horizontalPadding,
+                  ),
                   _TestimonialsSection(padding: horizontalPadding),
                   _FaqSection(padding: horizontalPadding),
                   _FinalCtaSection(key: contactKey, padding: horizontalPadding),
@@ -136,14 +145,17 @@ class _LandingMenu extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     color: AppTheme.primaryColor.withValues(alpha: 0.2),
                   ),
-                  child: const Icon(Icons.bar_chart_rounded, color: Colors.white),
+                  child: const Icon(
+                    Icons.bar_chart_rounded,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   'Graham Select',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -163,12 +175,19 @@ class _LandingMenu extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.accentColor,
                   foregroundColor: AppTheme.textColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                 ),
                 child: const Text('Ver Ranking'),
               ),
             ] else
-              _MobileMenu(menuEntries: menuEntries, onNavigate: onNavigate, onCtaPressed: onCtaPressed),
+              _MobileMenu(
+                menuEntries: menuEntries,
+                onNavigate: onNavigate,
+                onCtaPressed: onCtaPressed,
+              ),
           ],
         ),
       ),
@@ -189,27 +208,27 @@ class _MobileMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton(
+    return PopupMenuButton<String>(
       icon: const Icon(Icons.menu_rounded, size: 28),
       color: AppTheme.surfaceColor,
       onSelected: (value) {
         if (value == 'cta') {
           onCtaPressed();
         } else {
-          final section = menuEntries[int.parse(value as String)].$2;
+          final section = menuEntries[int.parse(value)].$2;
           onNavigate(section);
         }
       },
       itemBuilder: (context) => [
         for (var i = 0; i < menuEntries.length; i++)
-          PopupMenuItem(
-            value: '$i',
-            child: Text(menuEntries[i].$1),
-          ),
+          PopupMenuItem<String>(value: '$i', child: Text(menuEntries[i].$1)),
         const PopupMenuDivider(),
-        const PopupMenuItem(
+        const PopupMenuItem<String>(
           value: 'cta',
-          child: Text('Ver Ranking', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text(
+            'Ver Ranking',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
@@ -246,27 +265,31 @@ class _HeroSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: const Text('Ranking diário das 20 empresas mais baratas'),
+                      child: const Text(
+                        'Ranking diário das 20 empresas mais baratas',
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Text(
                       'Invista com a metodologia de Benjamin Graham',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'O Graham Select coleta, filtra e classifica dados financeiros em segundos para entregar um ranking confiável de barganhas na bolsa.',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppTheme.textColor.withValues(alpha: 0.8),
-                            height: 1.5,
-                          ),
+                        color: AppTheme.textColor.withValues(alpha: 0.8),
+                        height: 1.5,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     Wrap(
@@ -282,7 +305,10 @@ class _HeroSection extends StatelessWidget {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.textColor,
                             side: const BorderSide(color: AppTheme.textColor),
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 18,
+                            ),
                           ),
                           child: const Text('Entender metodologia'),
                         ),
@@ -290,10 +316,15 @@ class _HeroSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Row(
-                      children: const [
-                        Icon(Icons.refresh, color: AppTheme.accentColor),
-                        SizedBox(width: 8),
-                        Text('Atualizado diariamente • Processamento < 5s'),
+                      children: [
+                        const Icon(Icons.refresh, color: AppTheme.accentColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Atualizado diariamente • Processamento < 5s',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -305,7 +336,9 @@ class _HeroSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceColor,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,9 +348,18 @@ class _HeroSection extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
-                    const _HighlightRow(title: 'Empresas monitoradas', value: '180+'),
-                    const _HighlightRow(title: 'Atualizações por dia', value: '3'),
-                    const _HighlightRow(title: 'Filtros Graham aplicados', value: '7'),
+                    const _HighlightRow(
+                      title: 'Empresas monitoradas',
+                      value: '180+',
+                    ),
+                    const _HighlightRow(
+                      title: 'Atualizações por dia',
+                      value: '3',
+                    ),
+                    const _HighlightRow(
+                      title: 'Filtros Graham aplicados',
+                      value: '7',
+                    ),
                     const Divider(height: 32),
                     Text(
                       '“Precisei só de 2 minutos para chegar à lista final de aportes.”',
@@ -327,8 +369,8 @@ class _HeroSection extends StatelessWidget {
                     Text(
                       '— Maria, consultora financeira',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.textColor.withValues(alpha: 0.7),
-                          ),
+                        color: AppTheme.textColor.withValues(alpha: 0.7),
+                      ),
                     ),
                   ],
                 ),
@@ -349,9 +391,18 @@ class _HowItWorksSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      ('Coletamos dados', 'Integramos fontes confiáveis e validamos cada indicador antes do processamento.'),
-      ('Aplicamos filtros', 'Executamos as 7 regras de valor propostas por Benjamin Graham.'),
-      ('Entregamos o ranking', 'Você recebe a lista das 20 ações mais descontadas com métricas explicadas.'),
+      (
+        'Coletamos dados',
+        'Integramos fontes confiáveis e validamos cada indicador antes do processamento.',
+      ),
+      (
+        'Aplicamos filtros',
+        'Executamos as 7 regras de valor propostas por Benjamin Graham.',
+      ),
+      (
+        'Entregamos o ranking',
+        'Você recebe a lista das 20 ações mais descontadas com métricas explicadas.',
+      ),
     ];
 
     return Container(
@@ -360,13 +411,16 @@ class _HowItWorksSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Como funciona', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Como funciona',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 16),
           Text(
             'Automatizamos a parte pesada da análise fundamentalista para você focar na decisão.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.textColor.withValues(alpha: 0.7),
-                ),
+              color: AppTheme.textColor.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 32),
           Wrap(
@@ -376,10 +430,7 @@ class _HowItWorksSection extends StatelessWidget {
               for (final step in steps)
                 SizedBox(
                   width: 320,
-                  child: _InfoCard(
-                    title: step.$1,
-                    description: step.$2,
-                  ),
+                  child: _InfoCard(title: step.$1, description: step.$2),
                 ),
             ],
           ),
@@ -397,25 +448,39 @@ class _MethodologySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final metrics = [
-      ('P/L e P/VP', 'Aplicamos limites clássicos (< 15 e < 1.5) para barrar valuations distorcidos.'),
-      ('Margem de segurança', 'Requerimos múltiplos combinados abaixo de 22.5 para configurar desconto real.'),
-      ('Endividamento', 'Excluímos empresas com dívida líquida absurda para preservar o perfil conservador.'),
-      ('Histórico de lucros', 'Penalizamos quem não apresenta consistência nos últimos anos.'),
+      (
+        'P/L e P/VP',
+        'Aplicamos limites clássicos (< 15 e < 1.5) para barrar valuations distorcidos.',
+      ),
+      (
+        'Margem de segurança',
+        'Requerimos múltiplos combinados abaixo de 22.5 para configurar desconto real.',
+      ),
+      (
+        'Endividamento',
+        'Excluímos empresas com dívida líquida absurda para preservar o perfil conservador.',
+      ),
+      (
+        'Histórico de lucros',
+        'Penalizamos quem não apresenta consistência nos últimos anos.',
+      ),
     ];
 
     return Container(
-      key: key,
       padding: EdgeInsets.symmetric(horizontal: padding, vertical: 72),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Metodologia Benjamin Graham', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Metodologia Benjamin Graham',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 16),
           Text(
             'Explicamos cada filtro aplicado para que você saiba exatamente por que uma ação entrou no ranking.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.textColor.withValues(alpha: 0.7),
-                ),
+              color: AppTheme.textColor.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 32),
           Wrap(
@@ -425,10 +490,7 @@ class _MethodologySection extends StatelessWidget {
               for (final metric in metrics)
                 SizedBox(
                   width: 320,
-                  child: _InfoCard(
-                    title: metric.$1,
-                    description: metric.$2,
-                  ),
+                  child: _InfoCard(title: metric.$1, description: metric.$2),
                 ),
             ],
           ),
@@ -452,9 +514,18 @@ class _DifferentialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final diffs = [
-      ('Atualização diária', 'Ranking recalculado 3 vezes ao dia com dados auditáveis.'),
-      ('Processamento em segundos', '< 5 segundos entre o upload e a lista final.'),
-      ('Integrações prontas', 'API REST e docs disponíveis para integrações futuras.'),
+      (
+        'Atualização diária',
+        'Ranking recalculado 3 vezes ao dia com dados auditáveis.',
+      ),
+      (
+        'Processamento em segundos',
+        '< 5 segundos entre o upload e a lista final.',
+      ),
+      (
+        'Integrações prontas',
+        'API REST e docs disponíveis para integrações futuras.',
+      ),
     ];
 
     return Container(
@@ -463,7 +534,10 @@ class _DifferentialsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Por que confiar?', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Por que confiar?',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 24),
           Wrap(
             spacing: 24,
@@ -472,10 +546,7 @@ class _DifferentialsSection extends StatelessWidget {
               for (final diff in diffs)
                 SizedBox(
                   width: 320,
-                  child: _InfoCard(
-                    title: diff.$1,
-                    description: diff.$2,
-                  ),
+                  child: _InfoCard(title: diff.$1, description: diff.$2),
                 ),
             ],
           ),
@@ -503,7 +574,10 @@ class _RankingPreviewSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Um gostinho do ranking', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Um gostinho do ranking',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 24),
           Container(
             decoration: BoxDecoration(
@@ -515,7 +589,10 @@ class _RankingPreviewSection extends StatelessWidget {
               children: [
                 for (final row in sample)
                   ListTile(
-                    title: Text(row.$1, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(
+                      row.$1,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Text('${row.$2} • ${row.$3}'),
                     trailing: Text(row.$4),
                   ),
@@ -542,8 +619,14 @@ class _TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final quotes = [
-      ('“Economizei horas de planilhas e negociei com muito mais convicção.”', 'João, investidor pessoa física'),
-      ('“Uso o Graham Select para filtrar ideias antes de escrever meus relatórios.”', 'Carla, analista CNPI'),
+      (
+        '“Economizei horas de planilhas e negociei com muito mais convicção.”',
+        'João, investidor pessoa física',
+      ),
+      (
+        '“Uso o Graham Select para filtrar ideias antes de escrever meus relatórios.”',
+        'Carla, analista CNPI',
+      ),
     ];
 
     return Container(
@@ -556,10 +639,7 @@ class _TestimonialsSection extends StatelessWidget {
           for (final quote in quotes)
             SizedBox(
               width: 360,
-              child: _InfoCard(
-                title: quote.$1,
-                description: quote.$2,
-              ),
+              child: _InfoCard(title: quote.$1, description: quote.$2),
             ),
         ],
       ),
@@ -575,8 +655,14 @@ class _FaqSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final faqs = [
-      ('De onde vêm os dados?', 'Consumimos bases públicas e privadas com validações internas.'),
-      ('Com que frequência atualizam o ranking?', 'Três vezes ao dia ou sempre que novos dados são carregados.'),
+      (
+        'De onde vêm os dados?',
+        'Consumimos bases públicas e privadas com validações internas.',
+      ),
+      (
+        'Com que frequência atualizam o ranking?',
+        'Três vezes ao dia ou sempre que novos dados são carregados.',
+      ),
       ('Posso exportar?', 'Sim, via dashboard ou API REST autenticada.'),
     ];
 
@@ -589,10 +675,17 @@ class _FaqSection extends StatelessWidget {
           const SizedBox(height: 16),
           for (final faq in faqs)
             ExpansionTile(
-              title: Text(faq.$1, style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(
+                faq.$1,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
                   child: Text(faq.$2),
                 ),
               ],
@@ -618,8 +711,12 @@ class _FinalCtaSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Pronto para testar o Graham Select?',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            'Pronto para testar o Graham Select?',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           Text(
             'Acesse o ranking agora ou fale com o time para entender como integrar ao seu fluxo.',
@@ -657,13 +754,17 @@ class _Footer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('© ${DateTime.now().year} Graham Select. Todos os direitos reservados.',
-              style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            '© ${DateTime.now().year} Graham Select. Todos os direitos reservados.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           const SizedBox(height: 8),
-          Text('contato@grahamselect.com • +55 (11) 99999-9999',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textColor.withValues(alpha: 0.7),
-                  )),
+          Text(
+            'contato@grahamselect.com • +55 (11) 99999-9999',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.textColor.withValues(alpha: 0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -693,8 +794,8 @@ class _InfoCard extends StatelessWidget {
           Text(
             description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textColor.withValues(alpha: 0.75),
-                ),
+              color: AppTheme.textColor.withValues(alpha: 0.75),
+            ),
           ),
         ],
       ),
@@ -713,14 +814,17 @@ class _HighlightRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: Theme.of(context).textTheme.bodyMedium),
+          Expanded(
+            child: Text(title, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          const SizedBox(width: 12),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            textAlign: TextAlign.right,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
