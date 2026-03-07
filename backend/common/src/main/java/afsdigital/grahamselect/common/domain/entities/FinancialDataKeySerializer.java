@@ -11,6 +11,10 @@ public class FinancialDataKeySerializer extends JsonSerializer<FinancialDataKey>
 
     private static final DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
+    public FinancialDataKeySerializer() {
+        super();
+    }
+
     @Override
     public void serialize(FinancialDataKey value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (value == null) {
