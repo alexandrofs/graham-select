@@ -44,5 +44,13 @@ public class CommonRuntimeHints implements RuntimeHintsRegistrar {
 
                 // Register MySQL Resource Bundles
                 hints.resources().registerResourceBundle("com.mysql.cj.LocalizedErrorMessages");
+
+                // Register Jackson Custom Serializers/Deserializers for Native Image Reflection
+                hints.reflection().registerType(TypeReference.of("afsdigital.grahamselect.common.domain.entities.FinancialDataKeySerializer"),
+                                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+                hints.reflection().registerType(TypeReference.of("afsdigital.grahamselect.common.domain.entities.FinancialDataKeyDeserializer"),
+                                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+                hints.reflection().registerType(TypeReference.of("afsdigital.grahamselect.common.domain.entities.FinancialDataKey"),
+                                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS);
         }
 }
