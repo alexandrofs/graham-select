@@ -11,6 +11,10 @@ import java.time.LocalDate;
 
 public class FinancialDataKeyDeserializer extends JsonDeserializer<FinancialDataKey> {
 
+    public FinancialDataKeyDeserializer() {
+        super();
+    }
+
     @Override
     public FinancialDataKey deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         ObjectCodec codec = p.getCodec();
