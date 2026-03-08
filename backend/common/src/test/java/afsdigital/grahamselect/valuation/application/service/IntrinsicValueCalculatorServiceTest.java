@@ -37,19 +37,16 @@ public class IntrinsicValueCalculatorServiceTest {
                 InvalidEarningsPerShareException.class,
                 () -> intrinsicValueCalculatorService.calculate(financialDataDto)
         );
-        assertEquals("Earnings per share cannot be null or less than 0", exception.getMessage());
+        assertEquals("Earnings per share cannot be null", exception.getMessage());
     }
 
     @Test
-    public void shouldThrowInvalidEarningsPerShareExceptionWhenEpsIsLessThanZero() {
+    public void shouldReturnNullWhenEpsIsLessThanZero() {
 
         FinancialDataDto financialDataDto = new FinancialDataDto(-1.0, 20.0);
 
-        InvalidEarningsPerShareException exception = assertThrows(
-                InvalidEarningsPerShareException.class,
-                () -> intrinsicValueCalculatorService.calculate(financialDataDto)
-        );
-        assertEquals("Earnings per share cannot be null or less than 0", exception.getMessage());
+        Double intrinsicValue = intrinsicValueCalculatorService.calculate(financialDataDto);
+        assertNull(intrinsicValue);
     }
 
     @Test
@@ -61,19 +58,16 @@ public class IntrinsicValueCalculatorServiceTest {
                 InvalidBookValueException.class,
                 () -> intrinsicValueCalculatorService.calculate(financialDataDto)
         );
-        assertEquals("Book value per share cannot be null or less than 0", exception.getMessage());
+        assertEquals("Book value per share cannot be null", exception.getMessage());
     }
 
     @Test
-    public void shouldThrowInvalidBookValueExceptionWhenBookValueIsLessThanZero() {
+    public void shouldReturnNullWhenBookValueIsLessThanZero() {
 
         FinancialDataDto financialDataDto = new FinancialDataDto(5.0, -1.0);
 
-        InvalidBookValueException exception = assertThrows(
-                InvalidBookValueException.class,
-                () -> intrinsicValueCalculatorService.calculate(financialDataDto)
-        );
-        assertEquals("Book value per share cannot be null or less than 0", exception.getMessage());
+        Double intrinsicValue = intrinsicValueCalculatorService.calculate(financialDataDto);
+        assertNull(intrinsicValue);
     }
 
 }
