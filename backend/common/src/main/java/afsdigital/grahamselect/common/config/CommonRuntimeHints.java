@@ -52,5 +52,7 @@ public class CommonRuntimeHints implements RuntimeHintsRegistrar {
                                 MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
                 hints.reflection().registerType(TypeReference.of("afsdigital.grahamselect.common.domain.entities.FinancialDataKey"),
                                 MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS);
+                hints.reflection().registerType(TypeReference.of("afsdigital.grahamselect.common.domain.entities.FinancialDataEvent"),
+                                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
         }
 }
