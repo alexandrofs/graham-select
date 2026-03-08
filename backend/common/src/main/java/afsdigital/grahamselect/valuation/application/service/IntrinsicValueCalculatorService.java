@@ -10,15 +10,18 @@ public class IntrinsicValueCalculatorService {
 
     public Double calculate(FinancialDataDto financialDataDto) {
         validate(financialDataDto);
-        return  Math.sqrt(GRAHAM_FACTOR * financialDataDto.eps() * financialDataDto.bookValuePerShare());
+        if (financialDataDto.eps() < 0 || financialDataDto.bookValuePerShare() < 0) {
+            return null;
+        }
+        return Math.sqrt(GRAHAM_FACTOR * financialDataDto.eps() * financialDataDto.bookValuePerShare());
     }
 
-    private static void validate(FinancialDataDto financialDataDto) {
-        if (financialDataDto.eps() == null || financialDataDto.eps() <= 0) {
-            throw new InvalidEarningsPerShareException("Earnings per share cannot be null or less than 0");
+    private void validate(FinancialDataDto financialDataDto) {
+        if (financialDataDto.eps() == null) {
+            throw new InvalidEarningsPerShareException("Earnings per share cannot be null");
         }
-        if (financialDataDto.bookValuePerShare() == null || financialDataDto.bookValuePerShare() <= 0) {
-            throw new InvalidBookValueException("Book value per share cannot be null or less than 0");
+        if (financialDataDto.bookValuePerShare() == null) {
+            throw new InvalidBookValueException("Book value per share cannot be null");
         }
     }
 
