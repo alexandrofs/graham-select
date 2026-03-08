@@ -1,8 +1,6 @@
 package afsdigital.grahamselect.valuation.application.service;
 
 import afsdigital.grahamselect.valuation.application.dto.FinancialDataDto;
-import afsdigital.grahamselect.valuation.application.service.exceptions.InvalidBookValueException;
-import afsdigital.grahamselect.valuation.application.service.exceptions.InvalidEarningsPerShareException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,15 +27,12 @@ public class IntrinsicValueCalculatorServiceTest {
     }
 
     @Test
-    public void shouldThrowInvalidEarningsPerShareExceptionWhenEpsIsNull() {
+    public void shouldReturnNullWhenEpsIsNull() {
 
         FinancialDataDto financialDataDto = new FinancialDataDto(null, 20.0);
 
-        InvalidEarningsPerShareException exception = assertThrows(
-                InvalidEarningsPerShareException.class,
-                () -> intrinsicValueCalculatorService.calculate(financialDataDto)
-        );
-        assertEquals("Earnings per share cannot be null", exception.getMessage());
+        Double intrinsicValue = intrinsicValueCalculatorService.calculate(financialDataDto);
+        assertNull(intrinsicValue);
     }
 
     @Test
@@ -50,15 +45,12 @@ public class IntrinsicValueCalculatorServiceTest {
     }
 
     @Test
-    public void shouldThrowInvalidBookValueExceptionWhenBookValueIsNull() {
+    public void shouldReturnNullWhenBookValueIsNull() {
 
         FinancialDataDto financialDataDto = new FinancialDataDto(5.0, null);
 
-        InvalidBookValueException exception = assertThrows(
-                InvalidBookValueException.class,
-                () -> intrinsicValueCalculatorService.calculate(financialDataDto)
-        );
-        assertEquals("Book value per share cannot be null", exception.getMessage());
+        Double intrinsicValue = intrinsicValueCalculatorService.calculate(financialDataDto);
+        assertNull(intrinsicValue);
     }
 
     @Test
