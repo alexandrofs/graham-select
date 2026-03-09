@@ -50,12 +50,13 @@ class RankingRepositoryImplTest extends BaseRepositoryIT {
     void shouldReturnTop20BestRankedCompanies() {
         // Arrange: Create calculations for 25 companies
         IntStream.range(0, 25).forEach(i -> {
-            String companyId = "COMPANY_" + i;
+            String companyId = UUID.randomUUID().toString();
+            String ticker = "COMPANY_" + i;
 
             companyJpaRepository.save(CompanyEntity.builder()
                     .id(companyId)
                     .name("Company Name " + i)
-                    .ticker(companyId) // Ticker is now NOT NULL in DB
+                    .ticker(ticker) // Ticker is now NOT NULL in DB
                     .build());
 
             // Latest price
