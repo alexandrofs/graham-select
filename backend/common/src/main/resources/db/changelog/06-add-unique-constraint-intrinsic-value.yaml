@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 06-add-unique-constraint-intrinsic-value
+      author: duke
+      changes:
+        - addUniqueConstraint:
+            tableName: intrinsic_value
+            columnNames: company_id, calculation_date
+            constraintName: unq_intrinsic_value_company_date
