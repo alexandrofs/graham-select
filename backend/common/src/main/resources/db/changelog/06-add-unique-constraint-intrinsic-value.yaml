@@ -4,6 +4,6 @@ databaseChangeLog:
       author: duke
       changes:
         - addUniqueConstraint:
-            tableName: intrinsic_value
+            tableName: company_intrinsic_value
             columnNames: company_id, calculation_date
             constraintName: unq_intrinsic_value_company_date
