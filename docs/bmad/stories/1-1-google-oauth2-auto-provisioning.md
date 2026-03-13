@@ -1,6 +1,6 @@
 # Story 1.1: Google OAuth2 Auto-provisioning
 
-Status: done
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -51,11 +51,13 @@ Antigravity (Claude 3.5 Sonnet)
 
 - [pom.xml](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/pom.xml)
 - [pom.xml](file:///Users/alexandrofs/Documents/projects/graham-select/backend/common/pom.xml)
+- [ApiServiceApplication.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/src/main/java/afsdigital/grahamselect/api/ApiServiceApplication.java)
 - [User.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/User.java)
 - [UserRepository.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/common/src/main/java/afsdigital/grahamselect/common/user/infrastructure/persistence/UserRepository.java)
 - [SecurityConfig.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/SecurityConfig.java)
 - [OAuth2UserProvisioningConverter.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java)
 - [UserAutoProvisioningIT.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/src/test/java/afsdigital/grahamselect/api/auth/UserAutoProvisioningIT.java)
+- [UploadServiceDelegateTest.java](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/src/test/java/afsdigital/grahamselect/api/upload/web/UploadServiceDelegateTest.java)
 - [application.yml](file:///Users/alexandrofs/Documents/projects/graham-select/backend/api/src/main/resources/application.yml)
 - [07-create-users-table.yaml](file:///Users/alexandrofs/Documents/projects/graham-select/backend/common/src/main/resources/db/changelog/07-create-users-table.yaml)
 - [db.changelog-master.yaml](file:///Users/alexandrofs/Documents/projects/graham-select/backend/common/src/main/resources/db/changelog/db.changelog-master.yaml)
