@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/05-remove-price-from-intrinsic-value.yaml
   - include:
       file: db/changelog/06-add-unique-constraint-intrinsic-value.yaml
+  - include:
+      file: db/changelog/07-create-users-table.yaml

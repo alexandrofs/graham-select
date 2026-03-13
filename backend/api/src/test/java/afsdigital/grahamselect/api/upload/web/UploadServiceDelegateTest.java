@@ -19,12 +19,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.IOException;
 import java.time.Duration;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @EmbeddedKafka(topics = TopicConstants.FINANCIAL_DATA_TOPIC, partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
 @AutoConfigureMockMvc
@@ -49,7 +50,9 @@ public class UploadServiceDelegateTest extends BaseRepositoryIT {
                 new ClassPathResource("test-financial-data.csv").getInputStream());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.POST, "/api/v1/upload-financial-data")
-                .file(multipartFile)).andExpect(MockMvcResultMatchers.status().is(200));
+                .file(multipartFile)
+                .with(jwt()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
         kafkaTemplate.setConsumerFactory(defaultKafkaConsumerFactory);
         ConsumerRecord<String, String> consumerRecord = kafkaTemplate.receive(TopicConstants.FINANCIAL_DATA_TOPIC, 0, 0,
