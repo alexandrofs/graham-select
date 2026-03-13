@@ -32,3 +32,6 @@ databaseChangeLog:
                   type: DATETIME
                   constraints:
                     nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME

@@ -42,7 +42,7 @@ story_location: docs/bmad/implementation-artifacts
 development_status:
   epic-1: in-progress
   1-1-google-oauth2-auto-provisioning: in-progress
-  1-2-subscription-tier-management: backlog
+  1-2-subscription-tier-management: ready-for-dev
   1-3-tier-based-access-control: backlog
   1-4-account-deletion-lgpd-purge: backlog
   epic-1-retrospective: optional

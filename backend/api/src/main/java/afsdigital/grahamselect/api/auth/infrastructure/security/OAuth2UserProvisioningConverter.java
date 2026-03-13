@@ -31,28 +31,37 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
         String email = jwt.getClaimAsString("email");
         String name = jwt.getClaimAsString("name");
 
-        User user = userRepository.findByGoogleSub(sub)
-                .map(existingUser -> {
-                    if (name != null && !name.equals(existingUser.getFullName())) {
-                        existingUser.setFullName(name);
-                        return userRepository.save(existingUser);
-                    }
-                    return existingUser;
-                })
-                .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .googleSub(sub)
-                            .email(email != null ? email : "unknown@example.com")
-                            .fullName(name)
-                            .createdAt(LocalDateTime.now())
-                            .build();
-                    log.info("Provisioning new user from OAuth2: {}", email);
-                    return userRepository.save(newUser);
-                });
+        try {
+            User user = userRepository.findByGoogleSub(sub)
+                    .map(existingUser -> {
+                        if (name != null && !name.equals(existingUser.getFullName())) {
+                            existingUser.setFullName(name);
+                            return userRepository.save(existingUser);
+                        }
+                        return existingUser;
+                    })
+                    .orElseGet(() -> {
+                        if (email == null) {
+                            log.warn("OAuth2 login without email claim for sub: {}", sub);
+                        }
+                        User newUser = User.builder()
+                                .googleSub(sub)
+                                .email(email)
+                                .fullName(name)
+                                .build();
+                        log.info("Provisioning new user from OAuth2: {}", email);
+                        return userRepository.save(newUser);
+                    });
 
-        Collection<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
-        
-        // We use the internal database ID as the principal name to satisfy AC 5
-        return new JwtAuthenticationToken(jwt, authorities, user.getId().toString());
+            Collection<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
+            return new JwtAuthenticationToken(jwt, authorities, user.getId().toString());
+        } catch (Exception e) {
+            log.error("Error during user provisioning for sub: {}. Retrying lookup.", sub, e);
+            // Fallback: search again in case of race condition (another thread saved it)
+            User user = userRepository.findByGoogleSub(sub)
+                    .orElseThrow(() -> new RuntimeException("User provisioning failed and record not found", e));
+            Collection<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
+            return new JwtAuthenticationToken(jwt, authorities, user.getId().toString());
+        }
     }
 }
