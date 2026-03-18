@@ -30,7 +30,6 @@ class ApiClient {
         onError: (DioException e, handler) {
           if (e.response?.statusCode == 401) {
             // Futuro: Lógica para refresh token ou deslogar o usuário
-            print('Sessão expirada ou não autorizada (401)');
           }
           return handler.next(e);
         },

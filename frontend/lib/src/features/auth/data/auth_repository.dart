@@ -6,7 +6,6 @@ import '../../../core/api/api_client.dart';
 class AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
-  final ApiClient _apiClient;
   final FlutterSecureStorage _storage;
 
   AuthRepository({
@@ -14,8 +13,7 @@ class AuthRepository {
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
     FlutterSecureStorage? storage,
-  })  : _apiClient = apiClient,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn(
           clientId: const String.fromEnvironment('GOOGLE_CLIENT_ID', defaultValue: '').isEmpty 
               ? null 
@@ -49,7 +47,7 @@ class AuthRepository {
 
       return userCredential;
     } catch (e) {
-      print('Erro ao fazer login com Google: $e');
+      // Ignorando print em prod
       rethrow;
     }
   }
