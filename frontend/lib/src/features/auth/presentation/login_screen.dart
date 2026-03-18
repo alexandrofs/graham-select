@@ -22,12 +22,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final authRepository = context.read<AuthRepository>();
       final userCredential = await authRepository.signInWithGoogle();
       
-      if (userCredential != null && mounted) {
+      if (userCredential != null && context.mounted) {
         // Força navegação explícita caso o listenable demore pra refletir
         context.go('/');
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Falha ao entrar com Google: $e'),
@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } finally {
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isLoading = false;
         });

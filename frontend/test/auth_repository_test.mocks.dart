@@ -27,7 +27,6 @@ import 'package:mockito/src/dummies.dart' as _i11;
 // ignore_for_file: deprecated_member_use_from_same_package
 // ignore_for_file: implementation_imports
 // ignore_for_file: invalid_use_of_visible_for_testing_member
-// ignore_for_file: must_be_immutable
 // ignore_for_file: prefer_const_constructors
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
@@ -1196,7 +1195,6 @@ class MockGoogleSignIn extends _i1.Mock implements _i7.GoogleSignIn {
 /// A class which mocks [GoogleSignInAccount].
 ///
 /// See the documentation for Mockito's code generation for more information.
-// ignore: must_be_immutable
 class MockGoogleSignInAccount extends _i1.Mock
     implements _i7.GoogleSignInAccount {
   @override
