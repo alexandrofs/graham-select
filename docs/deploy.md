@@ -69,13 +69,27 @@ Como nossas imagens no GHCR (`ghcr.io/alexandrofs/graham-select-api` e `valuatio
 4. Salve e faça o deploy.
 5. Vá em **Settings** -> **Deploy Hook** e copie a URL.
 
-### Passo 3.3: Deploy do Frontend (Web)
+### Passo 3.3: Deploy do Frontend (Web) e Google Sign-In
+Para que a autenticação com o Google funcione na web (graças ao plugin `google_sign_in_web`), é **obrigatoriamente necessário** informar um `Client ID` gerado no [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+
+O build do Frontend aceita o `Client ID` como uma variável injetada no momento de compilação.
+Você pode registrar essa variável no Render ou via GitHub Actions para que nosso `main.dart` consuma usando `String.fromEnvironment`. 
+
 1. Crie um novo **Web Service**.
 2. Escolha **Deploy an existing image from a registry**.
 3. Image URL: `ghcr.io/alexandrofs/graham-select-frontend:latest`
 4. Selecione o plano **Free**.
-5. Salve e faça o deploy. O Frontend rodará em um mini-servidor Nginx otimizado.
-6. Vá em **Settings** -> **Deploy Hook** e copie a URL.
+5. Em **Environment Variables**, adicione as variáveis fundamentais para o build geradas no Firebase:
+   - `GOOGLE_CLIENT_ID`: `SEU_CLIENT_ID.apps.googleusercontent.com`
+   - `FIREBASE_API_KEY`: `AIzaSy...`
+   - `FIREBASE_AUTH_DOMAIN`: `seu-projeto.firebaseapp.com`
+   - `FIREBASE_PROJECT_ID`: `seu-projeto`
+   - `FIREBASE_STORAGE_BUCKET`: `seu-projeto.firebasestorage.app`
+   - `FIREBASE_MESSAGING_SENDER_ID`: `12345`
+   - `FIREBASE_APP_ID`: `1:12345:web:abcde`
+   - `FIREBASE_MEASUREMENT_ID`: `G-12345`
+6. Salve e faça o deploy. O Frontend rodará em um mini-servidor Nginx otimizado.
+7. Vá em **Settings** -> **Deploy Hook** e copie a URL.
 
 ### Passo 3.4: Configurar Auto-Deploy via GitHub (CD)
 Para que as atualizações cheguem no Render automaticamente a cada push na `main`, além de passar a chave para o frontend conectar com a API:
