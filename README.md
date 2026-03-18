@@ -43,8 +43,39 @@ A forma mais simples de rodar todo o ecossistema (Infra + Backend + Frontend) é
    cd graham-select
    ```
 
-2. **Execute o Inicializador**
+2. **Configuração do Google Sign-In (Login Web)**
+   O login com o Google no modo web exige a criação de um **Client ID** no seu projeto do Google Cloud e a habilitação da **People API**.
+   * [Acesse o Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+   * Crie ou selecione um projeto.
+   * Vá em **APIs & Services > Library**, pesquise por **Google People API** e clique em **Enable** (necessário para buscar o perfil do usuário).
+   * Retorne para **APIs & Services > Credentials** e clique em **Create Credentials > OAuth client ID**.
+   * Em Application Type, escolha **Web application**.
+   * Em *Authorized JavaScript origins*, adicione a URL local (ex: `http://localhost:3000`).
+   * Em *Authorized redirect URIs*, você pode deixar em branco ou preencher com a mesma URL.
+   * Clique em **Create**.
+   * Copie o valor gerado (Exemplo: `seu-id.apps.googleusercontent.com`).
+
+3. **Configuração do Firebase Auth**
+   Para que a troca do token do Google para o Firebase aconteça, o projeto Firebase precisa estar vinculado ao mesmo Google Cloud criado acima.
+   * Acesse o [Firebase Console](https://console.firebase.google.com/).
+   * Clique em **Add project** e selecione na lista o mesmo projeto do Google Cloud que você acabou de usar.
+   * Vá em **Build > Authentication > Sign-in method** e habilite o provedor **Google** (adicione o e-mail de suporte solicitado).
+   * Na página inicial (*Project Overview*), adicione um app **Web** ao projeto (ícone `</>`).
+   * No final da criação do app, o Firebase fornecerá um snippet de código contendo o `firebaseConfig`. Copie os valores do `apiKey`, `appId`, `messagingSenderId` e `projectId`.
+
+4. **Execute o Inicializador**
+   Para testar o *Google Sign-In* no frontend web, defina as variáveis relacionadas ao GCP e Firebase (obtidas nos passos anteriores) antes de executar o script.
+   
    ```bash
+   export GOOGLE_CLIENT_ID="seu-client-id.apps.googleusercontent.com"
+   export FIREBASE_API_KEY="AIzaSy..."
+   export FIREBASE_AUTH_DOMAIN="seu-projeto.firebaseapp.com"
+   export FIREBASE_PROJECT_ID="seu-projeto"
+   export FIREBASE_STORAGE_BUCKET="seu-projeto.firebasestorage.app"
+   export FIREBASE_MESSAGING_SENDER_ID="12345"
+   export FIREBASE_APP_ID="1:12345:web:abcde"
+   export FIREBASE_MEASUREMENT_ID="G-12345"
+   
    ./start-app.sh
    ```
    *Este script irá:*

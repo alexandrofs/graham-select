@@ -44,7 +44,15 @@ cd backend && mvn spring-boot:run -pl valuation-service -Dspring-boot.run.profil
 VALUATION_PID=$!
 
 echo -e "${BLUE}Iniciando Frontend (Flutter Web)...${NC}"
-cd frontend && flutter run -d chrome --web-port 3000 > ../frontend.log 2>&1 &
+cd frontend && flutter run -d chrome --web-port 3000 \
+  --dart-define=GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-''}" \
+  --dart-define=FIREBASE_API_KEY="${FIREBASE_API_KEY:-'dummy-api-key'}" \
+  --dart-define=FIREBASE_AUTH_DOMAIN="${FIREBASE_AUTH_DOMAIN:-'dummy-auth-domain'}" \
+  --dart-define=FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID:-'dummy-project-id'}" \
+  --dart-define=FIREBASE_STORAGE_BUCKET="${FIREBASE_STORAGE_BUCKET:-'dummy-storage-bucket'}" \
+  --dart-define=FIREBASE_MESSAGING_SENDER_ID="${FIREBASE_MESSAGING_SENDER_ID:-'dummy-sender-id'}" \
+  --dart-define=FIREBASE_APP_ID="${FIREBASE_APP_ID:-'dummy-app-id'}" \
+  --dart-define=FIREBASE_MEASUREMENT_ID="${FIREBASE_MEASUREMENT_ID:-'dummy-measurement-id'}" > ../frontend.log 2>&1 &
 FRONT_PID=$!
 
 
