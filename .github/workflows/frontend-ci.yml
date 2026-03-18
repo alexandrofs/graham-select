@@ -68,11 +68,16 @@ jobs:
       - name: Build Web
         working-directory: ./frontend
         run: |
-          if [ -n "${{ vars.API_BASE_URL }}" ]; then
-            flutter build web --release --dart-define=API_BASE_URL="${{ vars.API_BASE_URL }}"
-          else
-            flutter build web --release
-          fi
+          flutter build web --release \
+            --dart-define=API_BASE_URL="${{ vars.API_BASE_URL }}" \
+            --dart-define=GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
+            --dart-define=FIREBASE_API_KEY="${{ vars.FIREBASE_API_KEY }}" \
+            --dart-define=FIREBASE_AUTH_DOMAIN="${{ vars.FIREBASE_AUTH_DOMAIN }}" \
+            --dart-define=FIREBASE_PROJECT_ID="${{ vars.FIREBASE_PROJECT_ID }}" \
+            --dart-define=FIREBASE_STORAGE_BUCKET="${{ vars.FIREBASE_STORAGE_BUCKET }}" \
+            --dart-define=FIREBASE_MESSAGING_SENDER_ID="${{ vars.FIREBASE_MESSAGING_SENDER_ID }}" \
+            --dart-define=FIREBASE_APP_ID="${{ vars.FIREBASE_APP_ID }}" \
+            --dart-define=FIREBASE_MEASUREMENT_ID="${{ vars.FIREBASE_MEASUREMENT_ID }}"
 
 
       - name: Prepare Web Build for Buildpack
