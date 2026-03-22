@@ -1,8 +1,0 @@
-export FIREBASE_API_KEY="AIzaSyBMbODnxokROYnqS_SPnc_38iwGGNkkUzY"
-export FIREBASE_AUTH_DOMAIN="graham-select.firebaseapp.com"
-export FIREBASE_PROJECT_ID="graham-select"
-export FIREBASE_STORAGE_BUCKET="graham-select.firebasestorage.app"
-export FIREBASE_MESSAGING_SENDER_ID="674277500819"
-export FIREBASE_APP_ID="1:674277500819:web:490a906edbbe98f6326a66"
-export FIREBASE_MEASUREMENT_ID="G-7BQ7QD19N5"
-export GOOGLE_CLIENT_ID="674277500819-4fas7gfeqvtepmn2hte3sp8n6m4ogkq4.apps.googleusercontent.com"
