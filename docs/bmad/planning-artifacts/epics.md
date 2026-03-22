@@ -18,41 +18,41 @@ Este documento fornece a decomposição completa de épicos e histórias para o 
 - **FR1:** Usuários podem criar uma conta na plataforma utilizando e-mail ou provedores sociais (Google/Apple).
 - **FR2:** Usuários podem visualizar e alterar seu nível atual de assinatura (Gratuito ou Premium).
 - **FR3:** O Sistema deve restringir o acesso à recomendação baseada em Inteligência Artificial para contas no tier Gratuito (após o Trial expirar).
-- **FR4:** (Post-MVP) Usuários Premium podem vincular e visualizar múltiplos perfis/CPFs (Holding Familiar) sob uma mesma conta matriz.
+- **FR4:** Usuários Premium podem vincular e visualizar múltiplos perfis/CPFs (Holding Familiar) sob uma mesma conta matriz.
 - **FR5:** O Sistema deve permitir a exclusão definitiva da conta e expurgo total dos dados financeiros atrelados ao CPF (Direito ao Esquecimento LGPD).
 - **FR6:** Usuários podem realizar o upload manual de arquivos extraídos da Área Logada da B3 (PDF, XLS ou XML).
 - **FR7:** O Sistema deve extrair, estruturar e salvar as operações históricas contidas no arquivo em background (Assíncrono).
 - **FR8:** O Sistema deve notificar o usuário sobre o sucesso ou falha do processamento do arquivo importado.
-- **FR9:** (Post-MVP) Usuários poderão realizar o upload das Notas de Corretagem padrão (SINACOR) em arquivo PDF.
-- **FR10:** (Post-MVP) O Sistema permitirá a integração, cadastro manual ou parse de dados oriundos de corretoras internacionais e criptoativos.
-- **FR11:** (Post-MVP) Usuários poderão conectar suas contas via Open Finance para sincronização automática total.
+- **FR9 (New/Post-MVP):** Usuários poderão realizar o upload das Notas de Corretagem padrão (SINACOR) em arquivo PDF para alimentar as operações sem depender exclusivamente dos relatórios da bolsa.
+- **FR10 (New/Post-MVP):** O Sistema permitirá a integração, cadastro manual ou parse de dados oriundos de corretoras internacionais (Nyse/Nasdaq) e carteiras/plataformas de criptoativos, viabilizando a recomendação de alocação de "All-in-One Global Portfolio".
+- **FR11 (Post-MVP):** Usuários poderão conectar suas contas via Open Finance para sincronização automática total de custódia nacional e proventos.
 - **FR12:** Usuários podem visualizar a custódia atualizada do seu portfólio (posições ativas).
 - **FR13:** Usuários podem visualizar o histórico de proventos recebidos e aportes realizados.
-- **FR14:** (Post-MVP) Usuários podem criar "Tags de Carteira" personalizadas e associar ativos a essas tags.
-- **FR15:** (Post-MVP) O Sistema deve permitir a visualização de consolidações filtradas por Tags de Carteira.
+- **FR14:** Usuários podem criar "Tags de Carteira" personalizadas (ex: Aposentadoria, Hold, Dividendos) e associar ativos a essas tags (como "Progressive Profiling" em etapas pós-cadastro).
+- **FR15:** O Sistema deve permitir a visualização de consolidações, rentabilidade e recomendação de IA filtradas especificamente por essas Tags de Carteira.
 - **FR16:** Usuários podem inserir, editar ou deletar (CRUD) operações de ativos manualmente.
 - **FR17:** O Sistema deve manter uma trilha de auditoria imutável (log) de toda criação, alteração ou deleção manual.
-- **FR18:** O Sistema deve acessar via integração (API) as cotações financeiras atualizadas dos ativos custodiados.
-- **FR19:** O Sistema deve acessar e armazenar atualizações dos indicadores fundamentalistas das empresas (P/L, DY, P/VP).
+- **FR18:** O Sistema deve acessar via integração (API) as cotações financeiras atualizadas (end-of-day ou real-time) dos ativos custodiados.
+- **FR19:** O Sistema deve acessar e armazenar atualizações dos indicadores fundamentalistas das empresas acompanhadas (P/L, DY, P/VP, etc.).
 - **FR20:** Usuários Premium podem definir uma "Meta Percentual" de alocação por classe de ativos e por ativo específico.
-- **FR21:** O Sistema deve cruzar a carteira atual, as metas e o Filtro Fundamentalista (Filtro de Graham) para gerar recomendações de compra.
-- **FR22:** O Sistema deve apresentar o racional matemático por trás da recomendação (Explainable AI).
-- **FR23:** Usuários podem configurar um valor financeiro alvo como "Meta de Independência Financeira".
-- **FR24:** O Sistema deve projetar e visualizar o tempo de vida restante (anos/meses) para atingir a meta financeira.
-- **FR25:** (Post-MVP) O Sistema enviará alertas via WhatsApp contendo resumos de proventos e gatilhos de rebalanceamento.
-- **FR26:** Administradores podem visualizar volume e taxas de falha das importações de forma anonimizada.
-- **FR27:** Administradores podem disparar reprocessamento em lote de arquivos que falharam no parser.
+- **FR21:** O Sistema deve cruzar a carteira atual do usuário, as metas definidas e o Filtro Fundamentalista (Filtro de Graham) para gerar recomendações primárias de compra com o capital disponível (Isolado e configurado via backend em Engine dedicada).
+- **FR22:** O Sistema deve apresentar abertamente o racional matemático por trás da recomendação de ativo gerada pela IA (Explainable AI - Fallback).
+- **FR23:** Usuários podem configurar um valor financeiro alvo como "Meta de Independência Financeira" ou "Renda Passiva Mensal Alvo".
+- **FR24:** O Sistema deve projetar e visualizar o tempo de vida restante (anos/meses) para atingir a meta financeira com base na taxa de rentabilidade e aportes atuais.
+- **FR25:** (Post-MVP) O Sistema enviará alertas acionáveis via WhatsApp contendo resumos do recebimento de proventos e gatilhos de rebalanceamento.
+- **FR26:** Administradores do sistema podem visualizar o volume e as taxas de falha (tracing) das importações de arquivos B3 de forma anonimizada.
+- **FR27:** Administradores podem disparar o reprocessamento em lote (fila manual) de arquivos que falharam no parser após a subida de um hotfix corretivo.
 
 ### NonFunctional Requirements
 
-- **NFR1 (Performance):** Processamento assíncrono do arquivo B3 em até < 5 minutos (P95) para arquivos extensos.
-- **NFR2 (Responsividade):** Transições visuais não devem exceder < 300ms (sensação app-like).
-- **NFR3 (IA):** Cálculo da recomendação de aportes deve responder em < 2 segundos.
-- **NFR4 (Segurança/LGPD):** Isolamento de Tenant via Row-Level Security — nenhuma query pode vazar dados entre usuários.
-- **NFR5 (LGPD):** Expurgo efetivo (Hard Delete) em menos de 24 horas após solicitação de fechamento de conta.
-- **NFR6 (Criptografia):** AES-256 em repouso e TLS 1.3 em trânsito para dados sensíveis (PIIs, saldos, tokens).
-- **NFR7 (Escalabilidade):** Ingestão elástica via filas/workers escaláveis para picos de upload simultâneo.
-- **NFR8 (Resiliência):** Graceful Degradation — cotações em cache (D-1/D-X) quando API terceira indisponível.
+- **NFR1 (Tempo de Parse):** O processamento assíncrono do arquivo bruto da B3 (PDF/XLS/XML) e a consolidação inicial da carteira no banco de dados deve ocorrer em até `< 5 minutos` (P95) para arquivos extensos.
+- **NFR2 (Responsividade UX):** Como o front-end é construído utilizando renderização com base nativa (Flutter), as transições visuais (Dashboard, Portfólio, Sugestões) não devem exceder `< 300ms` via requisições REST/GraphQL, garantindo a sensação de fluidez ("app-like").
+- **NFR3 (Recomendação IA):** O cálculo da recomendação de aportes, que cruza saldos (Tenant), API de Fundamentos e as Tags do Usuário, deve responder em `< 2 segundos`.
+- **NFR4 (Isolamento de Tenant - LGPD):** Nenhuma query ou extração do backend deve ter arquitetura suscetível ao vazamento acidental de histórico de ordens entre IDs (Implementação estrutural de Multi-tenancy lógica via Row-Level Security no DB).
+- **NFR5 (Data Sanitization & GDPR):** A solicitação de fechamento da conta deve invocar em menos de 24 horas um expurgo efetivo (Hard Delete) dos espelhos de transações B3 e recomendações.
+- **NFR6 (Criptografia):** Elementos sensíveis (PIIs, saldos reais, e posteriormente tokens Open Finance) devem habitar banco cifrado em repouso (AES-256) e transitar criptografados (TLS 1.3).
+- **NFR7 (Ingestão Elástica):** A arquitetura do parser e do *Engine Core* da IA precisará tolerar e isolar cargas em filas elásticas (bus/workers) caso o volume de upload simultâneo ocorra todo mês nos "dias mundiais de aporte" (ex: dia útil 05 ou dia 10 de recebimento de P/L). A fila pesada não pode quebrar o app visual do NFR2.
+- **NFR8 (Graceful Degradation):** Em caso de queda momentânea da API terceira de Cotações ou do módulo da B3 parceira, o aplicativo deve continuar operável. O front-end exibirá as posições com um indicador tático de "Cotação em Cache - Desatualizado" no último fechamento (D-1/D-X), permitindo navegação sem telas "em branco".
 
 ### Additional Requirements
 
@@ -183,34 +183,31 @@ Usuários Premium podem vincular múltiplos CPFs e alternar entre visões famili
 
 ---
 
-#### Epic 8: Tags de Carteira & Visões Personalizadas
-Usuários criam taxonomias personalizadas para organizar ativos e filtrar métricas.
+#### Epic 10: Relatórios & Benchmarking
+Funcionalidades de comparação de performance e relatórios fiscais (IR).
+**FRs cobertos:** FR12, FR13
 
-**FRs cobertos:** FR14, FR15
-**Notas:** Progressive profiling pós-cadastro.
-
----
-
-#### Epic 9: Expansão de Ingestão de Dados
-Novas fontes de dados: Notas de Corretagem (SINACOR), corretoras internacionais, cripto e Open Finance.
-
-**FRs cobertos:** FR9, FR10, FR11
-
----
-
-#### Epic 10: Notificações & WhatsApp
-Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanceamento.
-
+#### Epic 11: Notificações Multicanal
+Alertas via Web Push e WhatsApp (Post-MVP).
 **FRs cobertos:** FR25
+
+---
+
 
 ---
 
 ## Detailed Stories
 
 ### Epic 1: Fundação & Autenticação
+**Related PRD Requirements:** FR1, FR2, FR3, FR5
+**NFRs impactados:** NFR4 (Disponibilidade), NFR5 (LGPD Expurge), NFR6 (Segurança/Logs)
+
+
 **Goal:** O usuário consegue criar conta, fazer login via Google e ter seu perfil provisionado automaticamente com segurança.
 
 #### Story 1.1: Registro e Login via Google Sign-In
+
+**Related FRs/NFRs:** FR1
 
 **As a** investidor pessoa física,
 **I want** me cadastrar e fazer login usando minha conta Google,
@@ -237,6 +234,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 1.2: Gestão de Tier de Assinatura
 
+**Related FRs/NFRs:** FR2, FR3
+
 **As a** usuário da plataforma,
 **I want** visualizar meu nível atual de assinatura (Trial/Gratuito/Premium),
 **So that** eu saiba quais funcionalidades estão disponíveis para mim.
@@ -255,6 +254,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** restringe acesso às funcionalidades Premium (ex: motor de recomendação)
 
 #### Story 1.3: Restrição de Funcionalidades por Tier
+
+**Related FRs/NFRs:** FR5
 
 **As a** sistema,
 **I want** controlar o acesso a funcionalidades Premium baseado no tier do usuário,
@@ -296,14 +297,26 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** conclui o expurgo em menos de 24 horas (NFR5)
 - **And** envia e-mail de confirmação antes de deletar os dados de autenticação
 
-- **Given** que o expurgo foi concluído
-- **When** alguém tenta logar com o mesmo Google ID
-- **Then** o sistema trata como novo registro (conta inexistente)
+#### Story 1.5: Perfil do Investidor (KYC/Suitability)
+
+**As a** investidor,
+**I want** responder um questionário rápido sobre meus objetivos e tolerância a risco,
+**So that** as recomendações do sistema sejam adequadas ao meu perfil.
+
+**Acceptance Criteria:**
+- **Given** que o usuário fez o primeiro login
+- **When** ele acessa o dashboard inicial
+- **Then** o sistema sugere o preenchimento do perfil de investidor
+- **And** salva o perfil (Conservador, Moderado, Arrojado) para calibrar o motor de alocação (Epic 4).
 
 ### Epic 2: Ingestão de Dados (B3 & Manual)
+**Related PRD Requirements:** FR16, FR17, FR26, FR6, FR7, FR8, NFR1, NFR7
+
 **Goal:** Garantir que o usuário possa consolidar seu histórico de investimentos de forma automatizada (CDB/B3) ou manual, com processamento assíncrono e resiliente.
 
 #### Story 2.1: Upload de Relatório de Negociação B3 (Excel)
+
+**Related FRs/NFRs:** FR6
 
 **As a** investidor,
 **I want** fazer o upload da minha planilha de negociação da B3,
@@ -318,6 +331,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 2.2: Processamento Assíncrono e Splitter (Worker)
 
+**Related FRs/NFRs:** FR7, NFR1, NFR7
+
 **As a** sistema,
 **I want** processar o arquivo Excel em segundo plano, fragmentando-o em operações individuais,
 **So that** grandes volumes de dados não bloqueiem a interface e sejam tolerantes a falhas.
@@ -331,6 +346,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 2.3: Deduplicação de Operações
 
+**Related FRs/NFRs:** FR8
+
 **As a** investidor,
 **I want** que o sistema identifique e ignore operações que eu já importei anteriormente,
 **So that** meu saldo e preço médio não fiquem duplicados e incorretos.
@@ -342,6 +359,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** informa o total de "novas operações" vs "duplicadas" no final do processo
 
 #### Story 2.4: Cadastro Manual de Operação (Fallback)
+
+**Related FRs/NFRs:** FR16, FR17
 
 **As a** investidor,
 **I want** cadastrar uma compra ou venda manualmente,
@@ -355,6 +374,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 2.5: Trilha de Auditoria das Importações
 
+**Related FRs/NFRs:** FR17, FR26
+
 **As a** investidor,
 **I want** ver um histórico de todos os arquivos que já importei,
 **So that** eu saiba quando foi minha última atualização de dados.
@@ -365,9 +386,13 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **Then** lista Nome do Arquivo, Data de Upload, Status (Sucesso/Parcial/Erro) e Qtd. de Linhas Processadas
 
 ### Epic 3: Portfólio & Dashboard Consolidado
+**Related PRD Requirements:** FR12, FR13, NFR2, NFR8
+
 **Goal:** O usuário visualiza todo seu patrimônio consolidado — posições ativas, proventos, aportes — com atualizações em tempo real e dashboard rico.
 
 #### Story 3.1: Dashboard KPI (Componente `PortfolioKpiCard`)
+
+**Related FRs/NFRs:** FR12, NFR2
 
 **As a** investidor,
 **I want** ver um resumo visual do meu patrimônio (Valor Total, Lucro/Prejuízo, Dividend Yield),
@@ -384,6 +409,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 3.2: Tabela de Custódia Atualizada (Componente `FinancialDataTable`)
 
+**Related FRs/NFRs:** FR12, NFR8
+
 **As a** investidor,
 **I want** ver a lista de todos os ativos que possuo hoje,
 **So that** eu acompanhe o preço médio e a valorização de cada papel individualmente.
@@ -398,6 +425,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 3.3: Histórico de Proventos e Aportes
 
+**Related FRs/NFRs:** FR13
+
 **As a** investidor,
 **I want** visualizar graficamente quanto recebi de dividendos e quanto aportei por mês,
 **So that** eu visualize a evolução do meu efeito "bola de neve".
@@ -410,6 +439,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** permite alternar para visão de tabela detalhada com filtros de data
 
 #### Story 3.4: Visualização de Alocação por Classe (Gráfico de Rosca)
+
+**Related FRs/NFRs:** FR12
 
 **As a** investidor,
 **I want** visualizar o balanceamento da minha carteira entre as diferentes classes de ativos (Ações, FIIs, Tesouro, etc.),
@@ -425,6 +456,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 3.5: Atualização em Tempo Real (Event-Driven UI)
 
+**Related FRs/NFRs:** NFR2
+
 **As a** usuário,
 **I want** que meu dashboard se atualize automaticamente quando um novo upload ou operação manual for concluído,
 **So that** eu não precise dar "refresh" na página manualmente.
@@ -437,9 +470,13 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** o Dashboard recarrega apenas os componentes de dados afetados com uma animação de fade (250ms)
 
 ### Epic 4: Market Data & Motor de Recomendação (Filtro de Graham)
+**Related PRD Requirements:** FR18, FR19, FR20, FR21, FR22, NFR3, NFR8
+
 **Goal:** O usuário Premium recebe recomendações de aporte baseadas no Filtro de Graham com transparência total do raciocínio matemático.
 
 #### Story 4.1: Integração de Market Data (Cotações & Indicadores)
+
+**Related FRs/NFRs:** FR18, FR19, NFR8
 
 **As a** sistema (backend),
 **I want** buscar cotações atualizadas e indicadores fundamentalistas (P/L, DY, P/VP),
@@ -455,6 +492,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 4.2: Configuração de Metas de Alocação (Tier Premium)
 
+**Related FRs/NFRs:** FR20
+
 **As a** investidor Premium,
 **I want** definir uma meta percentual de alocação para cada classe (ex: 50% Ações, 30% FIIs) e ativos específicos,
 **So that** o sistema saiba onde eu quero chegar.
@@ -468,6 +507,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** salva o plano de alocação por usuário (isolamento RLS)
 
 #### Story 4.3: Motor do Filtro de Graham (`valuation-service`)
+
+**Related FRs/NFRs:** FR21, NFR3
 
 **As a** sistema,
 **I want** processar o algoritmo de Graham cruzando cotação, indicadores e metas do usuário,
@@ -484,6 +525,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 4.4: Reasoning Box — Explainable AI (Componente `ReasoningBox`)
 
+**Related FRs/NFRs:** FR22
+
 **As a** investidor,
 **I want** visualizar o passo-a-passo matemático da recomendação,
 **So that** eu entenda por que o sistema está me sugerindo aquele aporte específico.
@@ -496,9 +539,13 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** destaca em Emerald Gold (#F59E0B) a vantagem competitiva encontrada
 
 ### Epic 5: Metas & Projeção Financeira (Time-to-Goal)
+**Related PRD Requirements:** FR23, FR24, FR25
+
 **Goal:** O usuário configura suas metas de independência financeira e visualiza projeções de quanto tempo falta para atingi-las (o famoso "Time-to-Goal").
 
 #### Story 5.1: Configuração de Metas de Patrimônio e Renda
+
+**Related FRs/NFRs:** FR23
 
 **As a** investidor,
 **I want** definir um objetivo financeiro (ex: R$ 1 Milhão ou R$ 5.000 de renda mensal),
@@ -512,6 +559,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** exibe um resumo: "Você precisa de R$ X para atingir sua meta."
 
 #### Story 5.2: Relógio Motivacional Time-to-Goal (Componente UI Principal)
+
+**Related FRs/NFRs:** FR24
 
 **As a** investidor,
 **I want** ver um cronômetro ou contagem regressiva de anos/meses para minha meta,
@@ -527,6 +576,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 5.3: Simulador de Sensibilidade ("E se?")
 
+**Related FRs/NFRs:** FR24
+
 **As a** investidor,
 **I want** simular como um aumento no aporte mensal ou na rentabilidade afetaria meu tempo para a meta,
 **So that** eu possa ajustar meu estilo de vida ou estratégia.
@@ -540,6 +591,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 5.4: Checklist de Saúde da Meta
 
+**Related FRs/NFRs:** FR25
+
 **As a** investidor,
 **I want** receber alertas se meu ritmo atual de aportes ou rentabilidade estiver me afastando da meta,
 **So that** eu não tenha surpresas negativas no futuro.
@@ -552,9 +605,13 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** sugere ações: "Aumente seu aporte em R$ 200 para voltar ao trilho" ou "Revise seu yield alvo".
 
 ### Epic 6: Administração & Operações (Saúde do Sistema)
+**Related PRD Requirements:** FR19, FR26, FR27
+
 **Goal:** Administradores podem monitorar a saúde do sistema e reprocessar importações falhas para garantir a integridade dos dados de todos os usuários.
 
 #### Story 6.1: Painel de Monitoramento Admin
+
+**Related FRs/NFRs:** FR26
 
 **As a** administrador do sistema,
 **I want** visualizar métricas agregadas de uso (número de usuários, volume de uploads, taxa de erro de parse),
@@ -568,6 +625,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **And** os dados financeiros sensíveis (portfólio individual) aparecem anonimizados
 
 #### Story 6.2: Reprocessamento de Importações Falhas (DLQ UI)
+
+**Related FRs/NFRs:** FR27
 
 **As a** administrador,
 **I want** visualizar os arquivos que falharam no processamento e disparar o reprocessamento manual,
@@ -584,6 +643,8 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 
 #### Story 6.3: Gestão de Ativos e Tickers (Mestre de Dados)
 
+**Related FRs/NFRs:** FR19
+
 **As a** administrador,
 **I want** cadastrar novos tickers ou corrigir informações de classes de ativos,
 **So that** o sistema reconheça novos papéis que entrem no mercado (IPOs).
@@ -595,102 +656,84 @@ Alertas acionáveis via WhatsApp com resumos de proventos e gatilhos de rebalanc
 - **Then** o sistema atualiza o dicionário de ativos global
 - **And** limpa o cache de Market Data para forçar o carregamento das novas informações
 
-### Epic 7: Relatórios & Exportação (Imposto de Renda)
-**Goal:** Facilitar a vida fiscal do investidor com relatórios prontos para declaração de Imposto de Renda.
+### Epic 7: Holding Familiar (Multi-CPF)
+**Related PRD Requirements:** FR4
 
-#### Story 7.1: Relatório de Bens e Direitos (Informe Anual)
+**Goal:** Usuários Premium podem consolidar a visão de patrimônio de toda a família em um único dashboard.
 
-**As a** investidor,
-**I want** gerar um relatório consolidado da minha custódia no dia 31/12,
-**So that** eu possa preencher minha ficha de Bens e Direitos no programa da Receita Federal.
-
-**Acceptance Criteria:**
-
-- **Given** que o usuário solicita o informe anual de um ano específico
-- **When** o sistema consolida o preço médio e quantidades históricas
-- **Then** gera um documento contendo: Descrição do Ativo, Ticker, CNPJ, Quantidade e Custo Total de Aquisição
-- **And** permite exportação em PDF e CSV
-
-#### Story 7.2: Cálculo Automático de Lucro Realizado e Isenção
-
-**As a** investidor,
-**I want** que o sistema calcule automaticamente o lucro de minhas vendas de ações,
-**So that** eu saiba se ultrapassei o limite de isenção de R$ 20.000,00 no mês.
+#### Story 7.1: Vínculo de Novo CPF à Conta Matriz
+**As a** usuário Premium e gestor familiar,
+**I want** vincular o CPF de um dependente à minha conta,
+**So that** eu possa gerenciar os investimentos da família centralizadamente.
 
 **Acceptance Criteria:**
+- **Given** que o usuário é Premium
+- **When** ele informa um novo CPF e Nome para vínculo
+- **Then** o sistema cria um sub-tenant lógico vinculado ao ID mestre
+- **And** permite upload de arquivos B3 específicos para esse novo perfil.
 
-- **Given** que houve alienações de ativos no mês calendário
-- **When** o sistema calcula a diferença entre Preço de Venda e Preço Médio (FIFO)
-- **Then** exibe o Lucro/Prejuízo Líquido
-- **And** sinaliza em vermelho se o volume total de vendas de ações ultrapassou R$ 20k no mês
+### Epic 8: Tags de Carteira & Visões Personalizadas
+**Related PRD Requirements:** FR14, FR15
 
-### Epic 8: Integração Bancária & Crawler (Automatização)
-**Goal:** Reduzir o trabalho manual do usuário buscando dados diretamente nas fontes de informação.
+**Goal:** Permitir que o usuário organize seus ativos em categorias lógicas personalizadas.
 
-#### Story 8.1: Web Crawler de Proventos Anunciados
+#### Story 8.1: Criação e Associação de Tags
+**As a** investidor,
+**I want** criar etiquetas como "Aposentadoria" ou "Longo Prazo" e associar aos meus ativos,
+**So that** eu veja a rentabilidade separada por estratégia.
 
+**Acceptance Criteria:**
+- **Given** que o usuário está na tela de ativos
+- **When** ele seleciona um ativo e cria/associa uma Tag
+- **Then** o sistema persiste a relação ativo-tag-usuário
+- **And** atualiza os filtros de dashboard para incluir essa nova tag.
+
+### Epic 9: Expansão de Ingestão de Dados (Post-MVP)
+**Related PRD Requirements:** FR9, FR10, FR11
+
+**Goal:** Expandir a coleta de dados (Crawler, PDF e APIs externas).
+
+#### Story 9.1: Importação de Nota de Corretagem (PDF)
+**As a** investidor,
+**I want** fazer upload de PDFs de notas de corretagem,
+**So that** os dados sejam extraídos automaticamente via Vision/Parser.
+
+#### Story 9.2: Web Crawler de Proventos e Fatos Relevantes
 **As a** sistema,
-**I want** buscar anúncios de dividendos e JCP nos canais oficiais das empresas,
-**Para que** a agenda de proventos do usuário esteja sempre atualizada.
+**I want** buscar anúncios de dividendos nos canais oficiais,
+**So that** a agenda de proventos esteja sempre atualizada.
 
-**Acceptance Criteria:**
+#### Story 9.3: Conector Open Finance
+**As a** usuário,
+**I want** conectar minha conta de investimento diretamente,
+**So that** eu não precise fazer uploads manuais.
 
-- **Given** um ativo presente na custódia de usuários
-- **When** o job de scraping executa e encontra novo fato relevante de proventos
-- **Then** extrai: Tipo, Valor por Ação, Data-Com e Data de Pagamento
-- **And** cria uma entrada de provento "Provisionado" na carteira dos usuários afetados
+### Epic 10: Relatórios & Benchmarking
+**Related PRD Requirements:** FR12, FR13
 
-#### Story 8.2: Conector de API de Custódia (Open Finance)
+**Goal:** Comparar performance com índices e gerar bases para IR.
 
+#### Story 10.1: Relatório de Bens e Direitos (Informe Anual)
 **As a** investidor,
-**I want** conectar minha conta de investimento diretamente à plataforma,
-**So that** eu não precise fazer uploads manuais de PDFs.
+**I want** gerar um relatório consolidado em 31/12,
+**So that** eu possa preencher o meu IR.
 
-**Acceptance Criteria:**
-
-- **Given** que o usuário autoriza o acesso via fluxo de Open Finance (OAuth)
-- **When** o conector roda periodicamente
-- **Then** sincroniza as posições de custódia e as notas de negociação automaticamente
-
-### Epic 9: Engine de Alertas (Web Push)
-**Goal:** Manter o usuário informado sobre movimentos críticos e oportunidades no portfólio.
-
-#### Story 9.1: Alerta de Ativo em "Zona de Compra"
-
+#### Story 10.2: Cálculo de Lucro Realizado e Isenção
 **As a** investidor,
-**I want** receber um alerta push quando um ativo que eu sigo ficar abaixo do preço de Graham,
-**So that** eu execute o aporte no momento ideal de desconto.
+**I want** saber quanto tive de lucro e se passei dos R$ 20k,
+**So that** eu pague o DARF corretamente.
 
-**Acceptance Criteria:**
+### Epic 11: Notificações Multicanal
+**Related PRD Requirements:** FR25
 
-- **Given** que a cotação de mercado oscilou para abaixo do Valor Intrínseco de Graham
-- **When** o sistema detecta a oportunidade
-- **Then** dispara uma notificação para os dispositivos do usuário
-- **And** exibe o % de desconto em relação ao Preço Teto
+**Goal:** Engajamento e alertas em tempo real.
 
-### Epic 10: Notificações & WhatsApp
-**Goal:** Tornar as recomendações e alertas acionáveis no canal de maior engajamento do usuário.
-
-#### Story 10.1: Resumo de Performance via WhatsApp
-
+#### Story 11.1: Alertas via WhatsApp (Gatilhos de Meta)
 **As a** investidor,
-**I want** receber um resumo semanal da minha carteira pelo WhatsApp,
-**So that** eu acompanhe meu progresso sem precisar abrir o app.
+**I want** receber zaps de rebalanceamento e proventos,
+**So that** eu tome decisões rápidas.
 
-**Acceptance Criteria:**
-
-- **Given** que o usuário ativou notificações via WhatsApp
-- **When** é enviada a mensagem semanal agendada
-- **Then** exibe: Patrimônio Total, Ativo da Semana e Sugestão de Rebalanceamento
-
-#### Story 10.2: Consulta de Cotação e Graham via Bot
-
+#### Story 11.2: Web Push para Zona de Compra (Graham)
 **As a** investidor,
-**I want** perguntar ao bot no WhatsApp o "Preço de Graham" de qualquer ticker,
-**So that** eu tome decisões rápidas durante o pregão.
-
-**Acceptance Criteria:**
-
-- **Given** uma mensagem recebida via WhatsApp com "/graham [TICKER]"
-- **When** o bot processa o comando
-- **Then** responde com a cotação atual e o Valor Intrínseco calculado pelo filtro.
+**I want** notificação no navegador quando o preço bater o Graham,
+**So that** eu aporte com desconto.

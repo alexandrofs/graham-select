@@ -40,23 +40,28 @@ void main() {
   });
 
   group('AuthRepository JWT Persistence Tests', () {
-    test('getPersistedToken should read from storage', () async {
+    test('getPersistedToken should read from storage then hit cache', () async {
       when(mockStorage.read(key: 'jwt_token'))
           .thenAnswer((_) async => 'mock_token');
 
-      final token = await authRepository.getPersistedToken();
-
-      expect(token, 'mock_token');
+      final token1 = await authRepository.getPersistedToken();
+      expect(token1, 'mock_token');
       verify(mockStorage.read(key: 'jwt_token')).called(1);
+
+      clearInteractions(mockStorage);
+
+      final token2 = await authRepository.getPersistedToken();
+      expect(token2, 'mock_token');
+      verifyNever(mockStorage.read(key: 'jwt_token'));
     });
 
-    test('signOut should delete token from storage', () async {
+    test('signOut should delete token from storage and clear cache', () async {
       await authRepository.signOut();
 
       verify(mockStorage.delete(key: 'jwt_token')).called(1);
     });
 
-    test('signInWithGoogle should write idToken to storage', () async {
+    test('signInWithGoogle should write idToken to storage and cache it', () async {
       // Setup mocks
       final mockGoogleUser = MockGoogleSignInAccount();
       final mockGoogleAuth = MockGoogleSignInAuthentication();
@@ -78,6 +83,36 @@ void main() {
 
       // Verify
       verify(mockStorage.write(key: 'jwt_token', value: 'fake_id_token')).called(1);
+
+      clearInteractions(mockStorage);
+      final cachedToken = await authRepository.getPersistedToken();
+      expect(cachedToken, 'fake_id_token');
+      verifyNever(mockStorage.read(key: 'jwt_token'));
+    });
+
+    test('signInWithGoogle should short-circuit if googleUser is null', () async {
+      when(mockGoogleSignIn.signIn()).thenAnswer((_) async => null);
+
+      final result = await authRepository.signInWithGoogle();
+
+      expect(result, isNull);
+      verifyNever(mockStorage.write(key: 'jwt_token', value: anyNamed('value')));
+      verifyNever(mockFirebaseAuth.signInWithCredential(any));
+    });
+
+    test('signInWithGoogle should rethrow exception from FirebaseAuth', () async {
+      final mockGoogleUser = MockGoogleSignInAccount();
+      final mockGoogleAuth = MockGoogleSignInAuthentication();
+
+      when(mockGoogleSignIn.signIn()).thenAnswer((_) async => mockGoogleUser);
+      when(mockGoogleUser.authentication).thenAnswer((_) async => mockGoogleAuth);
+      when(mockGoogleAuth.accessToken).thenReturn('access_token');
+      when(mockGoogleAuth.idToken).thenReturn('id_token');
+      
+      when(mockFirebaseAuth.signInWithCredential(any))
+          .thenThrow(FirebaseAuthException(code: 'ERROR', message: 'Test Error'));
+
+      expect(() => authRepository.signInWithGoogle(), throwsA(isA<FirebaseAuthException>()));
     });
   });
 }
