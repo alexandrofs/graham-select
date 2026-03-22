@@ -1,6 +1,6 @@
 # Story 1.1: Google OAuth2 Auto-provisioning
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

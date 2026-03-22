@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -53,7 +54,7 @@ void main() async {
   runApp(const GrahamSelectApp());
 }
 
-class GrahamSelectApp extends StatelessWidget {
+class GrahamSelectApp extends StatefulWidget {
   final AuthRepository? authRepository;
   final ApiClient? apiClient;
   final FlutterSecureStorage? storage;
@@ -66,32 +67,57 @@ class GrahamSelectApp extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  State<GrahamSelectApp> createState() => _GrahamSelectAppState();
+}
+
+class _GrahamSelectAppState extends State<GrahamSelectApp> {
+  late final http.Client httpClient;
+  late final FlutterSecureStorage effectiveStorage;
+  late final ApiClient effectiveApiClient;
+  late final AuthRepository effectiveAuthRepository;
+
+  late final UploadRemoteDataSource uploadRemoteDataSource;
+  late final UploadRepositoryImpl uploadRepository;
+  late final UploadFileUseCase uploadUseCase;
+
+  late final RankingRemoteDataSource rankingRemoteDataSource;
+  late final RankingRepositoryImpl rankingRepository;
+  late final GetRankingUseCase getRankingUseCase;
+
+  late final AuthStateListenable authListenable;
+  late final GoRouter router;
+
+  @override
+  void initState() {
+    super.initState();
     // Shared dependencies
-    final httpClient = http.Client();
+    httpClient = http.Client();
     const baseUrl = 'https://graham-select-api.render.com';
-    final effectiveStorage = storage ?? const FlutterSecureStorage();
-    final effectiveApiClient = apiClient ?? ApiClient(baseUrl: baseUrl, storage: effectiveStorage);
+    effectiveStorage = widget.storage ?? const FlutterSecureStorage();
+    effectiveApiClient = widget.apiClient ?? ApiClient(baseUrl: baseUrl, storage: effectiveStorage);
 
     // Auth Feature DI
-    final effectiveAuthRepository = authRepository ?? 
+    effectiveAuthRepository = widget.authRepository ?? 
         AuthRepository(apiClient: effectiveApiClient, storage: effectiveStorage);
 
     // Upload Feature DI
-    final uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient);
-    final uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
-    final uploadUseCase = UploadFileUseCase(uploadRepository);
+    uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient);
+    uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
+    uploadUseCase = UploadFileUseCase(uploadRepository);
 
     // Ranking Feature DI
-    final rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
-    final rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource);
-    final getRankingUseCase = GetRankingUseCase(rankingRepository);
+    rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
+    rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource);
+    getRankingUseCase = GetRankingUseCase(rankingRepository);
 
-    final router = GoRouter(
+    authListenable = AuthStateListenable(effectiveAuthRepository);
+
+    router = GoRouter(
       initialLocation: '/',
-      refreshListenable: AuthStateListenable(effectiveAuthRepository),
+      refreshListenable: authListenable,
       redirect: (context, state) async {
         final firebaseUser = effectiveAuthRepository.currentUser;
+        // O JWT token agora é carregado da memória em vez de fazer IO toda vez
         final jwtToken = await effectiveAuthRepository.getPersistedToken();
         
         // Consideramos logado se tivermos tanto o usuário Firebase quanto o JWT do backend
@@ -116,7 +142,17 @@ class GrahamSelectApp extends StatelessWidget {
         GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
       ],
     );
+  }
 
+  @override
+  void dispose() {
+    authListenable.dispose();
+    router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider.value(value: effectiveAuthRepository),
@@ -136,7 +172,15 @@ class GrahamSelectApp extends StatelessWidget {
 
 /// Helper para notificar o GoRouter sobre mudanças no estado de auth
 class AuthStateListenable extends ChangeNotifier {
+  late final StreamSubscription _subscription;
+
   AuthStateListenable(AuthRepository repository) {
-    repository.authStateChanges.listen((_) => notifyListeners());
+    _subscription = repository.authStateChanges.listen((_) => notifyListeners());
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }

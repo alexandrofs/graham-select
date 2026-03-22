@@ -7,6 +7,7 @@ class AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final FlutterSecureStorage _storage;
+  String? _cachedToken;
 
   AuthRepository({
     required ApiClient apiClient,
@@ -16,6 +17,9 @@ class AuthRepository {
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn(
           clientId: const String.fromEnvironment('GOOGLE_CLIENT_ID', defaultValue: '').isEmpty 
+              ? null 
+              : const String.fromEnvironment('GOOGLE_CLIENT_ID'),
+          serverClientId: const String.fromEnvironment('GOOGLE_CLIENT_ID', defaultValue: '').isEmpty 
               ? null 
               : const String.fromEnvironment('GOOGLE_CLIENT_ID'),
         ),
@@ -41,6 +45,7 @@ class AuthRepository {
       // Obter o ID Token para enviar ao backend (Resource Server)
       final String? idToken = await userCredential.user?.getIdToken();
       if (idToken != null) {
+        _cachedToken = idToken;
         // Persistir o ID Token diretamente. O backend validará este token nas APIs.
         await _storage.write(key: 'jwt_token', value: idToken);
       }
@@ -54,12 +59,15 @@ class AuthRepository {
 
   /// Verifica se existe um token JWT persistido
   Future<String?> getPersistedToken() async {
-    return await _storage.read(key: 'jwt_token');
+    if (_cachedToken != null) return _cachedToken;
+    _cachedToken = await _storage.read(key: 'jwt_token');
+    return _cachedToken;
   }
 
   Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _firebaseAuth.signOut();
+    _cachedToken = null;
     await _storage.delete(key: 'jwt_token');
   }
 }

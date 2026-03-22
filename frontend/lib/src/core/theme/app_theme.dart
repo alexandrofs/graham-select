@@ -23,11 +23,21 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: textColor,
       ),
-      textTheme: GoogleFonts.outfitTextTheme(
+      textTheme: GoogleFonts.interTextTheme(
         ThemeData.dark().textTheme.apply(
           bodyColor: textColor,
           displayColor: textColor,
         ),
+      ).copyWith(
+        displayLarge: GoogleFonts.dmSans(color: textColor),
+        displayMedium: GoogleFonts.dmSans(color: textColor),
+        displaySmall: GoogleFonts.dmSans(color: textColor),
+        headlineLarge: GoogleFonts.dmSans(color: textColor),
+        headlineMedium: GoogleFonts.dmSans(color: textColor),
+        headlineSmall: GoogleFonts.dmSans(color: textColor),
+        titleLarge: GoogleFonts.dmSans(color: textColor),
+        titleMedium: GoogleFonts.dmSans(color: textColor),
+        titleSmall: GoogleFonts.dmSans(color: textColor),
       ),
       cardTheme: CardThemeData(
         color: surfaceColor,
