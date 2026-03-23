@@ -42,7 +42,6 @@ class _ProfilePageState extends State<ProfilePage> {
             case ProfileState.success:
               return _buildContent(context, provider);
             case ProfileState.idle:
-            default:
               return const SizedBox.shrink();
           }
         },
