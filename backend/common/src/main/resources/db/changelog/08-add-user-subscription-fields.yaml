@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 08-add-user-subscription-fields
+      author: antigravity
+      changes:
+          - addColumn:
+              tableName: users
+              columns:
+                - column:
+                    name: tier
+                    type: VARCHAR(20)
+                    defaultValue: "TRIAL"
+                    constraints:
+                      nullable: false
+                - column:
+                    name: trial_ends_at
+                    type: DATETIME

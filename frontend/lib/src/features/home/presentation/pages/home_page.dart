@@ -59,6 +59,8 @@ class _HomePageState extends State<HomePage> {
                   _scrollTo(resourcesKey);
                 case LandingSection.contact:
                   _scrollTo(contactKey);
+                case LandingSection.profile:
+                  context.push('/profile');
               }
             },
             onCtaPressed: () => context.push('/ranking'),
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-enum LandingSection { hero, ranking, methodology, resources, contact }
+enum LandingSection { hero, ranking, methodology, resources, contact, profile }
 
 class _LandingMenu extends StatelessWidget {
   const _LandingMenu({
@@ -117,7 +119,7 @@ class _LandingMenu extends StatelessWidget {
       ("Ranking", LandingSection.ranking),
       ("Metodologia", LandingSection.methodology),
       ("Recursos", LandingSection.resources),
-      ("Contato", LandingSection.contact),
+      ("Perfil", LandingSection.profile),
     ];
 
     return Container(

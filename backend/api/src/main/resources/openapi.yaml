@@ -96,9 +96,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /users/me:
+    get:
+      summary: Retorna o perfil do usuário atual
+      description: Retorna o perfil do usuário autenticado no sistema.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Perfil do usuário retornado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        fullName:
+          type: string
+        tier:
+          $ref: '#/components/schemas/SubscriptionTier'
+        trialEndsAt:
+          type: string
+          format: date-time
+        daysRemaining:
+          type: integer
+    SubscriptionTier:
+      type: string
+      enum: [TRIAL, FREE, PREMIUM]
     RankedCompany:
       type: object
       properties:

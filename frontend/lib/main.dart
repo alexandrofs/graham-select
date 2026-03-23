@@ -28,6 +28,11 @@ import 'src/features/ranking/presentation/pages/ranking_page.dart';
 // Docs Feature Imports
 import 'src/features/docs/presentation/pages/docs_screen.dart';
 
+// Profile Feature Imports
+import 'src/features/profile/data/repositories/profile_repository.dart';
+import 'src/features/profile/presentation/providers/profile_provider.dart';
+import 'src/features/profile/presentation/pages/profile_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -84,6 +89,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final RankingRepositoryImpl rankingRepository;
   late final GetRankingUseCase getRankingUseCase;
 
+  late final ProfileRepository profileRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -109,6 +116,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
     rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource);
     getRankingUseCase = GetRankingUseCase(rankingRepository);
+
+    // Profile Feature DI
+    profileRepository = ProfileRepository(effectiveApiClient);
 
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
@@ -140,6 +150,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
         GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
         GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
+        GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
       ],
     );
   }
@@ -159,6 +170,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         Provider.value(value: effectiveApiClient),
         ChangeNotifierProvider(create: (_) => UploadProvider(uploadUseCase)),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
+        ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
       ],
       child: MaterialApp.router(
         title: 'Graham Select',
