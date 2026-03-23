@@ -4,7 +4,6 @@ import 'package:mockito/mockito.dart';
 import 'package:dio/dio.dart';
 import 'package:frontend/src/core/api/api_client.dart';
 import 'package:frontend/src/features/profile/data/repositories/profile_repository.dart';
-import 'package:frontend/src/features/profile/data/models/user_profile_model.dart';
 
 import 'profile_repository_test.mocks.dart';
 

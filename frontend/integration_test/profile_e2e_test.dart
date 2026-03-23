@@ -9,8 +9,8 @@ import 'package:frontend/src/features/profile/presentation/providers/profile_pro
 import 'package:frontend/src/features/profile/data/repositories/profile_repository.dart';
 import 'package:frontend/src/features/profile/data/models/user_profile_model.dart';
 
-// Import generated mocks (assuming we can reuse or need to generate for integration tests)
-import 'profile_e2e_test.mocks.dart';
+// Import generated mocks from the widget test location
+import '../test/features/profile/presentation/pages/profile_page_test.mocks.dart';
 
 @GenerateMocks([ProfileRepository])
 void main() {
