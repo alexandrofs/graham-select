@@ -1,5 +1,6 @@
 package afsdigital.grahamselect.api.auth.infrastructure.security;
 
+import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,8 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
                                 .googleSub(sub)
                                 .email(email)
                                 .fullName(name)
+                                .tier(SubscriptionTier.TRIAL)
+                                .trialEndsAt(LocalDateTime.now().plusDays(30))
                                 .build();
                         log.info("Provisioning new user from OAuth2: {}", email);
                         return userRepository.save(newUser);

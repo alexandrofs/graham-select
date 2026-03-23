@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/06-add-unique-constraint-intrinsic-value.yaml
   - include:
       file: db/changelog/07-create-users-table.yaml
+  - include:
+      file: db/changelog/08-add-user-subscription-fields.yaml

@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,6 +41,13 @@ public class User {
 
     @Column(name = "full_name")
     private String fullName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SubscriptionTier tier;
+
+    @Column(name = "trial_ends_at")
+    private LocalDateTime trialEndsAt;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
