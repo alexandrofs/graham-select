@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.api.valuation.web;
 
 import afsdigital.grahamselect.api.RankedCompaniesApiDelegate;
+import afsdigital.grahamselect.api.auth.infrastructure.security.RequirePremium;
 import afsdigital.grahamselect.model.RankedCompany;
 import afsdigital.grahamselect.valuation.application.usecase.GetRankedCompaniesUseCase;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class RankedCompanyDelegate implements RankedCompaniesApiDelegate {
     private final GetRankedCompaniesUseCase getRankedCompaniesUseCase;
 
     @Override
+    @RequirePremium
     public ResponseEntity<List<RankedCompany>> rankedCompaniesGet() {
         log.info("Handling request to get ranked companies");
         List<RankedCompany> response = getRankedCompaniesUseCase.execute().stream()
