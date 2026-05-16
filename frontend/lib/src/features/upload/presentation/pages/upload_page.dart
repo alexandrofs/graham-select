@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/upload_provider.dart';
-import '../widgets/file_picker_widget.dart';
 import '../widgets/file_info_card.dart';
 import '../widgets/upload_progress_widget.dart';
+import '../widgets/b3_upload_zone.dart';
 
 class UploadPage extends StatelessWidget {
   const UploadPage({super.key});
@@ -13,7 +13,7 @@ class UploadPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upload de Dados Financeiros'),
+        title: const Text('Upload de Planilha B3'),
         backgroundColor: AppTheme.backgroundColor,
       ),
       body: Container(
@@ -34,7 +34,7 @@ class UploadPage extends StatelessWidget {
                   children: [
                     // Header
                     Text(
-                      'Envie seus dados financeiros',
+                      'Importar Planilha da B3',
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -43,39 +43,31 @@ class UploadPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Selecione um arquivo CSV, XLS ou XLSX com os dados das empresas.',
+                      'Faça o upload do seu relatório de negociação extraído do portal do investidor B3 (.xlsx).',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textColor.withValues(alpha: 0.7),
+                        color: AppTheme.textColor.withOpacity(0.7),
                       ),
                     ),
                     const SizedBox(height: 32),
 
-                    // File Picker or File Info
-                    if (provider.selectedFile == null)
-                      FilePickerWidget(onTap: () => provider.pickFile())
-                    else
-                      FileInfoCard(
-                        file: provider.selectedFile!,
-                        onRemove: () => provider.reset(),
-                      ),
+                    // B3 Upload Zone (supports Drag and Drop and File Picker)
+                    const B3UploadZone(),
 
                     const SizedBox(height: 24),
 
                     // Upload Button
                     if (provider.hasFile &&
-                        provider.state != UploadState.uploading)
+                        provider.state != UploadState.uploading &&
+                        provider.state != UploadState.success)
                       ElevatedButton(
                         onPressed: provider.canUpload
-                            ? () => provider.uploadFile()
+                            ? () => provider.uploadB3File()
                             : null,
-                        child: const Text('Fazer Upload'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                        ),
+                        child: const Text('Confirmar e Enviar Planilha'),
                       ),
-
-                    // Progress Indicator
-                    if (provider.state == UploadState.uploading) ...[
-                      const SizedBox(height: 32),
-                      const Center(child: UploadProgressWidget()),
-                    ],
 
                     // Success Message
                     if (provider.state == UploadState.success) ...[
@@ -83,15 +75,15 @@ class UploadPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.accentColor.withValues(alpha: 0.1),
+                          color: AppTheme.accentColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.accentColor.withValues(alpha: 0.3),
+                            color: AppTheme.accentColor.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.check_circle,
                               color: AppTheme.accentColor,
                               size: 24,
@@ -114,13 +106,13 @@ class UploadPage extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
                           side: BorderSide(
-                            color: AppTheme.primaryColor.withValues(alpha: 0.5),
+                            color: AppTheme.primaryColor.withOpacity(0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Enviar Outro Arquivo'),
+                        child: const Text('Enviar Outra Planilha'),
                       ),
                     ],
 
@@ -130,10 +122,10 @@ class UploadPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
+                          color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.3),
+                            color: Colors.red.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -160,7 +152,7 @@ class UploadPage extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
                           side: BorderSide(
-                            color: AppTheme.primaryColor.withValues(alpha: 0.5),
+                            color: AppTheme.primaryColor.withOpacity(0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

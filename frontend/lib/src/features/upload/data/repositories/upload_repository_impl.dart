@@ -21,4 +21,18 @@ class UploadRepositoryImpl implements UploadRepository {
       );
     }
   }
+
+  @override
+  Future<UploadResult> uploadB3File(AppFile file) async {
+    try {
+      final responseModel = await remoteDataSource.uploadB3File(file);
+      return responseModel.toEntity();
+    } catch (e) {
+      return UploadResult(
+        success: false,
+        message: 'Erro ao conectar com o servidor: ${e.toString()}',
+        statusCode: null,
+      );
+    }
+  }
 }
