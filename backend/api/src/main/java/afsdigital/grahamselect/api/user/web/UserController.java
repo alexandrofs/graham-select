@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.api.user.web;
 
 import afsdigital.grahamselect.api.UsersApiDelegate;
+import afsdigital.grahamselect.api.user.service.SubscriptionTierService;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import afsdigital.grahamselect.model.SubscriptionTier;
@@ -19,6 +20,7 @@ import java.time.ZoneOffset;
 public class UserController implements UsersApiDelegate {
 
     private final UserRepository userRepository;
+    private final SubscriptionTierService subscriptionTierService;
 
     @Override
     public ResponseEntity<UserProfile> usersMeGet() {
@@ -44,12 +46,7 @@ public class UserController implements UsersApiDelegate {
         profile.setEmail(user.getEmail());
         profile.setFullName(user.getFullName());
 
-        var domainTier = user.getTier();
-        if (domainTier == afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier.TRIAL
-                && user.getTrialEndsAt() != null
-                && user.getTrialEndsAt().isBefore(LocalDateTime.now())) {
-            domainTier = afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier.FREE;
-        }
+        var domainTier = subscriptionTierService.resolveEffectiveTier(user, true);
 
         profile.setTier(SubscriptionTier.fromValue(domainTier.name()));
 

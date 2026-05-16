@@ -90,6 +90,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/RankedCompany'
+        '403':
+          description: Funcionalidade disponível apenas para assinantes Premium ou Trial válido
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '500':
           description: Erro interno no servidor
           content:
@@ -171,3 +177,18 @@ components:
         error:
           type: string
           example: "Erro interno no servidor."
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri

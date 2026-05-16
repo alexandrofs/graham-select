@@ -1,6 +1,6 @@
 # História 1.3: Restrição de Funcionalidades por Tier
 
-Status: ready-for-dev
+Status: in-progress
 
 ## História
 
@@ -39,20 +39,20 @@ Esta história foca na proteção de endpoints específicos na camada de API (Ba
    - **Dado** que o usuário está no nível "Trial" mas seu `trialEndsAt` já passou da data/hora atual (UTC),
    - **Quando** ele tentar usar o sistema,
    - **Então** a autorização para a feature Premium deve ser negada, e o sistema deve promover a mudança do status dele para `FREE` de forma preguiçosa (lazy update) ou reavaliar on-the-fly.
-
 ## Tarefas / Subtarefas
 
-- [ ] **Backend: Infraestrutura de Segurança Autorizativa**
-  - [ ] Criar um mecanismo de proteção para rotas Premium (ex: uma anotação customizada `@RequirePremium` ou configuração de segurança via expressões do Spring Security).
-  - [ ] Implementar a lógica de checagem do Tier do usuário atual logado (extraindo dados do contexto e valendo-se das regras definidas de Trial expirado).
-- [ ] **Backend: Handler de Exceções**
-  - [ ] Ajustar o `ControllerAdvice` global para tratar as exceções de acesso negado relacionadas ao tier.
-  - [ ] Retornar o formato padronizado (RFC 7807 Problem Detail) com um tipo/código customizado (e.g. `urn:problem-type:upgrade-required`).
-- [ ] **Backend: Verificação (Testes)**
-  - [ ] Implementar testes de integração (`FeatureRestrictionIT`) simulando usuários nos três níveis: FREE, TRIAL válido e PREMIUM.
-  - [ ] Simular um usuário com TRIAL expirado tentando acessar a rota restrita e validar que ocorre a negação.
-  - [ ] Validar o formato da resposta no padrão RFC 7807 para o caso de acesso negado.
+- [x] **Backend: Infraestrutura de Segurança Autorizativa**
+  - [x] Criar um mecanismo de proteção para rotas Premium (ex: uma anotação customizada `@RequirePremium` ou configuração de segurança via expressões do Spring Security).
+  - [x] Implementar a lógica de checagem do Tier do usuário atual logado (extraindo dados do contexto e valendo-se das regras definidas de Trial expirado).
+- [x] **Backend: Handler de Exceções**
+  - [x] Ajustar o `ControllerAdvice` global para tratar as exceções de acesso negado relacionadas ao tier.
+  - [x] Retornar o formato padronizado (RFC 7807 Problem Detail) com um tipo/código customizado (e.g. `urn:problem-type:upgrade-required`).
+- [x] **Backend: Verificação (Testes)**
+  - [x] Implementar testes de integração (`FeatureRestrictionIT`) simulando usuários nos três níveis: FREE, TRIAL válido e PREMIUM.
+  - [x] Simular um usuário com TRIAL expirado tentando acessar a rota restrita e validar que ocorre a negação.
+  - [x] Validar o formato da resposta no padrão RFC 7807 para o caso de acesso negado.
 
+Status: done
 ## Notas de Desenvolvimento
 
 - **Segurança (Spring Security):** Use as abstrações do Spring Boot (ex: `MethodSecurity` com `@PreAuthorize`) para injetar a checagem diretamente nos métodos do Controler ou Use Case.

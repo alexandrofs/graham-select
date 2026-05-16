@@ -7,18 +7,27 @@ import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.enti
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
+import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
+import afsdigital.grahamselect.common.user.domain.entities.User;
+import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,11 +46,18 @@ class RankedCompanyIT extends BaseRepositoryIT {
     @Autowired
     private IntrinsicValueJpaRepository intrinsicValueJpaRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
     @BeforeEach
     void setUp() {
         intrinsicValueJpaRepository.deleteAll();
         stockPriceJpaRepository.deleteAll();
         companyJpaRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -67,8 +83,27 @@ class RankedCompanyIT extends BaseRepositoryIT {
                 .intrinsicValue(BigDecimal.valueOf(200.0))
                 .build());
 
+        User premiumUser = userRepository.save(User.builder()
+                .googleSub("premium-ranked-sub")
+                .email("premium-ranked@example.com")
+                .fullName("Premium Ranked User")
+                .tier(SubscriptionTier.PREMIUM)
+                .trialEndsAt(LocalDateTime.now().minusDays(1))
+                .build());
+
+        Jwt jwt = Jwt.withTokenValue("ranked-premium-token")
+                .header("alg", "RS256")
+                .claim("sub", premiumUser.getGoogleSub())
+                .claim("email", premiumUser.getEmail())
+                .claim("name", premiumUser.getFullName())
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
+        when(jwtDecoder.decode("ranked-premium-token")).thenReturn(jwt);
+
         // Act & Assert
         mockMvc.perform(get("/api/v1/ranked-companies")
+                .header("Authorization", "Bearer ranked-premium-token")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

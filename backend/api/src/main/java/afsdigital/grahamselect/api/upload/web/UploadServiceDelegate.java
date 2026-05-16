@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.api.upload.web;
 
 import afsdigital.grahamselect.api.UploadFinancialDataApiDelegate;
+import afsdigital.grahamselect.api.auth.infrastructure.security.RequirePremium;
 import afsdigital.grahamselect.model.UploadFinancialDataPost200Response;
 import afsdigital.grahamselect.upload.application.usecase.UploadFinancialDataUseCase;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class UploadServiceDelegate implements UploadFinancialDataApiDelegate {
     private final UploadFinancialDataUseCase uploadFinancialDataUseCase;
 
     @Override
+    @RequirePremium
     public ResponseEntity<UploadFinancialDataPost200Response> uploadFinancialDataPost(MultipartFile file) {
         log.info("Receiving file");
         try {
