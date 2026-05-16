@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.api.user;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
+import afsdigital.grahamselect.api.user.infrastructure.persistence.jpa.repository.AccountDeletionRequestJpaRepository;
 import afsdigital.grahamselect.common.user.domain.entities.AccountDeletionRequest;
 import afsdigital.grahamselect.common.user.domain.entities.DeletionStatus;
 import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
@@ -39,6 +40,9 @@ public class AccountDeletionIT extends BaseRepositoryIT {
     private AccountDeletionRequestRepository deletionRequestRepository;
 
     @Autowired
+    private AccountDeletionRequestJpaRepository deletionRequestJpaRepository;
+
+    @Autowired
     private AccountPurgeScheduler purgeScheduler;
 
     @Autowired
@@ -49,6 +53,7 @@ public class AccountDeletionIT extends BaseRepositoryIT {
 
     @BeforeEach
     void cleanUp() {
+        deletionRequestJpaRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -91,7 +96,7 @@ public class AccountDeletionIT extends BaseRepositoryIT {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isAccepted())
                 .andReturn().getResponse().getContentAsString();
-        
+
         long requestId = Long.parseLong(com.jayway.jsonpath.JsonPath.read(responseContent, "$.data.requestId").toString());
 
         // 2. Run purge scheduler
@@ -105,6 +110,56 @@ public class AccountDeletionIT extends BaseRepositoryIT {
         assertThat(requestOpt).isPresent();
         assertThat(requestOpt.get().getStatus()).isEqualTo(DeletionStatus.COMPLETED);
         assertThat(requestOpt.get().getUserId()).isNull(); // Should be null due to ON DELETE SET NULL
+    }
+
+    @Test
+    @DisplayName("Duplicate deletion request should return 409 Conflict")
+    void shouldReturn409WhenDuplicateDeletionRequest() throws Exception {
+        User user = createAndMockUser("dup-user", "dup@example.com");
+        String token = "dup-token";
+        mockJwt(token, user);
+
+        // 1. First request - should succeed
+        mockMvc.perform(delete("/api/v1/users/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isAccepted());
+
+        // 2. Second request - should return 409
+        mockMvc.perform(delete("/api/v1/users/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("Cancel without pending request should return 404")
+    void shouldReturn404WhenNoPendingDeletionRequest() throws Exception {
+        User user = createAndMockUser("no-pending-user", "nopending@example.com");
+        String token = "no-pending-token";
+        mockJwt(token, user);
+
+        // Cancel without prior request
+        mockMvc.perform(post("/api/v1/users/me/cancel-deletion")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Deletion endpoints should not require @RequirePremium - FREE tier can delete")
+    void shouldAllowFreeTierToDeleteAccount() throws Exception {
+        User user = User.builder()
+                .googleSub("free-user-sub")
+                .email("free@example.com")
+                .fullName("Free User")
+                .tier(SubscriptionTier.FREE)
+                .build();
+        user = userRepository.save(user);
+
+        String token = "free-token";
+        mockJwt(token, user);
+
+        mockMvc.perform(delete("/api/v1/users/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isAccepted());
     }
 
     private User createAndMockUser(String sub, String email) {

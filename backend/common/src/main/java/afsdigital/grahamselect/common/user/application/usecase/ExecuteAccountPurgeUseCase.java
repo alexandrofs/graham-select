@@ -2,9 +2,9 @@ package afsdigital.grahamselect.common.user.application.usecase;
 
 import afsdigital.grahamselect.common.user.application.repository.AccountDeletionRequestRepository;
 import afsdigital.grahamselect.common.user.application.repository.UserDataPurgePort;
+import afsdigital.grahamselect.common.user.application.repository.UserDeletionPort;
 import afsdigital.grahamselect.common.user.domain.entities.AccountDeletionRequest;
 import afsdigital.grahamselect.common.user.domain.entities.DeletionStatus;
-import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,32 +17,24 @@ public class ExecuteAccountPurgeUseCase {
 
     private final AccountDeletionRequestRepository deletionRequestRepository;
     private final UserDataPurgePort userDataPurgePort;
-    private final UserRepository userRepository;
+    private final UserDeletionPort userDeletionPort;
 
     public void execute(AccountDeletionRequest request) {
         Long userId = request.getUserId();
-        try {
-            log.info("Starting purge for user ID: {}", userId);
-            
-            // 1. Purge data from other modules
-            userDataPurgePort.purgeAllUserData(userId);
-            
-            // 2. Update request status and clear user_id to allow user deletion
-            request.setStatus(DeletionStatus.COMPLETED);
-            request.setCompletedAt(LocalDateTime.now(ZoneOffset.UTC));
-            request.setUserId(null); // Disconnect from user to allow deletion
-            deletionRequestRepository.save(request);
-            
-            // 3. Delete user record
-            userRepository.deleteById(userId);
-            
-            log.info("Purge completed for user ID: {}", userId);
-        } catch (Exception e) {
-            log.error("Failed to purge data for user ID: {}", userId, e);
-            request.setStatus(DeletionStatus.FAILED);
-            request.setFailureReason(e.getMessage());
-            deletionRequestRepository.save(request);
-            throw e;
-        }
+        log.info("Starting purge for user ID: {}", userId);
+
+        // 1. Purge data from other modules
+        userDataPurgePort.purgeAllUserData(userId);
+
+        // 2. Delete user record (FK ON DELETE SET NULL handles user_id in requests)
+        userDeletionPort.deleteById(userId);
+
+        // 3. Update request status
+        request.setStatus(DeletionStatus.COMPLETED);
+        request.setCompletedAt(LocalDateTime.now(ZoneOffset.UTC));
+        request.setUserId(null); // Match DB state after FK cascade
+        deletionRequestRepository.save(request);
+
+        log.info("Purge completed for user ID: {}", userId);
     }
 }
