@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/09-create-account-deletion-requests-table.yaml
   - include:
       file: db/changelog/10-fix-deletion-request-unique-constraint.yaml
+  - include:
+      file: db/changelog/11-add-user-investor-profile.yaml

@@ -19,4 +19,21 @@ class ProfileRepository {
       throw Exception('Error fetching profile: $e');
     }
   }
+
+  Future<UserProfile> updateInvestorProfile(String profile) async {
+    try {
+      final response = await _apiClient.patch(
+        '/api/v1/users/profile',
+        data: {'investorProfile': profile},
+      );
+
+      if (response.statusCode == 200) {
+        return UserProfile.fromJson(response.data);
+      } else {
+        throw Exception('Failed to update profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error updating profile: $e');
+    }
+  }
 }

@@ -10,6 +10,7 @@ import afsdigital.grahamselect.common.user.infrastructure.persistence.UserReposi
 import afsdigital.grahamselect.model.DeletionRequestResponse;
 import afsdigital.grahamselect.model.DeletionRequestResponseData;
 import afsdigital.grahamselect.model.SubscriptionTier;
+import afsdigital.grahamselect.model.UpdateProfileRequest;
 import afsdigital.grahamselect.model.UserProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,21 @@ public class UserController implements UsersApiDelegate {
     public ResponseEntity<UserProfile> usersMeGet() {
         return getAuthenticatedUserId()
                 .flatMap(userRepository::findById)
+                .map(this::mapToUserProfile)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(401).build());
+    }
+
+    @Override
+    public ResponseEntity<UserProfile> usersProfilePatch(UpdateProfileRequest updateProfileRequest) {
+        return getAuthenticatedUserId()
+                .flatMap(userRepository::findById)
+                .map(user -> {
+                    if (updateProfileRequest.getInvestorProfile() != null) {
+                        user.setInvestorProfile(afsdigital.grahamselect.common.user.domain.entities.InvestorProfile.valueOf(updateProfileRequest.getInvestorProfile().name()));
+                    }
+                    return userRepository.save(user);
+                })
                 .map(this::mapToUserProfile)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(401).build());
@@ -86,6 +102,10 @@ public class UserController implements UsersApiDelegate {
         profile.setId(user.getId());
         profile.setEmail(user.getEmail());
         profile.setFullName(user.getFullName());
+
+        if (user.getInvestorProfile() != null) {
+            profile.setInvestorProfile(afsdigital.grahamselect.model.InvestorProfile.fromValue(user.getInvestorProfile().name()));
+        }
 
         var domainTier = subscriptionTierService.resolveEffectiveTier(user, true);
 

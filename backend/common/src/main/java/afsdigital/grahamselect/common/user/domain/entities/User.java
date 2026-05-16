@@ -49,6 +49,10 @@ public class User {
     @Column(name = "trial_ends_at")
     private LocalDateTime trialEndsAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "investor_profile")
+    private InvestorProfile investorProfile;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

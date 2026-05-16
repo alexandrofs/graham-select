@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,8 +20,16 @@ class _HomePageState extends State<HomePage> {
   final resourcesKey = GlobalKey();
   final contactKey = GlobalKey();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileProvider>().fetchProfile();
+    });
+  }
+
   void _scrollTo(GlobalKey key) {
-    final context = key.currentContext;
+...
     if (context == null) return;
     Scrollable.ensureVisible(
       context,
@@ -65,6 +75,7 @@ class _HomePageState extends State<HomePage> {
             },
             onCtaPressed: () => context.push('/ranking'),
           ),
+          const _SuitabilityBanner(),
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -801,6 +812,49 @@ class _InfoCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SuitabilityBanner extends StatelessWidget {
+  const _SuitabilityBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProfileProvider>(
+      builder: (context, provider, child) {
+        final profile = provider.profile;
+        if (profile == null || profile.investorProfile != null) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          width: double.infinity,
+          color: AppTheme.primaryColor.withValues(alpha: 0.9),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.white),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  'Você ainda não definiu seu perfil de investidor. Responda ao questionário para recomendações personalizadas.',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 16),
+              TextButton(
+                onPressed: () => context.push('/suitability'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                ),
+                child: const Text('Responder agora'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -32,6 +32,7 @@ import 'src/features/docs/presentation/pages/docs_screen.dart';
 import 'src/features/profile/data/repositories/profile_repository.dart';
 import 'src/features/profile/presentation/providers/profile_provider.dart';
 import 'src/features/profile/presentation/pages/profile_page.dart';
+import 'src/features/profile/presentation/pages/investor_profile_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -151,6 +152,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
         GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
         GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
+        GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
       ],
     );
   }

@@ -47,7 +47,7 @@ development_status:
   1-2-f-subscription-tier-frontend: done
   1-3-tier-based-access-control: done
   1-4-account-deletion-lgpd-purge: done
-  1-5-investor-profile-kyc-suitability: ready-for-dev
+  1-5-investor-profile-kyc-suitability: review
   epic-1-retrospective: optional
   epic-2: backlog
   2-1-b3-upload-excel-ingestion: backlog
