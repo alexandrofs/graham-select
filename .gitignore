@@ -26,3 +26,4 @@ replay_pid*
 .DS_Store
 .structurizr
 .env.render
+.env.local
