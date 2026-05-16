@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/07-create-users-table.yaml
   - include:
       file: db/changelog/08-add-user-subscription-fields.yaml
+  - include:
+      file: db/changelog/09-create-account-deletion-requests-table.yaml

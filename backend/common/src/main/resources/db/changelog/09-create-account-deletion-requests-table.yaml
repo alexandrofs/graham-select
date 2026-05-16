@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 09-create-account-deletion-requests-table
+      author: gemini-cli
+      changes:
+        - createTable:
+            tableName: account_deletion_requests
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: requested_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completed_at
+                  type: DATETIME
+              - column:
+                  name: failure_reason
+                  type: TEXT
+        - addForeignKeyConstraint:
+            baseTableName: account_deletion_requests
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_deletion_request_user
+            onDelete: SET NULL
+        - addUniqueConstraint:
+            columnNames: user_id, status
+            constraintName: uq_deletion_requests_user_status
+            tableName: account_deletion_requests

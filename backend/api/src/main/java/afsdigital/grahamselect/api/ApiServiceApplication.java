@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = { "afsdigital.grahamselect.common", "afsdigital.grahamselect.api" })
 @EnableJpaRepositories(basePackages = { "afsdigital.grahamselect.common", "afsdigital.grahamselect.api" })
 @org.springframework.data.jpa.repository.config.EnableJpaAuditing
+@org.springframework.scheduling.annotation.EnableScheduling
 @ImportRuntimeHints(CommonRuntimeHints.class)
 public class ApiServiceApplication {
 
