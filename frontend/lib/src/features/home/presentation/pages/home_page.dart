@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _scrollTo(GlobalKey key) {
-...
+    final context = key.currentContext;
     if (context == null) return;
     Scrollable.ensureVisible(
       context,

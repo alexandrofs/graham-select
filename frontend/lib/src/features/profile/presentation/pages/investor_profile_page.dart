@@ -89,7 +89,7 @@ class _InvestorProfilePageState extends State<InvestorProfilePage> {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+                        color: isSelected ? Colors.blue.withValues(alpha: 0.1) : Colors.transparent,
                         border: Border.all(
                           color: isSelected ? Colors.blue : Colors.grey.shade800,
                           width: 2,
