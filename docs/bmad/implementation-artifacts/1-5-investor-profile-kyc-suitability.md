@@ -1,6 +1,6 @@
 # História 1.5: Perfil do Investidor (KYC/Suitability)
 
-Status: revisão
+Status: done
 
 ## História
 
@@ -54,12 +54,18 @@ gemini-2.0-flash
 - Adicionado banner informativo no `HomePage` que redireciona para o questionário caso o perfil não esteja definido.
 - Modelo `UserProfile` no frontend atualizado para suportar o novo campo.
 
+### Review Fixes (AI)
+- **Architectural Fix**: Criado `UpdateInvestorProfileUseCase` no pacote `application.usecase` para manter a Clean Architecture e removida a dependência direta de persistência do `UserController`.
+- **Flutter Code Style**: Removida constante global `bold` em `investor_profile_page.dart`.
+
 ### File List
 
 - `backend/common/src/main/resources/db/changelog/11-add-user-investor-profile.yaml`
 - `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
 - `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/InvestorProfile.java`
 - `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/User.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/usecase/UpdateInvestorProfileUseCase.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/spring/UserProfileConfiguration.java`
 - `backend/api/src/main/resources/openapi.yaml`
 - `backend/api/src/main/java/afsdigital/grahamselect/api/user/web/UserController.java`
 - `backend/api/src/test/java/afsdigital/grahamselect/api/user/UserProfileIT.java`

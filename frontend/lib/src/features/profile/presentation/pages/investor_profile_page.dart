@@ -64,7 +64,7 @@ class _InvestorProfilePageState extends State<InvestorProfilePage> {
           children: [
             const Text(
               'Qual seu perfil de investidor?',
-              style: TextStyle(fontSize: 24, fontWeight: bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -106,7 +106,7 @@ class _InvestorProfilePageState extends State<InvestorProfilePage> {
                                 profile['title']!,
                                 style: TextStyle(
                                   fontSize: 18,
-                                  fontWeight: bold,
+                                  fontWeight: FontWeight.bold,
                                   color: isSelected ? Colors.blue : Colors.white,
                                 ),
                               ),
@@ -148,4 +148,3 @@ class _InvestorProfilePageState extends State<InvestorProfilePage> {
     );
   }
 }
-const bold = FontWeight.bold;

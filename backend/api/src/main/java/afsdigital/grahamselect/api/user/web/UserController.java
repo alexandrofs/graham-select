@@ -4,6 +4,7 @@ import afsdigital.grahamselect.api.UsersApiDelegate;
 import afsdigital.grahamselect.api.user.service.SubscriptionTierService;
 import afsdigital.grahamselect.common.user.application.usecase.CancelAccountDeletionUseCase;
 import afsdigital.grahamselect.common.user.application.usecase.RequestAccountDeletionUseCase;
+import afsdigital.grahamselect.common.user.application.usecase.UpdateInvestorProfileUseCase;
 import afsdigital.grahamselect.common.user.domain.entities.AccountDeletionRequest;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
@@ -30,6 +31,7 @@ public class UserController implements UsersApiDelegate {
     private final SubscriptionTierService subscriptionTierService;
     private final RequestAccountDeletionUseCase requestAccountDeletionUseCase;
     private final CancelAccountDeletionUseCase cancelAccountDeletionUseCase;
+    private final UpdateInvestorProfileUseCase updateInvestorProfileUseCase;
 
     @Override
     public ResponseEntity<UserProfile> usersMeGet() {
@@ -43,12 +45,12 @@ public class UserController implements UsersApiDelegate {
     @Override
     public ResponseEntity<UserProfile> usersProfilePatch(UpdateProfileRequest updateProfileRequest) {
         return getAuthenticatedUserId()
-                .flatMap(userRepository::findById)
-                .map(user -> {
+                .map(userId -> {
+                    afsdigital.grahamselect.common.user.domain.entities.InvestorProfile domainProfile = null;
                     if (updateProfileRequest.getInvestorProfile() != null) {
-                        user.setInvestorProfile(afsdigital.grahamselect.common.user.domain.entities.InvestorProfile.valueOf(updateProfileRequest.getInvestorProfile().name()));
+                        domainProfile = afsdigital.grahamselect.common.user.domain.entities.InvestorProfile.valueOf(updateProfileRequest.getInvestorProfile().name());
                     }
-                    return userRepository.save(user);
+                    return updateInvestorProfileUseCase.execute(userId, domainProfile);
                 })
                 .map(this::mapToUserProfile)
                 .map(ResponseEntity::ok)
