@@ -160,6 +160,37 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
+  /users/profile:
+    patch:
+      summary: Atualiza o perfil do investidor
+      description: Atualiza o perfil do investidor (Suitability) do usuário autenticado.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Perfil atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno no servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -175,11 +206,21 @@ components:
           type: string
         tier:
           $ref: '#/components/schemas/SubscriptionTier'
+        investorProfile:
+          $ref: '#/components/schemas/InvestorProfile'
         trialEndsAt:
           type: string
           format: date-time
         daysRemaining:
           type: integer
+    UpdateProfileRequest:
+      type: object
+      properties:
+        investorProfile:
+          $ref: '#/components/schemas/InvestorProfile'
+    InvestorProfile:
+      type: string
+      enum: [CONSERVATIVE, MODERATE, AGGRESSIVE]
     DeletionRequestResponse:
       type: object
       properties:

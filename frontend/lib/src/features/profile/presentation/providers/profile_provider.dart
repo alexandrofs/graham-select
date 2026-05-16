@@ -33,4 +33,21 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> updateInvestorProfile(String investorProfile) async {
+    _state = ProfileState.loading;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _profile = await _repository.updateInvestorProfile(investorProfile);
+      _state = ProfileState.success;
+    } catch (e) {
+      _state = ProfileState.error;
+      _errorMessage = e.toString();
+      rethrow;
+    } finally {
+      notifyListeners();
+    }
+  }
 }

@@ -1,6 +1,6 @@
 # História 1.5: Perfil do Investidor (KYC/Suitability)
 
-Status: pronto-para-desenvolvimento
+Status: revisão
 
 ## História
 
@@ -19,20 +19,56 @@ Status: pronto-para-desenvolvimento
 
 ## Tarefas / Subtarefas
 
-- [ ] Backend: Atualização do Banco de Dados
-  - [ ] Criar changelog Liquibase para adicionar coluna `investor_profile` na tabela `users`.
-- [ ] Backend: Domínio e Infraestrutura
-  - [ ] Atualizar entidade `User` com o novo campo.
-  - [ ] Criar DTO `UpdateProfileRequest`.
-  - [ ] Implementar `UserService.updateProfile`.
-  - [ ] Criar endpoint no `UserController`.
-- [ ] Frontend: Implementação da Interface (UI)
-  - [ ] Criar tela de Suitability/KYC.
-  - [ ] Implementar lógica de navegação após o questionário.
-  - [ ] Adicionar verificação no Dashboard para exibir o prompt de perfil.
-- [ ] Verificação
-  - [ ] Teste de integração: verificar se o perfil é salvo corretamente via API.
-  - [ ] Teste manual no simulador Flutter.
+- [x] Backend: Atualização do Banco de Dados
+  - [x] Criar changelog Liquibase para adicionar coluna `investor_profile` na tabela `users`.
+- [x] Backend: Domínio e Infraestrutura
+  - [x] Atualizar entidade `User` com o novo campo.
+  - [x] Criar DTO `UpdateProfileRequest`.
+  - [x] Implementar `UserService.updateProfile`.
+  - [x] Criar endpoint no `UserController`.
+- [x] Frontend: Implementação da Interface (UI)
+  - [x] Criar tela de Suitability/KYC.
+  - [x] Implementar lógica de navegação após o questionário.
+  - [x] Adicionar verificação no Dashboard para exibir o prompt de perfil.
+- [x] Verificação
+  - [x] Teste de integração: verificar se o perfil é salvo corretamente via API.
+  - [x] Teste manual no simulador Flutter.
+
+## Dev Agent Record
+
+### Agent Model Used
+
+gemini-2.0-flash
+
+### Debug Log References
+
+- Backend tests passed: `UserProfileIT` (JUnit 5 + Testcontainers).
+- OpenAPI models generated successfully.
+
+### Completion Notes List
+
+- Adicionado campo `investor_profile` à tabela `users` via Liquibase.
+- Criado enum `InvestorProfile` no backend (domínio) e exposto via API.
+- Implementado endpoint `PATCH /api/v1/users/profile`.
+- Criada nova tela `InvestorProfilePage` no Flutter para o questionário de Suitability.
+- Adicionado banner informativo no `HomePage` que redireciona para o questionário caso o perfil não esteja definido.
+- Modelo `UserProfile` no frontend atualizado para suportar o novo campo.
+
+### File List
+
+- `backend/common/src/main/resources/db/changelog/11-add-user-investor-profile.yaml`
+- `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/InvestorProfile.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/User.java`
+- `backend/api/src/main/resources/openapi.yaml`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/web/UserController.java`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/user/UserProfileIT.java`
+- `frontend/lib/src/features/profile/data/models/user_profile_model.dart`
+- `frontend/lib/src/features/profile/data/repositories/profile_repository.dart`
+- `frontend/lib/src/features/profile/presentation/providers/profile_provider.dart`
+- `frontend/lib/src/features/profile/presentation/pages/investor_profile_page.dart`
+- `frontend/lib/src/features/home/presentation/pages/home_page.dart`
+- `frontend/lib/main.dart`
 
 ## Notas de Desenvolvimento
 
