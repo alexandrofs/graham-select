@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10-fix-deletion-request-unique-constraint
+      author: code-review
+      comment: >
+        Drop overly strict unique constraint on (user_id, status) that prevents
+        multiple CANCELLED records per user. Application-level check in
+        RequestAccountDeletionUseCase enforces single PENDING constraint.
+      changes:
+        - dropUniqueConstraint:
+            tableName: account_deletion_requests
+            constraintName: uq_deletion_requests_user_status

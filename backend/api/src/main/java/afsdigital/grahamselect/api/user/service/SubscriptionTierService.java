@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class SubscriptionTierService {
             return user.getTier();
         }
 
-        if (user.getTrialEndsAt() != null && user.getTrialEndsAt().isBefore(LocalDateTime.now())) {
+        if (user.getTrialEndsAt() != null && user.getTrialEndsAt().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
             if (persistLazyDowngrade) {
                 user.setTier(SubscriptionTier.FREE);
                 userRepository.save(user);

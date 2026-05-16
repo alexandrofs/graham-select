@@ -2,9 +2,9 @@ package afsdigital.grahamselect.common.user.application.usecase;
 
 import afsdigital.grahamselect.common.user.application.repository.AccountDeletionRequestRepository;
 import afsdigital.grahamselect.common.user.application.repository.UserDataPurgePort;
+import afsdigital.grahamselect.common.user.application.repository.UserDeletionPort;
 import afsdigital.grahamselect.common.user.domain.entities.AccountDeletionRequest;
 import afsdigital.grahamselect.common.user.domain.entities.DeletionStatus;
-import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,7 +23,7 @@ class ExecuteAccountPurgeUseCaseTest {
     @Mock
     private UserDataPurgePort userDataPurgePort;
     @Mock
-    private UserRepository userRepository;
+    private UserDeletionPort userDeletionPort;
 
     @InjectMocks
     private ExecuteAccountPurgeUseCase useCase;
@@ -39,13 +40,14 @@ class ExecuteAccountPurgeUseCaseTest {
 
         assertEquals(DeletionStatus.COMPLETED, request.getStatus());
         assertNotNull(request.getCompletedAt());
+        assertNull(request.getUserId());
         verify(userDataPurgePort).purgeAllUserData(1L);
-        verify(userRepository).deleteById(1L);
+        verify(userDeletionPort).deleteById(1L);
         verify(deletionRequestRepository).save(request);
     }
 
     @Test
-    void shouldMarkAsFailedWhenErrorOccurs() {
+    void shouldPropagateExceptionWhenPurgeFails() {
         AccountDeletionRequest request = AccountDeletionRequest.builder()
                 .id(1L)
                 .userId(1L)
@@ -56,8 +58,9 @@ class ExecuteAccountPurgeUseCaseTest {
 
         assertThrows(RuntimeException.class, () -> useCase.execute(request));
 
-        assertEquals(DeletionStatus.FAILED, request.getStatus());
-        assertEquals("Database error", request.getFailureReason());
-        verify(deletionRequestRepository).save(request);
+        // Status should NOT be changed by the use case - scheduler handles failure marking
+        assertEquals(DeletionStatus.PENDING, request.getStatus());
+        verify(userDeletionPort, never()).deleteById(anyLong());
+        verify(deletionRequestRepository, never()).save(any());
     }
 }

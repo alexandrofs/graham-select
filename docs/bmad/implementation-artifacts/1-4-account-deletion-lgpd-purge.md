@@ -1,6 +1,6 @@
 # Story 1.4: Exclusão de Conta e Expurgo LGPD
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -210,8 +210,44 @@ No estado atual do banco, as tabelas com dados vinculados a `user_id` são:
 
 
 ### File List
-java`
+
+**Domain & Application (common):**
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/AccountDeletionRequest.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/DeletionStatus.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/repository/AccountDeletionRequestRepository.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/repository/UserDataPurgePort.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/repository/UserDeletionPort.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/usecase/RequestAccountDeletionUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/usecase/ExecuteAccountPurgeUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/usecase/CancelAccountDeletionUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/service/exceptions/DeletionAlreadyPendingException.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/application/service/exceptions/DeletionNotFoundException.java`
+
+**Infrastructure (api):**
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/persistence/jpa/entities/AccountDeletionRequestEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/persistence/jpa/repository/AccountDeletionRequestJpaRepository.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/persistence/AccountDeletionRequestRepositoryImpl.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/persistence/EmptyUserDataPurgeAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/persistence/UserDeletionAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/spring/AccountDeletionConfiguration.java`
 - `backend/api/src/main/java/afsdigital/grahamselect/api/user/infrastructure/spring/AccountPurgeScheduler.java`
+
+**Web (api):**
 - `backend/api/src/main/java/afsdigital/grahamselect/api/user/web/UserController.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/common/web/GlobalExceptionHandler.java`
+
+**Config & Migrations:**
+- `backend/api/src/main/java/afsdigital/grahamselect/api/ApiServiceApplication.java`
+- `backend/api/src/main/resources/openapi.yaml`
+- `backend/common/src/main/resources/db/changelog/09-create-account-deletion-requests-table.yaml`
+- `backend/common/src/main/resources/db/changelog/10-fix-deletion-request-unique-constraint.yaml`
+- `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
+
+**Testes:**
+- `backend/common/src/test/java/.../usecase/RequestAccountDeletionUseCaseTest.java`
+- `backend/common/src/test/java/.../usecase/ExecuteAccountPurgeUseCaseTest.java`
+- `backend/common/src/test/java/.../usecase/CancelAccountDeletionUseCaseTest.java`
 - `backend/api/src/test/java/afsdigital/grahamselect/api/user/AccountDeletionIT.java`
 
+**Bug Fixes (pré-existentes, corrigidos nesta review):**
+- `backend/api/src/main/java/.../user/service/SubscriptionTierService.java` — UTC fix

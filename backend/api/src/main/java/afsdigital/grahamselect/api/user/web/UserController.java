@@ -93,7 +93,7 @@ public class UserController implements UsersApiDelegate {
 
         if (user.getTrialEndsAt() != null) {
             profile.setTrialEndsAt(user.getTrialEndsAt().atOffset(ZoneOffset.UTC));
-            long daysRemaining = Duration.between(LocalDateTime.now(), user.getTrialEndsAt()).toDays();
+            long daysRemaining = Duration.between(LocalDateTime.now(ZoneOffset.UTC), user.getTrialEndsAt()).toDays();
             profile.setDaysRemaining((int) Math.max(0, daysRemaining));
         }
 
