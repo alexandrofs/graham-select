@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
                                 .email(email)
                                 .fullName(name)
                                 .tier(SubscriptionTier.TRIAL)
-                                .trialEndsAt(LocalDateTime.now().plusDays(30))
+                                .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).plusDays(30))
                                 .build();
                         log.info("Provisioning new user from OAuth2: {}", email);
                         return userRepository.save(newUser);

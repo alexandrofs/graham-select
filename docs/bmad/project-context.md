@@ -27,7 +27,9 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 ### Language-Specific Rules
 
-- **Java 21:** Priorizar recursos modernos da linguagem (Records, Pattern Matching) onde aplicável.
+- **Java 21:** 
+  - Priorizar recursos modernos da linguagem (Records, Pattern Matching) onde aplicável.
+  - **Obrigatório:** Todas as operações temporais (datas e horas) DEVEM utilizar `ZoneOffset.UTC`. Use `OffsetDateTime.now(ZoneOffset.UTC)` ou `LocalDateTime.now(ZoneOffset.UTC)` de forma consistente para evitar bugs de fuso horário.
 - **Dart:** Tipagem estrita é obrigatória. Null safety garantido em todas as implementações.
 
 ### Framework-Specific Rules
