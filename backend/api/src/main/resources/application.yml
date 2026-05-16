@@ -24,3 +24,7 @@ spring:
         jwt:
           issuer-uri: https://accounts.google.com
           jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+
+app:
+  upload:
+    storage-path: ${STORAGE_PATH:./uploads}

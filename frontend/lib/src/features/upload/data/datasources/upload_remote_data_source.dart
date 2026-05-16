@@ -12,10 +12,14 @@ class UploadRemoteDataSource {
     this.baseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8080/api/v1'),
   });
 
-  Future<UploadResponseModel> uploadFile(AppFile file) async {
+  Future<UploadResponseModel> uploadFile(AppFile file, {String? token}) async {
     try {
       final uri = Uri.parse('$baseUrl/upload-financial-data');
       final request = http.MultipartRequest('POST', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
 
       // Adicionar o arquivo como multipart usando os bytes
       request.files.add(
@@ -39,6 +43,36 @@ class UploadRemoteDataSource {
     } catch (e) {
       // Em caso de erro de rede ou outro erro
       throw Exception('Erro ao fazer upload: ${e.toString()}');
+    }
+  }
+
+  Future<UploadResponseModel> uploadB3File(AppFile file, {String? token}) async {
+    try {
+      final uri = Uri.parse('$baseUrl/upload/b3');
+      final request = http.MultipartRequest('POST', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          file.bytes,
+          filename: file.name,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final Map<String, dynamic> jsonResponse = response.body.isNotEmpty
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : {};
+
+      return UploadResponseModel.fromJson(jsonResponse, response.statusCode);
+    } catch (e) {
+      throw Exception('Erro ao fazer upload B3: ${e.toString()}');
     }
   }
 }

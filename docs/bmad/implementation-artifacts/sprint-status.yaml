@@ -50,8 +50,8 @@ development_status:
   1-5-investor-profile-kyc-suitability: done
   epic-1-retrospective: done
   epic-2: in-progress
-  2-1-b3-upload-excel-ingestion: ready-for-dev
-  2-2-async-kafka-splitter-processing: backlog
+  2-1-b3-upload-excel-ingestion: done
+  2-2-async-kafka-splitter-processing: ready-for-dev
   2-3-smart-trade-deduplication: backlog
   2-4-manual-operation-fallback-crud: backlog
   2-5-ingestion-audit-history: backlog

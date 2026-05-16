@@ -11,8 +11,10 @@ import 'src/features/home/presentation/pages/home_page.dart';
 import 'src/features/upload/presentation/pages/upload_page.dart';
 import 'src/features/upload/presentation/providers/upload_provider.dart';
 import 'src/features/upload/domain/usecases/upload_file_usecase.dart';
+import 'src/features/upload/domain/usecases/upload_b3_file_usecase.dart';
 import 'src/features/upload/data/repositories/upload_repository_impl.dart';
 import 'src/features/upload/data/datasources/upload_remote_data_source.dart';
+
 
 // Auth Feature Imports
 import 'src/features/auth/data/auth_repository.dart';
@@ -85,6 +87,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final UploadRemoteDataSource uploadRemoteDataSource;
   late final UploadRepositoryImpl uploadRepository;
   late final UploadFileUseCase uploadUseCase;
+  late final UploadB3FileUseCase uploadB3UseCase;
 
   late final RankingRemoteDataSource rankingRemoteDataSource;
   late final RankingRepositoryImpl rankingRepository;
@@ -112,6 +115,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient);
     uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
     uploadUseCase = UploadFileUseCase(uploadRepository);
+    uploadB3UseCase = UploadB3FileUseCase(uploadRepository);
 
     // Ranking Feature DI
     rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
@@ -170,7 +174,12 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       providers: [
         Provider.value(value: effectiveAuthRepository),
         Provider.value(value: effectiveApiClient),
-        ChangeNotifierProvider(create: (_) => UploadProvider(uploadUseCase)),
+        ChangeNotifierProvider(
+          create: (_) => UploadProvider(
+            uploadFileUseCase: uploadUseCase,
+            uploadB3FileUseCase: uploadB3UseCase,
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
       ],
