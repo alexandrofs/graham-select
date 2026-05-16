@@ -127,6 +127,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Solicita a exclusão permanente da conta
+      description: Inicia o processo de expurgo de dados conforme LGPD. O processo é assíncrono.
+      tags:
+        - User
+      responses:
+        '202':
+          description: Solicitação de exclusão aceita
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequestResponse'
+        '409':
+          description: Já existe uma solicitação pendente para este usuário
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /users/me/cancel-deletion:
+    post:
+      summary: Cancela uma solicitação de exclusão pendente
+      description: Se o expurgo ainda não tiver sido executado, cancela a solicitação.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Solicitação cancelada com sucesso
+        '404':
+          description: Nenhuma solicitação pendente encontrada
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
 components:
   schemas:
@@ -147,6 +180,21 @@ components:
           format: date-time
         daysRemaining:
           type: integer
+    DeletionRequestResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            requestId:
+              type: integer
+              format: int64
+            status:
+              type: string
+              example: "PENDING"
+            estimatedCompletionWithin:
+              type: string
+              example: "24h"
     SubscriptionTier:
       type: string
       enum: [TRIAL, FREE, PREMIUM]

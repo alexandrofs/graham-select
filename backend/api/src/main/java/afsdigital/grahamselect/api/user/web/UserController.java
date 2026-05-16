@@ -2,8 +2,13 @@ package afsdigital.grahamselect.api.user.web;
 
 import afsdigital.grahamselect.api.UsersApiDelegate;
 import afsdigital.grahamselect.api.user.service.SubscriptionTierService;
+import afsdigital.grahamselect.common.user.application.usecase.CancelAccountDeletionUseCase;
+import afsdigital.grahamselect.common.user.application.usecase.RequestAccountDeletionUseCase;
+import afsdigital.grahamselect.common.user.domain.entities.AccountDeletionRequest;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
+import afsdigital.grahamselect.model.DeletionRequestResponse;
+import afsdigital.grahamselect.model.DeletionRequestResponseData;
 import afsdigital.grahamselect.model.SubscriptionTier;
 import afsdigital.grahamselect.model.UserProfile;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,22 +27,57 @@ public class UserController implements UsersApiDelegate {
 
     private final UserRepository userRepository;
     private final SubscriptionTierService subscriptionTierService;
+    private final RequestAccountDeletionUseCase requestAccountDeletionUseCase;
+    private final CancelAccountDeletionUseCase cancelAccountDeletionUseCase;
 
     @Override
     public ResponseEntity<UserProfile> usersMeGet() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
+        return getAuthenticatedUserId()
+                .flatMap(userRepository::findById)
+                .map(this::mapToUserProfile)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(401).build());
+    }
+
+    @Override
+    public ResponseEntity<DeletionRequestResponse> usersMeDelete() {
+        Optional<Long> userIdOpt = getAuthenticatedUserId();
+        if (userIdOpt.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
 
-        try {
-            Long userId = Long.parseLong(authentication.getName());
-            return userRepository.findById(userId)
-                    .map(this::mapToUserProfile)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (NumberFormatException e) {
+        AccountDeletionRequest request = requestAccountDeletionUseCase.execute(userIdOpt.get());
+
+        DeletionRequestResponse response = new DeletionRequestResponse();
+        DeletionRequestResponseData data = new DeletionRequestResponseData();
+        data.setRequestId(request.getId());
+        data.setStatus(request.getStatus().name());
+        data.setEstimatedCompletionWithin("24h");
+        response.setData(data);
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    @Override
+    public ResponseEntity<Void> usersMeCancelDeletionPost() {
+        Optional<Long> userIdOpt = getAuthenticatedUserId();
+        if (userIdOpt.isEmpty()) {
             return ResponseEntity.status(401).build();
+        }
+
+        cancelAccountDeletionUseCase.execute(userIdOpt.get());
+        return ResponseEntity.ok().build();
+    }
+
+    private Optional<Long> getAuthenticatedUserId() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Long.parseLong(authentication.getName()));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
         }
     }
 
