@@ -29,7 +29,8 @@ public class LocalB3FileStorage implements B3FileStoragePort {
     @Override
     public String save(InputStream inputStream, String fileName, String userId) {
         try {
-            String uniqueFileName = UUID.randomUUID() + "_" + fileName;
+            String safeFileName = Paths.get(fileName).getFileName().toString();
+            String uniqueFileName = UUID.randomUUID() + "_" + safeFileName;
             Path targetPath = storagePath.resolve(uniqueFileName);
             Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
             return targetPath.toString();

@@ -11,6 +11,10 @@ import org.testcontainers.containers.MySQLContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
+import afsdigital.grahamselect.common.upload.application.repository.B3FileStoragePort;
+import afsdigital.grahamselect.common.upload.application.repository.B3UploadEventPort;
+
 @SpringBootTest
 @EmbeddedKafka(topics = {
         "FINANCIAL_DATA_TOPIC" }, partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
@@ -29,6 +33,12 @@ public class ValuationConsumerServiceContextTest {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @MockBean
+    private B3FileStoragePort b3FileStoragePort;
+
+    @MockBean
+    private B3UploadEventPort b3UploadEventPort;
 
     @Test
     public void contextLoadsSuccessfully() {
