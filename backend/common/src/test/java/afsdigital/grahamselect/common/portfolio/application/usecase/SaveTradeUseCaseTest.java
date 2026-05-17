@@ -32,6 +32,7 @@ class SaveTradeUseCaseTest {
         trade = Trade.builder()
                 .userId("user-123")
                 .ticker("PETR4")
+                .side("COMPRA")
                 .tradeDate(LocalDate.now())
                 .quantity(new BigDecimal("100"))
                 .price(new BigDecimal("30.00"))
@@ -42,7 +43,7 @@ class SaveTradeUseCaseTest {
     @Test
     void shouldSaveTradeWhenNotDuplicate() {
         // Given
-        when(tradePort.exists(any(), any(), any(), any(), any(), any())).thenReturn(false);
+        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any())).thenReturn(false);
         when(tradePort.save(any())).thenReturn(trade);
 
         // When
@@ -62,7 +63,8 @@ class SaveTradeUseCaseTest {
                 trade.getTradeDate(),
                 trade.getQuantity(),
                 trade.getPrice(),
-                trade.getBroker()
+                trade.getBroker(),
+                trade.getSide()
         )).thenReturn(true);
 
         // When

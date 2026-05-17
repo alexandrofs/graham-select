@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 15-create-manual-trade-audits-table
+      author: gemini-cli
+      changes:
+        - createTable:
+            tableName: manual_trade_audits
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: trade_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: action_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload_json
+                  type: JSON
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: manual_trade_audits
+            indexName: idx_mta_user_id
+            columns:
+              - column:
+                  name: user_id

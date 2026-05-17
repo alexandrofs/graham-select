@@ -53,7 +53,7 @@ development_status:
   2-1-b3-upload-excel-ingestion: done
   2-2-async-kafka-splitter-processing: done
   2-3-smart-trade-deduplication: done
-  2-4-manual-operation-fallback-crud: backlog
+  2-4-manual-operation-fallback-crud: done
   2-5-ingestion-audit-history: backlog
   epic-2-retrospective: optional
   epic-3: backlog

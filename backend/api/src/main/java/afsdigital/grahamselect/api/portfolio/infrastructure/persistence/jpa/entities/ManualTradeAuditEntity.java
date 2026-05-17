@@ -8,43 +8,35 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "trades")
+@Table(name = "manual_trade_audits")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TradeEntity {
+public class ManualTradeAuditEntity {
 
     @Id
     private UUID id;
 
+    @Column(name = "trade_id", nullable = false)
+    private UUID tradeId;
+
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(nullable = false, length = 20)
-    private String ticker;
+    @Column(name = "action_type", nullable = false, length = 50)
+    private String actionType;
 
-    @Column(nullable = false, length = 10)
-    private String side;
-
-    @Column(name = "trade_date", nullable = false)
-    private LocalDate tradeDate;
-
-    @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal quantity;
-
-    @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal price;
-
-    @Column(nullable = false, length = 100)
-    private String broker;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "payload_json", nullable = false)
+    private String payloadJson;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

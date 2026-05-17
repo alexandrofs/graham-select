@@ -1,7 +1,7 @@
 ---
-stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets', 'step-03-generate-tests']
-lastStep: 'step-03-generate-tests'
-lastSaved: '2026-05-17T17:15:00Z'
+stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets', 'step-03-generate-tests', 'step-03c-aggregate', 'step-04-validate-and-summarize']
+lastStep: 'step-04-validate-and-summarize'
+lastSaved: '2026-05-17T17:30:00Z'
 inputDocuments:
   - docs/bmad/planning-artifacts/traceability-matrix.md
   - backend/api/src/main/resources/openapi.yaml
@@ -47,3 +47,16 @@ inputDocuments:
 - **Geração E2E**: ~5 min.
 - **Geração Backend**: ~4 min.
 - **Total de Testes Gerados**: 5 suítes de teste de alta prioridade.
+
+## Passo 4: Validação e Conclusão
+
+### Premissas e Riscos
+- **Premissa**: Assume-se que o ambiente de teste tem o Kafka e banco de dados H2 configurados via Spring Profiles.
+- **Premissa**: Os testes de Flutter assumem que o `mock_repository` está devidamente gerado via `build_runner`.
+- **Risco**: A complexidade de upload de arquivos reais em testes de integração Flutter pode exigir mocks de IO mais profundos dependendo da plataforma.
+- **Risco**: Race conditions em ambientes de CI compartilhados podem causar instabilidade nos testes de Kafka se os timeouts da Awaitility forem muito baixos.
+
+### Próximos Passos Recomendados
+1. **Execução Local**: Rodar `./mvnw test` e `flutter test integration_test/` para validar a suite completa.
+2. **Review de Testes**: Utilizar o workflow `test-review` para garantir que os testes seguem os padrões Murat de qualidade.
+3. **Traceability**: Gerar a matriz de rastreabilidade final com o workflow `trace` para confirmar cobertura de 100% dos critérios de aceitação.

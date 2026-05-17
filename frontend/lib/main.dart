@@ -37,6 +37,11 @@ import 'src/features/profile/presentation/providers/profile_provider.dart';
 import 'src/features/profile/presentation/pages/profile_page.dart';
 import 'src/features/profile/presentation/pages/investor_profile_page.dart';
 
+// Portfolio Feature Imports
+import 'src/features/portfolio/data/datasources/portfolio_remote_data_source.dart';
+import 'src/features/portfolio/data/repositories/portfolio_repository_impl.dart';
+import 'src/features/portfolio/presentation/providers/portfolio_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -97,6 +102,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
   late final ProfileRepository profileRepository;
 
+  late final PortfolioRemoteDataSource portfolioRemoteDataSource;
+  late final PortfolioRepositoryImpl portfolioRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -127,6 +135,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
     // Profile Feature DI
     profileRepository = ProfileRepository(effectiveApiClient);
+
+    // Portfolio Feature DI
+    portfolioRemoteDataSource = PortfolioRemoteDataSource(client: httpClient);
+    portfolioRepository = PortfolioRepositoryImpl(portfolioRemoteDataSource, effectiveAuthRepository);
 
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
@@ -186,6 +198,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
+        ChangeNotifierProvider(create: (_) => PortfolioProvider(portfolioRepository)),
       ],
       child: MaterialApp.router(
         title: 'Graham Select',
