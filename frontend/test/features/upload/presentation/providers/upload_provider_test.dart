@@ -4,6 +4,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:frontend/src/features/upload/domain/entities/app_file.dart';
 import 'package:frontend/src/features/upload/domain/usecases/upload_file_usecase.dart';
+import 'package:frontend/src/features/upload/domain/usecases/upload_b3_file_usecase.dart';
 import 'package:frontend/src/features/upload/domain/entities/upload_result.dart';
 import 'package:frontend/src/features/upload/domain/repositories/upload_repository.dart';
 import 'package:frontend/src/features/upload/presentation/providers/upload_provider.dart';
@@ -11,16 +12,21 @@ import 'package:frontend/src/features/upload/presentation/providers/upload_provi
 import 'upload_provider_test.mocks.dart';
 
 // Create a simpler test by mocking the repository instead of the use case
-@GenerateMocks([UploadRepository])
+@GenerateMocks([UploadRepository, UploadB3FileUseCase])
 void main() {
   late UploadProvider provider;
   late UploadFileUseCase useCase;
   late MockUploadRepository mockRepository;
+  late MockUploadB3FileUseCase mockUploadB3FileUseCase;
 
   setUp(() {
     mockRepository = MockUploadRepository();
     useCase = UploadFileUseCase(mockRepository);
-    provider = UploadProvider(useCase);
+    mockUploadB3FileUseCase = MockUploadB3FileUseCase();
+    provider = UploadProvider(
+      uploadFileUseCase: useCase,
+      uploadB3FileUseCase: mockUploadB3FileUseCase,
+    );
   });
 
   group('UploadProvider', () {

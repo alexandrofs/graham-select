@@ -88,6 +88,19 @@ class MockApiClient extends _i1.Mock implements _i3.ApiClient {
           as _i4.Future<_i2.Response<dynamic>>);
 
   @override
+  _i4.Future<_i2.Response<dynamic>> patch(String? path, {dynamic data}) =>
+      (super.noSuchMethod(
+            Invocation.method(#patch, [path], {#data: data}),
+            returnValue: _i4.Future<_i2.Response<dynamic>>.value(
+              _FakeResponse_1<dynamic>(
+                this,
+                Invocation.method(#patch, [path], {#data: data}),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.Response<dynamic>>);
+
+  @override
   _i4.Future<_i2.Response<dynamic>> put(String? path, {dynamic data}) =>
       (super.noSuchMethod(
             Invocation.method(#put, [path], {#data: data}),

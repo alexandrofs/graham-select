@@ -50,4 +50,17 @@ class MockUploadRepository extends _i1.Mock implements _i3.UploadRepository {
             ),
           )
           as _i4.Future<_i2.UploadResult>);
+
+  @override
+  _i4.Future<_i2.UploadResult> uploadB3File(_i5.AppFile? file) =>
+      (super.noSuchMethod(
+            Invocation.method(#uploadB3File, [file]),
+            returnValue: _i4.Future<_i2.UploadResult>.value(
+              _FakeUploadResult_0(
+                this,
+                Invocation.method(#uploadB3File, [file]),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.UploadResult>);
 }

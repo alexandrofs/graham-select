@@ -48,4 +48,17 @@ class MockProfileRepository extends _i1.Mock implements _i3.ProfileRepository {
             ),
           )
           as _i4.Future<_i2.UserProfile>);
+
+  @override
+  _i4.Future<_i2.UserProfile> updateInvestorProfile(String? profile) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateInvestorProfile, [profile]),
+            returnValue: _i4.Future<_i2.UserProfile>.value(
+              _FakeUserProfile_0(
+                this,
+                Invocation.method(#updateInvestorProfile, [profile]),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.UserProfile>);
 }
