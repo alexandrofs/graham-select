@@ -1,43 +1,49 @@
 ---
-stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets', 'step-03-generate-tests', 'step-03c-aggregate', 'step-04-validate-and-summarize']
-lastStep: 'step-04-validate-and-summarize'
-lastSaved: '2026-05-17'
+stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets', 'step-03-generate-tests']
+lastStep: 'step-03-generate-tests'
+lastSaved: '2026-05-17T17:15:00Z'
 inputDocuments:
-  - docs/bmad/implementation-artifacts/2-2-async-kafka-splitter-processing.md
-  - docs/bmad/test-artifacts/test-design/graham-select-handoff.md
-  - _bmad/tea/config.yaml
-  - _bmad/tea/testarch/tea-index.csv
+  - docs/bmad/planning-artifacts/traceability-matrix.md
+  - backend/api/src/main/resources/openapi.yaml
+  - docs/bmad/implementation-artifacts/
 ---
 
-# Automation Summary: Graham Select - Story 2.2
+# Automação de Testes - Graham Select
 
-## Executive Summary
-O workflow de automação de testes para a Story 2.2 foi concluído com sucesso. O foco principal foi garantir a resiliência do processamento assíncrono (Splitter Pattern) e a correta ingestão de dados da B3 via Kafka.
+## Passo 3: Test Generation Results
 
-## 1. Coverage Plan & Targets
+### Resumo da Execução (Adaptive Mode)
+- **Modo Utilizado**: `subagents` (Parallel Execution).
+- **Stack**: `fullstack`.
+- **Status**: Sucesso ✅.
 
-| Feature | Level | Priority | Status |
-|---------|-------|----------|--------|
-| Kafka Async Splitter Flow | Integration (API) | P0 | ✅ Generated |
-| B3 Excel Parser Robustness | Unit | P1 | ✅ Generated |
-| UI Polling Status | Component/Integration | P2 | ✅ Reviewed |
+### Testes de API (Subagente API)
+- **Arquivo**: `backend/api/src/test/java/afsdigital/grahamselect/api/ApiAutomationIT.java`
+- **Cobertura**:
+  - `GET /api/v1/ranked-companies`: Validação de restrição de Tier (FREE: 403, PREMIUM: 200).
+  - `POST /api/v1/upload-financial-data`: Validação de multipart upload e tratamento de erros.
+  - **Diferencial**: Lógica de polling implementada para validar processamento assíncrono.
 
-## 2. Implementation Details
+### Testes E2E Flutter (Subagente E2E)
+- **Arquivos**:
+  - `frontend/integration_test/upload_flow_test.dart`
+  - `frontend/integration_test/profile_e2e_test.dart`
+- **Cobertura**:
+  - Fluxo completo de Upload B3 -> Processamento -> Verificação no Dashboard.
+  - Onboarding de Perfil do Investidor (Suitability).
 
-### Backend (Java/Spring Boot)
-- **`FastExcelB3TradeRowParserTest.java`**: Suíte de testes unitários validando o parser streaming. Cobre casos de sucesso, datas brasileiras, valores numéricos e falhas isoladas de linha (isolamento de erros para DLQ).
-- **`KafkaB3WorkerIT.java`**: Teste de integração real utilizando `@EmbeddedKafka`. Valida que o envio de um evento de upload dispara o processamento, fragmenta os dados em novos eventos e atualiza o status no banco de dados.
+### Testes de Backend/Kafka (Subagente Backend)
+- **Arquivos**:
+  - `backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractedConsumerIT.java`
+  - `backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractionDlqIT.java`
+- **Cobertura**:
+  - **Race Condition (P0)**: Validação empírica de mensagens simultâneas para o mesmo trade.
+  - **DLQ Flow (P1)**: Garantia de que falhas de extração são enviadas para a fila de erro.
+- **Fixtures Utilizadas**: `EmbeddedKafkaBroker`, `Awaitility`.
 
-### Frontend (Flutter)
-- **`upload_flow_test.dart`**: Revisão e ajuste do teste de integração para validar a presença dos novos componentes de progresso e feedback de sucesso/erro.
-
-## 3. Assumptions & Risks
-- **Assunção**: O ambiente de teste possui memória suficiente para o `EmbeddedKafka`.
-- **Risco**: Mudanças no formato da planilha B3 podem exigir atualizações no parser e nos testes unitários (mitigado pelo uso de headers normalizados).
-
-## 4. Next Steps
-- **`trace`**: Executar o workflow de rastreabilidade para atualizar a matriz de cobertura com os novos testes automatizados.
-- **`test-review`**: Realizar uma revisão de qualidade dos testes gerados para garantir manutenibilidade a longo prazo.
-
----
-*Gerado automaticamente pelo Test Architect Agent (TEA) em 2026-05-17.*
+### Métricas de Performance
+- **Modo**: Subagent (Parallel).
+- **Geração API**: ~3 min.
+- **Geração E2E**: ~5 min.
+- **Geração Backend**: ~4 min.
+- **Total de Testes Gerados**: 5 suítes de teste de alta prioridade.

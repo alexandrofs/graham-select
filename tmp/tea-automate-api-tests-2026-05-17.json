@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "subagent": "api",
+  "tests": [
+    {
+      "name": "RankedCompaniesTests.shouldReturn401WhenNoToken",
+      "target": "/api/v1/ranked-companies",
+      "status": "generated",
+      "validation": "401 Unauthorized"
+    },
+    {
+      "name": "RankedCompaniesTests.shouldReturn403ForFreeUsers",
+      "target": "/api/v1/ranked-companies",
+      "status": "generated",
+      "validation": "403 Forbidden + RFC 7807"
+    },
+    {
+      "name": "RankedCompaniesTests.shouldReturn200ForPremiumUsers",
+      "target": "/api/v1/ranked-companies",
+      "status": "generated",
+      "validation": "200 OK + Payload validation"
+    },
+    {
+      "name": "UploadFinancialDataTests.shouldReturn401WhenNoToken",
+      "target": "/api/v1/upload-financial-data",
+      "status": "generated",
+      "validation": "401 Unauthorized"
+    },
+    {
+      "name": "UploadFinancialDataTests.shouldReturn200ForValidUpload",
+      "target": "/api/v1/upload-financial-data",
+      "status": "generated",
+      "validation": "200 OK + Polling simulation"
+    }
+  ],
+  "summary": "Generated Java JUnit 5 integration tests for Graham Select API. Covered P0 targets /ranked-companies and /upload-financial-data with security validations and polling patterns inspired by Playwright Utils."
+}
