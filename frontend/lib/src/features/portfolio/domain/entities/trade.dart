@@ -13,6 +13,7 @@ class Trade {
     required this.id,
     required this.userId,
     required this.ticker,
+    required this.side,
     required this.tradeDate,
     required this.quantity,
     required this.price,
