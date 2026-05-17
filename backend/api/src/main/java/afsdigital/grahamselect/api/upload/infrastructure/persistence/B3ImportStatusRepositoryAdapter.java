@@ -31,6 +31,7 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
                 .processedRows(0)
                 .successfulRows(0)
                 .failedRows(0)
+                .duplicatedRows(0)
                 .message("Arquivo recebido e aguardando processamento.")
                 .createdAt(now)
                 .updatedAt(now)
@@ -51,6 +52,7 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
             entity.setProcessedRows(0);
             entity.setSuccessfulRows(0);
             entity.setFailedRows(0);
+            entity.setDuplicatedRows(0);
             entity.setMessage("Processando arquivo em segundo plano.");
         }
         
@@ -74,6 +76,16 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
     }
 
     @Override
+    public void addDuplicate(String correlationId, String userId, int addedDuplicate) {
+        B3ImportStatusEntity entity = getByCorrelationIdAndUserId(correlationId, userId);
+        entity.setDuplicatedRows(entity.getDuplicatedRows() + addedDuplicate);
+        entity.setProcessedRows(entity.getProcessedRows() + addedDuplicate);
+        entity.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        entity.setMessage(buildProgressMessage(entity));
+        repository.save(entity);
+    }
+
+    @Override
     public B3ImportStatus markCompleted(String correlationId, String userId) {
         B3ImportStatusEntity entity = getByCorrelationIdAndUserId(correlationId, userId);
         entity.setStatus(entity.getFailedRows() > 0
@@ -83,12 +95,14 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
         entity.setUpdatedAt(entity.getCompletedAt());
         entity.setMessage(entity.getFailedRows() > 0
                 ? String.format(
-                "Processamento concluído com alertas: %d sucesso(s), %d falha(s).",
+                "Processamento concluído com alertas: %d sucesso(s), %d duplicada(s), %d falha(s).",
                 entity.getSuccessfulRows(),
+                entity.getDuplicatedRows(),
                 entity.getFailedRows())
                 : String.format(
-                "Processamento concluído com sucesso: %d linha(s) processada(s).",
-                entity.getSuccessfulRows()));
+                "Processamento concluído com sucesso: %d novas, %d duplicadas.",
+                entity.getSuccessfulRows(),
+                entity.getDuplicatedRows()));
         return toDomain(repository.save(entity));
     }
 
@@ -119,9 +133,10 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
 
     private String buildProgressMessage(B3ImportStatusEntity entity) {
         return String.format(
-                "Processadas %d linha(s): %d sucesso(s), %d falha(s).",
+                "Processadas %d linha(s): %d sucesso(s), %d duplicada(s), %d falha(s).",
                 entity.getProcessedRows(),
                 entity.getSuccessfulRows(),
+                entity.getDuplicatedRows(),
                 entity.getFailedRows());
     }
 
@@ -134,6 +149,7 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
                 entity.getProcessedRows(),
                 entity.getSuccessfulRows(),
                 entity.getFailedRows(),
+                entity.getDuplicatedRows(),
                 entity.getMessage(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),

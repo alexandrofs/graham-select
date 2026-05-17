@@ -67,6 +67,7 @@ public class B3UploadController {
                         status.processedRows(),
                         status.successfulRows(),
                         status.failedRows(),
+                        status.duplicatedRows(),
                         status.message()
                 ))))
                 .orElseGet(() -> ResponseEntity.notFound().build());

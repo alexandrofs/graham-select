@@ -10,6 +10,7 @@ public record B3ImportStatus(
         int processedRows,
         int successfulRows,
         int failedRows,
+        int duplicatedRows,
         String message,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,

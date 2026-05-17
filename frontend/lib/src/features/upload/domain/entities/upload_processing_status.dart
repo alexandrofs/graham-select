@@ -5,6 +5,7 @@ class UploadProcessingStatus {
   final int processedRows;
   final int successfulRows;
   final int failedRows;
+  final int duplicatedRows;
   final String message;
 
   const UploadProcessingStatus({
@@ -14,6 +15,7 @@ class UploadProcessingStatus {
     required this.processedRows,
     required this.successfulRows,
     required this.failedRows,
+    required this.duplicatedRows,
     required this.message,
   });
 
