@@ -18,12 +18,21 @@ public class LocalB3FileStorage implements B3FileStoragePort {
     private final Path storagePath;
 
     public LocalB3FileStorage(@Value("${app.upload.storage-path}") String storagePath) {
-        this.storagePath = Paths.get(storagePath);
+        Path path = Paths.get(storagePath);
+        Path initializedPath;
         try {
-            Files.createDirectories(this.storagePath);
+            Files.createDirectories(path);
+            initializedPath = path;
         } catch (IOException e) {
-            throw new RuntimeException("Could not create storage directory", e);
+            Path tempPath = Paths.get(System.getProperty("java.io.tmpdir"), "graham-select-uploads");
+            try {
+                Files.createDirectories(tempPath);
+                initializedPath = tempPath;
+            } catch (IOException ex) {
+                throw new RuntimeException("Could not create storage directory or fallback directory", ex);
+            }
         }
+        this.storagePath = initializedPath;
     }
 
     @Override
