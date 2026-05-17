@@ -15,6 +15,7 @@ public interface TradePort {
             LocalDate tradeDate,
             BigDecimal quantity,
             BigDecimal price,
-            String broker
+            String broker,
+            String side
     );
 }

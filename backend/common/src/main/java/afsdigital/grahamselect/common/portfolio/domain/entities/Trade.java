@@ -14,6 +14,7 @@ public class Trade {
     private UUID id;
     private String userId;
     private String ticker;
+    private String side; // COMPRA, VENDA
     private LocalDate tradeDate;
     private BigDecimal quantity;
     private BigDecimal price;

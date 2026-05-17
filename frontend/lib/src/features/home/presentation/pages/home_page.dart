@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
+import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -53,6 +54,19 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => const ManualOperationEntry(),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Nova Operação'),
+        backgroundColor: AppTheme.accentColor,
+      ),
       body: Column(
         children: [
           _LandingMenu(

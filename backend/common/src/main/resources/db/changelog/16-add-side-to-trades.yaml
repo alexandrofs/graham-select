@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 16-add-side-to-trades
+      author: gemini-cli
+      changes:
+        - addColumn:
+            tableName: trades
+            columns:
+              - column:
+                  name: side
+                  type: VARCHAR(10)
+                  defaultValue: "COMPRA"
+                  constraints:
+                    nullable: false
+        - dropUniqueConstraint:
+            constraintName: uq_trade_deduplication
+            tableName: trades
+        - addUniqueConstraint:
+            columnNames: user_id, ticker, trade_date, quantity, price, broker, side
+            constraintName: uq_trade_deduplication
+            tableName: trades

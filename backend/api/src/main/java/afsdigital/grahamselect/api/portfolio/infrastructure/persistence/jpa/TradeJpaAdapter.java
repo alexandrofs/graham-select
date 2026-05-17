@@ -22,6 +22,7 @@ public class TradeJpaAdapter implements TradePort {
                 .id(trade.getId())
                 .userId(trade.getUserId())
                 .ticker(trade.getTicker())
+                .side(trade.getSide())
                 .tradeDate(trade.getTradeDate())
                 .quantity(trade.getQuantity())
                 .price(trade.getPrice())
@@ -35,6 +36,7 @@ public class TradeJpaAdapter implements TradePort {
                 .id(saved.getId())
                 .userId(saved.getUserId())
                 .ticker(saved.getTicker())
+                .side(saved.getSide())
                 .tradeDate(saved.getTradeDate())
                 .quantity(saved.getQuantity())
                 .price(saved.getPrice())
@@ -50,10 +52,11 @@ public class TradeJpaAdapter implements TradePort {
             LocalDate tradeDate,
             BigDecimal quantity,
             BigDecimal price,
-            String broker
+            String broker,
+            String side
     ) {
-        return repository.existsByUserIdAndTickerAndTradeDateAndQuantityAndPriceAndBroker(
-                userId, ticker, tradeDate, quantity, price, broker
+        return repository.existsByUserIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+                userId, ticker, tradeDate, quantity, price, broker, side
         );
     }
 }

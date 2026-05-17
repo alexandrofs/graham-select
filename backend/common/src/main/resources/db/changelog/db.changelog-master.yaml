@@ -27,3 +27,7 @@ databaseChangeLog:
       file: db/changelog/13-create-trades-table.yaml
   - include:
       file: db/changelog/14-add-duplicated-rows-to-import-status.yaml
+  - include:
+      file: db/changelog/15-create-manual-trade-audits-table.yaml
+  - include:
+      file: db/changelog/16-add-side-to-trades.yaml

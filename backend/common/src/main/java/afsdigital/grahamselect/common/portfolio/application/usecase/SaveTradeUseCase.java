@@ -15,7 +15,8 @@ public class SaveTradeUseCase {
                 trade.getTradeDate(),
                 trade.getQuantity(),
                 trade.getPrice(),
-                trade.getBroker()
+                trade.getBroker(),
+                trade.getSide()
         );
 
         if (alreadyExists) {
