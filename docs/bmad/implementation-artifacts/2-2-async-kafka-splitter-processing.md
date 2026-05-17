@@ -66,12 +66,31 @@ Gemini 2.0 Flash
 
 ### Completion Notes
 - Worker assíncrono implementado com consumer Kafka para `file-uploaded`, parser streaming com FastExcel e publicação por linha em `trade-extracted`.
+- Proteção contra Path Traversal implementada no consumer para validar caminhos de arquivos.
 - Falhas por linha agora seguem para `trade-extracted-dlq` com payload original, motivo do erro e rastreabilidade por `correlationId`.
+- Idempotência no processamento garantida: retentativas do Kafka não resetam o progresso já persistido.
 - Status da importação foi persistido em banco com migration Liquibase, atualização incremental de progresso e endpoint HTTP para polling autenticado.
 - Upload B3 agora retorna `correlationId`, e o frontend acompanha o processamento em tempo real com polling e mensagens progressivas até concluir.
 - Testes validados no `common`, compilação do backend `api` e testes focados do frontend de upload.
 
 ### File List
+- `backend/api/pom.xml`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaB3FileUploadedConsumer.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaB3UploadEventPublisher.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractionEventPublisher.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/parser/FastExcelB3TradeRowParser.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/B3ImportStatusRepositoryAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/jpa/entities/B3ImportStatusEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/jpa/repository/B3ImportStatusJpaRepository.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/spring/B3ProcessingConfiguration.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3ImportStatusEnvelope.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3ImportStatusView.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3UploadAcceptedResponse.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3UploadController.java`
+- `backend/api/src/main/resources/application-local.yml`
+- `backend/api/src/main/resources/application.yml`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/upload/web/B3UploadControllerIT.java`
+- `backend/api/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker`
 - `backend/common/src/main/java/afsdigital/grahamselect/common/domain/entities/TopicConstants.java`
 - `backend/common/src/main/java/afsdigital/grahamselect/common/upload/application/repository/B3ImportStatusPort.java`
 - `backend/common/src/main/java/afsdigital/grahamselect/common/upload/application/repository/TradeExtractionEventPort.java`
@@ -89,22 +108,6 @@ Gemini 2.0 Flash
 - `backend/common/src/test/java/afsdigital/grahamselect/common/upload/application/usecase/ProcessB3FileUseCaseTest.java`
 - `backend/common/src/test/java/afsdigital/grahamselect/common/upload/application/usecase/UploadB3FileUseCaseTest.java`
 - `backend/common/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaB3FileUploadedConsumer.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractionEventPublisher.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/parser/FastExcelB3TradeRowParser.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/B3ImportStatusRepositoryAdapter.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/jpa/entities/B3ImportStatusEntity.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/jpa/repository/B3ImportStatusJpaRepository.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/spring/B3ProcessingConfiguration.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3ImportStatusEnvelope.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3ImportStatusView.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3UploadAcceptedResponse.java`
-- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3UploadController.java`
-- `backend/api/src/main/resources/application-local.yml`
-- `backend/api/src/main/resources/application.yml`
-- `backend/api/src/test/java/afsdigital/grahamselect/api/upload/web/B3UploadControllerIT.java`
-- `backend/api/src/test/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/BaseRepositoryIT.java`
-- `backend/api/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker`
 - `frontend/lib/main.dart`
 - `frontend/lib/src/features/upload/data/datasources/upload_remote_data_source.dart`
 - `frontend/lib/src/features/upload/data/models/upload_response_model.dart`
@@ -122,4 +125,5 @@ Gemini 2.0 Flash
 
 ## Change Log
 - 2026-05-17: Implementado worker assíncrono de split do arquivo B3 com eventos Kafka por linha, DLQ por falha isolada, persistência de status da importação e polling de progresso no frontend.
-- 2026-05-17: Validada a implementação via testes automatizados. Corrigido `B3UploadControllerIT.java` para habilitar Liquibase nos testes e ajustar asserção de chave Kafka (JsonSerializer context).
+- 2026-05-17: Aplicadas correções do Code Review: validação de Path Traversal, idempotência no processamento, refatoração do parser com Enums e melhoria na serialização Kafka.
+- 2026-05-17: Validada a implementação via testes automatizados.
