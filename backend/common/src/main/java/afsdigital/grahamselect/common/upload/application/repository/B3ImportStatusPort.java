@@ -12,6 +12,8 @@ public interface B3ImportStatusPort {
 
     void addProgress(String correlationId, String userId, int addedSuccess, int addedFailure, String lastFailureReason);
 
+    void addDuplicate(String correlationId, String userId, int addedDuplicate);
+
     B3ImportStatus markCompleted(String correlationId, String userId);
 
     B3ImportStatus markFailed(String correlationId, String userId, String failureReason);

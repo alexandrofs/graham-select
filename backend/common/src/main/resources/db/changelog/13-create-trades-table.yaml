@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: 13-create-trades-table
+      author: gemini-cli
+      changes:
+        - createTable:
+            tableName: trades
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ticker
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trade_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: DECIMAL(19,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(19,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: broker
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            columnNames: user_id, ticker, trade_date, quantity, price, broker
+            constraintName: uq_trade_deduplication
+            tableName: trades
+        - createIndex:
+            tableName: trades
+            indexName: idx_trades_user_id_ticker
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: ticker

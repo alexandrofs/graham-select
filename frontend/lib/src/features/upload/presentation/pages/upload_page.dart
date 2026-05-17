@@ -108,7 +108,8 @@ class UploadPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Linhas processadas: ${provider.processingStatus!.processedRows} | '
-                          'Sucesso: ${provider.processingStatus!.successfulRows} | '
+                          'Novas: ${provider.processingStatus!.successfulRows} | '
+                          'Duplicadas: ${provider.processingStatus!.duplicatedRows} | '
                           'Falhas: ${provider.processingStatus!.failedRows}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppTheme.textColor.withValues(alpha: 0.75),

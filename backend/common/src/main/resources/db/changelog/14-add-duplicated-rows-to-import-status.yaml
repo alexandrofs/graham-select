@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 14-add-duplicated-rows-to-import-status
+      author: gemini-cli
+      changes:
+        - addColumn:
+            tableName: b3_import_status
+            columns:
+              - column:
+                  name: duplicated_rows
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false

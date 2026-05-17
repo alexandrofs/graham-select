@@ -1,6 +1,6 @@
 # Story 2.3: Deduplicação de Operações
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,15 +25,15 @@ So that meu saldo e preço médio não fiquem duplicados e incorretos.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Adicionar restrições de unicidade ou lógica de verificação
-  - [ ] Subtask 1.1: Criar migration Liquibase adicionando indexação para busca rápida ou `UNIQUE` constraint usando (`user_id`, `ticker`, `trade_date`, `quantity`, `price`).
-- [ ] Task 2: Lógica de Deduplicação no Caso de Uso
-  - [ ] Subtask 2.1: Modificar o `SaveTradeUseCase` para verificar duplicatas antes da inserção.
-  - [ ] Subtask 2.2: Ajustar Consumer do `trade-extracted` para contabilizar duplicadas vs sucesso.
-- [ ] Task 3: Informar Total de Novas vs Duplicadas
-  - [ ] Subtask 3.1: Emitir evento ou atualizar status da importação contendo contagem.
-- [ ] Task 4: UI/Frontend
-  - [ ] Subtask 4.1: Mostrar no dashboard/histórico o sumário da importação (X novas, Y ignoradas).
+- [x] Task 1: Adicionar restrições de unicidade ou lógica de verificação
+  - [x] Subtask 1.1: Criar migration Liquibase adicionando indexação para busca rápida ou `UNIQUE` constraint usando (`user_id`, `ticker`, `trade_date`, `quantity`, `price`).
+- [x] Task 2: Lógica de Deduplicação no Caso de Uso
+  - [x] Subtask 2.1: Modificar o `SaveTradeUseCase` para verificar duplicatas antes da inserção.
+  - [x] Subtask 2.2: Ajustar Consumer do `trade-extracted` para contabilizar duplicadas vs sucesso.
+- [x] Task 3: Informar Total de Novas vs Duplicadas
+  - [x] Subtask 3.1: Emitir evento ou atualizar status da importação contendo contagem.
+- [x] Task 4: UI/Frontend
+  - [x] Subtask 4.1: Mostrar no dashboard/histórico o sumário da importação (X novas, Y ignoradas).
 
 ## Dev Notes
 
@@ -60,4 +60,25 @@ So that meu saldo e preço médio não fiquem duplicados e incorretos.
 Gemini 2.0 Flash
 
 ### File List
-(Será preenchido pelo agente dev-story)
+- `backend/common/src/main/resources/db/changelog/13-create-trades-table.yaml`
+- `backend/common/src/main/resources/db/changelog/14-add-duplicated-rows-to-import-status.yaml`
+- `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/domain/entities/Trade.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/repository/TradePort.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/SaveTradeUseCase.java`
+- `backend/common/src/test/java/afsdigital/grahamselect/common/portfolio/application/usecase/SaveTradeUseCaseTest.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/upload/domain/model/B3ImportStatus.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/upload/application/repository/B3ImportStatusPort.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/jpa/entities/TradeEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/jpa/repositories/JpaTradeRepository.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/jpa/TradeJpaAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractedConsumer.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/B3ImportStatusRepositoryAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/persistence/jpa/entities/B3ImportStatusEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3ImportStatusView.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/web/B3UploadController.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/config/PortfolioConfig.java`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/TradeDeduplicationIT.java`
+- `frontend/lib/src/features/upload/domain/entities/upload_processing_status.dart`
+- `frontend/lib/src/features/upload/data/models/upload_status_response_model.dart`
+- `frontend/lib/src/features/upload/presentation/pages/upload_page.dart`

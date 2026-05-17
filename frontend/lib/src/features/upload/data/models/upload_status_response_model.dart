@@ -7,6 +7,7 @@ class UploadStatusResponseModel {
   final int processedRows;
   final int successfulRows;
   final int failedRows;
+  final int duplicatedRows;
   final String message;
 
   const UploadStatusResponseModel({
@@ -16,6 +17,7 @@ class UploadStatusResponseModel {
     required this.processedRows,
     required this.successfulRows,
     required this.failedRows,
+    required this.duplicatedRows,
     required this.message,
   });
 
@@ -28,6 +30,7 @@ class UploadStatusResponseModel {
       processedRows: (data['processedRows'] as num?)?.toInt() ?? 0,
       successfulRows: (data['successfulRows'] as num?)?.toInt() ?? 0,
       failedRows: (data['failedRows'] as num?)?.toInt() ?? 0,
+      duplicatedRows: (data['duplicatedRows'] as num?)?.toInt() ?? 0,
       message: data['message'] as String? ?? 'Aguardando processamento.',
     );
   }
@@ -40,6 +43,7 @@ class UploadStatusResponseModel {
       processedRows: processedRows,
       successfulRows: successfulRows,
       failedRows: failedRows,
+      duplicatedRows: duplicatedRows,
       message: message,
     );
   }

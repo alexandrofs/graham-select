@@ -50,6 +50,9 @@ public class B3ImportStatusEntity {
     @Column(name = "failed_rows", nullable = false)
     private int failedRows;
 
+    @Column(name = "duplicated_rows", nullable = false)
+    private int duplicatedRows;
+
     @Column(name = "status_message")
     private String message;
 

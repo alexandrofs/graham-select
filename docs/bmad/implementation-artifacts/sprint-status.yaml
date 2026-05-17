@@ -52,7 +52,7 @@ development_status:
   epic-2: in-progress
   2-1-b3-upload-excel-ingestion: done
   2-2-async-kafka-splitter-processing: done
-  2-3-smart-trade-deduplication: ready-for-dev
+  2-3-smart-trade-deduplication: done
   2-4-manual-operation-fallback-crud: backlog
   2-5-ingestion-audit-history: backlog
   epic-2-retrospective: optional

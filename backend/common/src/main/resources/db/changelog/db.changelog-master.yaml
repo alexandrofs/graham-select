@@ -23,3 +23,7 @@ databaseChangeLog:
       file: db/changelog/11-add-user-investor-profile.yaml
   - include:
       file: db/changelog/12-create-b3-import-status-table.yaml
+  - include:
+      file: db/changelog/13-create-trades-table.yaml
+  - include:
+      file: db/changelog/14-add-duplicated-rows-to-import-status.yaml
