@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import afsdigital.grahamselect.common.upload.application.repository.B3FileStoragePort;
 import afsdigital.grahamselect.common.upload.application.repository.B3UploadEventPort;
+import afsdigital.grahamselect.common.upload.application.repository.B3ImportStatusPort;
 
 @SpringBootTest
 @EmbeddedKafka(topics = {
@@ -39,6 +40,9 @@ public class ValuationConsumerServiceContextTest {
 
     @MockBean
     private B3UploadEventPort b3UploadEventPort;
+
+    @MockBean
+    private B3ImportStatusPort b3ImportStatusPort;
 
     @Test
     public void contextLoadsSuccessfully() {
