@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend/src/features/upload/presentation/pages/upload_page.dart';
 import 'package:frontend/src/features/upload/presentation/providers/upload_provider.dart';
 import 'package:mockito/mockito.dart';
+import 'package:frontend/src/features/upload/domain/usecases/get_b3_upload_status_usecase.dart';
 import 'package:frontend/src/features/upload/domain/usecases/upload_file_usecase.dart';
 import 'package:frontend/src/features/upload/domain/usecases/upload_b3_file_usecase.dart';
 import 'package:frontend/src/features/upload/domain/repositories/upload_repository.dart';
@@ -13,6 +14,7 @@ class MockUploadRepository extends Mock implements UploadRepository {}
 void main() {
   late UploadFileUseCase uploadFileUseCase;
   late UploadB3FileUseCase uploadB3FileUseCase;
+  late GetB3UploadStatusUseCase getB3UploadStatusUseCase;
   late UploadProvider uploadProvider;
   late MockUploadRepository mockRepository;
 
@@ -20,9 +22,11 @@ void main() {
     mockRepository = MockUploadRepository();
     uploadFileUseCase = UploadFileUseCase(mockRepository);
     uploadB3FileUseCase = UploadB3FileUseCase(mockRepository);
+    getB3UploadStatusUseCase = GetB3UploadStatusUseCase(mockRepository);
     uploadProvider = UploadProvider(
       uploadFileUseCase: uploadFileUseCase,
       uploadB3FileUseCase: uploadB3FileUseCase,
+      getB3UploadStatusUseCase: getB3UploadStatusUseCase,
     );
   });
 

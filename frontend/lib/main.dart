@@ -10,6 +10,7 @@ import 'src/core/api/api_client.dart';
 import 'src/features/home/presentation/pages/home_page.dart';
 import 'src/features/upload/presentation/pages/upload_page.dart';
 import 'src/features/upload/presentation/providers/upload_provider.dart';
+import 'src/features/upload/domain/usecases/get_b3_upload_status_usecase.dart';
 import 'src/features/upload/domain/usecases/upload_file_usecase.dart';
 import 'src/features/upload/domain/usecases/upload_b3_file_usecase.dart';
 import 'src/features/upload/data/repositories/upload_repository_impl.dart';
@@ -88,6 +89,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final UploadRepositoryImpl uploadRepository;
   late final UploadFileUseCase uploadUseCase;
   late final UploadB3FileUseCase uploadB3UseCase;
+  late final GetB3UploadStatusUseCase getB3UploadStatusUseCase;
 
   late final RankingRemoteDataSource rankingRemoteDataSource;
   late final RankingRepositoryImpl rankingRepository;
@@ -116,6 +118,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
     uploadUseCase = UploadFileUseCase(uploadRepository);
     uploadB3UseCase = UploadB3FileUseCase(uploadRepository);
+    getB3UploadStatusUseCase = GetB3UploadStatusUseCase(uploadRepository);
 
     // Ranking Feature DI
     rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
@@ -178,6 +181,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
           create: (_) => UploadProvider(
             uploadFileUseCase: uploadUseCase,
             uploadB3FileUseCase: uploadB3UseCase,
+            getB3UploadStatusUseCase: getB3UploadStatusUseCase,
           ),
         ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),

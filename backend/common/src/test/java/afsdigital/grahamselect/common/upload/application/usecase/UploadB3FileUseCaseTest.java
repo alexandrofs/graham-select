@@ -1,7 +1,9 @@
 package afsdigital.grahamselect.common.upload.application.usecase;
 
 import afsdigital.grahamselect.common.upload.application.repository.B3FileStoragePort;
+import afsdigital.grahamselect.common.upload.application.repository.B3ImportStatusPort;
 import afsdigital.grahamselect.common.upload.application.repository.B3UploadEventPort;
+import afsdigital.grahamselect.common.upload.domain.events.FileUploadedEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +25,9 @@ public class UploadB3FileUseCaseTest {
     @Mock
     private B3UploadEventPort eventPort;
 
+    @Mock
+    private B3ImportStatusPort importStatusPort;
+
     @InjectMocks
     private UploadB3FileUseCase useCase;
 
@@ -35,14 +40,17 @@ public class UploadB3FileUseCaseTest {
 
         when(storagePort.save(any(), eq(filename), eq(userId))).thenReturn(savedPath);
 
-        useCase.execute(fileStream, filename, userId);
+        FileUploadedEvent result = useCase.execute(fileStream, filename, userId);
 
         verify(storagePort).save(fileStream, filename, userId);
+        verify(importStatusPort).createPending(result.correlationId(), userId, filename);
         verify(eventPort).publish(argThat(event -> 
             event.userId().equals(userId) && 
             event.fileName().equals(filename) && 
             event.storagePath().equals(savedPath) &&
-            event.correlationId() != null
+            event.correlationId() != null &&
+            event.eventId() != null &&
+            "v1".equals(event.version())
         ));
     }
 }

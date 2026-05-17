@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:frontend/src/features/upload/domain/entities/app_file.dart';
+import 'package:frontend/src/features/upload/domain/usecases/get_b3_upload_status_usecase.dart';
 import 'package:frontend/src/features/upload/domain/usecases/upload_file_usecase.dart';
 import 'package:frontend/src/features/upload/domain/usecases/upload_b3_file_usecase.dart';
 import 'package:frontend/src/features/upload/domain/entities/upload_result.dart';
@@ -16,16 +17,19 @@ import 'upload_provider_test.mocks.dart';
 void main() {
   late UploadProvider provider;
   late UploadFileUseCase useCase;
+  late GetB3UploadStatusUseCase getB3UploadStatusUseCase;
   late MockUploadRepository mockRepository;
   late MockUploadB3FileUseCase mockUploadB3FileUseCase;
 
   setUp(() {
     mockRepository = MockUploadRepository();
     useCase = UploadFileUseCase(mockRepository);
+    getB3UploadStatusUseCase = GetB3UploadStatusUseCase(mockRepository);
     mockUploadB3FileUseCase = MockUploadB3FileUseCase();
     provider = UploadProvider(
       uploadFileUseCase: useCase,
       uploadB3FileUseCase: mockUploadB3FileUseCase,
+      getB3UploadStatusUseCase: getB3UploadStatusUseCase,
     );
   });
 

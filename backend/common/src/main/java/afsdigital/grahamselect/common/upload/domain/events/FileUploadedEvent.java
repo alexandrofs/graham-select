@@ -5,9 +5,11 @@ import java.time.OffsetDateTime;
 
 @Builder
 public record FileUploadedEvent(
+    String eventId,
     String userId,
     String fileName,
     String storagePath,
     String correlationId,
+    String version,
     OffsetDateTime timestamp
 ) {}

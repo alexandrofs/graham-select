@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/upload_provider.dart';
 import '../widgets/b3_upload_zone.dart';
+import '../widgets/upload_progress_widget.dart';
 
 class UploadPage extends StatelessWidget {
   const UploadPage({super.key});
@@ -67,6 +68,11 @@ class UploadPage extends StatelessWidget {
                         child: const Text('Confirmar e Enviar Planilha'),
                       ),
 
+                    if (provider.state == UploadState.uploading) ...[
+                      const SizedBox(height: 24),
+                      UploadProgressWidget(message: provider.progressMessage),
+                    ],
+
                     // Success Message
                     if (provider.state == UploadState.success) ...[
                       const SizedBox(height: 32),
@@ -98,6 +104,17 @@ class UploadPage extends StatelessWidget {
                           ],
                         ),
                       ),
+                      if (provider.processingStatus != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          'Linhas processadas: ${provider.processingStatus!.processedRows} | '
+                          'Sucesso: ${provider.processingStatus!.successfulRows} | '
+                          'Falhas: ${provider.processingStatus!.failedRows}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textColor.withValues(alpha: 0.75),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       OutlinedButton(
                         onPressed: () => provider.reset(),

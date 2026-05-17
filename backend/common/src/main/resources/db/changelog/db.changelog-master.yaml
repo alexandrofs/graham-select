@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/10-fix-deletion-request-unique-constraint.yaml
   - include:
       file: db/changelog/11-add-user-investor-profile.yaml
+  - include:
+      file: db/changelog/12-create-b3-import-status-table.yaml
