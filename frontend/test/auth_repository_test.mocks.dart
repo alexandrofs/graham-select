@@ -195,6 +195,25 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
           as _i9.Future<_i2.Response<dynamic>>);
 
   @override
+  _i9.Future<_i2.Response<dynamic>> patch(String? path, {dynamic data}) =>
+      (super.noSuchMethod(
+            Invocation.method(#patch, [path], {#data: data}),
+            returnValue: _i9.Future<_i2.Response<dynamic>>.value(
+              _FakeResponse_1<dynamic>(
+                this,
+                Invocation.method(#patch, [path], {#data: data}),
+              ),
+            ),
+            returnValueForMissingStub: _i9.Future<_i2.Response<dynamic>>.value(
+              _FakeResponse_1<dynamic>(
+                this,
+                Invocation.method(#patch, [path], {#data: data}),
+              ),
+            ),
+          )
+          as _i9.Future<_i2.Response<dynamic>>);
+
+  @override
   _i9.Future<_i2.Response<dynamic>> put(String? path, {dynamic data}) =>
       (super.noSuchMethod(
             Invocation.method(#put, [path], {#data: data}),
