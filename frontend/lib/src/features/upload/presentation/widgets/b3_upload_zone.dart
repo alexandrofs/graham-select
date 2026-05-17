@@ -44,12 +44,12 @@ class _B3UploadZoneState extends State<B3UploadZone> {
               border: Border.all(
                 color: _dragging || provider.hasFile
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                    : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                 width: 2,
                 style: BorderStyle.solid,
               ),
               color: _dragging
-                  ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1)
+                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1)
                   : Colors.transparent,
             ),
             child: Column(
