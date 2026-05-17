@@ -30,19 +30,22 @@ public class B3UploadController {
 
     @PostMapping
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt) throws IOException {
-        if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
+        if (file.isEmpty() || file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".xlsx")) {
             throw new B3UploadValidationException("Apenas arquivos .xlsx (Excel) da B3 são suportados no momento.");
         }
 
-        validateHeaders(file);
+        byte[] fileBytes = file.getBytes();
+        validateHeaders(fileBytes);
 
-        uploadB3FileUseCase.execute(file.getInputStream(), file.getOriginalFilename(), jwt.getSubject());
+        try (InputStream is = new java.io.ByteArrayInputStream(fileBytes)) {
+            uploadB3FileUseCase.execute(is, file.getOriginalFilename(), jwt.getSubject());
+        }
 
         return ResponseEntity.accepted().build();
     }
 
-    private void validateHeaders(MultipartFile file) throws IOException {
-        try (InputStream is = file.getInputStream();
+    private void validateHeaders(byte[] fileBytes) throws IOException {
+        try (InputStream is = new java.io.ByteArrayInputStream(fileBytes);
              ReadableWorkbook wb = new ReadableWorkbook(is)) {
             Sheet sheet = wb.getFirstSheet();
             try (Stream<Row> rows = sheet.openStream()) {
@@ -52,10 +55,12 @@ public class B3UploadController {
                 }
                 List<String> headers = firstRow.get().stream()
                         .map(Cell::asString)
+                        .filter(java.util.Objects::nonNull)
                         .map(String::trim)
+                        .map(String::toLowerCase)
                         .toList();
 
-                List<String> requiredHeaders = List.of("Ticker", "Data", "Quantidade", "Preço");
+                List<String> requiredHeaders = List.of("ticker", "data", "quantidade", "preço");
                 if (!headers.containsAll(requiredHeaders)) {
                     throw new B3UploadValidationException("Arquivo inválido: Colunas obrigatórias não encontradas.");
                 }
