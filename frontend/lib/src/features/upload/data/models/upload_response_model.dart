@@ -3,8 +3,13 @@ import '../../domain/entities/upload_result.dart';
 class UploadResponseModel {
   final String message;
   final int statusCode;
+  final String? correlationId;
 
-  const UploadResponseModel({required this.message, required this.statusCode});
+  const UploadResponseModel({
+    required this.message,
+    required this.statusCode,
+    this.correlationId,
+  });
 
   factory UploadResponseModel.fromJson(
     Map<String, dynamic> json,
@@ -13,6 +18,7 @@ class UploadResponseModel {
     return UploadResponseModel(
       message: json['message'] as String? ?? 'Upload completed',
       statusCode: statusCode,
+      correlationId: json['correlationId'] as String?,
     );
   }
 
@@ -21,6 +27,7 @@ class UploadResponseModel {
       success: statusCode >= 200 && statusCode < 300,
       message: message,
       statusCode: statusCode,
+      correlationId: correlationId,
     );
   }
 }

@@ -14,12 +14,17 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AccountPurgeScheduler {
 
     private final AccountDeletionRequestRepository repository;
     private final ExecuteAccountPurgeUseCase purgeUseCase;
     private final TransactionTemplate transactionTemplate;
+
+    public AccountPurgeScheduler(AccountDeletionRequestRepository repository, ExecuteAccountPurgeUseCase purgeUseCase, @org.springframework.beans.factory.annotation.Qualifier("transactionManager") org.springframework.transaction.PlatformTransactionManager transactionManager) {
+        this.repository = repository;
+        this.purgeUseCase = purgeUseCase;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+    }
 
     @Scheduled(fixedRate = 3600000) // 1h
     public void processPendingPurges() {

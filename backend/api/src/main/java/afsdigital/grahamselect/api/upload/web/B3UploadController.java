@@ -1,6 +1,8 @@
 package afsdigital.grahamselect.api.upload.web;
 
+import afsdigital.grahamselect.common.upload.application.repository.B3ImportStatusPort;
 import afsdigital.grahamselect.common.upload.application.usecase.UploadB3FileUseCase;
+import afsdigital.grahamselect.common.upload.domain.events.FileUploadedEvent;
 import lombok.RequiredArgsConstructor;
 import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
@@ -9,6 +11,8 @@ import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,9 +31,10 @@ import java.util.stream.Stream;
 public class B3UploadController {
 
     private final UploadB3FileUseCase uploadB3FileUseCase;
+    private final B3ImportStatusPort importStatusPort;
 
     @PostMapping
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt) throws IOException {
+    public ResponseEntity<B3UploadAcceptedResponse> upload(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt) throws IOException {
         if (file.isEmpty() || file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".xlsx")) {
             throw new B3UploadValidationException("Apenas arquivos .xlsx (Excel) da B3 são suportados no momento.");
         }
@@ -37,11 +42,34 @@ public class B3UploadController {
         byte[] fileBytes = file.getBytes();
         validateHeaders(fileBytes);
 
+        FileUploadedEvent event;
         try (InputStream is = new java.io.ByteArrayInputStream(fileBytes)) {
-            uploadB3FileUseCase.execute(is, file.getOriginalFilename(), jwt.getSubject());
+            event = uploadB3FileUseCase.execute(is, file.getOriginalFilename(), jwt.getSubject());
         }
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.accepted().body(new B3UploadAcceptedResponse(
+                "Arquivo B3 enviado com sucesso para processamento assíncrono.",
+                event.correlationId(),
+                "RECEIVED"
+        ));
+    }
+
+    @GetMapping("/status/{correlationId}")
+    public ResponseEntity<B3ImportStatusEnvelope> getUploadStatus(
+            @PathVariable String correlationId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return importStatusPort.findByCorrelationIdAndUserId(correlationId, jwt.getSubject())
+                .map(status -> ResponseEntity.ok(new B3ImportStatusEnvelope(new B3ImportStatusView(
+                        status.correlationId(),
+                        status.fileName(),
+                        status.status().name(),
+                        status.processedRows(),
+                        status.successfulRows(),
+                        status.failedRows(),
+                        status.message()
+                ))))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     private void validateHeaders(byte[] fileBytes) throws IOException {

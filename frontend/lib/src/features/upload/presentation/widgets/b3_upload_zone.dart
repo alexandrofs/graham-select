@@ -81,7 +81,7 @@ class _B3UploadZoneState extends State<B3UploadZone> {
                   const SizedBox(height: 24),
                   const LinearProgressIndicator(),
                   const SizedBox(height: 8),
-                  const Text('Enviando para processamento...'),
+                  Text(provider.progressMessage),
                 ],
               ],
             ),

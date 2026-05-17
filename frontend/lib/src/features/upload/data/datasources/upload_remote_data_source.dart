@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../domain/entities/app_file.dart';
 import '../models/upload_response_model.dart';
+import '../models/upload_status_response_model.dart';
 
 class UploadRemoteDataSource {
   final http.Client client;
@@ -73,6 +74,31 @@ class UploadRemoteDataSource {
       return UploadResponseModel.fromJson(jsonResponse, response.statusCode);
     } catch (e) {
       throw Exception('Erro ao fazer upload B3: ${e.toString()}');
+    }
+  }
+
+  Future<UploadStatusResponseModel> fetchB3UploadStatus(
+    String correlationId, {
+    String? token,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/upload/b3/status/$correlationId');
+      final response = await client.get(
+        uri,
+        headers: token == null ? null : {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 404) {
+        throw Exception('Status de processamento não encontrado.');
+      }
+
+      final Map<String, dynamic> jsonResponse = response.body.isNotEmpty
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : {};
+
+      return UploadStatusResponseModel.fromJson(jsonResponse);
+    } catch (e) {
+      throw Exception('Erro ao consultar status do upload B3: ${e.toString()}');
     }
   }
 }

@@ -25,12 +25,14 @@ import java.time.Duration;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = {
-    "spring.liquibase.enabled=false",
-    "spring.datasource.url=jdbc:h2:mem:testdb",
+    "spring.liquibase.enabled=true",
+    "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL",
     "spring.jpa.hibernate.ddl-auto=none",
     "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"
 })
@@ -87,13 +89,39 @@ public class B3UploadControllerIT {
                 Duration.ofSeconds(5));
 
         assertThat(consumerRecord).isNotNull();
-        assertThat(consumerRecord.key()).isEqualTo("user-123");
+        assertThat(consumerRecord.key().replace("\"", "")).isEqualTo("user-123");
 
         FileUploadedEvent event = objectMapper.readValue(consumerRecord.value(), FileUploadedEvent.class);
         assertThat(event.fileName()).isEqualTo("test.xlsx");
         assertThat(event.userId()).isEqualTo("user-123");
         assertThat(event.correlationId()).isNotNull();
         assertThat(event.storagePath()).isNotNull();
+        assertThat(event.eventId()).isNotNull();
+    }
+
+    @Test
+    public void shouldReturnAcceptedPayloadAndAllowStatusPolling() throws Exception {
+        byte[] content = createExcel(new String[]{"Ticker", "Data", "Quantidade", "Preço"});
+        MockMultipartFile file = new MockMultipartFile("file", "test.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", content);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String responseBody = mockMvc.perform(multipart("/api/v1/upload/b3")
+                        .file(file)
+                        .with(jwt().jwt(j -> j.subject("user-123"))))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.correlationId").isNotEmpty())
+                .andExpect(jsonPath("$.status").value("RECEIVED"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String correlationId = objectMapper.readTree(responseBody).get("correlationId").asText();
+
+        mockMvc.perform(get("/api/v1/upload/b3/status/{correlationId}", correlationId)
+                        .with(jwt().jwt(j -> j.subject("user-123"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.correlationId").value(correlationId))
+                .andExpect(jsonPath("$.data.status").exists());
     }
 
     private byte[] createExcel(String[] headers) throws IOException {

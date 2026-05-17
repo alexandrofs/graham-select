@@ -1,4 +1,5 @@
 import '../../domain/entities/app_file.dart';
+import '../../domain/entities/upload_processing_status.dart';
 import '../../domain/entities/upload_result.dart';
 import '../../domain/repositories/upload_repository.dart';
 import '../datasources/upload_remote_data_source.dart';
@@ -34,5 +35,11 @@ class UploadRepositoryImpl implements UploadRepository {
         statusCode: null,
       );
     }
+  }
+
+  @override
+  Future<UploadProcessingStatus> fetchB3UploadStatus(String correlationId) async {
+    final responseModel = await remoteDataSource.fetchB3UploadStatus(correlationId);
+    return responseModel.toEntity();
   }
 }
