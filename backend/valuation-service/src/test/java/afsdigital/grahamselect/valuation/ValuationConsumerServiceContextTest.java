@@ -44,6 +44,9 @@ public class ValuationConsumerServiceContextTest {
     @MockBean
     private B3ImportStatusPort b3ImportStatusPort;
 
+    @MockBean
+    private afsdigital.grahamselect.common.ingestion.infrastructure.persistence.jpa.repositories.IngestionAuditRepository ingestionAuditRepository;
+
     @Test
     public void contextLoadsSuccessfully() {
         // Verify that the Spring context loads successfully with all beans
