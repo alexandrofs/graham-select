@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:provider/provider.dart';
 import 'package:frontend/main.dart' as app;
-import 'package:frontend/src/features/upload/presentation/providers/upload_provider.dart';
 import 'package:frontend/src/features/upload/presentation/pages/upload_page.dart';
 
 void main() {

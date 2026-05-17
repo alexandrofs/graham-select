@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/upload_provider.dart';
-import '../widgets/file_info_card.dart';
-import '../widgets/upload_progress_widget.dart';
 import '../widgets/b3_upload_zone.dart';
 
 class UploadPage extends StatelessWidget {
@@ -45,7 +43,7 @@ class UploadPage extends StatelessWidget {
                     Text(
                       'Faça o upload do seu relatório de negociação extraído do portal do investidor B3 (.xlsx).',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textColor.withOpacity(0.7),
+                        color: AppTheme.textColor.withValues(alpha: 0.7),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -75,10 +73,10 @@ class UploadPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppTheme.accentColor.withOpacity(0.1),
+                          color: AppTheme.accentColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.accentColor.withOpacity(0.3),
+                            color: AppTheme.accentColor.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -106,7 +104,7 @@ class UploadPage extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
                           side: BorderSide(
-                            color: AppTheme.primaryColor.withOpacity(0.5),
+                            color: AppTheme.primaryColor.withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -122,10 +120,10 @@ class UploadPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.red.withOpacity(0.3),
+                            color: Colors.red.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -152,7 +150,7 @@ class UploadPage extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
                           side: BorderSide(
-                            color: AppTheme.primaryColor.withOpacity(0.5),
+                            color: AppTheme.primaryColor.withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
