@@ -1,6 +1,12 @@
 package afsdigital.grahamselect.valuation.infrastructure.persistence;
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import afsdigital.grahamselect.common.upload.application.repository.B3FileStoragePort;
+import afsdigital.grahamselect.common.upload.application.repository.B3UploadEventPort;
+import afsdigital.grahamselect.common.upload.application.repository.B3ImportStatusPort;
+import afsdigital.grahamselect.common.domain.entities.TopicConstants;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
@@ -14,7 +20,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Testcontainers
 @SpringBootTest
+@EmbeddedKafka(topics = {
+        TopicConstants.FINANCIAL_DATA_TOPIC }, partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
 public abstract class BaseRepositoryIT {
+
+    @MockBean
+    private B3FileStoragePort b3FileStoragePort;
+
+    @MockBean
+    private B3UploadEventPort b3UploadEventPort;
+
+    @MockBean
+    private B3ImportStatusPort b3ImportStatusPort;
 
     @Container
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.28")

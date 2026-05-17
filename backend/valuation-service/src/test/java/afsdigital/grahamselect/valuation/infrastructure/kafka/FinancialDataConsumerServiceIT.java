@@ -3,22 +3,17 @@ package afsdigital.grahamselect.valuation.infrastructure.kafka;
 import afsdigital.grahamselect.common.domain.entities.FinancialDataEvent;
 import afsdigital.grahamselect.common.domain.entities.FinancialDataKey;
 import afsdigital.grahamselect.common.domain.entities.TopicConstants;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.BaseRepositoryIT;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.CompanyEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.IntrinsicValueEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;
+import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,25 +23,8 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest
-@Testcontainers
 @DirtiesContext
-@EmbeddedKafka(topics = {
-        TopicConstants.FINANCIAL_DATA_TOPIC }, partitions = 1, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
-class FinancialDataConsumerServiceIT {
-
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0.28")
-            .withDatabaseName("grahamselect")
-            .withUsername("root")
-            .withPassword("password");
-
-    @DynamicPropertySource
-    static void configureTestContainers(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-    }
+class FinancialDataConsumerServiceIT extends BaseRepositoryIT {
 
     @Autowired
     private KafkaTemplate<FinancialDataKey, FinancialDataEvent> kafkaTemplate;
@@ -57,9 +35,13 @@ class FinancialDataConsumerServiceIT {
     @Autowired
     private IntrinsicValueJpaRepository intrinsicValueJpaRepository;
 
+    @Autowired
+    private StockPriceJpaRepository stockPriceJpaRepository;
+
     @BeforeEach
     void setUp() {
         intrinsicValueJpaRepository.deleteAll();
+        stockPriceJpaRepository.deleteAll();
         companyJpaRepository.deleteAll();
     }
 

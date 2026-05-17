@@ -7,6 +7,12 @@ databaseChangeLog:
         multiple CANCELLED records per user. Application-level check in
         RequestAccountDeletionUseCase enforces single PENDING constraint.
       changes:
+        - createIndex:
+            tableName: account_deletion_requests
+            indexName: idx_deletion_request_user_id
+            columns:
+              - column:
+                  name: user_id
         - dropUniqueConstraint:
             tableName: account_deletion_requests
             constraintName: uq_deletion_requests_user_status
