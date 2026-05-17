@@ -2,6 +2,8 @@ package afsdigital.grahamselect.api.upload.infrastructure.parser;
 
 import afsdigital.grahamselect.common.upload.domain.model.B3TradeRow;
 import afsdigital.grahamselect.common.upload.domain.model.B3TradeRowFailure;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
@@ -14,8 +16,8 @@ import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +27,26 @@ import java.util.stream.Stream;
 @Component
 public class FastExcelB3TradeRowParser {
 
-    private static final List<String> REQUIRED_HEADERS = List.of("ticker", "data", "quantidade", "preco");
+    @Getter
+    @RequiredArgsConstructor
+    private enum B3Header {
+        TICKER("ticker", true),
+        DATA("data", true),
+        QUANTIDADE("quantidade", true),
+        PRECO("preco", true),
+        CORRETORA("corretora", false);
+
+        private final String normalizedName;
+        private final boolean required;
+
+        public static B3Header fromNormalized(String value) {
+            return Arrays.stream(values())
+                    .filter(h -> h.normalizedName.equals(value))
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
     private static final DateTimeFormatter BRAZILIAN_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public void parse(
@@ -42,7 +63,7 @@ public class FastExcelB3TradeRowParser {
                 }
 
                 Row headerRow = iterator.next();
-                Map<String, Integer> headerIndexes = extractHeaderIndexes(headerRow);
+                Map<B3Header, Integer> headerIndexes = extractHeaderIndexes(headerRow);
                 validateRequiredHeaders(headerIndexes);
 
                 while (iterator.hasNext()) {
@@ -51,13 +72,13 @@ public class FastExcelB3TradeRowParser {
                         continue;
                     }
 
-                    Map<String, String> rawPayload = extractRawPayload(row, headerIndexes);
+                    Map<B3Header, String> rawPayload = extractRawPayload(row, headerIndexes);
                     try {
                         successConsumer.accept(toTradeRow(row, headerIndexes, rawPayload));
                     } catch (Exception exception) {
                         failureConsumer.accept(new B3TradeRowFailure(
                                 row.getRowNum(),
-                                rawPayload,
+                                convertPayloadToStringMap(rawPayload),
                                 exception.getMessage() == null ? "Falha ao processar linha." : exception.getMessage()
                         ));
                     }
@@ -66,40 +87,52 @@ public class FastExcelB3TradeRowParser {
         }
     }
 
-    private Map<String, Integer> extractHeaderIndexes(Row headerRow) {
-        Map<String, Integer> indexes = new HashMap<>();
+    private Map<B3Header, Integer> extractHeaderIndexes(Row headerRow) {
+        Map<B3Header, Integer> indexes = new HashMap<>();
         headerRow.stream()
                 .filter(Objects::nonNull)
-                .forEach(cell -> indexes.put(normalize(cell.asString()), cell.getColumnIndex()));
+                .forEach(cell -> {
+                    B3Header header = B3Header.fromNormalized(normalize(cell.asString()));
+                    if (header != null) {
+                        indexes.put(header, cell.getColumnIndex());
+                    }
+                });
         return indexes;
     }
 
-    private void validateRequiredHeaders(Map<String, Integer> headerIndexes) {
-        if (!headerIndexes.keySet().containsAll(REQUIRED_HEADERS)) {
-            throw new IllegalArgumentException("Arquivo inválido: Colunas obrigatórias não encontradas.");
+    private void validateRequiredHeaders(Map<B3Header, Integer> headerIndexes) {
+        for (B3Header header : B3Header.values()) {
+            if (header.isRequired() && !headerIndexes.containsKey(header)) {
+                throw new IllegalArgumentException("Arquivo inválido: Coluna obrigatória '" + header.normalizedName + "' não encontrada.");
+            }
         }
     }
 
-    private Map<String, String> extractRawPayload(Row row, Map<String, Integer> headerIndexes) {
-        Map<String, String> payload = new HashMap<>();
+    private Map<B3Header, String> extractRawPayload(Row row, Map<B3Header, Integer> headerIndexes) {
+        Map<B3Header, String> payload = new HashMap<>();
         headerIndexes.forEach((header, index) -> payload.put(header, row.getCellText(index)));
         return payload;
     }
 
-    private B3TradeRow toTradeRow(Row row, Map<String, Integer> headerIndexes, Map<String, String> rawPayload) {
-        Integer tickerIndex = headerIndexes.get("ticker");
-        Integer dateIndex = headerIndexes.get("data");
-        Integer quantityIndex = headerIndexes.get("quantidade");
-        Integer priceIndex = headerIndexes.get("preco");
-        Integer brokerIndex = headerIndexes.get("corretora");
+    private Map<String, String> convertPayloadToStringMap(Map<B3Header, String> payload) {
+        Map<String, String> stringMap = new HashMap<>();
+        payload.forEach((k, v) -> stringMap.put(k.getNormalizedName(), v));
+        return stringMap;
+    }
 
-        String ticker = requireText(rawPayload.get("ticker"), "Ticker é obrigatório").toUpperCase(Locale.ROOT);
-        LocalDate tradeDate = parseTradeDate(row, dateIndex, rawPayload.get("data"));
-        BigDecimal quantity = row.getCellAsNumber(quantityIndex)
+    private B3TradeRow toTradeRow(Row row, Map<B3Header, Integer> headerIndexes, Map<B3Header, String> rawPayload) {
+        String ticker = requireText(rawPayload.get(B3Header.TICKER), "Ticker é obrigatório").toUpperCase(Locale.ROOT);
+        LocalDate tradeDate = parseTradeDate(row, headerIndexes.get(B3Header.DATA), rawPayload.get(B3Header.DATA));
+        
+        BigDecimal quantity = row.getCellAsNumber(headerIndexes.get(B3Header.QUANTIDADE))
                 .orElseThrow(() -> new IllegalArgumentException("Quantidade inválida"));
-        BigDecimal price = row.getCellAsNumber(priceIndex)
+        BigDecimal price = row.getCellAsNumber(headerIndexes.get(B3Header.PRECO))
                 .orElseThrow(() -> new IllegalArgumentException("Preço inválido"));
-        String broker = brokerIndex == null ? null : emptyToNull(row.getCellText(brokerIndex));
+        
+        String broker = null;
+        if (headerIndexes.containsKey(B3Header.CORRETORA)) {
+            broker = emptyToNull(row.getCellText(headerIndexes.get(B3Header.CORRETORA)));
+        }
 
         return new B3TradeRow(
                 row.getRowNum(),

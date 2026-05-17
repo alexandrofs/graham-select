@@ -42,11 +42,18 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
     @Override
     public B3ImportStatus markProcessing(String correlationId, String userId) {
         B3ImportStatusEntity entity = getByCorrelationIdAndUserId(correlationId, userId);
-        entity.setStatus(B3ImportStatusState.PROCESSING);
-        entity.setProcessedRows(0);
-        entity.setSuccessfulRows(0);
-        entity.setFailedRows(0);
-        entity.setMessage("Processando arquivo em segundo plano.");
+        
+        // Idempotency: If already processing, don't reset counters
+        if (entity.getStatus() == B3ImportStatusState.PROCESSING) {
+            entity.setMessage("Retentando processamento do arquivo.");
+        } else {
+            entity.setStatus(B3ImportStatusState.PROCESSING);
+            entity.setProcessedRows(0);
+            entity.setSuccessfulRows(0);
+            entity.setFailedRows(0);
+            entity.setMessage("Processando arquivo em segundo plano.");
+        }
+        
         entity.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         return toDomain(repository.save(entity));
     }
