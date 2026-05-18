@@ -47,6 +47,9 @@ public class ValuationConsumerServiceContextTest {
     @MockBean
     private afsdigital.grahamselect.common.ingestion.infrastructure.persistence.jpa.repositories.IngestionAuditRepository ingestionAuditRepository;
 
+    @MockBean
+    private afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository userRepository;
+
     @Test
     public void contextLoadsSuccessfully() {
         // Verify that the Spring context loads successfully with all beans
