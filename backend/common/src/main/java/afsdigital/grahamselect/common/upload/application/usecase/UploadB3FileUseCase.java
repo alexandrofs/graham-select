@@ -12,7 +12,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
 public class UploadB3FileUseCase {
 
