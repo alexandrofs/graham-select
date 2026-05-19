@@ -45,6 +45,7 @@ VALUATION_PID=$!
 
 echo -e "${BLUE}Iniciando Frontend (Flutter Web)...${NC}"
 cd frontend && flutter run -d chrome --web-port 3000 \
+  --dart-define=API_BASE_URL="${API_BASE_URL:-'http://localhost:8080/api/v1'}" \
   --dart-define=GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-''}" \
   --dart-define=FIREBASE_API_KEY="${FIREBASE_API_KEY:-'dummy-api-key'}" \
   --dart-define=FIREBASE_AUTH_DOMAIN="${FIREBASE_AUTH_DOMAIN:-'dummy-auth-domain'}" \

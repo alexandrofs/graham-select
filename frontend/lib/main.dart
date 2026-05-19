@@ -113,23 +113,29 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     super.initState();
     // Shared dependencies
     httpClient = http.Client();
-    const baseUrl = 'https://graham-select-api.render.com';
+    // baseUrl para datasources que usam http.Client diretamente (inclui /api/v1)
+    const datasourceBaseUrl = String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: 'http://localhost:8080/api/v1',
+    );
+    // baseUrl para ApiClient (Dio) - sem /api/v1 pois os repos já incluem o prefixo nos paths
+    final apiClientBaseUrl = datasourceBaseUrl.replaceFirst('/api/v1', '');
     effectiveStorage = widget.storage ?? const FlutterSecureStorage();
-    effectiveApiClient = widget.apiClient ?? ApiClient(baseUrl: baseUrl, storage: effectiveStorage);
+    effectiveApiClient = widget.apiClient ?? ApiClient(baseUrl: apiClientBaseUrl, storage: effectiveStorage);
 
     // Auth Feature DI
     effectiveAuthRepository = widget.authRepository ?? 
         AuthRepository(apiClient: effectiveApiClient, storage: effectiveStorage);
 
     // Upload Feature DI
-    uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient);
+    uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
     uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
     uploadUseCase = UploadFileUseCase(uploadRepository);
     uploadB3UseCase = UploadB3FileUseCase(uploadRepository);
     getB3UploadStatusUseCase = GetB3UploadStatusUseCase(uploadRepository);
 
     // Ranking Feature DI
-    rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient);
+    rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
     rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource);
     getRankingUseCase = GetRankingUseCase(rankingRepository);
 
@@ -137,7 +143,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     profileRepository = ProfileRepository(effectiveApiClient);
 
     // Portfolio Feature DI
-    portfolioRemoteDataSource = PortfolioRemoteDataSource(client: httpClient);
+    portfolioRemoteDataSource = PortfolioRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
     portfolioRepository = PortfolioRepositoryImpl(portfolioRemoteDataSource, effectiveAuthRepository);
 
     authListenable = AuthStateListenable(effectiveAuthRepository);
