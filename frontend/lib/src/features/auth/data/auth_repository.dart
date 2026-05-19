@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../core/api/api_client.dart';
 
 class AuthRepository {
@@ -19,7 +20,7 @@ class AuthRepository {
           clientId: const String.fromEnvironment('GOOGLE_CLIENT_ID', defaultValue: '').isEmpty 
               ? null 
               : const String.fromEnvironment('GOOGLE_CLIENT_ID'),
-          serverClientId: const String.fromEnvironment('GOOGLE_CLIENT_ID', defaultValue: '').isEmpty 
+          serverClientId: kIsWeb || const String.fromEnvironment('GOOGLE_CLIENT_ID', defaultValue: '').isEmpty 
               ? null 
               : const String.fromEnvironment('GOOGLE_CLIENT_ID'),
         ),
@@ -31,7 +32,9 @@ class AuthRepository {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = kIsWeb 
+          ? await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn()
+          : await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;

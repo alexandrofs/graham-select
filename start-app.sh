@@ -4,9 +4,27 @@
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}=== Graham Select - Inicializador Local ===${NC}"
+
+# 0. Carregar variáveis de ambiente do .env.local
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/.env.local"
+
+if [ -f "$ENV_FILE" ]; then
+  echo -e "${GREEN}[0/4] Carregando variáveis de .env.local...${NC}"
+  # Exporta cada linha não-comentada e não-vazia
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+  echo -e "${YELLOW}  API_BASE_URL=${API_BASE_URL:-'(não definida, usando default)'}${NC}"
+else
+  echo -e "${YELLOW}[AVISO] Arquivo .env.local não encontrado. Usando valores padrão.${NC}"
+  echo -e "${YELLOW}  Crie o arquivo baseado em .env.local.example${NC}"
+fi
 
 # 1. Subir Infraestrutura Docker
 echo -e "${GREEN}[1/4] Iniciando infraestrutura (MySQL & Kafka)...${NC}"
