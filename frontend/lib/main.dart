@@ -129,7 +129,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
     // Upload Feature DI
     uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
-    uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource);
+    uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource, effectiveAuthRepository);
     uploadUseCase = UploadFileUseCase(uploadRepository);
     uploadB3UseCase = UploadB3FileUseCase(uploadRepository);
     getB3UploadStatusUseCase = GetB3UploadStatusUseCase(uploadRepository);
