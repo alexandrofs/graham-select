@@ -11,11 +11,14 @@ class RankingRemoteDataSource {
     this.baseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8080/api/v1'),
   });
 
-  Future<List<RankedCompanyModel>> getRankedCompanies() async {
+  Future<List<RankedCompanyModel>> getRankedCompanies({String? token}) async {
     try {
       final response = await client.get(
         Uri.parse('$baseUrl/ranked-companies'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 200) {

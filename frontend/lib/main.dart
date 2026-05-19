@@ -136,7 +136,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
     // Ranking Feature DI
     rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
-    rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource);
+    rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource, effectiveAuthRepository);
     getRankingUseCase = GetRankingUseCase(rankingRepository);
 
     // Profile Feature DI
