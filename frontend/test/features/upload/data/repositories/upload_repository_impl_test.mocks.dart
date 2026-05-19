@@ -3,17 +3,21 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i7;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i10;
+import 'package:frontend/src/features/auth/data/auth_repository.dart' as _i9;
 import 'package:frontend/src/features/upload/data/datasources/upload_remote_data_source.dart'
-    as _i4;
+    as _i5;
 import 'package:frontend/src/features/upload/data/models/upload_response_model.dart'
     as _i3;
+import 'package:frontend/src/features/upload/data/models/upload_status_response_model.dart'
+    as _i4;
 import 'package:frontend/src/features/upload/domain/entities/app_file.dart'
-    as _i7;
+    as _i8;
 import 'package:http/http.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i5;
+import 'package:mockito/src/dummies.dart' as _i6;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -41,11 +45,17 @@ class _FakeUploadResponseModel_1 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
+class _FakeUploadStatusResponseModel_2 extends _i1.SmartFake
+    implements _i4.UploadStatusResponseModel {
+  _FakeUploadStatusResponseModel_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [UploadRemoteDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUploadRemoteDataSource extends _i1.Mock
-    implements _i4.UploadRemoteDataSource {
+    implements _i5.UploadRemoteDataSource {
   MockUploadRemoteDataSource() {
     _i1.throwOnMissingStub(this);
   }
@@ -62,7 +72,7 @@ class MockUploadRemoteDataSource extends _i1.Mock
   String get baseUrl =>
       (super.noSuchMethod(
             Invocation.getter(#baseUrl),
-            returnValue: _i5.dummyValue<String>(
+            returnValue: _i6.dummyValue<String>(
               this,
               Invocation.getter(#baseUrl),
             ),
@@ -70,34 +80,100 @@ class MockUploadRemoteDataSource extends _i1.Mock
           as String);
 
   @override
-  _i6.Future<_i3.UploadResponseModel> uploadFile(
-    _i7.AppFile? file, {
+  _i7.Future<_i3.UploadResponseModel> uploadFile(
+    _i8.AppFile? file, {
     String? token,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#uploadFile, [file], {#token: token}),
-            returnValue: _i6.Future<_i3.UploadResponseModel>.value(
+            returnValue: _i7.Future<_i3.UploadResponseModel>.value(
               _FakeUploadResponseModel_1(
                 this,
                 Invocation.method(#uploadFile, [file], {#token: token}),
               ),
             ),
           )
-          as _i6.Future<_i3.UploadResponseModel>);
+          as _i7.Future<_i3.UploadResponseModel>);
 
   @override
-  _i6.Future<_i3.UploadResponseModel> uploadB3File(
-    _i7.AppFile? file, {
+  _i7.Future<_i3.UploadResponseModel> uploadB3File(
+    _i8.AppFile? file, {
     String? token,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#uploadB3File, [file], {#token: token}),
-            returnValue: _i6.Future<_i3.UploadResponseModel>.value(
+            returnValue: _i7.Future<_i3.UploadResponseModel>.value(
               _FakeUploadResponseModel_1(
                 this,
                 Invocation.method(#uploadB3File, [file], {#token: token}),
               ),
             ),
           )
-          as _i6.Future<_i3.UploadResponseModel>);
+          as _i7.Future<_i3.UploadResponseModel>);
+
+  @override
+  _i7.Future<_i4.UploadStatusResponseModel> fetchB3UploadStatus(
+    String? correlationId, {
+    String? token,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #fetchB3UploadStatus,
+              [correlationId],
+              {#token: token},
+            ),
+            returnValue: _i7.Future<_i4.UploadStatusResponseModel>.value(
+              _FakeUploadStatusResponseModel_2(
+                this,
+                Invocation.method(
+                  #fetchB3UploadStatus,
+                  [correlationId],
+                  {#token: token},
+                ),
+              ),
+            ),
+          )
+          as _i7.Future<_i4.UploadStatusResponseModel>);
+}
+
+/// A class which mocks [AuthRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
+  MockAuthRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i7.Stream<_i10.User?> get authStateChanges =>
+      (super.noSuchMethod(
+            Invocation.getter(#authStateChanges),
+            returnValue: _i7.Stream<_i10.User?>.empty(),
+          )
+          as _i7.Stream<_i10.User?>);
+
+  @override
+  _i7.Future<_i10.UserCredential?> signInWithGoogle() =>
+      (super.noSuchMethod(
+            Invocation.method(#signInWithGoogle, []),
+            returnValue: _i7.Future<_i10.UserCredential?>.value(),
+          )
+          as _i7.Future<_i10.UserCredential?>);
+
+  @override
+  _i7.Future<String?> getPersistedToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#getPersistedToken, []),
+            returnValue: _i7.Future<String?>.value(),
+          )
+          as _i7.Future<String?>);
+
+  @override
+  _i7.Future<void> signOut() =>
+      (super.noSuchMethod(
+            Invocation.method(#signOut, []),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
 }

@@ -40,7 +40,7 @@ class _InvestorProfilePageState extends State<InvestorProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Perfil atualizado com sucesso!')),
         );
-        context.go('/');
+        context.go('/dashboard');
       }
     } catch (e) {
       if (mounted) {
@@ -54,9 +54,7 @@ class _InvestorProfilePageState extends State<InvestorProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil do Investidor'),
-      ),
+      backgroundColor: Colors.transparent,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

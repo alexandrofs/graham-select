@@ -6,17 +6,23 @@ import 'package:frontend/src/features/upload/domain/entities/app_file.dart';
 import 'package:frontend/src/features/upload/data/datasources/upload_remote_data_source.dart';
 import 'package:frontend/src/features/upload/data/repositories/upload_repository_impl.dart';
 import 'package:frontend/src/features/upload/data/models/upload_response_model.dart';
+import 'package:frontend/src/features/auth/data/auth_repository.dart';
 
 import 'upload_repository_impl_test.mocks.dart';
 
-@GenerateMocks([UploadRemoteDataSource])
+@GenerateMocks([UploadRemoteDataSource, AuthRepository])
 void main() {
   late UploadRepositoryImpl repository;
   late MockUploadRemoteDataSource mockDataSource;
+  late MockAuthRepository mockAuthRepository;
 
   setUp(() {
     mockDataSource = MockUploadRemoteDataSource();
-    repository = UploadRepositoryImpl(mockDataSource);
+    mockAuthRepository = MockAuthRepository();
+    repository = UploadRepositoryImpl(mockDataSource, mockAuthRepository);
+    
+    // Default mock behavior for token
+    when(mockAuthRepository.getPersistedToken()).thenAnswer((_) async => 'test-token');
   });
 
   group('UploadRepositoryImpl', () {
@@ -33,7 +39,7 @@ void main() {
         statusCode: 200,
       );
       when(
-        mockDataSource.uploadFile(testAppFile),
+        mockDataSource.uploadFile(testAppFile, token: anyNamed('token')),
       ).thenAnswer((_) async => responseModel);
 
       // Act
@@ -43,7 +49,7 @@ void main() {
       expect(result.success, true);
       expect(result.message, 'Upload completed successfully');
       expect(result.statusCode, 200);
-      verify(mockDataSource.uploadFile(testAppFile)).called(1);
+      verify(mockDataSource.uploadFile(testAppFile, token: anyNamed('token'))).called(1);
     });
 
     test('should return error result when data source returns 400', () async {
@@ -53,7 +59,7 @@ void main() {
         statusCode: 400,
       );
       when(
-        mockDataSource.uploadFile(testAppFile),
+        mockDataSource.uploadFile(testAppFile, token: anyNamed('token')),
       ).thenAnswer((_) async => responseModel);
 
       // Act
@@ -72,7 +78,7 @@ void main() {
         statusCode: 500,
       );
       when(
-        mockDataSource.uploadFile(testAppFile),
+        mockDataSource.uploadFile(testAppFile, token: anyNamed('token')),
       ).thenAnswer((_) async => responseModel);
 
       // Act
@@ -87,7 +93,7 @@ void main() {
     test('should handle data source exceptions', () async {
       // Arrange
       when(
-        mockDataSource.uploadFile(testAppFile),
+        mockDataSource.uploadFile(testAppFile, token: anyNamed('token')),
       ).thenThrow(Exception('Network error'));
 
       // Act

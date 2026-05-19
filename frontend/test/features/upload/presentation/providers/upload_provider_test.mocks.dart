@@ -3,16 +3,18 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i5;
 
 import 'package:frontend/src/features/upload/domain/entities/app_file.dart'
-    as _i5;
+    as _i6;
+import 'package:frontend/src/features/upload/domain/entities/upload_processing_status.dart'
+    as _i3;
 import 'package:frontend/src/features/upload/domain/entities/upload_result.dart'
     as _i2;
 import 'package:frontend/src/features/upload/domain/repositories/upload_repository.dart'
-    as _i3;
+    as _i4;
 import 'package:frontend/src/features/upload/domain/usecases/upload_b3_file_usecase.dart'
-    as _i6;
+    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -35,71 +37,92 @@ class _FakeUploadResult_0 extends _i1.SmartFake implements _i2.UploadResult {
     : super(parent, parentInvocation);
 }
 
-class _FakeUploadRepository_1 extends _i1.SmartFake
-    implements _i3.UploadRepository {
-  _FakeUploadRepository_1(Object parent, Invocation parentInvocation)
+class _FakeUploadProcessingStatus_1 extends _i1.SmartFake
+    implements _i3.UploadProcessingStatus {
+  _FakeUploadProcessingStatus_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeUploadRepository_2 extends _i1.SmartFake
+    implements _i4.UploadRepository {
+  _FakeUploadRepository_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
 /// A class which mocks [UploadRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUploadRepository extends _i1.Mock implements _i3.UploadRepository {
+class MockUploadRepository extends _i1.Mock implements _i4.UploadRepository {
   MockUploadRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.UploadResult> uploadFile(_i5.AppFile? file) =>
+  _i5.Future<_i2.UploadResult> uploadFile(_i6.AppFile? file) =>
       (super.noSuchMethod(
             Invocation.method(#uploadFile, [file]),
-            returnValue: _i4.Future<_i2.UploadResult>.value(
+            returnValue: _i5.Future<_i2.UploadResult>.value(
               _FakeUploadResult_0(this, Invocation.method(#uploadFile, [file])),
             ),
           )
-          as _i4.Future<_i2.UploadResult>);
+          as _i5.Future<_i2.UploadResult>);
 
   @override
-  _i4.Future<_i2.UploadResult> uploadB3File(_i5.AppFile? file) =>
+  _i5.Future<_i2.UploadResult> uploadB3File(_i6.AppFile? file) =>
       (super.noSuchMethod(
             Invocation.method(#uploadB3File, [file]),
-            returnValue: _i4.Future<_i2.UploadResult>.value(
+            returnValue: _i5.Future<_i2.UploadResult>.value(
               _FakeUploadResult_0(
                 this,
                 Invocation.method(#uploadB3File, [file]),
               ),
             ),
           )
-          as _i4.Future<_i2.UploadResult>);
+          as _i5.Future<_i2.UploadResult>);
+
+  @override
+  _i5.Future<_i3.UploadProcessingStatus> fetchB3UploadStatus(
+    String? correlationId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchB3UploadStatus, [correlationId]),
+            returnValue: _i5.Future<_i3.UploadProcessingStatus>.value(
+              _FakeUploadProcessingStatus_1(
+                this,
+                Invocation.method(#fetchB3UploadStatus, [correlationId]),
+              ),
+            ),
+          )
+          as _i5.Future<_i3.UploadProcessingStatus>);
 }
 
 /// A class which mocks [UploadB3FileUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUploadB3FileUseCase extends _i1.Mock
-    implements _i6.UploadB3FileUseCase {
+    implements _i7.UploadB3FileUseCase {
   MockUploadB3FileUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.UploadRepository get repository =>
+  _i4.UploadRepository get repository =>
       (super.noSuchMethod(
             Invocation.getter(#repository),
-            returnValue: _FakeUploadRepository_1(
+            returnValue: _FakeUploadRepository_2(
               this,
               Invocation.getter(#repository),
             ),
           )
-          as _i3.UploadRepository);
+          as _i4.UploadRepository);
 
   @override
-  _i4.Future<_i2.UploadResult> call(_i5.AppFile? file) =>
+  _i5.Future<_i2.UploadResult> call(_i6.AppFile? file) =>
       (super.noSuchMethod(
             Invocation.method(#call, [file]),
-            returnValue: _i4.Future<_i2.UploadResult>.value(
+            returnValue: _i5.Future<_i2.UploadResult>.value(
               _FakeUploadResult_0(this, Invocation.method(#call, [file])),
             ),
           )
-          as _i4.Future<_i2.UploadResult>);
+          as _i5.Future<_i2.UploadResult>);
 }

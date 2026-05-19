@@ -8,6 +8,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/api/api_client.dart';
 import 'src/features/home/presentation/pages/home_page.dart';
+import 'src/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'src/core/widgets/main_layout.dart';
 import 'src/features/upload/presentation/pages/upload_page.dart';
 import 'src/features/upload/presentation/providers/upload_provider.dart';
 import 'src/features/upload/domain/usecases/get_b3_upload_status_usecase.dart';
@@ -153,19 +155,19 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       refreshListenable: authListenable,
       redirect: (context, state) async {
         final firebaseUser = effectiveAuthRepository.currentUser;
-        // O JWT token agora é carregado da memória em vez de fazer IO toda vez
         final jwtToken = await effectiveAuthRepository.getPersistedToken();
         
-        // Consideramos logado se tivermos tanto o usuário Firebase quanto o JWT do backend
         final isLoggedIn = firebaseUser != null && jwtToken != null;
         final isLoggingIn = state.matchedLocation == '/login';
+        final isAtLanding = state.matchedLocation == '/';
 
         if (!isLoggedIn) {
-          return isLoggingIn ? null : '/login';
+          if (isLoggingIn || isAtLanding) return null;
+          return '/login';
         }
 
-        if (isLoggingIn) {
-          return '/';
+        if (isLoggingIn || (isAtLanding && isLoggedIn)) {
+          return '/dashboard';
         }
 
         return null;
@@ -173,11 +175,17 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       routes: [
         GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
-        GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
-        GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
         GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
-        GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
-        GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
+        ShellRoute(
+          builder: (context, state, child) => MainLayout(child: child),
+          routes: [
+            GoRoute(path: '/dashboard', builder: (context, state) => const DashboardPage()),
+            GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
+            GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
+            GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
+            GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
+          ],
+        ),
       ],
     );
   }

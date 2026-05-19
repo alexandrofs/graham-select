@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
-import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -54,19 +53,6 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) => const ManualOperationEntry(),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Nova Operação'),
-        backgroundColor: AppTheme.accentColor,
-      ),
       body: Column(
         children: [
           _LandingMenu(
@@ -83,13 +69,12 @@ class _HomePageState extends State<HomePage> {
                   _scrollTo(resourcesKey);
                 case LandingSection.contact:
                   _scrollTo(contactKey);
-                case LandingSection.profile:
-                  context.push('/profile');
+                case LandingSection.login:
+                  context.push('/login');
               }
             },
-            onCtaPressed: () => context.push('/ranking'),
+            onCtaPressed: () => context.push('/login'),
           ),
-          const _SuitabilityBanner(),
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -124,7 +109,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-enum LandingSection { hero, ranking, methodology, resources, contact, profile }
+enum LandingSection { hero, ranking, methodology, resources, contact, login }
 
 class _LandingMenu extends StatelessWidget {
   const _LandingMenu({
@@ -144,7 +129,7 @@ class _LandingMenu extends StatelessWidget {
       ("Ranking", LandingSection.ranking),
       ("Metodologia", LandingSection.methodology),
       ("Recursos", LandingSection.resources),
-      ("Perfil", LandingSection.profile),
+      ("Entrar", LandingSection.login),
     ];
 
     return Container(
@@ -207,7 +192,7 @@ class _LandingMenu extends StatelessWidget {
                     vertical: 16,
                   ),
                 ),
-                child: const Text('Ver Ranking'),
+                child: const Text('Começar Agora'),
               ),
             ] else
               _MobileMenu(
@@ -253,7 +238,7 @@ class _MobileMenu extends StatelessWidget {
         const PopupMenuItem<String>(
           value: 'cta',
           child: Text(
-            'Ver Ranking',
+            'Começar Agora',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -830,49 +815,6 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
-class _SuitabilityBanner extends StatelessWidget {
-  const _SuitabilityBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ProfileProvider>(
-      builder: (context, provider, child) {
-        final profile = provider.profile;
-        if (profile == null || profile.investorProfile != null) {
-          return const SizedBox.shrink();
-        }
-
-        return Container(
-          width: double.infinity,
-          color: AppTheme.primaryColor.withValues(alpha: 0.9),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            children: [
-              const Icon(Icons.info_outline, color: Colors.white),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Text(
-                  'Você ainda não definiu seu perfil de investidor. Responda ao questionário para recomendações personalizadas.',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                ),
-              ),
-              const SizedBox(width: 16),
-              TextButton(
-                onPressed: () => context.push('/suitability'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                ),
-                child: const Text('Responder agora'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _HighlightRow extends StatelessWidget {
   const _HighlightRow({required this.title, required this.value});
 
@@ -901,3 +843,4 @@ class _HighlightRow extends StatelessWidget {
     );
   }
 }
+

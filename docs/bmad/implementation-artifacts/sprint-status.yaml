@@ -49,12 +49,12 @@ development_status:
   1-4-account-deletion-lgpd-purge: done
   1-5-investor-profile-kyc-suitability: done
   epic-1-retrospective: done
-  epic-2: in-progress
+  epic-2: done
   2-1-b3-upload-excel-ingestion: done
   2-2-async-kafka-splitter-processing: done
   2-3-smart-trade-deduplication: done
   2-4-manual-operation-fallback-crud: done
-  2-5-ingestion-audit-history: backlog
+  2-5-ingestion-audit-history: done
   epic-2-retrospective: optional
   epic-3: backlog
   3-1-portfolio-kpi-dashboard: backlog

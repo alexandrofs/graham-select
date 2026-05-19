@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:frontend/src/core/theme/app_theme.dart';
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart';
 import 'package:frontend/src/features/profile/presentation/widgets/tier_badge.dart';
@@ -25,28 +24,42 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Meu Perfil'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
       body: Consumer<ProfileProvider>(
         builder: (context, provider, child) {
-          switch (provider.state) {
-            case ProfileState.loading:
-              return _buildLoadingState();
-            case ProfileState.error:
-              return _buildErrorState(provider.errorMessage);
-            case ProfileState.success:
-              return _buildContent(context, provider);
-            case ProfileState.idle:
-              return const SizedBox.shrink();
-          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  'Meu Perfil',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Expanded(
+                child: _buildStateContent(context, provider),
+              ),
+            ],
+          );
         },
       ),
     );
+  }
+
+  Widget _buildStateContent(BuildContext context, ProfileProvider provider) {
+    switch (provider.state) {
+      case ProfileState.loading:
+        return _buildLoadingState();
+      case ProfileState.error:
+        return _buildErrorState(provider.errorMessage);
+      case ProfileState.success:
+        return _buildContent(context, provider);
+      case ProfileState.idle:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _buildLoadingState() {
