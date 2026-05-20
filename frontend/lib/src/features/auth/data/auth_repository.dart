@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../core/api/api_client.dart';
 
-class AuthRepository {
+class AuthRepository implements TokenProvider {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final FlutterSecureStorage _storage;
@@ -60,9 +60,30 @@ class AuthRepository {
     }
   }
 
-  /// Verifica se existe um token JWT persistido
+  @override
+  /// Retorna um token JWT válido, renovando-o automaticamente se necessário.
+  /// Tokens do Firebase expiram em 1 hora — sempre busca um token fresco do Firebase
+  /// quando o usuário está logado, usando o storage apenas como fallback.
   Future<String?> getPersistedToken() async {
+    // 1. Verifica cache em memória primeiro
     if (_cachedToken != null) return _cachedToken;
+
+    // 2. Se há usuário Firebase logado, busca sempre um token fresco (auto-renova se expirado)
+    final currentFirebaseUser = _firebaseAuth.currentUser;
+    if (currentFirebaseUser != null) {
+      try {
+        final freshToken = await currentFirebaseUser.getIdToken(false);
+        if (freshToken != null) {
+          _cachedToken = freshToken;
+          await _storage.write(key: 'jwt_token', value: freshToken);
+          return freshToken;
+        }
+      } catch (_) {
+        // Em caso de falha, cai no fallback do storage
+      }
+    }
+
+    // 3. Fallback: lê do storage (usuário pode ter feito reload da página)
     _cachedToken = await _storage.read(key: 'jwt_token');
     return _cachedToken;
   }

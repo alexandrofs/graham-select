@@ -25,8 +25,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://accounts.google.com
-          jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+          issuer-uri: https://securetoken.google.com/graham-select
+          jwk-set-uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
 
 app:
   upload:

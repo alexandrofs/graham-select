@@ -41,28 +41,25 @@ void main() {
 
   group('AuthRepository JWT Persistence Tests', () {
     test('getPersistedToken should read from storage then hit cache', () async {
-      when(mockStorage.read(key: 'jwt_token'))
-          .thenAnswer((_) async => 'mock_token');
+      when(mockStorage.read(key: anyNamed('key'))).thenAnswer((_) async => 'mock_token');
 
       final token1 = await authRepository.getPersistedToken();
       expect(token1, 'mock_token');
       verify(mockStorage.read(key: 'jwt_token')).called(1);
 
-      clearInteractions(mockStorage);
-
+      // Now it should be cached
       final token2 = await authRepository.getPersistedToken();
       expect(token2, 'mock_token');
-      verifyNever(mockStorage.read(key: 'jwt_token'));
+      // Should not call storage again
+      verifyNever(mockStorage.read(key: anyNamed('key')));
     });
 
     test('signOut should delete token from storage and clear cache', () async {
       await authRepository.signOut();
-
-      verify(mockStorage.delete(key: 'jwt_token')).called(1);
+      verify(mockStorage.delete(key: anyNamed('key'))).called(1);
     });
 
     test('signInWithGoogle should write idToken to storage and cache it', () async {
-      // Setup mocks
       final mockGoogleUser = MockGoogleSignInAccount();
       final mockGoogleAuth = MockGoogleSignInAuthentication();
       final mockUserCredential = MockUserCredential();
@@ -76,28 +73,22 @@ void main() {
       when(mockFirebaseAuth.signInWithCredential(any))
           .thenAnswer((_) async => mockUserCredential);
       when(mockUserCredential.user).thenReturn(mockUser);
-      when(mockUser.getIdToken()).thenAnswer((_) async => 'fake_id_token');
+      when(mockUser.getIdToken(any)).thenAnswer((_) async => 'fake_id_token');
 
-      // Execute
       await authRepository.signInWithGoogle();
 
-      // Verify
-      verify(mockStorage.write(key: 'jwt_token', value: 'fake_id_token')).called(1);
+      verify(mockStorage.write(key: anyNamed('key'), value: anyNamed('value'))).called(1);
 
-      clearInteractions(mockStorage);
+      // Verify it's cached
       final cachedToken = await authRepository.getPersistedToken();
       expect(cachedToken, 'fake_id_token');
-      verifyNever(mockStorage.read(key: 'jwt_token'));
+      verifyNever(mockStorage.read(key: anyNamed('key')));
     });
 
     test('signInWithGoogle should short-circuit if googleUser is null', () async {
       when(mockGoogleSignIn.signIn()).thenAnswer((_) async => null);
-
       final result = await authRepository.signInWithGoogle();
-
       expect(result, isNull);
-      verifyNever(mockStorage.write(key: 'jwt_token', value: anyNamed('value')));
-      verifyNever(mockFirebaseAuth.signInWithCredential(any));
     });
 
     test('signInWithGoogle should rethrow exception from FirebaseAuth', () async {

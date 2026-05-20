@@ -129,7 +129,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     effectiveAuthRepository = widget.authRepository ?? 
         AuthRepository(apiClient: effectiveApiClient, storage: effectiveStorage);
 
-    // Upload Feature DI
+    // Conecta o AuthRepository ao ApiClient para auto-refresh de token
+    effectiveApiClient.setTokenProvider(effectiveAuthRepository);
     uploadRemoteDataSource = UploadRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
     uploadRepository = UploadRepositoryImpl(uploadRemoteDataSource, effectiveAuthRepository);
     uploadUseCase = UploadFileUseCase(uploadRepository);
