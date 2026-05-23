@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 
 enum PortfolioStatus { initial, loading, success, error }
@@ -13,6 +14,24 @@ class PortfolioProvider extends ChangeNotifier {
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  PortfolioSummary? _summary;
+  PortfolioSummary? get summary => _summary;
+
+  Future<void> loadSummary() async {
+    _status = PortfolioStatus.loading;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _summary = await repository.getSummary();
+      _status = PortfolioStatus.success;
+    } catch (e) {
+      _status = PortfolioStatus.error;
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    }
+    notifyListeners();
+  }
 
   Future<void> createManualTrade({
     required String ticker,
