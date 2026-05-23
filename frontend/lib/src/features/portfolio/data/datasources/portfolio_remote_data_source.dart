@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/portfolio_summary_model.dart';
 import '../models/trade_model.dart';
 
 class PortfolioRemoteDataSource {
@@ -10,6 +11,23 @@ class PortfolioRemoteDataSource {
     required this.client,
     this.baseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8080/api/v1'),
   });
+
+  Future<PortfolioSummaryModel> getSummary({String? token}) async {
+    final uri = Uri.parse('$baseUrl/portfolios/summary');
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return PortfolioSummaryModel.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erro ao buscar resumo do portfólio: ${response.statusCode}');
+    }
+  }
 
   Future<TradeModel> createManualTrade({
     required String ticker,

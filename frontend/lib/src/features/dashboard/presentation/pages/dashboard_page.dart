@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
+import '../../../portfolio/presentation/providers/portfolio_provider.dart';
+import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -17,6 +19,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().fetchProfile();
+      context.read<PortfolioProvider>().loadSummary();
     });
   }
 
@@ -56,24 +59,83 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
             ),
             const SizedBox(height: 32),
-            // Placeholder para os KPIs do Epic 3
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-              ),
-              child: const Center(
-                child: Text(
-                  'KPIs e Posições Ativas serão implementados no Epic 3.',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+            _buildKpiSection(context),
+            const SizedBox(height: 32),
+            // Outras seções do Epic 3 virão aqui
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildKpiSection(BuildContext context) {
+    return Consumer<PortfolioProvider>(
+      builder: (context, provider, child) {
+        if (provider.status == PortfolioStatus.error) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.redAccent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.redAccent),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Erro ao carregar resumo: ${provider.errorMessage ?? "Erro desconhecido"}',
+                    style: const TextStyle(color: Colors.redAccent),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => provider.loadSummary(),
+                  child: const Text('Tentar novamente'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final summary = provider.summary;
+        final isLoading = provider.status == PortfolioStatus.loading;
+
+        return GridView.count(
+          crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : (MediaQuery.of(context).size.width > 800 ? 2 : 1),
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 2.5,
+          children: [
+            PortfolioKpiCard(
+              title: 'Patrimônio Total',
+              value: summary?.totalEquity ?? 0,
+              isLoading: isLoading,
+            ),
+            PortfolioKpiCard(
+              title: 'Rendimento Bruto',
+              value: summary?.grossYieldPercentage ?? 0,
+              isPercentage: true,
+              isCurrency: false,
+              isLoading: isLoading,
+              valueColor: (summary?.grossYieldPercentage ?? 0) >= 0 ? const Color(0xFF10B981) : Colors.redAccent,
+            ),
+            PortfolioKpiCard(
+              title: 'Dividendos Acumulados',
+              value: summary?.accumulatedDividends ?? 0,
+              isLoading: isLoading,
+              valueColor: const Color(0xFFF59E0B),
+            ),
+            PortfolioKpiCard(
+              title: 'Projeção Mensal',
+              value: summary?.monthlyProjection ?? 0,
+              isLoading: isLoading,
+            ),
+          ],
+        );
+      },
     );
   }
 }

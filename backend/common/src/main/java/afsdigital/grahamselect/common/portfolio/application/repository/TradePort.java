@@ -4,6 +4,7 @@ import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface TradePort {
@@ -18,4 +19,6 @@ public interface TradePort {
             String broker,
             String side
     );
+
+    List<Trade> findAllByUserId(String userId);
 }

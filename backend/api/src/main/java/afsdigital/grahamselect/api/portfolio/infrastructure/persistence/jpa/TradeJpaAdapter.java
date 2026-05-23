@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -58,5 +59,22 @@ public class TradeJpaAdapter implements TradePort {
         return repository.existsByUserIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
                 userId, ticker, tradeDate, quantity, price, broker, side
         );
+    }
+
+    @Override
+    public List<Trade> findAllByUserId(String userId) {
+        return repository.findAllByUserId(userId).stream()
+                .map(saved -> Trade.builder()
+                        .id(saved.getId())
+                        .userId(saved.getUserId())
+                        .ticker(saved.getTicker())
+                        .side(saved.getSide())
+                        .tradeDate(saved.getTradeDate())
+                        .quantity(saved.getQuantity())
+                        .price(saved.getPrice())
+                        .broker(saved.getBroker())
+                        .createdAt(saved.getCreatedAt())
+                        .build())
+                .toList();
     }
 }

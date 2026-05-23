@@ -1,3 +1,4 @@
+import '../entities/portfolio_summary.dart';
 import '../entities/trade.dart';
 
 abstract class PortfolioRepository {
@@ -9,4 +10,6 @@ abstract class PortfolioRepository {
     required double price,
     required String broker,
   });
+
+  Future<PortfolioSummary> getSummary();
 }

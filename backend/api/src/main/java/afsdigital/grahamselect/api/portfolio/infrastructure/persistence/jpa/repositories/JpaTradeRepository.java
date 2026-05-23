@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -19,4 +20,6 @@ public interface JpaTradeRepository extends JpaRepository<TradeEntity, UUID> {
             String broker,
             String side
     );
+
+    List<TradeEntity> findAllByUserId(String userId);
 }
