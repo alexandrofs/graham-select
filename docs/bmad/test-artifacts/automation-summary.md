@@ -1,62 +1,56 @@
 ---
 stepsCompleted: ['step-01-preflight-and-context', 'step-02-identify-targets', 'step-03-generate-tests', 'step-03c-aggregate', 'step-04-validate-and-summarize']
 lastStep: 'step-04-validate-and-summarize'
-lastSaved: '2026-05-17T17:30:00Z'
+lastSaved: 'sábado, 23 de maio de 2026'
 inputDocuments:
-  - docs/bmad/planning-artifacts/traceability-matrix.md
-  - backend/api/src/main/resources/openapi.yaml
-  - docs/bmad/implementation-artifacts/
+  - _bmad/tea/config.yaml
+  - _bmad/tea/testarch/tea-index.csv
+  - docs/bmad/planning-artifacts/epics.md
+  - docs/bmad/implementation-artifacts/3-1-portfolio-kpi-dashboard.md
+  - docs/bmad/test-artifacts/traceability-matrix.md
+  - backend/api/src/test/java/afsdigital/grahamselect/api/portfolio/web/PortfolioControllerTest.java
+  - backend/common/src/test/java/afsdigital/grahamselect/common/portfolio/application/usecase/GetPortfolioSummaryUseCaseTest.java
+  - frontend/lib/src/features/portfolio/presentation/widgets/portfolio_kpi_card.dart
+  - frontend/lib/src/features/dashboard/presentation/pages/dashboard_page.dart
 ---
 
-# Automação de Testes - Graham Select
+# Test Automation Summary - Story 3.1
 
-## Passo 3: Test Generation Results
+## 📊 Resumo Executivo
+A automação de testes para a História 3.1 foi concluída com sucesso, resolvendo os gaps críticos identificados na Matriz de Rastreabilidade. Foram implementados testes de widget e integração para o frontend Flutter, garantindo a validação dos critérios de aceitação P0 e P1.
 
-### Resumo da Execução (Adaptive Mode)
-- **Modo Utilizado**: `subagents` (Parallel Execution).
-- **Stack**: `fullstack`.
-- **Status**: Sucesso ✅.
+## 🎯 Cobertura por Nível de Teste
 
-### Testes de API (Subagente API)
-- **Arquivo**: `backend/api/src/test/java/afsdigital/grahamselect/api/ApiAutomationIT.java`
-- **Cobertura**:
-  - `GET /api/v1/ranked-companies`: Validação de restrição de Tier (FREE: 403, PREMIUM: 200).
-  - `POST /api/v1/upload-financial-data`: Validação de multipart upload e tratamento de erros.
-  - **Diferencial**: Lógica de polling implementada para validar processamento assíncrono.
+| Nível | Qtd | Cobertura de Critérios | Status |
+| :--- | :---: | :--- | :--- |
+| **Component (Widget)** | 6 | AC-2, AC-3, AC-4, AC-5 | ✅ PASS |
+| **Integration** | 1 | AC-2, AC-6 (NFR2) | ✅ PASS |
+| **API** | 1 | AC-1, AC-3 (Backend) | ✅ PASS (Existente) |
+| **Unit** | 1 | AC-3 (Lógica Backend) | ✅ PASS (Existente) |
 
-### Testes E2E Flutter (Subagente E2E)
-- **Arquivos**:
-  - `frontend/integration_test/upload_flow_test.dart`
-  - `frontend/integration_test/profile_e2e_test.dart`
-- **Cobertura**:
-  - Fluxo completo de Upload B3 -> Processamento -> Verificação no Dashboard.
-  - Onboarding de Perfil do Investidor (Suitability).
+## 📂 Arquivos Criados/Atualizados
 
-### Testes de Backend/Kafka (Subagente Backend)
-- **Arquivos**:
-  - `backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractedConsumerIT.java`
-  - `backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractionDlqIT.java`
-- **Cobertura**:
-  - **Race Condition (P0)**: Validação empírica de mensagens simultâneas para o mesmo trade.
-  - **DLQ Flow (P1)**: Garantia de que falhas de extração são enviadas para a fila de erro.
-- **Fixtures Utilizadas**: `EmbeddedKafkaBroker`, `Awaitility`.
+- `frontend/test/features/portfolio/presentation/widgets/portfolio_kpi_card_test.dart`
+  - Valida formatação BRL/%, Skeleton Loading e Cores Emerald/Navy.
+- `frontend/test/features/dashboard/presentation/pages/dashboard_page_test.dart`
+  - Valida renderização dos 4 cards, integração com `PortfolioProvider` e estados de erro/retry.
+- `frontend/test/features/dashboard/presentation/pages/dashboard_page_test.mocks.dart`
+  - Mocks gerados via `build_runner`.
+- `frontend/integration_test/performance_test.dart`
+  - Benchmark de transição < 300ms (NFR2).
 
-### Métricas de Performance
-- **Modo**: Subagent (Parallel).
-- **Geração API**: ~3 min.
-- **Geração E2E**: ~5 min.
-- **Geração Backend**: ~4 min.
-- **Total de Testes Gerados**: 5 suítes de teste de alta prioridade.
+## 🛠️ Infraestrutura de Teste
+- **Mocks:** Utilização de `Mockito` para `PortfolioProvider` e `ProfileProvider`.
+- **Gerador:** `build_runner` executado para garantir integridade dos mocks.
+- **Matchers:** Uso de `find.textContaining` para robustez contra variações de formatação do `NumberFormat`.
 
-## Passo 4: Validação e Conclusão
+## ⚠️ Premissas e Riscos
+- **Ambiente de Teste:** Os testes de widget rodam em ambiente isolado (Mocked). O teste de integração pressupõe o `app.main()` inicializado.
+- **Performance:** O teste de 300ms é um benchmark sintético e pode variar dependendo da máquina de CI.
 
-### Premissas e Riscos
-- **Premissa**: Assume-se que o ambiente de teste tem o Kafka e banco de dados H2 configurados via Spring Profiles.
-- **Premissa**: Os testes de Flutter assumem que o `mock_repository` está devidamente gerado via `build_runner`.
-- **Risco**: A complexidade de upload de arquivos reais em testes de integração Flutter pode exigir mocks de IO mais profundos dependendo da plataforma.
-- **Risco**: Race conditions em ambientes de CI compartilhados podem causar instabilidade nos testes de Kafka se os timeouts da Awaitility forem muito baixos.
+## 🚀 Próximos Passos Recomendados
+1. **Executar Traceability Matrix:** Rodar o workflow `trace` para atualizar a matriz e confirmar a aprovação da história para release.
+2. **Promover para CI:** Adicionar os novos testes ao pipeline do GitHub Actions.
 
-### Próximos Passos Recomendados
-1. **Execução Local**: Rodar `./mvnw test` e `flutter test integration_test/` para validar a suite completa.
-2. **Review de Testes**: Utilizar o workflow `test-review` para garantir que os testes seguem os padrões Murat de qualidade.
-3. **Traceability**: Gerar a matriz de rastreabilidade final com o workflow `trace` para confirmar cobertura de 100% dos critérios de aceitação.
+---
+<!-- Powered by BMAD-CORE™ -->
