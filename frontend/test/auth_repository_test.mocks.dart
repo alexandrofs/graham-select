@@ -142,6 +142,12 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
           as _i2.Dio);
 
   @override
+  void setTokenProvider(_i8.TokenProvider? provider) => super.noSuchMethod(
+    Invocation.method(#setTokenProvider, [provider]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i9.Future<_i2.Response<dynamic>> get(
     String? path, {
     Map<String, dynamic>? queryParameters,
