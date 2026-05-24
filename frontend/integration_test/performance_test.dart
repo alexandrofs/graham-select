@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:frontend/main.dart' as app;
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ void main() {
       stopwatch.stop();
 
       final transitionTime = stopwatch.elapsedMilliseconds;
-      print('TRANSITION TIME: ${transitionTime}ms');
+      debugPrint('TRANSITION TIME: ${transitionTime}ms');
       
       expect(transitionTime, lessThan(300), reason: 'Dashboard transition should be under 300ms');
     });
