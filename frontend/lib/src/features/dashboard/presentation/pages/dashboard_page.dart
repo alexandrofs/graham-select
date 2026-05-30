@@ -5,6 +5,7 @@ import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
+import '../../../portfolio/presentation/widgets/financial_data_table.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -20,6 +21,7 @@ class _DashboardPageState extends State<DashboardPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().fetchProfile();
       context.read<PortfolioProvider>().loadSummary();
+      context.read<PortfolioProvider>().loadCustodyPositions();
     });
   }
 
@@ -61,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 32),
             _buildKpiSection(context),
             const SizedBox(height: 32),
-            // Outras seções do Epic 3 virão aqui
+            const FinancialDataTable(),
           ],
         ),
       ),

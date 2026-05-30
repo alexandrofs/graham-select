@@ -1,6 +1,6 @@
 # Story 3.2: Tabela de Custódia Atualizada (Componente `FinancialDataTable`)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

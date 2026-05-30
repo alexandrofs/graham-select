@@ -1,5 +1,6 @@
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/entities/trade.dart';
+import '../../domain/entities/custody_position.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 import '../datasources/portfolio_remote_data_source.dart';
 import '../../../auth/data/auth_repository.dart';
@@ -35,5 +36,11 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       broker: broker,
       token: token,
     );
+  }
+
+  @override
+  Future<List<CustodyPosition>> getCustodyPositions() async {
+    final token = await authRepository.getPersistedToken();
+    return remoteDataSource.getCustodyPositions(token: token);
   }
 }
