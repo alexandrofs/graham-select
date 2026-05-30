@@ -1,0 +1,14 @@
+{
+  "subagentType": "backend",
+  "testsGenerated": [],
+  "coverageSummary": {
+    "totalTests": 0,
+    "testLevels": [],
+    "fixtureNeeds": []
+  },
+  "status": "complete",
+  "success": true,
+  "subagent": "backend-tests",
+  "knowledge_fragments_used": ["test-levels-framework"],
+  "summary": "No backend tests needed. Backend already covered."
+}
