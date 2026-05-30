@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/portfolio_summary_model.dart';
 import '../models/trade_model.dart';
+import '../models/custody_position_model.dart';
 
 class PortfolioRemoteDataSource {
   final http.Client client;
@@ -61,6 +62,25 @@ class PortfolioRemoteDataSource {
       throw Exception('Operação duplicada detectada.');
     } else {
       throw Exception('Erro ao criar operação manual: ${response.statusCode}');
+    }
+  }
+
+  Future<List<CustodyPositionModel>> getCustodyPositions({String? token}) async {
+    final uri = Uri.parse('$baseUrl/portfolios/custody');
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      final List<dynamic> data = body['data'];
+      return data.map((json) => CustodyPositionModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Erro ao buscar posições de custódia: ${response.statusCode}');
     }
   }
 }

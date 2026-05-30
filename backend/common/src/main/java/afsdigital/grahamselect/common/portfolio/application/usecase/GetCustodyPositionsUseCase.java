@@ -28,7 +28,11 @@ public class GetCustodyPositionsUseCase {
     private final StockPricePort stockPricePort;
 
     public List<CustodyPositionDTO> execute(String userId) {
-        List<Trade> trades = tradePort.findAllByUserId(userId);
+        // Ordenar trades por data cronologicamente de forma robusta
+        List<Trade> trades = tradePort.findAllByUserId(userId).stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(Trade::getTradeDate, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
 
         // 1. Agrupar trades por Ticker (somar COMPRA, subtrair VENDA, excluir DIVIDENDO)
         // Também calcular Preço Médio Ponderado das Compras
@@ -46,7 +50,16 @@ public class GetCustodyPositionsUseCase {
                 totalPurchaseAmount.merge(ticker, quantity.multiply(price), BigDecimal::add);
                 totalPurchaseQty.merge(ticker, quantity, BigDecimal::add);
             } else if (TradeSide.VENDA.name().equals(trade.getSide())) {
-                quantities.merge(ticker, quantity.negate(), BigDecimal::add);
+                BigDecimal currentQty = quantities.getOrDefault(ticker, BigDecimal.ZERO);
+                BigDecimal newQty = currentQty.subtract(quantity);
+                quantities.put(ticker, newQty);
+
+                // Se liquidar a posicao (quantidade zerada ou menor), reseta os acumulados daquele ticker
+                if (newQty.compareTo(BigDecimal.ZERO) <= 0) {
+                    totalPurchaseAmount.put(ticker, BigDecimal.ZERO);
+                    totalPurchaseQty.put(ticker, BigDecimal.ZERO);
+                    quantities.put(ticker, BigDecimal.ZERO);
+                }
             }
             // Trades do tipo DIVIDENDO devem ser excluídos
         }

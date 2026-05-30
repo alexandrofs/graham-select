@@ -3,16 +3,19 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
-import 'dart:ui' as _i5;
+import 'dart:async' as _i6;
+import 'dart:ui' as _i7;
 
+import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart'
+    as _i4;
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart'
     as _i2;
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart'
     as _i3;
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart'
-    as _i6;
+    as _i8;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -63,21 +66,53 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i3.PortfolioStatus);
 
   @override
+  List<_i4.CustodyPosition> get custodyPositions =>
+      (super.noSuchMethod(
+            Invocation.getter(#custodyPositions),
+            returnValue: <_i4.CustodyPosition>[],
+          )
+          as List<_i4.CustodyPosition>);
+
+  @override
+  _i3.PortfolioStatus get custodyStatus =>
+      (super.noSuchMethod(
+            Invocation.getter(#custodyStatus),
+            returnValue: _i3.PortfolioStatus.initial,
+          )
+          as _i3.PortfolioStatus);
+
+  @override
+  String get sortColumn =>
+      (super.noSuchMethod(
+            Invocation.getter(#sortColumn),
+            returnValue: _i5.dummyValue<String>(
+              this,
+              Invocation.getter(#sortColumn),
+            ),
+          )
+          as String);
+
+  @override
+  bool get sortAscending =>
+      (super.noSuchMethod(Invocation.getter(#sortAscending), returnValue: false)
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
 
   @override
-  _i4.Future<void> loadSummary() =>
+  _i6.Future<void> loadSummary() =>
       (super.noSuchMethod(
             Invocation.method(#loadSummary, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i6.Future<void>);
 
   @override
-  _i4.Future<void> createManualTrade({
+  _i6.Future<void> createManualTrade({
     required String? ticker,
     required String? side,
     required DateTime? tradeDate,
@@ -94,10 +129,10 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
               #price: price,
               #broker: broker,
             }),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i6.Future<void>);
 
   @override
   void resetStatus() => super.noSuchMethod(
@@ -106,13 +141,28 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   );
 
   @override
-  void addListener(_i5.VoidCallback? listener) => super.noSuchMethod(
+  _i6.Future<void> loadCustodyPositions() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadCustodyPositions, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  void sortBy(String? column) => super.noSuchMethod(
+    Invocation.method(#sortBy, [column]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void removeListener(_i5.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#removeListener, [listener]),
     returnValueForMissingStub: null,
   );
@@ -133,18 +183,18 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
 /// A class which mocks [ProfileProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockProfileProvider extends _i1.Mock implements _i6.ProfileProvider {
+class MockProfileProvider extends _i1.Mock implements _i8.ProfileProvider {
   MockProfileProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.ProfileState get state =>
+  _i8.ProfileState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _i6.ProfileState.idle,
+            returnValue: _i8.ProfileState.idle,
           )
-          as _i6.ProfileState);
+          as _i8.ProfileState);
 
   @override
   bool get hasListeners =>
@@ -152,31 +202,31 @@ class MockProfileProvider extends _i1.Mock implements _i6.ProfileProvider {
           as bool);
 
   @override
-  _i4.Future<void> fetchProfile() =>
+  _i6.Future<void> fetchProfile() =>
       (super.noSuchMethod(
             Invocation.method(#fetchProfile, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i6.Future<void>);
 
   @override
-  _i4.Future<void> updateInvestorProfile(String? investorProfile) =>
+  _i6.Future<void> updateInvestorProfile(String? investorProfile) =>
       (super.noSuchMethod(
             Invocation.method(#updateInvestorProfile, [investorProfile]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i6.Future<void>);
 
   @override
-  void addListener(_i5.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void removeListener(_i5.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#removeListener, [listener]),
     returnValueForMissingStub: null,
   );

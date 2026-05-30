@@ -218,4 +218,69 @@ class GetCustodyPositionsUseCaseTest {
         assertEquals("CACHE", pos.priceSource());
         assertEquals(yesterday.atStartOfDay(ZoneOffset.UTC).toInstant(), pos.priceUpdatedAt());
     }
+
+    @Test
+    void shouldResetAveragePriceWhenPositionIsZeroedAndReboughtAndRespectChronologicalOrder() {
+        String userId = "user-1";
+        String ticker = "PETR4";
+        String companyId = "comp-1";
+
+        // Adicionados FORA de ordem cronologica para testar a ordenacao automatica do UseCase
+        // Trade 3: Recompra cronologicamente em data posterior (30/05)
+        Trade trade3 = Trade.builder()
+                .userId(userId)
+                .ticker(ticker)
+                .side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("5"))
+                .price(new BigDecimal("35.00"))
+                .tradeDate(LocalDate.of(2026, 5, 30))
+                .build();
+
+        // Trade 1: Primeira compra cronologicamente (10/05)
+        Trade trade1 = Trade.builder()
+                .userId(userId)
+                .ticker(ticker)
+                .side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("10"))
+                .price(new BigDecimal("30.00"))
+                .tradeDate(LocalDate.of(2026, 5, 10))
+                .build();
+
+        // Trade 2: Venda cronologicamente que zera a posicao (20/05)
+        Trade trade2 = Trade.builder()
+                .userId(userId)
+                .ticker(ticker)
+                .side(TradeSide.VENDA.name())
+                .quantity(new BigDecimal("10"))
+                .price(new BigDecimal("32.00"))
+                .tradeDate(LocalDate.of(2026, 5, 20))
+                .build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(trade3, trade1, trade2));
+
+        Company company = new Company(companyId, ticker);
+        when(companyRepository.findByTicker(ticker)).thenReturn(company);
+
+        LocalDate today = LocalDate.of(2026, 5, 30);
+        StockPrice stockPrice = StockPrice.builder()
+                .companyId(companyId)
+                .price(new BigDecimal("40.00"))
+                .date(today)
+                .build();
+        when(stockPricePort.findLatestByCompanyIds(List.of(companyId))).thenReturn(Map.of(companyId, stockPrice));
+
+        List<CustodyPositionDTO> result = useCase.execute(userId);
+
+        assertEquals(1, result.size());
+        CustodyPositionDTO pos = result.get(0);
+
+        assertEquals(ticker, pos.ticker());
+        // A quantidade deve ser 5 (da recompra posterior)
+        assertEquals(new BigDecimal("5.00"), pos.quantity());
+        // O preco medio deve ser R$ 35.00 (apenas o preco da recompra, porque as anteriores foram liquidadas!)
+        assertEquals(new BigDecimal("35.00"), pos.averagePrice());
+        assertEquals(new BigDecimal("40.00"), pos.currentPrice());
+        assertEquals(new BigDecimal("200.00"), pos.marketValue()); // 5 * 40 = 200
+        assertEquals(new BigDecimal("14.29"), pos.gainLossPercentage()); // ((40 - 35) / 35) * 100 = 14.2857% -> 14.29%
+    }
 }
