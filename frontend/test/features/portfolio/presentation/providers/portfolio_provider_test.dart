@@ -1,0 +1,206 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
+import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
+import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/trade.dart';
+
+class MockPortfolioRepository implements PortfolioRepository {
+  bool shouldThrow = false;
+  List<CustodyPosition> positionsToReturn = [];
+  DateTime? metaPriceUpdatedAtToReturn;
+  PortfolioSummary? summaryToReturn;
+
+  @override
+  Future<Trade> createManualTrade({
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+  }) async {
+    if (shouldThrow) {
+      throw Exception('Failed to create manual trade');
+    }
+    return Trade(
+      id: '123',
+      userId: 'user-123',
+      ticker: ticker,
+      side: side,
+      tradeDate: tradeDate,
+      quantity: quantity,
+      price: price,
+      broker: broker,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<PortfolioSummary> getSummary() async {
+    if (shouldThrow) {
+      throw Exception('Erro ao buscar resumo');
+    }
+    if (summaryToReturn != null) {
+      return summaryToReturn!;
+    }
+    return PortfolioSummary(
+      totalEquity: 10000.0,
+      grossYieldPercentage: 15.0,
+      accumulatedDividends: 1500.0,
+      monthlyProjection: 200.0,
+    );
+  }
+
+  @override
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})>
+      getCustodyPositions() async {
+    if (shouldThrow) {
+      throw Exception('Erro ao buscar custódia');
+    }
+    return (positions: positionsToReturn, metaPriceUpdatedAt: metaPriceUpdatedAtToReturn);
+  }
+}
+
+void main() {
+  group('PortfolioProvider', () {
+    late MockPortfolioRepository mockRepository;
+    late PortfolioProvider provider;
+
+    setUp(() {
+      mockRepository = MockPortfolioRepository();
+      provider = PortfolioProvider(mockRepository);
+    });
+
+    test('deve ter estado inicial correto', () {
+      expect(provider.custodyStatus, equals(PortfolioStatus.initial));
+      expect(provider.custodyPositions, isEmpty);
+      expect(provider.custodyError, isNull);
+      expect(provider.custodyMetaPriceUpdatedAt, isNull);
+    });
+
+    group('loadCustodyPositions', () {
+      final tPositions = [
+        const CustodyPosition(
+          ticker: 'PETR4',
+          quantity: 100.0,
+          averagePrice: 30.0,
+          currentPrice: 35.0,
+          marketValue: 3500.0,
+          gainLossPercentage: 16.67,
+          priceSource: 'LIVE',
+          priceUpdatedAt: null,
+        ),
+        const CustodyPosition(
+          ticker: 'VALE3',
+          quantity: 50.0,
+          averagePrice: 80.0,
+          currentPrice: 75.0,
+          marketValue: 3750.0,
+          gainLossPercentage: -6.25,
+          priceSource: 'CACHE',
+          priceUpdatedAt: null,
+        ),
+      ];
+      final tDate = DateTime.utc(2026, 5, 30, 18, 0, 0);
+
+      test('deve carregar posições de custódia com sucesso', () async {
+        mockRepository.positionsToReturn = tPositions;
+        mockRepository.metaPriceUpdatedAtToReturn = tDate;
+
+        final future = provider.loadCustodyPositions();
+
+        expect(provider.custodyStatus, equals(PortfolioStatus.loading));
+
+        await future;
+
+        expect(provider.custodyStatus, equals(PortfolioStatus.success));
+        expect(provider.custodyPositions.length, equals(2));
+        expect(provider.custodyMetaPriceUpdatedAt, equals(tDate));
+        expect(provider.custodyError, isNull);
+      });
+
+      test('deve atualizar estado para erro se a chamada falhar', () async {
+        mockRepository.shouldThrow = true;
+
+        await provider.loadCustodyPositions();
+
+        expect(provider.custodyStatus, equals(PortfolioStatus.error));
+        expect(provider.custodyPositions, isEmpty);
+        expect(provider.custodyError, equals('Erro ao buscar custódia'));
+      });
+    });
+
+    group('sortBy', () {
+      final tPositions = [
+        const CustodyPosition(
+          ticker: 'VALE3',
+          quantity: 50.0,
+          averagePrice: 80.0,
+          currentPrice: 75.0,
+          marketValue: 3750.0,
+          gainLossPercentage: -6.25,
+          priceSource: 'CACHE',
+        ),
+        const CustodyPosition(
+          ticker: 'PETR4',
+          quantity: 100.0,
+          averagePrice: 30.0,
+          currentPrice: 35.0,
+          marketValue: 3500.0,
+          gainLossPercentage: 16.67,
+          priceSource: 'LIVE',
+        ),
+      ];
+
+      setUp(() async {
+        mockRepository.positionsToReturn = tPositions;
+        await provider.loadCustodyPositions();
+      });
+
+      test('deve ordenar por ticker de forma ascendente por padrão', () {
+        expect(provider.sortColumn, equals('ticker'));
+        expect(provider.sortAscending, isTrue);
+
+        final sorted = provider.custodyPositions;
+        expect(sorted[0].ticker, equals('PETR4'));
+        expect(sorted[1].ticker, equals('VALE3'));
+      });
+
+      test('deve inverter ordenação ao chamar sortBy na mesma coluna', () {
+        provider.sortBy('ticker');
+
+        expect(provider.sortColumn, equals('ticker'));
+        expect(provider.sortAscending, isFalse);
+
+        final sorted = provider.custodyPositions;
+        expect(sorted[0].ticker, equals('VALE3'));
+        expect(sorted[1].ticker, equals('PETR4'));
+      });
+
+      test('deve alterar a coluna de ordenação com asc=true por padrão', () {
+        provider.sortBy('marketValue');
+
+        expect(provider.sortColumn, equals('marketValue'));
+        expect(provider.sortAscending, isTrue);
+
+        final sorted = provider.custodyPositions;
+        expect(sorted[0].ticker, equals('PETR4'));
+        expect(sorted[1].ticker, equals('VALE3'));
+      });
+    });
+
+    test('resetStatus deve limpar mensagens de erro e voltar para o estado initial', () async {
+      mockRepository.shouldThrow = true;
+      await provider.loadSummary();
+
+      expect(provider.status, equals(PortfolioStatus.error));
+      expect(provider.errorMessage, equals('Erro ao buscar resumo'));
+
+      provider.resetStatus();
+
+      expect(provider.status, equals(PortfolioStatus.initial));
+      expect(provider.errorMessage, isNull);
+    });
+  });
+}
