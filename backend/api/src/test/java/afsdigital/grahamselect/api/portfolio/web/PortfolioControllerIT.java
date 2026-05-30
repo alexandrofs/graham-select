@@ -1,7 +1,7 @@
 package afsdigital.grahamselect.api.portfolio.web;
 
-import afsdigital.grahamselect.common.portfolio.infrastructure.persistence.jpa.entities.TradeEntity;
-import afsdigital.grahamselect.common.portfolio.infrastructure.persistence.jpa.repositories.TradeRepository;
+import afsdigital.grahamselect.api.portfolio.infrastructure.persistence.jpa.entities.TradeEntity;
+import afsdigital.grahamselect.api.portfolio.infrastructure.persistence.jpa.repositories.JpaTradeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class PortfolioControllerIT {
     private MockMvc mockMvc;
 
     @Autowired
-    private TradeRepository tradeRepository;
+    private JpaTradeRepository tradeRepository;
 
     private static final String USER_ID = "user-custody-it";
 
