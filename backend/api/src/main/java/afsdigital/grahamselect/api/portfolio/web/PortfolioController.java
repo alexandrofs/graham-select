@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,18 +38,21 @@ public class PortfolioController {
         String userId = jwt.getSubject();
         List<CustodyPositionDTO> positions = getCustodyPositionsUseCase.execute(userId);
         
+        // Retorna null quando não há cotação real — evita exibir "Atualizado em HH:mm" com hora falsa
         Instant latestUpdate = positions.stream()
                 .map(CustodyPositionDTO::priceUpdatedAt)
                 .filter(Objects::nonNull)
                 .max(Instant::compareTo)
-                .orElse(Instant.now());
+                .orElse(null);
+
+        // Usa HashMap para permitir valores null no meta (Map.of() não aceita null)
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("total", positions.size());
+        meta.put("priceUpdatedAt", latestUpdate); // null quando todas as posições são CACHE sem data
 
         Map<String, Object> response = Map.of(
             "data", positions,
-            "meta", Map.of(
-                "total", positions.size(),
-                "priceUpdatedAt", latestUpdate
-            )
+            "meta", meta
         );
         return ResponseEntity.ok(response);
     }

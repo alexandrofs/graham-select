@@ -104,6 +104,11 @@ class PortfolioProvider extends ChangeNotifier {
   String? _custodyError;
   String? get custodyError => _custodyError;
 
+  /// Timestamp autoritativo vindo do backend (meta.priceUpdatedAt).
+  /// Null quando todas as posições são CACHE sem cotação real.
+  DateTime? _custodyMetaPriceUpdatedAt;
+  DateTime? get custodyMetaPriceUpdatedAt => _custodyMetaPriceUpdatedAt;
+
   String _sortColumn = 'ticker';
   String get sortColumn => _sortColumn;
 
@@ -116,7 +121,9 @@ class PortfolioProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _custodyPositions = await repository.getCustodyPositions();
+      final result = await repository.getCustodyPositions();
+      _custodyPositions = result.positions;
+      _custodyMetaPriceUpdatedAt = result.metaPriceUpdatedAt;
       _custodyStatus = PortfolioStatus.success;
     } catch (e) {
       _custodyStatus = PortfolioStatus.error;

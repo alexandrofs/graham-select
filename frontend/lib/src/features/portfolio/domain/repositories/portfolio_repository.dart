@@ -13,5 +13,5 @@ abstract class PortfolioRepository {
   });
 
   Future<PortfolioSummary> getSummary();
-  Future<List<CustodyPosition>> getCustodyPositions();
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})> getCustodyPositions();
 }
