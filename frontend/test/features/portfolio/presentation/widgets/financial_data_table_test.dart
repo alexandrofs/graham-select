@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/trade.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/monthly_evolution.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 class MockPortfolioRepository implements PortfolioRepository {
@@ -35,6 +36,9 @@ class MockPortfolioRepository implements PortfolioRepository {
     }
     return (positions: positionsToReturn, metaPriceUpdatedAt: metaPriceUpdatedAtToReturn);
   }
+
+  @override
+  Future<PortfolioEvolution> getPortfolioEvolution() async => throw UnimplementedError();
 }
 
 void main() {

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/entities/custody_position.dart';
+import '../../domain/entities/monthly_evolution.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 
 enum PortfolioStatus { initial, loading, success, error }
@@ -161,5 +162,30 @@ class PortfolioProvider extends ChangeNotifier {
       default:
         return null;
     }
+  }
+
+  // --- Estados de Evolução (Histórico Proventos e Aportes) ---
+  PortfolioStatus _evolutionStatus = PortfolioStatus.initial;
+  PortfolioStatus get evolutionStatus => _evolutionStatus;
+
+  String? _evolutionError;
+  String? get evolutionError => _evolutionError;
+
+  PortfolioEvolution? _evolutionData;
+  PortfolioEvolution? get evolutionData => _evolutionData;
+
+  Future<void> loadEvolutionData() async {
+    _evolutionStatus = PortfolioStatus.loading;
+    _evolutionError = null;
+    notifyListeners();
+
+    try {
+      _evolutionData = await repository.getPortfolioEvolution();
+      _evolutionStatus = PortfolioStatus.success;
+    } catch (e) {
+      _evolutionStatus = PortfolioStatus.error;
+      _evolutionError = e.toString().replaceFirst('Exception: ', '');
+    }
+    notifyListeners();
   }
 }

@@ -1,6 +1,7 @@
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/entities/trade.dart';
 import '../../domain/entities/custody_position.dart';
+import '../../domain/entities/monthly_evolution.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 import '../datasources/portfolio_remote_data_source.dart';
 import '../../../auth/data/auth_repository.dart';
@@ -43,5 +44,11 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       getCustodyPositions() async {
     final token = await authRepository.getPersistedToken();
     return remoteDataSource.getCustodyPositions(token: token);
+  }
+
+  @override
+  Future<PortfolioEvolution> getPortfolioEvolution() async {
+    final token = await authRepository.getPersistedToken();
+    return remoteDataSource.getPortfolioEvolution(token: token);
   }
 }

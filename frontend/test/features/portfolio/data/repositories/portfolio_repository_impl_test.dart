@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:frontend/src/features/auth/data/auth_repository.dart';
 import 'package:frontend/src/features/portfolio/data/datasources/portfolio_remote_data_source.dart';
 import 'package:frontend/src/features/portfolio/data/models/custody_position_model.dart';
+import 'package:frontend/src/features/portfolio/data/models/monthly_evolution_model.dart';
 import 'package:frontend/src/features/portfolio/data/repositories/portfolio_repository_impl.dart';
 import 'package:http/http.dart' as http;
 
@@ -40,6 +41,7 @@ class FakeHttpClient extends http.BaseClient {
 
 class MockPortfolioRemoteDataSource extends PortfolioRemoteDataSource {
   ({List<CustodyPositionModel> positions, DateTime? metaPriceUpdatedAt})? responseToReturn;
+  PortfolioEvolutionModel? evolutionResponseToReturn;
   String? capturedToken;
 
   MockPortfolioRemoteDataSource() : super(client: FakeHttpClient());
@@ -50,6 +52,15 @@ class MockPortfolioRemoteDataSource extends PortfolioRemoteDataSource {
     capturedToken = token;
     if (responseToReturn != null) {
       return responseToReturn!;
+    }
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PortfolioEvolutionModel> getPortfolioEvolution({String? token}) async {
+    capturedToken = token;
+    if (evolutionResponseToReturn != null) {
+      return evolutionResponseToReturn!;
     }
     throw UnimplementedError();
   }

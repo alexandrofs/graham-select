@@ -2,8 +2,10 @@ package afsdigital.grahamselect.api.portfolio.web;
 
 import afsdigital.grahamselect.common.portfolio.application.dto.CustodyPositionDTO;
 import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioSummaryDTO;
+import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioEvolutionDTO;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetCustodyPositionsUseCase;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioSummaryUseCase;
+import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioEvolutionUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +27,7 @@ public class PortfolioController {
 
     private final GetPortfolioSummaryUseCase getPortfolioSummaryUseCase;
     private final GetCustodyPositionsUseCase getCustodyPositionsUseCase;
+    private final GetPortfolioEvolutionUseCase getPortfolioEvolutionUseCase;
 
     @GetMapping("/summary")
     public ResponseEntity<PortfolioSummaryDTO> getSummary(@AuthenticationPrincipal Jwt jwt) {
@@ -55,5 +58,12 @@ public class PortfolioController {
             "meta", meta
         );
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/evolution")
+    public ResponseEntity<PortfolioEvolutionDTO> getEvolution(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        PortfolioEvolutionDTO evolution = getPortfolioEvolutionUseCase.execute(userId);
+        return ResponseEntity.ok(evolution);
     }
 }
