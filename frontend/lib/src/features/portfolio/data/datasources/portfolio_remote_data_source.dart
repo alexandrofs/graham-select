@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/portfolio_summary_model.dart';
 import '../models/trade_model.dart';
 import '../models/custody_position_model.dart';
+import '../models/monthly_evolution_model.dart';
 
 class PortfolioRemoteDataSource {
   final http.Client client;
@@ -91,6 +92,23 @@ class PortfolioRemoteDataSource {
       return (positions: positions, metaPriceUpdatedAt: metaUpdatedAt);
     } else {
       throw Exception('Erro ao buscar posições de custódia: ${response.statusCode}');
+    }
+  }
+
+  Future<PortfolioEvolutionModel> getPortfolioEvolution({String? token}) async {
+    final uri = Uri.parse('$baseUrl/portfolios/evolution');
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return PortfolioEvolutionModel.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erro ao buscar evolução do portfólio: ${response.statusCode}');
     }
   }
 }

@@ -43,6 +43,7 @@ import 'src/features/profile/presentation/pages/investor_profile_page.dart';
 import 'src/features/portfolio/data/datasources/portfolio_remote_data_source.dart';
 import 'src/features/portfolio/data/repositories/portfolio_repository_impl.dart';
 import 'src/features/portfolio/presentation/providers/portfolio_provider.dart';
+import 'src/features/portfolio/presentation/pages/evolution_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -181,6 +182,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
           builder: (context, state, child) => MainLayout(child: child),
           routes: [
             GoRoute(path: '/dashboard', builder: (context, state) => const DashboardPage()),
+            GoRoute(path: '/evolution', builder: (context, state) => const EvolutionPage()),
             GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
             GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),

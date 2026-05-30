@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/monthly_evolution.dart';
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/trade.dart';
@@ -10,6 +11,7 @@ class MockPortfolioRepository implements PortfolioRepository {
   List<CustodyPosition> positionsToReturn = [];
   DateTime? metaPriceUpdatedAtToReturn;
   PortfolioSummary? summaryToReturn;
+  PortfolioEvolution? evolutionToReturn;
 
   @override
   Future<Trade> createManualTrade({
@@ -59,6 +61,17 @@ class MockPortfolioRepository implements PortfolioRepository {
       throw Exception('Erro ao buscar custódia');
     }
     return (positions: positionsToReturn, metaPriceUpdatedAt: metaPriceUpdatedAtToReturn);
+  }
+
+  @override
+  Future<PortfolioEvolution> getPortfolioEvolution() async {
+    if (shouldThrow) {
+      throw Exception('Erro ao buscar evolução');
+    }
+    if (evolutionToReturn != null) {
+      return evolutionToReturn!;
+    }
+    return const PortfolioEvolution(monthlyData: []);
   }
 }
 
@@ -201,6 +214,39 @@ void main() {
 
       expect(provider.status, equals(PortfolioStatus.initial));
       expect(provider.errorMessage, isNull);
+    });
+
+    group('loadEvolutionData', () {
+      test('deve carregar os dados de evolução com sucesso', () async {
+        const tEvolution = PortfolioEvolution(
+          monthlyData: [
+            MonthlyEvolution(month: '2026-04', totalContributions: 1000.0, totalDividends: 50.0),
+            MonthlyEvolution(month: '2026-05', totalContributions: 2000.0, totalDividends: 100.0),
+          ],
+        );
+
+        mockRepository.evolutionToReturn = tEvolution;
+        expect(provider.evolutionStatus, equals(PortfolioStatus.initial));
+
+        final future = provider.loadEvolutionData();
+        expect(provider.evolutionStatus, equals(PortfolioStatus.loading));
+
+        await future;
+
+        expect(provider.evolutionStatus, equals(PortfolioStatus.success));
+        expect(provider.evolutionData, equals(tEvolution));
+        expect(provider.evolutionError, isNull);
+      });
+
+      test('deve definir o estado de erro se falhar no carregamento', () async {
+        mockRepository.shouldThrow = true;
+
+        await provider.loadEvolutionData();
+
+        expect(provider.evolutionStatus, equals(PortfolioStatus.error));
+        expect(provider.evolutionData, isNull);
+        expect(provider.evolutionError, equals('Erro ao buscar evolução'));
+      });
     });
   });
 }

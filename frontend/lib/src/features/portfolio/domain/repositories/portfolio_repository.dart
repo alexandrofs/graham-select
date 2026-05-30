@@ -1,6 +1,7 @@
 import '../entities/portfolio_summary.dart';
 import '../entities/trade.dart';
 import '../entities/custody_position.dart';
+import '../entities/monthly_evolution.dart';
 
 abstract class PortfolioRepository {
   Future<Trade> createManualTrade({
@@ -14,4 +15,5 @@ abstract class PortfolioRepository {
 
   Future<PortfolioSummary> getSummary();
   Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})> getCustodyPositions();
+  Future<PortfolioEvolution> getPortfolioEvolution();
 }

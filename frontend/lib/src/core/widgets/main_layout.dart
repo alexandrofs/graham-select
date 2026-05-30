@@ -40,9 +40,10 @@ class _Sidebar extends StatelessWidget {
 
     int getSelectedIndex() {
       if (location.startsWith('/dashboard')) return 0;
-      if (location.startsWith('/ranking')) return 1;
-      if (location.startsWith('/upload')) return 2;
-      if (location.startsWith('/profile')) return 3;
+      if (location.startsWith('/evolution')) return 1;
+      if (location.startsWith('/ranking')) return 2;
+      if (location.startsWith('/upload')) return 3;
+      if (location.startsWith('/profile')) return 4;
       return 0;
     }
 
@@ -56,10 +57,12 @@ class _Sidebar extends StatelessWidget {
           case 0:
             context.go('/dashboard');
           case 1:
-            context.go('/ranking');
+            context.go('/evolution');
           case 2:
-            context.go('/upload');
+            context.go('/ranking');
           case 3:
+            context.go('/upload');
+          case 4:
             context.go('/profile');
         }
       },
@@ -86,6 +89,11 @@ class _Sidebar extends StatelessWidget {
           icon: Icon(Icons.dashboard_outlined),
           selectedIcon: Icon(Icons.dashboard),
           label: Text('Dashboard'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.show_chart_rounded),
+          selectedIcon: Icon(Icons.show_chart_rounded),
+          label: Text('Evolução'),
         ),
         NavigationRailDestination(
           icon: Icon(Icons.star_outline),
@@ -116,9 +124,10 @@ class _BottomNavBar extends StatelessWidget {
 
     int getSelectedIndex() {
       if (location.startsWith('/dashboard')) return 0;
-      if (location.startsWith('/ranking')) return 1;
-      if (location.startsWith('/upload')) return 2;
-      if (location.startsWith('/profile')) return 3;
+      if (location.startsWith('/evolution')) return 1;
+      if (location.startsWith('/ranking')) return 2;
+      if (location.startsWith('/upload')) return 3;
+      if (location.startsWith('/profile')) return 4;
       return 0;
     }
 
@@ -129,10 +138,12 @@ class _BottomNavBar extends StatelessWidget {
           case 0:
             context.go('/dashboard');
           case 1:
-            context.go('/ranking');
+            context.go('/evolution');
           case 2:
-            context.go('/upload');
+            context.go('/ranking');
           case 3:
+            context.go('/upload');
+          case 4:
             context.go('/profile');
         }
       },
@@ -140,6 +151,10 @@ class _BottomNavBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.dashboard_outlined),
           label: 'Início',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.show_chart_rounded),
+          label: 'Evolução',
         ),
         NavigationDestination(
           icon: Icon(Icons.star_outline),
