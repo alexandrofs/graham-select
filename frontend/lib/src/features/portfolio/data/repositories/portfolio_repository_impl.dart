@@ -39,7 +39,8 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   }
 
   @override
-  Future<List<CustodyPosition>> getCustodyPositions() async {
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})>
+      getCustodyPositions() async {
     final token = await authRepository.getPersistedToken();
     return remoteDataSource.getCustodyPositions(token: token);
   }

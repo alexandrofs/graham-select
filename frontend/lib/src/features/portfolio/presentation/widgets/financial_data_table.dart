@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/portfolio_provider.dart';
 
+/// Rota de upload centralizada — evita string mágica espalhada no código
+const _kUploadRoute = '/upload';
+
 class FinancialDataTable extends StatelessWidget {
   const FinancialDataTable({super.key});
 
@@ -39,15 +42,8 @@ class FinancialDataTable extends StatelessWidget {
     final isAscending = provider.sortAscending;
     final sortColumn = provider.sortColumn;
 
-    // Calcular metadados da tabela
-    final latestUpdate = positions
-        .map((e) => e.priceUpdatedAt)
-        .whereType<DateTime>()
-        .fold<DateTime?>(null, (prev, element) {
-      if (prev == null) return element;
-      return element.isAfter(prev) ? element : prev;
-    });
-
+    // Usa o timestamp autoritativo do backend (meta.priceUpdatedAt) em vez de calcular localmente
+    final latestUpdate = provider.custodyMetaPriceUpdatedAt;
     final hasCachePrice = positions.any((e) => e.priceSource == 'CACHE');
 
     return Card(
@@ -283,8 +279,55 @@ class FinancialDataTable extends StatelessWidget {
   }
 }
 
-class _SkeletonTableWidget extends StatelessWidget {
+class _SkeletonTableWidget extends StatefulWidget {
   const _SkeletonTableWidget();
+
+  @override
+  State<_SkeletonTableWidget> createState() => _SkeletonTableWidgetState();
+}
+
+class _SkeletonTableWidgetState extends State<_SkeletonTableWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+    _animation = Tween<double>(begin: -1.5, end: 2.5).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _shimmerBlock({double width = 60, double height = 16}) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) {
+        // Converte o valor da animação (-1.5 a 2.5) para opacidade (0.05 a 0.20)
+        // usando uma curva senoidal para criar o efeito de pulso shimmer
+        final t = ((_animation.value + 1.5) / 4.0).clamp(0.0, 1.0);
+        final opacity = 0.05 + 0.15 * (1 - (2 * t - 1).abs());
+        return Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            color: Colors.white.withValues(alpha: opacity),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -297,44 +340,34 @@ class _SkeletonTableWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 24,
-              width: 150,
-              decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
+            _shimmerBlock(width: 150, height: 24),
             const SizedBox(height: 24),
             // Header skeleton
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(
                 6,
-                (index) => Container(
-                  height: 20,
-                  width: 60,
-                  color: Colors.white10,
-                ),
+                (index) => _shimmerBlock(width: 60, height: 20),
               ),
             ),
             const Divider(color: Colors.white10, height: 24),
-            // Rows skeleton
+            // Rows skeleton — 5 linhas imitando layout da tabela
             Column(
               children: List.generate(
                 5,
                 (rowIndex) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(
-                      6,
-                      (colIndex) => Container(
-                        height: 16,
-                        width: colIndex == 0 ? 50 : 65,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(4),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(
+                        6,
+                        (colIndex) => Padding(
+                          padding: const EdgeInsets.only(right: 24),
+                          child: _shimmerBlock(
+                            width: colIndex == 0 ? 50 : 65,
+                            height: 16,
+                          ),
                         ),
                       ),
                     ),
@@ -348,6 +381,8 @@ class _SkeletonTableWidget extends StatelessWidget {
     );
   }
 }
+
+
 
 class _EmptyStateWidget extends StatelessWidget {
   const _EmptyStateWidget();
@@ -387,7 +422,7 @@ class _EmptyStateWidget extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.go('/upload'),
+              onPressed: () => context.go(_kUploadRoute),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1B2A4A),
                 foregroundColor: Colors.white,
@@ -398,7 +433,7 @@ class _EmptyStateWidget extends StatelessWidget {
               ),
               icon: const Icon(Icons.upload_file),
               label: const Text(
-                'Faça upload do seu arquivo B3 para começar',
+                'Fazer upload do arquivo B3 para começar',
                 style: TextStyle(fontFamily: 'DM Sans', fontWeight: FontWeight.bold),
               ),
             ),

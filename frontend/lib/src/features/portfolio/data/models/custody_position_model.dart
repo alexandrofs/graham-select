@@ -13,13 +13,15 @@ class CustodyPositionModel extends CustodyPosition {
   });
 
   factory CustodyPositionModel.fromJson(Map<String, dynamic> json) {
+    // Backend serializa BigDecimal como String via @JsonSerialize(ToStringSerializer)
+    // Por isso usamos double.parse(toString()) para aceitar tanto String quanto num
     return CustodyPositionModel(
       ticker: json['ticker'] as String,
-      quantity: (json['quantity'] as num).toDouble(),
-      averagePrice: (json['averagePrice'] as num).toDouble(),
-      currentPrice: (json['currentPrice'] as num).toDouble(),
-      marketValue: (json['marketValue'] as num).toDouble(),
-      gainLossPercentage: (json['gainLossPercentage'] as num).toDouble(),
+      quantity: double.parse(json['quantity'].toString()),
+      averagePrice: double.parse(json['averagePrice'].toString()),
+      currentPrice: double.parse(json['currentPrice'].toString()),
+      marketValue: double.parse(json['marketValue'].toString()),
+      gainLossPercentage: double.parse(json['gainLossPercentage'].toString()),
       priceSource: json['priceSource'] as String,
       priceUpdatedAt: json['priceUpdatedAt'] != null
           ? DateTime.parse(json['priceUpdatedAt'] as String)

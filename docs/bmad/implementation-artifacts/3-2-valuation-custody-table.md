@@ -308,6 +308,7 @@ Gemini 3.5 Flash — dev-story workflow
 - backend/common/src/test/java/afsdigital/grahamselect/common/portfolio/application/usecase/GetCustodyPositionsUseCaseTest.java
 - backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/spring/PortfolioSummaryConfiguration.java
 - backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/web/PortfolioController.java
+- backend/api/src/test/java/afsdigital/grahamselect/api/portfolio/web/PortfolioControllerIT.java
 - backend/pom.xml
 - backend/common/pom.xml
 - frontend/lib/src/features/portfolio/domain/entities/custody_position.dart
@@ -318,4 +319,10 @@ Gemini 3.5 Flash — dev-story workflow
 - frontend/lib/src/features/portfolio/presentation/providers/portfolio_provider.dart
 - frontend/lib/src/features/portfolio/presentation/widgets/financial_data_table.dart
 - frontend/lib/src/features/dashboard/presentation/pages/dashboard_page.dart
+- frontend/test/features/dashboard/presentation/pages/dashboard_page_test.dart
+- frontend/test/features/dashboard/presentation/pages/dashboard_page_test.mocks.dart
 - docs/bmad/implementation-artifacts/3-2-valuation-custody-table.md
+
+### Review Follow-ups (AI)
+
+- [ ] [AI-Review][HIGH] Violação de Clean Architecture: `GetCustodyPositionsUseCase` em `common` importa diretamente de `valuation` (`CompanyRepository`, `StockPricePort`, `StockPrice`). Débito arquitetural pré-existente da história 3.1. Solução: mover as interfaces `CompanyRepository` e `StockPricePort` para o módulo `common` para eliminar a dependência cruzada entre módulos Maven.

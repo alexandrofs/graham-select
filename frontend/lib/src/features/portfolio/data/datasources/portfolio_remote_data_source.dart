@@ -65,7 +65,10 @@ class PortfolioRemoteDataSource {
     }
   }
 
-  Future<List<CustodyPositionModel>> getCustodyPositions({String? token}) async {
+  /// Retorna as posições de custódia e o priceUpdatedAt autoritativo do backend.
+  /// O campo [metaPriceUpdatedAt] pode ser null quando todas as posições são CACHE sem data real.
+  Future<({List<CustodyPositionModel> positions, DateTime? metaPriceUpdatedAt})>
+      getCustodyPositions({String? token}) async {
     final uri = Uri.parse('$baseUrl/portfolios/custody');
     final response = await client.get(
       uri,
@@ -78,7 +81,14 @@ class PortfolioRemoteDataSource {
     if (response.statusCode == 200) {
       final Map<String, dynamic> body = jsonDecode(response.body);
       final List<dynamic> data = body['data'];
-      return data.map((json) => CustodyPositionModel.fromJson(json)).toList();
+      final Map<String, dynamic> meta = body['meta'] as Map<String, dynamic>;
+
+      final positions = data.map((json) => CustodyPositionModel.fromJson(json)).toList();
+      final metaUpdatedAt = meta['priceUpdatedAt'] != null
+          ? DateTime.parse(meta['priceUpdatedAt'] as String)
+          : null;
+
+      return (positions: positions, metaPriceUpdatedAt: metaUpdatedAt);
     } else {
       throw Exception('Erro ao buscar posições de custódia: ${response.statusCode}');
     }
