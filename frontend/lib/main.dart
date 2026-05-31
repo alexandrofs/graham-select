@@ -42,6 +42,7 @@ import 'src/features/profile/presentation/pages/investor_profile_page.dart';
 // Portfolio Feature Imports
 import 'src/features/portfolio/data/datasources/portfolio_remote_data_source.dart';
 import 'src/features/portfolio/data/repositories/portfolio_repository_impl.dart';
+import 'src/features/portfolio/data/datasources/notification_service.dart';
 import 'src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'src/features/portfolio/presentation/pages/evolution_page.dart';
 
@@ -215,7 +216,14 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
-        ChangeNotifierProvider(create: (_) => PortfolioProvider(portfolioRepository)),
+        ChangeNotifierProvider(
+          create: (_) {
+            final notificationService = NotificationService(effectiveApiClient);
+            final provider = PortfolioProvider(portfolioRepository, notificationService);
+            provider.startListeningForUpdates();
+            return provider;
+          },
+        ),
       ],
       child: MaterialApp.router(
         title: 'Graham Select',

@@ -6,11 +6,20 @@ import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolio
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioEvolutionUseCase;
 import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
 import afsdigital.grahamselect.valuation.application.repository.StockPricePort;
+import afsdigital.grahamselect.common.portfolio.application.repository.NotificationPort;
+import afsdigital.grahamselect.common.portfolio.application.usecase.SendPortfolioUpdateNotificationUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PortfolioSummaryConfiguration {
+
+    @Bean
+    public SendPortfolioUpdateNotificationUseCase sendPortfolioUpdateNotificationUseCase(
+            NotificationPort notificationPort
+    ) {
+        return new SendPortfolioUpdateNotificationUseCase(notificationPort);
+    }
 
     @Bean
     public GetPortfolioSummaryUseCase getPortfolioSummaryUseCase(

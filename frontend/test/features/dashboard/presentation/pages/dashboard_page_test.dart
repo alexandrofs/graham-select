@@ -10,7 +10,10 @@ import 'package:provider/provider.dart';
 
 import 'dashboard_page_test.mocks.dart';
 
-@GenerateMocks([PortfolioProvider, ProfileProvider])
+@GenerateNiceMocks([
+  MockSpec<PortfolioProvider>(),
+  MockSpec<ProfileProvider>(),
+])
 void main() {
   late MockPortfolioProvider mockPortfolioProvider;
   late MockProfileProvider mockProfileProvider;
@@ -30,6 +33,7 @@ void main() {
     when(mockPortfolioProvider.selectedAssetClassFilter).thenReturn(null);
     when(mockPortfolioProvider.custodyError).thenReturn(null);
     when(mockPortfolioProvider.loadCustodyPositions()).thenAnswer((_) async {});
+    when(mockPortfolioProvider.isReceivingLiveUpdates).thenReturn(false);
   });
 
   Widget createWidgetUnderTest() {

@@ -45,102 +45,209 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bem-vindo ao seu Dashboard',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+        child: Consumer<PortfolioProvider>(
+          builder: (context, provider, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bem-vindo ao seu Dashboard',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Acompanhe seu patrimônio e veja recomendações de aporte.',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  color: AppTheme.textColor.withValues(alpha: 0.7),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (provider.isReceivingLiveUpdates)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: LiveUpdatesBadge(),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: _buildKpiSection(context, provider),
+                ),
+                const SizedBox(height: 32),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: AssetAllocationDonutChart(
+                    key: ValueKey(provider.rawCustodyPositions.hashCode),
                   ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Acompanhe seu patrimônio e veja recomendações de aporte.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.textColor.withValues(alpha: 0.7),
+                ),
+                const SizedBox(height: 32),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: FinancialDataTable(
+                    key: ValueKey(provider.rawCustodyPositions.hashCode),
                   ),
-            ),
-            const SizedBox(height: 32),
-            _buildKpiSection(context),
-            const SizedBox(height: 32),
-            const AssetAllocationDonutChart(),
-            const SizedBox(height: 32),
-            const FinancialDataTable(),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildKpiSection(BuildContext context) {
-    return Consumer<PortfolioProvider>(
-      builder: (context, provider, child) {
-        if (provider.status == PortfolioStatus.error) {
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.redAccent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.redAccent),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Erro ao carregar resumo: ${provider.errorMessage ?? "Erro desconhecido"}',
-                    style: const TextStyle(color: Colors.redAccent),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => provider.loadSummary(),
-                  child: const Text('Tentar novamente'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final summary = provider.summary;
-        final isLoading = provider.status == PortfolioStatus.loading;
-
-        return GridView.count(
-          crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : (MediaQuery.of(context).size.width > 800 ? 2 : 1),
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 2.5,
+  Widget _buildKpiSection(BuildContext context, PortfolioProvider provider) {
+    if (provider.status == PortfolioStatus.error) {
+      return Container(
+        key: const ValueKey('error'),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+        ),
+        child: Row(
           children: [
-            PortfolioKpiCard(
-              title: 'Patrimônio Total',
-              value: summary?.totalEquity ?? 0,
-              isLoading: isLoading,
+            const Icon(Icons.error_outline, color: Colors.redAccent),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Erro ao carregar resumo: ${provider.errorMessage ?? "Erro desconhecido"}',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
             ),
-            PortfolioKpiCard(
-              title: 'Rendimento Bruto',
-              value: summary?.grossYieldPercentage ?? 0,
-              isPercentage: true,
-              isCurrency: false,
-              isLoading: isLoading,
-              valueColor: (summary?.grossYieldPercentage ?? 0) >= 0 ? const Color(0xFF10B981) : Colors.redAccent,
-            ),
-            PortfolioKpiCard(
-              title: 'Dividendos Acumulados',
-              value: summary?.accumulatedDividends ?? 0,
-              isLoading: isLoading,
-              valueColor: const Color(0xFFF59E0B),
-            ),
-            PortfolioKpiCard(
-              title: 'Projeção Mensal',
-              value: summary?.monthlyProjection ?? 0,
-              isLoading: isLoading,
+            TextButton(
+              onPressed: () => provider.loadSummary(),
+              child: const Text('Tentar novamente'),
             ),
           ],
-        );
-      },
+        ),
+      );
+    }
+
+    final summary = provider.summary;
+    final isLoading = provider.status == PortfolioStatus.loading;
+
+    return GridView.count(
+      key: ValueKey(summary != null ? '${summary.totalEquity}_${summary.grossYieldPercentage}' : 'loading'),
+      crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : (MediaQuery.of(context).size.width > 800 ? 2 : 1),
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 2.5,
+      children: [
+        PortfolioKpiCard(
+          title: 'Patrimônio Total',
+          value: summary?.totalEquity ?? 0,
+          isLoading: isLoading,
+        ),
+        PortfolioKpiCard(
+          title: 'Rendimento Bruto',
+          value: summary?.grossYieldPercentage ?? 0,
+          isPercentage: true,
+          isCurrency: false,
+          isLoading: isLoading,
+          valueColor: (summary?.grossYieldPercentage ?? 0) >= 0 ? const Color(0xFF10B981) : Colors.redAccent,
+        ),
+        PortfolioKpiCard(
+          title: 'Dividendos Acumulados',
+          value: summary?.accumulatedDividends ?? 0,
+          isLoading: isLoading,
+          valueColor: const Color(0xFFF59E0B),
+        ),
+        PortfolioKpiCard(
+          title: 'Projeção Mensal',
+          value: summary?.monthlyProjection ?? 0,
+          isLoading: isLoading,
+        ),
+      ],
+    );
+  }
+}
+
+class LiveUpdatesBadge extends StatefulWidget {
+  const LiveUpdatesBadge({super.key});
+
+  @override
+  State<LiveUpdatesBadge> createState() => _LiveUpdatesBadgeState();
+}
+
+class _LiveUpdatesBadgeState extends State<LiveUpdatesBadge> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+    
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF10B981).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF10B981).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Opacity(
+                opacity: _animation.value,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 6),
+          const Text(
+            'Ao vivo',
+            style: TextStyle(
+              color: Color(0xFF10B981),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
