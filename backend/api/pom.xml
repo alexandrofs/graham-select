@@ -89,6 +89,7 @@
                                 <env>
                                     <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
                                     <BP_JVM_VERSION>21</BP_JVM_VERSION>
+                                    <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--initialize-at-run-time=com.mysql.cj.jdbc.AbandonedConnectionCleanupThread --initialize-at-build-time=java.io.ProxyingConsole</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                                 </env>
                             </image>
                         </configuration>
@@ -101,6 +102,7 @@
                             <mainClass>afsdigital.grahamselect.api.ApiServiceApplication</mainClass>
                             <buildArgs>
                                 <buildArg>--initialize-at-run-time=com.mysql.cj.jdbc.AbandonedConnectionCleanupThread</buildArg>
+                                <buildArg>--initialize-at-build-time=java.io.ProxyingConsole</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
