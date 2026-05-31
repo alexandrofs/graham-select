@@ -2,8 +2,8 @@ package afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities.StockPriceEntity;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.StockPriceJpaRepository;
-import afsdigital.grahamselect.valuation.application.repository.StockPricePort;
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.repository.StockPricePort;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

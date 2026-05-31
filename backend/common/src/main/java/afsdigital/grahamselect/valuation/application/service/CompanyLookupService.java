@@ -1,7 +1,7 @@
 package afsdigital.grahamselect.valuation.application.service;
 
 import afsdigital.grahamselect.common.domain.entities.Company;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

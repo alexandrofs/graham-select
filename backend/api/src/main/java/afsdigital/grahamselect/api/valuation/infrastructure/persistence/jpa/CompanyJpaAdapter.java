@@ -2,7 +2,7 @@ package afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import afsdigital.grahamselect.common.domain.entities.Company;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

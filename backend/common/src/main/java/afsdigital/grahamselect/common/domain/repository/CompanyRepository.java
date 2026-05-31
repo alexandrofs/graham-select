@@ -1,4 +1,4 @@
-package afsdigital.grahamselect.valuation.application.repository;
+package afsdigital.grahamselect.common.domain.repository;
 
 import afsdigital.grahamselect.common.domain.entities.Company;
 

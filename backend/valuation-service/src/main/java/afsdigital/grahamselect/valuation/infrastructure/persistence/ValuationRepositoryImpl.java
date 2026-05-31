@@ -2,7 +2,7 @@ package afsdigital.grahamselect.valuation.infrastructure.persistence;
 
 import afsdigital.grahamselect.valuation.application.repository.ValuationRepository;
 import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.IntrinsicValueEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.StockPriceEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.IntrinsicValueJpaRepository;

@@ -1,7 +1,7 @@
 package afsdigital.grahamselect.valuation.application.service;
 
 import afsdigital.grahamselect.common.domain.entities.Company;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

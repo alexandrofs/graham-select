@@ -1,7 +1,7 @@
 package afsdigital.grahamselect.valuation.infrastructure.persistence;
 
 import afsdigital.grahamselect.common.domain.entities.Company;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities.CompanyEntity;
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import lombok.RequiredArgsConstructor;
