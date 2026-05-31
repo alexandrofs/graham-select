@@ -159,9 +159,9 @@ public class GetCustodyPositionsUseCase {
         }
         String t = ticker.trim().toUpperCase();
         
-        // Remove sufixo 'F' de mercado fracionário se for uma ação (ex: PETR4F -> PETR4)
-        if (t.endsWith("F") && t.length() == 6 && Character.isDigit(t.charAt(4))) {
-            t = t.substring(0, 5);
+        // Remove sufixo 'F' de mercado fracionário (ex: PETR4F -> PETR4, MXRF11F -> MXRF11, AAPL34F -> AAPL34)
+        if (t.endsWith("F") && t.length() > 4 && Character.isDigit(t.charAt(t.length() - 2))) {
+            t = t.substring(0, t.length() - 1);
         }
 
         // Renda Fixa

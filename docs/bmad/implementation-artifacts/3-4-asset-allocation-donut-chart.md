@@ -155,11 +155,13 @@ List<CustodyPosition> get filteredPositions {
 }
 ```
 
-### Lições Aprendidas da Implementação Real (Commits ba7a936 e 301210a)
+### Lições Aprendidas da Implementação Real (Commits ba7a936, 301210a e subsequentes do Code Review)
 
 1. **Code Review detectou:** Ausência de testes unitários explícitos para `inferAssetClass` — foram adicionados no commit `301210a` no `GetCustodyPositionsUseCaseTest`
-2. **Dead Code:** A regex `^[A-Z]{4}11$` dentro do bloco que já verifica `t.endsWith("11") && t.length() == 6` é redundante — FIIs com 6 chars já são capturados antes desse bloco
-3. **CustomPainter vs fl_chart:** A decisão de usar `CustomPainter` nativo foi correta pois elimina dependência externa; o resultado visual é equivalente com controle total sobre animações
+2. **Bug Crítico de Tickers Fracionários Corrigido:** Descobriu-se que FIIs fracionários (ex: `MXRF11F`) e BDRs fracionários (ex: `AAPL34F`) têm comprimento 7, fazendo com que o código original falhasse na remoção do "F" e classificasse como "Outros". A lógica de remoção de fracionários no `GetCustodyPositionsUseCase` foi totalmente reestruturada para ser robusta e generalizada a qualquer tamanho de ticker. Testes unitários dedicados foram adicionados no backend para validar todos estes casos.
+3. **Interatividade Real via Toque Trigonométrico Implementada:** Adicionado `GestureDetector` com detecção baseada em cálculo trigonométrico radial e angular (`atan2`) no `AssetAllocationDonutChart` do Flutter, permitindo que o usuário interaja diretamente com as fatias do gráfico de rosca de forma premium, sem depender apenas da legenda.
+4. **Testes do Provedor de Filtro Adicionados:** Implementada a suíte de testes unitários em `portfolio_provider_test.dart` cobrindo detalhadamente a lógica de ativação/limpeza do filtro e o retorno das posições filtradas, corrigindo a brecha de cobertura anterior.
+5. **CustomPainter vs fl_chart:** A decisão de usar `CustomPainter` nativo foi correta pois elimina dependência externa; o resultado visual é equivalente com controle total sobre animações
 
 ### Estrutura de Arquivos Alterados
 
@@ -209,8 +211,9 @@ N/A — Story recriada com contexto enriquecido a partir do código real impleme
 
 - **Backend:** Campo `assetClass` adicionado ao `CustodyPositionDTO` como record Java. Método `inferAssetClass(String ticker)` implementado no `GetCustodyPositionsUseCase` com lógica de 5 categorias: Ações, FIIs, BDRs, Renda Fixa e Outros. Testes unitários adicionados após code review.
 - **Backend Refactoring (2026-05-31):** Refatorada a lógica de inferência de classes no UseCase para remover redundâncias de regex e código morto. Novo teste unitário exaustivo `shouldInferAssetClassForAllCategoriesCorrectly` adicionado em `GetCustodyPositionsUseCaseTest` com 100% de sucesso.
-- **Frontend:** Widget `AssetAllocationDonutChart` criado (418 linhas) usando `CustomPainter` nativo sem dependências externas. Animação de entrada suave com `Curves.easeOutQuart`. Interação de tap para filtrar a tabela de custódia implementada via `PortfolioProvider`. Paleta de cores alinhada ao Design System do projeto.
-- **Testes:** `flutter analyze` passou com zero erros no frontend. `mvn test` e `flutter test` (80 testes) executados com sucesso total, sem regressões.
+- **Correções do Adversarial Code Review (2026-05-31):** Corrigido bug crítico de inferência de tickers fracionários para FII/BDR fracionados (tamanho 7). No frontend, implementada interatividade premium por toque radial/angular trigonométrico (`atan2`) diretamente nas fatias do Donut Chart e criada a suíte de testes de filtro no `portfolio_provider_test.dart`.
+- **Frontend:** Widget `AssetAllocationDonutChart` criado usando `CustomPainter` nativo sem dependências externas. Animação de entrada suave com `Curves.easeOutQuart`. Interação de tap nas fatias para filtrar a tabela de custódia implementada via `PortfolioProvider`. Paleta de cores alinhada ao Design System do projeto.
+- **Testes:** `flutter analyze` passou com zero erros no frontend. `mvn test` e `flutter test` executados com sucesso total, sem regressões.
 
 ### File List
 

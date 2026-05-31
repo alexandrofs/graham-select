@@ -154,12 +154,54 @@ class _AssetAllocationDonutChartState extends State<AssetAllocationDonutChart> w
                             return Stack(
                               alignment: Alignment.center,
                               children: [
-                                CustomPaint(
-                                  size: const Size(200, 200),
-                                  painter: DonutChartPainter(
-                                    slices: slices,
-                                    animationPercent: _animation.value,
-                                    selectedClass: provider.selectedAssetClassFilter,
+                                GestureDetector(
+                                  onTapUp: (details) {
+                                    // Coordenadas relativas do toque
+                                    final localPos = details.localPosition;
+                                    
+                                    // O tamanho fixo do CustomPaint é 200x200
+                                    const center = Offset(100, 100);
+                                    
+                                    final dx = localPos.dx - center.dx;
+                                    final dy = localPos.dy - center.dy;
+                                    
+                                    // Distância radial
+                                    final distance = sqrt(dx * dx + dy * dy);
+                                    
+                                    // A rosca tem outerRadius de 100-15 = 85. A largura da rosca é 30 (vai de raio 55 a 85).
+                                    // Permitimos uma margem de toque confortável (entre 45 e 110 pixels do centro).
+                                    if (distance >= 45 && distance <= 110) {
+                                      // Calcular ângulo do toque em radianos (-pi a pi)
+                                      double angle = atan2(dy, dx);
+                                      
+                                      // O gráfico de rosca começa em -pi/2 (-90 graus, topo) e gira no sentido horário.
+                                      // Ajustamos o ângulo para ficar no intervalo contínuo de [-pi/2, 3*pi/2].
+                                      if (angle < -pi / 2) {
+                                        angle += 2 * pi;
+                                      }
+                                      
+                                      // Identificar em qual fatia o toque ocorreu
+                                      for (var slice in slices) {
+                                        final endAngle = slice.startAngle + slice.sweepAngle;
+                                        if (angle >= slice.startAngle && angle < endAngle) {
+                                          final isSelected = provider.selectedAssetClassFilter == slice.name;
+                                          if (isSelected) {
+                                            provider.selectAssetClassFilter(null);
+                                          } else {
+                                            provider.selectAssetClassFilter(slice.name);
+                                          }
+                                          break;
+                                        }
+                                      }
+                                    }
+                                  },
+                                  child: CustomPaint(
+                                    size: const Size(200, 200),
+                                    painter: DonutChartPainter(
+                                      slices: slices,
+                                      animationPercent: _animation.value,
+                                      selectedClass: provider.selectedAssetClassFilter,
+                                    ),
                                   ),
                                 ),
                                 // Centro do Donut

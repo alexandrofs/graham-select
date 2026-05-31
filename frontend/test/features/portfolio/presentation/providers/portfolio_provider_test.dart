@@ -252,5 +252,56 @@ void main() {
         expect(provider.evolutionError, equals('Erro ao buscar evolução'));
       });
     });
+
+    group('Filtro por classe de ativos', () {
+      final tPositions = [
+        const CustodyPosition(
+          ticker: 'PETR4',
+          quantity: 100.0,
+          averagePrice: 30.0,
+          currentPrice: 35.0,
+          marketValue: 3500.0,
+          gainLossPercentage: 16.67,
+          priceSource: 'LIVE',
+          assetClass: 'Ações',
+        ),
+        const CustodyPosition(
+          ticker: 'HGLG11',
+          quantity: 10.0,
+          averagePrice: 160.0,
+          currentPrice: 165.0,
+          marketValue: 1650.0,
+          gainLossPercentage: 3.125,
+          priceSource: 'LIVE',
+          assetClass: 'FIIs',
+        ),
+      ];
+
+      setUp(() async {
+        mockRepository.positionsToReturn = tPositions;
+        await provider.loadCustodyPositions();
+      });
+
+      test('deve retornar todas as posições sem filtro por padrão', () {
+        expect(provider.selectedAssetClassFilter, isNull);
+        expect(provider.custodyPositions.length, equals(2));
+      });
+
+      test('deve filtrar posições quando selecionado uma classe de ativos', () {
+        provider.selectAssetClassFilter('FIIs');
+
+        expect(provider.selectedAssetClassFilter, equals('FIIs'));
+        expect(provider.custodyPositions.length, equals(1));
+        expect(provider.custodyPositions[0].ticker, equals('HGLG11'));
+      });
+
+      test('deve retornar todas as posições ao limpar o filtro', () {
+        provider.selectAssetClassFilter('FIIs');
+        provider.selectAssetClassFilter(null);
+
+        expect(provider.selectedAssetClassFilter, isNull);
+        expect(provider.custodyPositions.length, equals(2));
+      });
+    });
   });
 }
