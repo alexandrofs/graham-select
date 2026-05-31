@@ -284,4 +284,36 @@ class GetCustodyPositionsUseCaseTest {
         assertEquals(new BigDecimal("200.00"), pos.marketValue()); // 5 * 40 = 200
         assertEquals(new BigDecimal("14.29"), pos.gainLossPercentage()); // ((40 - 35) / 35) * 100 = 14.2857% -> 14.29%
     }
+
+    @Test
+    void shouldInferAssetClassForFractionalTickersCorrectly() {
+        String userId = "user-1";
+        String ticker = "ITUB4F"; // Fracionário de ITUB4
+        String companyId = "comp-3";
+
+        Trade trade1 = Trade.builder()
+                .userId(userId)
+                .ticker(ticker)
+                .side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("5"))
+                .price(new BigDecimal("25.00"))
+                .build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(trade1));
+
+        Company company = new Company(companyId, ticker);
+        when(companyRepository.findByTicker(ticker)).thenReturn(company);
+
+        StockPrice stockPrice = StockPrice.builder()
+                .companyId(companyId)
+                .price(new BigDecimal("25.00"))
+                .date(LocalDate.now(ZoneOffset.UTC))
+                .build();
+        when(stockPricePort.findLatestByCompanyIds(List.of(companyId))).thenReturn(Map.of(companyId, stockPrice));
+
+        List<CustodyPositionDTO> result = useCase.execute(userId);
+
+        assertEquals(1, result.size());
+        assertEquals("Ações", result.get(0).assetClass());
+    }
 }
