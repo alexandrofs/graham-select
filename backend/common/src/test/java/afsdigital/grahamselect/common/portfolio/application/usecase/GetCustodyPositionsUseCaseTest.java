@@ -20,6 +20,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -315,5 +316,59 @@ class GetCustodyPositionsUseCaseTest {
 
         assertEquals(1, result.size());
         assertEquals("Ações", result.get(0).assetClass());
+    }
+
+    @Test
+    void shouldInferAssetClassForAllCategoriesCorrectly() {
+        String userId = "user-1";
+        
+        // Trades para cada tipo de ativo
+        Trade t1 = Trade.builder().userId(userId).ticker("VALE3").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t2 = Trade.builder().userId(userId).ticker("HGLG11").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t3 = Trade.builder().userId(userId).ticker("AAPL34").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t4 = Trade.builder().userId(userId).ticker("CDB_PRE_12").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t5 = Trade.builder().userId(userId).ticker("TESOURO_IPCA").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t6 = Trade.builder().userId(userId).ticker("OUTRO_ATIVO").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(t1, t2, t3, t4, t5, t6));
+
+        // Mock Companies
+        Company c1 = new Company("id-vale", "VALE3");
+        Company c2 = new Company("id-hglg", "HGLG11");
+        Company c3 = new Company("id-aapl", "AAPL34");
+        Company c4 = new Company("id-cdb", "CDB_PRE_12");
+        Company c5 = new Company("id-tes", "TESOURO_IPCA");
+        Company c6 = new Company("id-out", "OUTRO_ATIVO");
+
+        when(companyRepository.findByTicker("VALE3")).thenReturn(c1);
+        when(companyRepository.findByTicker("HGLG11")).thenReturn(c2);
+        when(companyRepository.findByTicker("AAPL34")).thenReturn(c3);
+        when(companyRepository.findByTicker("CDB_PRE_12")).thenReturn(c4);
+        when(companyRepository.findByTicker("TESOURO_IPCA")).thenReturn(c5);
+        when(companyRepository.findByTicker("OUTRO_ATIVO")).thenReturn(c6);
+
+        // Mock Stock Prices
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Map.of(
+            "id-vale", StockPrice.builder().companyId("id-vale").price(BigDecimal.TEN).date(today).build(),
+            "id-hglg", StockPrice.builder().companyId("id-hglg").price(BigDecimal.TEN).date(today).build(),
+            "id-aapl", StockPrice.builder().companyId("id-aapl").price(BigDecimal.TEN).date(today).build(),
+            "id-cdb", StockPrice.builder().companyId("id-cdb").price(BigDecimal.TEN).date(today).build(),
+            "id-tes", StockPrice.builder().companyId("id-tes").price(BigDecimal.TEN).date(today).build(),
+            "id-out", StockPrice.builder().companyId("id-out").price(BigDecimal.TEN).date(today).build()
+        ));
+
+        List<CustodyPositionDTO> result = useCase.execute(userId);
+
+        Map<String, String> inferredClasses = result.stream()
+                .collect(Collectors.toMap(CustodyPositionDTO::ticker, CustodyPositionDTO::assetClass));
+
+        assertEquals(6, result.size());
+        assertEquals("Ações", inferredClasses.get("VALE3"));
+        assertEquals("FIIs", inferredClasses.get("HGLG11"));
+        assertEquals("BDRs", inferredClasses.get("AAPL34"));
+        assertEquals("Renda Fixa", inferredClasses.get("CDB_PRE_12"));
+        assertEquals("Renda Fixa", inferredClasses.get("TESOURO_IPCA"));
+        assertEquals("Outros", inferredClasses.get("OUTRO_ATIVO"));
     }
 }
