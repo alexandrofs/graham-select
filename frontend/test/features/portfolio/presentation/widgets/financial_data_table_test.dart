@@ -121,6 +121,7 @@ void main() {
         gainLossPercentage: 16.67,
         priceSource: 'LIVE',
         priceUpdatedAt: null,
+        assetClass: 'Ações',
       ),
     ];
     mockRepository.positionsToReturn = tPositions;
@@ -155,6 +156,7 @@ void main() {
         marketValue: 3750.0,
         gainLossPercentage: -6.25,
         priceSource: 'CACHE',
+        assetClass: 'Ações',
       ),
       const CustodyPosition(
         ticker: 'PETR4',
@@ -164,6 +166,7 @@ void main() {
         marketValue: 3500.0,
         gainLossPercentage: 16.67,
         priceSource: 'LIVE',
+        assetClass: 'Ações',
       ),
     ];
     mockRepository.positionsToReturn = tPositions;

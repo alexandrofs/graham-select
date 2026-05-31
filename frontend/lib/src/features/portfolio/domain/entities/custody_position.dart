@@ -7,6 +7,7 @@ class CustodyPosition {
   final double gainLossPercentage;
   final String priceSource;
   final DateTime? priceUpdatedAt;
+  final String assetClass;
 
   const CustodyPosition({
     required this.ticker,
@@ -17,5 +18,6 @@ class CustodyPosition {
     required this.gainLossPercentage,
     required this.priceSource,
     this.priceUpdatedAt,
+    required this.assetClass,
   });
 }

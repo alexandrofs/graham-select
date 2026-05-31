@@ -90,6 +90,7 @@ void main() {
             marketValue: 350.0,
             gainLossPercentage: 16.67,
             priceSource: 'LIVE',
+            assetClass: 'Ações',
           )
         ],
         metaPriceUpdatedAt: tDate,

@@ -6,6 +6,7 @@ import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
 import '../../../portfolio/presentation/widgets/financial_data_table.dart';
+import '../../../portfolio/presentation/widgets/asset_allocation_donut_chart.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -62,6 +63,8 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 32),
             _buildKpiSection(context),
+            const SizedBox(height: 32),
+            const AssetAllocationDonutChart(),
             const SizedBox(height: 32),
             const FinancialDataTable(),
           ],

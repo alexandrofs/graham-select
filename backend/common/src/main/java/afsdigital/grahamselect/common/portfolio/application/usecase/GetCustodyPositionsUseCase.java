@@ -145,10 +145,37 @@ public class GetCustodyPositionsUseCase {
                     marketValue.setScale(2, RoundingMode.HALF_UP),
                     gainLossPercentage.setScale(2, RoundingMode.HALF_UP),
                     priceSource,
-                    priceUpdatedAt
+                    priceUpdatedAt,
+                    inferAssetClass(ticker)
             ));
         }
 
         return result;
+    }
+
+    private String inferAssetClass(String ticker) {
+        if (ticker == null || ticker.isBlank()) {
+            return "Outros";
+        }
+        String t = ticker.trim().toUpperCase();
+        if (t.startsWith("TESOURO") || t.startsWith("CDB") || t.startsWith("LCI") || t.startsWith("LCA") || t.contains("DIRETO") || t.contains("DEBENTURE")) {
+            return "Renda Fixa";
+        }
+        if (t.endsWith("11") && t.length() == 6) {
+            return "FIIs";
+        }
+        if (t.matches("^[A-Z]{4}[34568]$") || t.matches("^[A-Z]{4}11$") || t.matches("^[A-Z]{4}34$")) {
+            if (t.endsWith("11")) {
+                return "FIIs";
+            }
+            if (t.endsWith("34")) {
+                return "BDRs";
+            }
+            return "Ações";
+        }
+        if (t.length() == 5 && Character.isDigit(t.charAt(4))) {
+            return "Ações";
+        }
+        return "Outros";
     }
 }

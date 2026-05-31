@@ -25,6 +25,8 @@ public record CustodyPositionDTO(
         
         String priceSource, // "LIVE" ou "CACHE"
         
-        Instant priceUpdatedAt
+        Instant priceUpdatedAt,
+        
+        String assetClass
 ) {
 }
