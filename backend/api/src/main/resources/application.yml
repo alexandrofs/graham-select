@@ -31,3 +31,6 @@ spring:
 app:
   upload:
     storage-path: ${STORAGE_PATH:./uploads}
+  security:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5000,https://graham-select-frontend.onrender.com}
