@@ -289,33 +289,39 @@ class GetCustodyPositionsUseCaseTest {
     @Test
     void shouldInferAssetClassForFractionalTickersCorrectly() {
         String userId = "user-1";
-        String ticker = "ITUB4F"; // Fracionário de ITUB4
-        String companyId = "comp-3";
+        
+        // Trades com diferentes ativos fracionários
+        Trade t1 = Trade.builder().userId(userId).ticker("ITUB4F").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t2 = Trade.builder().userId(userId).ticker("MXRF11F").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
+        Trade t3 = Trade.builder().userId(userId).ticker("AAPL34F").side(TradeSide.COMPRA.name()).quantity(BigDecimal.ONE).price(BigDecimal.TEN).build();
 
-        Trade trade1 = Trade.builder()
-                .userId(userId)
-                .ticker(ticker)
-                .side(TradeSide.COMPRA.name())
-                .quantity(new BigDecimal("5"))
-                .price(new BigDecimal("25.00"))
-                .build();
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(t1, t2, t3));
 
-        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(trade1));
+        // Mock das empresas correspondentes
+        Company c1 = new Company("comp-1", "ITUB4F");
+        Company c2 = new Company("comp-2", "MXRF11F");
+        Company c3 = new Company("comp-3", "AAPL34F");
 
-        Company company = new Company(companyId, ticker);
-        when(companyRepository.findByTicker(ticker)).thenReturn(company);
+        when(companyRepository.findByTicker("ITUB4F")).thenReturn(c1);
+        when(companyRepository.findByTicker("MXRF11F")).thenReturn(c2);
+        when(companyRepository.findByTicker("AAPL34F")).thenReturn(c3);
 
-        StockPrice stockPrice = StockPrice.builder()
-                .companyId(companyId)
-                .price(new BigDecimal("25.00"))
-                .date(LocalDate.now(ZoneOffset.UTC))
-                .build();
-        when(stockPricePort.findLatestByCompanyIds(List.of(companyId))).thenReturn(Map.of(companyId, stockPrice));
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Map.of(
+            "comp-1", StockPrice.builder().companyId("comp-1").price(BigDecimal.TEN).date(today).build(),
+            "comp-2", StockPrice.builder().companyId("comp-2").price(BigDecimal.TEN).date(today).build(),
+            "comp-3", StockPrice.builder().companyId("comp-3").price(BigDecimal.TEN).date(today).build()
+        ));
 
         List<CustodyPositionDTO> result = useCase.execute(userId);
 
-        assertEquals(1, result.size());
-        assertEquals("Ações", result.get(0).assetClass());
+        assertEquals(3, result.size());
+        Map<String, String> inferredClasses = result.stream()
+                .collect(Collectors.toMap(CustodyPositionDTO::ticker, CustodyPositionDTO::assetClass));
+
+        assertEquals("Ações", inferredClasses.get("ITUB4F"));
+        assertEquals("FIIs", inferredClasses.get("MXRF11F"));
+        assertEquals("BDRs", inferredClasses.get("AAPL34F"));
     }
 
     @Test
