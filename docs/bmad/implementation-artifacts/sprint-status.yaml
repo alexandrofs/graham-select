@@ -55,14 +55,14 @@ development_status:
   2-3-smart-trade-deduplication: done
   2-4-manual-operation-fallback-crud: done
   2-5-ingestion-audit-history: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
   epic-3: in-progress
   3-1-portfolio-kpi-dashboard: done
   3-2-valuation-custody-table: done
   3-3-dividend-contribution-history: done
   3-4-asset-allocation-donut-chart: done
   3-5-event-driven-ui-updates: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
   epic-4: backlog
   4-1-market-data-indicator-integration: backlog
   4-2-premium-allocation-strategy-config: backlog
