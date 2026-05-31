@@ -8,7 +8,7 @@ import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalcu
 import afsdigital.grahamselect.valuation.application.dto.FinancialDataDto;
 import afsdigital.grahamselect.valuation.application.usecase.exceptions.InvalidFinancialDataEventException;
 import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

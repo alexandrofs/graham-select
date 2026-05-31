@@ -5,9 +5,9 @@ import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioSummary
 import afsdigital.grahamselect.common.portfolio.application.repository.TradePort;
 import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
 import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
-import afsdigital.grahamselect.valuation.application.repository.StockPricePort;
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.StockPricePort;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

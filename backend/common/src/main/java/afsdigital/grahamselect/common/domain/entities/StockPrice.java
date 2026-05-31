@@ -1,4 +1,4 @@
-package afsdigital.grahamselect.valuation.domain.entities;
+package afsdigital.grahamselect.common.domain.entities;
 
 import lombok.Builder;
 import lombok.Data;

@@ -4,8 +4,8 @@ import afsdigital.grahamselect.common.portfolio.application.repository.TradePort
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetCustodyPositionsUseCase;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioSummaryUseCase;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioEvolutionUseCase;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
-import afsdigital.grahamselect.valuation.application.repository.StockPricePort;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.StockPricePort;
 import afsdigital.grahamselect.common.portfolio.application.repository.NotificationPort;
 import afsdigital.grahamselect.common.portfolio.application.usecase.SendPortfolioUpdateNotificationUseCase;
 import org.springframework.context.annotation.Bean;

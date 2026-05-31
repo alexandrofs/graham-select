@@ -8,7 +8,7 @@ import afsdigital.grahamselect.valuation.application.service.CompanyLookupServic
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;
 import afsdigital.grahamselect.valuation.application.usecase.exceptions.InvalidFinancialDataEventException;
 import afsdigital.grahamselect.valuation.domain.entities.IntrinsicValue;
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

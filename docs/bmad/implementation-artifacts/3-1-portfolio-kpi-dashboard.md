@@ -79,4 +79,14 @@ Gemini 2.0 Flash (CLI YOLO Mode)
 - Análise completa do motor de contexto realizada - guia abrangente para o desenvolvedor criado.
 
 ### File List
+- backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/dto/PortfolioSummaryDTO.java
+- backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/GetPortfolioSummaryUseCase.java
+- backend/common/src/test/java/afsdigital/grahamselect/common/portfolio/application/usecase/GetPortfolioSummaryUseCaseTest.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/web/PortfolioController.java
+- backend/api/src/test/java/afsdigital/grahamselect/api/portfolio/web/PortfolioControllerTest.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/spring/PortfolioSummaryConfiguration.java
+- frontend/lib/src/features/portfolio/presentation/providers/portfolio_provider.dart
+- frontend/lib/src/features/dashboard/presentation/pages/dashboard_page.dart
+- frontend/test/features/dashboard/presentation/pages/dashboard_page_test.dart
+- frontend/test/features/portfolio/presentation/providers/portfolio_provider_test.dart
 - docs/bmad/implementation-artifacts/3-1-portfolio-kpi-dashboard.md

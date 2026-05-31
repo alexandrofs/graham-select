@@ -1,6 +1,6 @@
 package afsdigital.grahamselect.valuation.infrastructure.spring;
 
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import afsdigital.grahamselect.valuation.application.repository.ValuationRepository;
 import afsdigital.grahamselect.valuation.application.service.CompanyLookupService;
 import afsdigital.grahamselect.valuation.application.service.IntrinsicValueCalculatorService;

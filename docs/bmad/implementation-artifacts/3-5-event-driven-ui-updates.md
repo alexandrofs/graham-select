@@ -19,52 +19,52 @@ so that eu não precise dar "refresh" na página manualmente.
 
 ### Backend (Spring Boot — módulo `api`)
 
-- [ ] Criar endpoint SSE (Server-Sent Events) `GET /api/v1/notifications/stream` no módulo `api` (AC: 3)
-  - [ ] Criar a interface Port `NotificationPort` em `common/src/.../portfolio/application/repository/`
-  - [ ] Criar o Use Case `SendPortfolioUpdateNotificationUseCase` em `common/src/.../portfolio/application/usecase/` como POJO puro (sem Spring)
-  - [ ] Criar o adapter SSE `SseNotificationAdapter` em `api/src/.../portfolio/infrastructure/sse/` implementando `NotificationPort` usando `SseEmitter`
-  - [ ] Criar o controller REST `NotificationController` em `api/src/.../portfolio/web/` com o endpoint `/api/v1/notifications/stream`
-  - [ ] Registrar o `SseNotificationAdapter` no `PortfolioSummaryConfiguration` (ou criar nova `@Configuration` dedicada)
+- [x] Criar endpoint SSE (Server-Sent Events) `GET /api/v1/notifications/stream` no módulo `api` (AC: 3)
+  - [x] Criar a interface Port `NotificationPort` em `common/src/.../portfolio/application/repository/`
+  - [x] Criar o Use Case `SendPortfolioUpdateNotificationUseCase` em `common/src/.../portfolio/application/usecase/` como POJO puro (sem Spring)
+  - [x] Criar o adapter SSE `SseNotificationAdapter` em `api/src/.../portfolio/infrastructure/sse/` implementando `NotificationPort` usando `SseEmitter`
+  - [x] Criar o controller REST `NotificationController` em `api/src/.../portfolio/web/` com o endpoint `/api/v1/notifications/stream`
+  - [x] Registrar o `SseNotificationAdapter` no `PortfolioSummaryConfiguration` (ou criar nova `@Configuration` dedicada)
 
-- [ ] Integrar o envio de notificação no `KafkaTradeExtractedConsumer` existente (AC: 2)
-  - [ ] Após `saveTradeUseCase.execute(trade)` com sucesso (trade não nulo), chamar `sendPortfolioUpdateNotificationUseCase.execute(event.userId())`
-  - [ ] A notificação deve conter: `userId`, `event: "PORTFOLIO_UPDATED"`, `timestamp`
+- [x] Integrar o envio de notificação no `KafkaTradeExtractedConsumer` existente (AC: 2)
+  - [x] Após `saveTradeUseCase.execute(trade)` com sucesso (trade não nulo), chamar `sendPortfolioUpdateNotificationUseCase.execute(event.userId())`
+  - [x] A notificação deve conter: `userId`, `event: "PORTFOLIO_UPDATED"`, `timestamp`
 
-- [ ] Adicionar permissão no `SecurityConfig` para o novo endpoint SSE (AC: 3)
-  - [ ] Garantir que `/api/v1/notifications/stream` requer autenticação JWT
-  - [ ] Configurar CORS no `WebConfig` para aceitar o header `Accept: text/event-stream`
+- [x] Adicionar permissão no `SecurityConfig` para o novo endpoint SSE (AC: 3)
+  - [x] Garantir que `/api/v1/notifications/stream` requer autenticação JWT
+  - [x] Configurar CORS no `WebConfig` para aceitar o header `Accept: text/event-stream`
 
-- [ ] Escrever testes unitários (AC: 3)
-  - [ ] `SendPortfolioUpdateNotificationUseCaseTest` validando que o Port é chamado corretamente
-  - [ ] `NotificationControllerTest` (mock MVC) validando o endpoint SSE
-  - [ ] Atualizar `KafkaTradeExtractedConsumerTest` para verificar que a notificação é enviada após salvar o trade
+- [x] Escrever testes unitários (AC: 3)
+  - [x] `SendPortfolioUpdateNotificationUseCaseTest` validando que o Port é chamado corretamente
+  - [x] `NotificationControllerTest` (mock MVC) validando o endpoint SSE
+  - [x] Atualizar `KafkaTradeExtractedConsumerTest` para verificar que a notificação é enviada após salvar o trade
 
-- [ ] Executar `mvn clean test` no módulo `api` (AC: 3)
+- [x] Executar `mvn clean test` no módulo `api` (AC: 3)
 
 ### Frontend (Flutter)
 
-- [ ] Criar o `NotificationService` em `lib/src/features/portfolio/data/datasources/notification_service.dart` (AC: 3)
-  - [ ] Conectar ao endpoint SSE via `Dio` ou `http` package para streaming
-  - [ ] Implementar `Stream<PortfolioNotificationEvent>` que emite quando o evento `PORTFOLIO_UPDATED` chega
-  - [ ] Gerenciar reconexão automática com backoff exponencial em caso de falha
+- [x] Criar o `NotificationService` em `lib/src/features/portfolio/data/datasources/notification_service.dart` (AC: 3)
+  - [x] Conectar ao endpoint SSE via `Dio` ou `http` package para streaming
+  - [x] Implementar `Stream<PortfolioNotificationEvent>` que emite quando o evento `PORTFOLIO_UPDATED` chega
+  - [x] Gerenciar reconexão automática com backoff exponencial em caso de falha
 
-- [ ] Criar a entidade de domínio `PortfolioNotificationEvent` em `lib/src/features/portfolio/domain/entities/` (AC: 3)
-  - [ ] Campos: `userId`, `event` (String), `timestamp` (DateTime)
+- [x] Criar a entidade de domínio `PortfolioNotificationEvent` em `lib/src/features/portfolio/domain/entities/` (AC: 3)
+  - [x] Campos: `userId`, `event` (String), `timestamp` (DateTime)
 
-- [ ] Integrar o `NotificationService` no `PortfolioProvider` (AC: 4)
-  - [ ] Adicionar método `startListeningForUpdates()` que inicia a escuta do stream SSE
-  - [ ] Quando um evento `PORTFOLIO_UPDATED` chegar, chamar `loadSummary()` e `loadCustodyPositions()` em paralelo
-  - [ ] Adicionar método `stopListeningForUpdates()` para cancelar o stream na destruição do Provider
-  - [ ] Adicionar estado `_isReceivingLiveUpdates` (bool) e getter para exibir indicador visual
+- [x] Integrar o `NotificationService` no `PortfolioProvider` (AC: 4)
+  - [x] Adicionar método `startListeningForUpdates()` que inicia a escuta do stream SSE
+  - [x] Quando um evento `PORTFOLIO_UPDATED` chegar, chamar `loadSummary()` e `loadCustodyPositions()` em paralelo
+  - [x] Adicionar método `stopListeningForUpdates()` para cancelar o stream na destruição do Provider
+  - [x] Adicionar estado `_isReceivingLiveUpdates` (bool) e getter para exibir indicador visual
 
-- [ ] Adicionar indicador visual de "atualização ao vivo" no `DashboardPage` (AC: 4)
-  - [ ] Exibir um chip/badge sutil mostrando "● Ao vivo" (ponto verde pulsante) quando SSE conectado
-  - [ ] Animar os componentes afetados (KPI Cards, tabela de custódia) com fade de 250ms ao receber atualização
-  - [ ] Usar `AnimatedOpacity` ou `AnimatedSwitcher` com duração de 250ms
+- [x] Adicionar indicador visual de "atualização ao vivo" no `DashboardPage` (AC: 4)
+  - [x] Exibir um chip/badge sutil mostrando "● Ao vivo" (ponto verde pulsante) quando SSE conectado
+  - [x] Animar os componentes afetados (KPI Cards, tabela de custódia) com fade de 250ms ao receber atualização
+  - [x] Usar `AnimatedOpacity` ou `AnimatedSwitcher` com duração de 250ms
 
-- [ ] Registrar o `NotificationService` no container de DI (ex: `main.dart` ou provider setup) (AC: 3)
+- [x] Registrar o `NotificationService` no container de DI (ex: `main.dart` ou provider setup) (AC: 3)
 
-- [ ] Rodar `flutter analyze` e garantir zero warnings/erros (AC: 4)
+- [x] Rodar `flutter analyze` e garantir zero warnings/erros (AC: 4)
 
 ## Dev Notes
 

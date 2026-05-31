@@ -5,9 +5,9 @@ import afsdigital.grahamselect.common.portfolio.application.dto.CustodyPositionD
 import afsdigital.grahamselect.common.portfolio.application.repository.TradePort;
 import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
 import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
-import afsdigital.grahamselect.valuation.application.repository.CompanyRepository;
-import afsdigital.grahamselect.valuation.application.repository.StockPricePort;
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
+import afsdigital.grahamselect.common.domain.repository.StockPricePort;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

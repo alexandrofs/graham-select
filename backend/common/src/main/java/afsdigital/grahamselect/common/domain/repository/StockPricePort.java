@@ -1,6 +1,6 @@
-package afsdigital.grahamselect.valuation.application.repository;
+package afsdigital.grahamselect.common.domain.repository;
 
-import afsdigital.grahamselect.valuation.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.domain.entities.StockPrice;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

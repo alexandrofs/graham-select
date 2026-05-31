@@ -61,6 +61,36 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 ---
 
+## Security Checklist
+
+Antes de dar como finalizado qualquer desenvolvimento backend ou de infraestrutura, valide:
+1. **CORS Production Domain:** Domínios locais e o domínio oficial do Render (`https://graham-select-frontend.onrender.com`) devem estar explicitamente configurados em um bean centralizado de `CorsConfigurationSource` no `SecurityConfig.java`. Evite padrões dinâmicos ou `*` combinados com `allowCredentials(true)` em produção.
+2. **JWT Extraction & Multitenancy:** O `userId` deve ser extraído do token JWT (`jwt.getSubject()`) de forma estrita em todos os endpoints não públicos. Cada query ou persistência de dados de carteira, trades ou auditoria deve incluir o `userId` no filtro para garantir o isolamento total por usuário.
+3. **Path Traversal Protection:** Qualquer funcionalidade de recebimento de arquivos (como uploads de extratos B3) deve filtrar o nome do arquivo descartando caminhos relativos ou caracteres de escape (`../`) para prevenir ataques de Path Traversal.
+4. **SSE Preflight Validation:** Certifique-se de que endpoints de streaming de eventos (como SSE `/stream`) tratam corretamente requisições Preflight `OPTIONS` de forma anônima antes da requisição real autenticada.
+
+---
+
+## Deploy & Production Gate Checklist (Smoke Tests)
+
+Após qualquer deploy em produção (Render.com), o Project Lead e o agente DEV devem validar manualmente estes 5 pontos críticos em `graham-select-frontend.onrender.com`:
+1. **Status Ao Vivo (SSE):** O dashboard exibe o badge pulsante verde "● Ao vivo" no canto superior indicando sucesso na conexão de streaming de eventos em tempo real.
+2. **KPI Dashboard Cards:** Os cards de patrimônio, rentabilidade e dividendos carregam e exibem dados reais (com Skeleton Screen animado durante o fetching).
+3. **Upload de Extrato B3:** A funcionalidade de upload aceita planilhas `.xlsx` e dispara o pipeline assíncrono Kafka.
+4. **Operações Manuais (Reactive Update):** A inserção manual de um trade (Compra/Venda) deve atualizar o dashboard e a tabela de custódia instantaneamente via SSE (sem necessidade de dar refresh no browser).
+5. **Session Persistency & Auth:** Efetuar logout e login novamente via Google OAuth2 garantindo fluxo correto de renovação e armazenamento do JWT.
+
+---
+
+## Autonomous / YOLO Mode Governance
+
+Quando agentes AI operam de forma autônoma (sem validação humana história a história):
+1. **Rastreabilidade Obrigatória:** Nenhuma história de usuário (`story.md`) pode ter seu status alterado para `done` sem que **todas** as caixas de tarefas `[ ]` internas estejam marcadas como `[x]` e a seção `File List` liste fisicamente todos os caminhos dos arquivos criados e editados.
+2. **Testes Estáticos & Compilação:** É obrigatório rodar localmente `mvn clean test` no backend e `flutter analyze` + testes de widget no frontend a cada história concluída.
+3. **Gate Humano de Deploy:** Modificações que envolvam CORS, portas, banco de dados ou ambiente de produção exigem aprovação manual e Smoke Test do Project Lead antes do merge da branch na `main`.
+
+---
+
 ## Usage Guidelines
 
 **For AI Agents:**
@@ -77,4 +107,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Review quarterly for outdated rules
 - Remove rules that become obvious over time
 
-Last Updated: 2026-03-08T15:24:29-03:00
+Last Updated: 2026-05-31T16:46:00-03:00
