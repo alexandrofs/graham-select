@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../../data/datasources/notification_service.dart';
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/entities/custody_position.dart';
 import '../../domain/entities/monthly_evolution.dart';
@@ -8,8 +10,9 @@ enum PortfolioStatus { initial, loading, success, error }
 
 class PortfolioProvider extends ChangeNotifier {
   final PortfolioRepository repository;
+  final NotificationService? notificationService;
 
-  PortfolioProvider(this.repository);
+  PortfolioProvider(this.repository, [this.notificationService]);
 
   PortfolioStatus _status = PortfolioStatus.initial;
   PortfolioStatus get status => _status;
@@ -200,5 +203,43 @@ class PortfolioProvider extends ChangeNotifier {
       _evolutionError = e.toString().replaceFirst('Exception: ', '');
     }
     notifyListeners();
+  }
+
+  // --- Live Updates (SSE) ---
+  StreamSubscription? _notificationSubscription;
+  bool _isReceivingLiveUpdates = false;
+  bool get isReceivingLiveUpdates => _isReceivingLiveUpdates;
+
+  void startListeningForUpdates() {
+    if (notificationService == null) return;
+    
+    _notificationSubscription?.cancel();
+    notificationService!.connect();
+    _isReceivingLiveUpdates = true;
+    notifyListeners();
+
+    _notificationSubscription = notificationService!.notificationStream.listen((event) {
+      if (event.event == 'PORTFOLIO_UPDATED') {
+        Future.wait([
+          loadSummary(),
+          loadCustodyPositions(),
+          loadEvolutionData(),
+        ]);
+      }
+    });
+  }
+
+  void stopListeningForUpdates() {
+    _notificationSubscription?.cancel();
+    _notificationSubscription = null;
+    notificationService?.dispose();
+    _isReceivingLiveUpdates = false;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
   }
 }

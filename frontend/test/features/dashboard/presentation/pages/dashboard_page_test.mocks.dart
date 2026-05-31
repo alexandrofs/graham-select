@@ -42,15 +42,15 @@ class _FakePortfolioRepository_0 extends _i1.SmartFake
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
-  MockPortfolioProvider() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   _i2.PortfolioRepository get repository =>
       (super.noSuchMethod(
             Invocation.getter(#repository),
             returnValue: _FakePortfolioRepository_0(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakePortfolioRepository_0(
               this,
               Invocation.getter(#repository),
             ),
@@ -62,6 +62,7 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
       (super.noSuchMethod(
             Invocation.getter(#status),
             returnValue: _i3.PortfolioStatus.initial,
+            returnValueForMissingStub: _i3.PortfolioStatus.initial,
           )
           as _i3.PortfolioStatus);
 
@@ -70,6 +71,7 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
       (super.noSuchMethod(
             Invocation.getter(#rawCustodyPositions),
             returnValue: <_i4.CustodyPosition>[],
+            returnValueForMissingStub: <_i4.CustodyPosition>[],
           )
           as List<_i4.CustodyPosition>);
 
@@ -78,6 +80,7 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
       (super.noSuchMethod(
             Invocation.getter(#custodyPositions),
             returnValue: <_i4.CustodyPosition>[],
+            returnValueForMissingStub: <_i4.CustodyPosition>[],
           )
           as List<_i4.CustodyPosition>);
 
@@ -86,6 +89,7 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
       (super.noSuchMethod(
             Invocation.getter(#custodyStatus),
             returnValue: _i3.PortfolioStatus.initial,
+            returnValueForMissingStub: _i3.PortfolioStatus.initial,
           )
           as _i3.PortfolioStatus);
 
@@ -97,12 +101,20 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
               this,
               Invocation.getter(#sortColumn),
             ),
+            returnValueForMissingStub: _i5.dummyValue<String>(
+              this,
+              Invocation.getter(#sortColumn),
+            ),
           )
           as String);
 
   @override
   bool get sortAscending =>
-      (super.noSuchMethod(Invocation.getter(#sortAscending), returnValue: false)
+      (super.noSuchMethod(
+            Invocation.getter(#sortAscending),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
           as bool);
 
   @override
@@ -110,12 +122,26 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
       (super.noSuchMethod(
             Invocation.getter(#evolutionStatus),
             returnValue: _i3.PortfolioStatus.initial,
+            returnValueForMissingStub: _i3.PortfolioStatus.initial,
           )
           as _i3.PortfolioStatus);
 
   @override
+  bool get isReceivingLiveUpdates =>
+      (super.noSuchMethod(
+            Invocation.getter(#isReceivingLiveUpdates),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
   bool get hasListeners =>
-      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+      (super.noSuchMethod(
+            Invocation.getter(#hasListeners),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
           as bool);
 
   @override
@@ -187,6 +213,24 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i6.Future<void>);
 
   @override
+  void startListeningForUpdates() => super.noSuchMethod(
+    Invocation.method(#startListeningForUpdates, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void stopListeningForUpdates() => super.noSuchMethod(
+    Invocation.method(#stopListeningForUpdates, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,
@@ -195,12 +239,6 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   @override
   void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#removeListener, [listener]),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void dispose() => super.noSuchMethod(
-    Invocation.method(#dispose, []),
     returnValueForMissingStub: null,
   );
 
@@ -215,21 +253,22 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockProfileProvider extends _i1.Mock implements _i8.ProfileProvider {
-  MockProfileProvider() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   _i8.ProfileState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
             returnValue: _i8.ProfileState.idle,
+            returnValueForMissingStub: _i8.ProfileState.idle,
           )
           as _i8.ProfileState);
 
   @override
   bool get hasListeners =>
-      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+      (super.noSuchMethod(
+            Invocation.getter(#hasListeners),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
           as bool);
 
   @override

@@ -1,6 +1,6 @@
 # Story 3.5: Atualização em Tempo Real (Event-Driven UI)
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
