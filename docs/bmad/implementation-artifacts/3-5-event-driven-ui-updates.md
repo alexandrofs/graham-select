@@ -1,6 +1,6 @@
 # Story 3.5: Atualização em Tempo Real (Event-Driven UI)
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -323,10 +323,34 @@ public SendPortfolioUpdateNotificationUseCase sendPortfolioUpdateNotificationUse
 
 ### Agent Model Used
 
-Claude Sonnet 4.6 (Thinking)
+Gemini 3.5 Flash (High)
 
 ### Debug Log References
 
+N/A
+
 ### Completion Notes List
 
+- Implementado endpoint SSE no backend (`GET /api/v1/notifications/stream`) usando `SseEmitter` e ConcurrentHashMap/CopyOnWriteArrayList para thread-safety reativo.
+- Integrada chamada de notificação de atualização ao salvar novo trade no consumidor Kafka.
+- Criado o cliente SSE no frontend Flutter usando o `ApiClient` (Dio) com controle de reconexão robusto e backoff exponencial.
+- Adicionado badge "● Ao vivo" pulsante premium (micro-animação) e transições reativas de fade de 250ms com AnimatedSwitcher no dashboard.
+- Garantida 100% de cobertura de testes unitários e de integração no backend e testes de widget atualizados com mocks estáveis no frontend.
+
 ### File List
+
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/repository/NotificationPort.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/SendPortfolioUpdateNotificationUseCase.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/sse/SseNotificationAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/web/NotificationController.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/spring/PortfolioSummaryConfiguration.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaTradeExtractedConsumer.java`
+- `backend/common/src/test/java/afsdigital/grahamselect/common/portfolio/application/usecase/SendPortfolioUpdateNotificationUseCaseTest.java`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/portfolio/web/NotificationControllerTest.java`
+- `frontend/lib/src/features/portfolio/domain/entities/portfolio_notification_event.dart`
+- `frontend/lib/src/features/portfolio/data/datasources/notification_service.dart`
+- `frontend/lib/src/features/portfolio/presentation/providers/portfolio_provider.dart`
+- `frontend/lib/src/features/dashboard/presentation/pages/dashboard_page.dart`
+- `frontend/lib/main.dart`
+- `frontend/test/features/dashboard/presentation/pages/dashboard_page_test.dart`
+
