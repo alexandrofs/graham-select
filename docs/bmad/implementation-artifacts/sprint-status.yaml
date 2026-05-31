@@ -60,7 +60,7 @@ development_status:
   3-1-portfolio-kpi-dashboard: done
   3-2-valuation-custody-table: done
   3-3-dividend-contribution-history: done
-  3-4-asset-allocation-donut-chart: backlog
+  3-4-asset-allocation-donut-chart: in-progress
   3-5-event-driven-ui-updates: backlog
   epic-3-retrospective: optional
   epic-4: backlog

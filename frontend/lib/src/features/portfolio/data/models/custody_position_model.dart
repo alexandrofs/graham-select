@@ -10,6 +10,7 @@ class CustodyPositionModel extends CustodyPosition {
     required super.gainLossPercentage,
     required super.priceSource,
     super.priceUpdatedAt,
+    required super.assetClass,
   });
 
   factory CustodyPositionModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +27,7 @@ class CustodyPositionModel extends CustodyPosition {
       priceUpdatedAt: json['priceUpdatedAt'] != null
           ? DateTime.parse(json['priceUpdatedAt'] as String)
           : null,
+      assetClass: json['assetClass'] as String? ?? 'Outros',
     );
   }
 
@@ -39,6 +41,7 @@ class CustodyPositionModel extends CustodyPosition {
       'gainLossPercentage': gainLossPercentage,
       'priceSource': priceSource,
       'priceUpdatedAt': priceUpdatedAt?.toIso8601String(),
+      'assetClass': assetClass,
     };
   }
 }

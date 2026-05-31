@@ -72,9 +72,22 @@ class PortfolioProvider extends ChangeNotifier {
 
   // --- Estados de Custódia ---
   List<CustodyPosition> _custodyPositions = [];
+  List<CustodyPosition> get rawCustodyPositions => _custodyPositions;
+  
+  String? _selectedAssetClassFilter;
+  String? get selectedAssetClassFilter => _selectedAssetClassFilter;
+
+  void selectAssetClassFilter(String? assetClass) {
+    _selectedAssetClassFilter = assetClass;
+    notifyListeners();
+  }
   
   List<CustodyPosition> get custodyPositions {
-    final sorted = List<CustodyPosition>.from(_custodyPositions);
+    Iterable<CustodyPosition> filtered = _custodyPositions;
+    if (_selectedAssetClassFilter != null) {
+      filtered = filtered.where((p) => p.assetClass == _selectedAssetClassFilter);
+    }
+    final sorted = List<CustodyPosition>.from(filtered);
     if (_sortColumn.isNotEmpty) {
       sorted.sort((a, b) {
         dynamic valA = _getValueByColumn(a, _sortColumn);

@@ -26,6 +26,8 @@ void main() {
     // Stubs da custódia para evitar MissingStubError
     when(mockPortfolioProvider.custodyStatus).thenReturn(PortfolioStatus.initial);
     when(mockPortfolioProvider.custodyPositions).thenReturn([]);
+    when(mockPortfolioProvider.rawCustodyPositions).thenReturn([]);
+    when(mockPortfolioProvider.selectedAssetClassFilter).thenReturn(null);
     when(mockPortfolioProvider.custodyError).thenReturn(null);
     when(mockPortfolioProvider.loadCustodyPositions()).thenAnswer((_) async {});
   });

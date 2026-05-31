@@ -103,6 +103,7 @@ void main() {
           gainLossPercentage: 16.67,
           priceSource: 'LIVE',
           priceUpdatedAt: null,
+          assetClass: 'Ações',
         ),
         const CustodyPosition(
           ticker: 'VALE3',
@@ -113,6 +114,7 @@ void main() {
           gainLossPercentage: -6.25,
           priceSource: 'CACHE',
           priceUpdatedAt: null,
+          assetClass: 'Ações',
         ),
       ];
       final tDate = DateTime.utc(2026, 5, 30, 18, 0, 0);
@@ -154,6 +156,7 @@ void main() {
           marketValue: 3750.0,
           gainLossPercentage: -6.25,
           priceSource: 'CACHE',
+          assetClass: 'Ações',
         ),
         const CustodyPosition(
           ticker: 'PETR4',
@@ -163,6 +166,7 @@ void main() {
           marketValue: 3500.0,
           gainLossPercentage: 16.67,
           priceSource: 'LIVE',
+          assetClass: 'Ações',
         ),
       ];
 

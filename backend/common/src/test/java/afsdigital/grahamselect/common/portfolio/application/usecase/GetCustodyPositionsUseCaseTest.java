@@ -114,6 +114,7 @@ class GetCustodyPositionsUseCaseTest {
         assertEquals(new BigDecimal("10.00"), pos.gainLossPercentage()); // ((34.10 - 31.00) / 31.00) * 100 = 10%
         assertEquals("LIVE", pos.priceSource());
         assertEquals(today.atStartOfDay(ZoneOffset.UTC).toInstant(), pos.priceUpdatedAt());
+        assertEquals("Ações", pos.assetClass());
     }
 
     @Test

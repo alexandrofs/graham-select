@@ -66,6 +66,14 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i3.PortfolioStatus);
 
   @override
+  List<_i4.CustodyPosition> get rawCustodyPositions =>
+      (super.noSuchMethod(
+            Invocation.getter(#rawCustodyPositions),
+            returnValue: <_i4.CustodyPosition>[],
+          )
+          as List<_i4.CustodyPosition>);
+
+  @override
   List<_i4.CustodyPosition> get custodyPositions =>
       (super.noSuchMethod(
             Invocation.getter(#custodyPositions),
@@ -96,6 +104,14 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   bool get sortAscending =>
       (super.noSuchMethod(Invocation.getter(#sortAscending), returnValue: false)
           as bool);
+
+  @override
+  _i3.PortfolioStatus get evolutionStatus =>
+      (super.noSuchMethod(
+            Invocation.getter(#evolutionStatus),
+            returnValue: _i3.PortfolioStatus.initial,
+          )
+          as _i3.PortfolioStatus);
 
   @override
   bool get hasListeners =>
@@ -141,6 +157,12 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   );
 
   @override
+  void selectAssetClassFilter(String? assetClass) => super.noSuchMethod(
+    Invocation.method(#selectAssetClassFilter, [assetClass]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i6.Future<void> loadCustodyPositions() =>
       (super.noSuchMethod(
             Invocation.method(#loadCustodyPositions, []),
@@ -154,6 +176,15 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
     Invocation.method(#sortBy, [column]),
     returnValueForMissingStub: null,
   );
+
+  @override
+  _i6.Future<void> loadEvolutionData() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadEvolutionData, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
 
   @override
   void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
