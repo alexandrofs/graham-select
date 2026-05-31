@@ -158,6 +158,11 @@ public class GetCustodyPositionsUseCase {
             return "Outros";
         }
         String t = ticker.trim().toUpperCase();
+        // Remove sufixo 'F' de mercado fracionário se for uma ação (ex: PETR4F -> PETR4)
+        if (t.endsWith("F") && t.length() == 6 && Character.isDigit(t.charAt(4))) {
+            t = t.substring(0, 5);
+        }
+
         if (t.startsWith("TESOURO") || t.startsWith("CDB") || t.startsWith("LCI") || t.startsWith("LCA") || t.contains("DIRETO") || t.contains("DEBENTURE")) {
             return "Renda Fixa";
         }
