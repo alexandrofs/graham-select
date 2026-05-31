@@ -1,6 +1,6 @@
 # Story 3.4: Visualização de Alocação por Classe (Gráfico de Rosca)
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -19,28 +19,28 @@ so that eu possa verificar se a minha diversificação está de acordo com a min
 ## Tasks / Subtasks
 
 ### Backend (Spring Boot)
-- [ ] Adicionar campo `assetClass` no `CustodyPositionDTO` do módulo `common` (AC: 3)
-- [ ] Implementar a inferência de classe de ativos baseada no ticker no `GetCustodyPositionsUseCase` (AC: 3)
+- [x] Adicionar campo `assetClass` no `CustodyPositionDTO` do módulo `common` (AC: 3)
+- [x] Implementar a inferência de classe de ativos baseada no ticker no `GetCustodyPositionsUseCase` (AC: 3)
   - Inferir "Ações" para tickers terminados em 3, 4, 5, 6, 8, etc.
   - Inferir "FIIs" para tickers terminados em 11 (ex: HGLG11, MXRF11)
   - Inferir "BDRs" para tickers terminados em 34
   - Inferir "Renda Fixa" para Tesouro ou Renda Fixa
   - Inferir "Outros" como fallback
-- [ ] Atualizar os testes unitários do `GetCustodyPositionsUseCaseTest` para contemplar o novo campo e regras (AC: 3)
-- [ ] Executar build completa e testes do backend (`mvn clean compile && mvn test`)
+- [x] Atualizar os testes unitários do `GetCustodyPositionsUseCaseTest` para contemplar o novo campo e regras (AC: 3)
+- [x] Executar build completa e testes do backend (`mvn clean compile && mvn test`)
 
 ### Frontend (Flutter)
-- [ ] Adicionar campo `assetClass` no `CustodyPosition` em `lib/src/features/portfolio/domain/entities/custody_position.dart` (AC: 3)
-- [ ] Atualizar o mapeamento no `CustodyPositionModel` ou similar para decodificar `assetClass` da API (AC: 3)
-- [ ] Criar o componente `AssetAllocationDonutChart` em `lib/src/features/portfolio/presentation/widgets/` (AC: 3, 5)
+- [x] Adicionar campo `assetClass` no `CustodyPosition` em `lib/src/features/portfolio/domain/entities/custody_position.dart` (AC: 3)
+- [x] Atualizar o mapeamento no `CustodyPositionModel` ou similar para decodificar `assetClass` da API (AC: 3)
+- [x] Criar o componente `AssetAllocationDonutChart` em `lib/src/features/portfolio/presentation/widgets/` (AC: 3, 5)
   - Utilizar uma biblioteca de gráficos robusta e integrada no Flutter ou desenhar um Donut Chart nativo usando CustomPainter para controle total e sem dependências extras, ou utilizar `fl_chart` se estiver instalado.
   - Exibir a rosca com cores elegantes combinando com o Design System (Navy Blue, Emerald Green, Amber Gold, etc.).
   - Adicionar interação de hover/clique para expandir ou filtrar a tabela de ativos pela classe selecionada (AC: 4).
   - Renderizar legenda com o valor financeiro total por classe e percentual (AC: 5).
-- [ ] Integrar o gráfico de rosca no `DashboardPage` logo abaixo dos KPIs e acima da tabela de custódia (AC: 2).
-- [ ] Permitir filtrar a tabela de custódia ao clicar em uma classe do gráfico, exibindo um botão de limpar filtro (AC: 4).
-- [ ] Garantir que o gráfico seja responsivo e tenha transições e animações fluidas (< 300ms) (NFR2).
-- [ ] Rodar `flutter analyze` e garantir conformidade com as regras estáticas de análise.
+- [x] Integrar o gráfico de rosca no `DashboardPage` logo abaixo dos KPIs e acima da tabela de custódia (AC: 2).
+- [x] Permitir filtrar a tabela de custódia ao clicar em uma classe do gráfico, exibindo um botão de limpar filtro (AC: 4).
+- [x] Garantir que o gráfico seja responsivo e tenha transições e animações fluidas (< 300ms) (NFR2).
+- [x] Rodar `flutter analyze` e garantir conformidade com as regras estáticas de análise.
 
 ## Dev Notes
 
