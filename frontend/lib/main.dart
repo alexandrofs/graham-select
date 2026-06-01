@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/api/api_client.dart';
@@ -48,6 +49,7 @@ import 'src/features/portfolio/presentation/pages/evolution_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('pt_BR', null);
   
   try {
     // No Flutter Web sem firebase_options.dart, o Firebase.initializeApp() falha
