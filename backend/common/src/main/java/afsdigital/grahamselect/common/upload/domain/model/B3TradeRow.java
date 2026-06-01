@@ -7,6 +7,7 @@ public record B3TradeRow(
         long lineNumber,
         String ticker,
         LocalDate tradeDate,
+        String side,
         BigDecimal quantity,
         BigDecimal price,
         String broker

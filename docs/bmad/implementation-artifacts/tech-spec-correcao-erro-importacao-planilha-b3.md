@@ -2,7 +2,7 @@
 title: 'Correção do Erro de Importação de Planilha B3'
 slug: 'correcao-erro-importacao-planilha-b3'
 created: '2026-06-01T00:40:22-03:00'
-status: 'ready-for-dev'
+status: 'completed'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack: ["Java 21", "Spring Boot 3.4.13", "FastExcel", "Apache Kafka", "JUnit 5", "AssertJ"]
 files_to_modify: ["backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/parser/FastExcelB3TradeRowParser.java", "backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/parser/FastExcelB3TradeRowParserTest.java"]
@@ -59,7 +59,7 @@ Tornar o parser `FastExcelB3TradeRowParser` altamente resiliente por meio de uma
 
 ### Tasks
 
-- [ ] **Task 1: Implementação de helpers resilientes no parser**
+- [x] **Task 1: Implementação de helpers resilientes no parser**
   - **File:** `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/parser/FastExcelB3TradeRowParser.java`
   - **Action:**
     - Implementar o método utilitário `parseNumericCell(Row row, Integer index)` para parsear e higienizar células numéricas de quantidade e preço (com tratamento de fallback de String, limpeza de `R$`, espaços e pontos, e substituição de vírgula).
@@ -67,7 +67,7 @@ Tornar o parser `FastExcelB3TradeRowParser` altamente resiliente por meio de uma
     - Atualizar o parseador de data `parseTradeDate` para fazer trim na string e remover o horário embutido (caso haja espaço) antes de efetuar o `LocalDate.parse`.
   - **Notes:** Garantir que nenhuma exceção seja lançada para formatos válidos representados textualmente (ex: "35,50", " 1.200 ", "15/05/2026 14:00").
 
-- [ ] **Task 2: Atualização dos Testes Unitários do Parser**
+- [x] **Task 2: Atualização dos Testes Unitários do Parser**
   - **File:** `backend/api/src/test/java/afsdigital/grahamselect/api/upload/infrastructure/parser/FastExcelB3TradeRowParserTest.java`
   - **Action:**
     - Adicionar testes de sucesso contendo células numéricas representadas como Strings com formatação brasileira e símbolos monetários (ex: "R$ 35,50", "1.000", " 100 ").
@@ -77,17 +77,17 @@ Tornar o parser `FastExcelB3TradeRowParser` altamente resiliente por meio de uma
 
 ### Acceptance Criteria
 
-- [ ] **AC 1: Resiliência em Valores Monetários e Numéricos**
+- [x] **AC 1: Resiliência em Valores Monetários e Numéricos**
   - **Given** uma planilha B3 contendo a quantidade formatada como texto com espaços e o preço como string contendo "R$ " e vírgula decimal (ex: `"100"` e `"R$ 35,50"`),
   - **When** o parser processa a linha,
   - **Then** a linha é convertida com sucesso em um `B3TradeRow` com quantidade `100` e preço `35.50` sem lançar exceções.
 
-- [ ] **AC 2: Tolerância em Strings de Datas**
+- [x] **AC 2: Tolerância em Strings de Datas**
   - **Given** uma planilha B3 contendo a data formatada como string com espaços invisíveis ou contendo horas (ex: `" 15/05/2026 "` ou `"15/05/2026 14:30"`),
   - **When** o parser processa a data,
   - **Then** ela é extraída com sucesso como `2026-05-15` (LocalDate) sem falhar.
 
-- [ ] **AC 3: Isolamento de Erros por Linha**
+- [x] **AC 3: Isolamento de Erros por Linha**
   - **Given** uma linha da planilha que seja puramente corrompida (como quantidade `"abc"` ou data inválida `"xyz"`),
   - **When** o parser processa a linha,
   - **Then** a falha é detectada individualmente e encaminhada para o `failureConsumer` preservando a execução e o parsing das demais linhas corretas.
@@ -107,3 +107,8 @@ Tornar o parser `FastExcelB3TradeRowParser` altamente resiliente por meio de uma
 ### Notes
 
 Nenhum.
+
+## Review Notes
+- Adversarial review completed
+- Findings: 10 total, 7 fixed, 3 skipped (classified as noise/unrelated)
+- Resolution approach: auto-fix

@@ -47,6 +47,7 @@ class ProcessB3FileUseCaseTest {
                 2L,
                 "PETR4",
                 LocalDate.of(2026, 5, 17),
+                "COMPRA",
                 BigDecimal.valueOf(100),
                 new BigDecimal("29.90"),
                 "XP"

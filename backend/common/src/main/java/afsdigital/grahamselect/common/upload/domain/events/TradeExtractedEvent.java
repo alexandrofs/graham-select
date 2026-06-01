@@ -17,6 +17,7 @@ public record TradeExtractedEvent(
         long lineNumber,
         String ticker,
         LocalDate tradeDate,
+        String side,
         BigDecimal quantity,
         BigDecimal price,
         String broker

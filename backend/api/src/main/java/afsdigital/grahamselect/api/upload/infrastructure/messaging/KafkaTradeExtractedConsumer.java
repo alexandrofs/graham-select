@@ -38,6 +38,7 @@ public class KafkaTradeExtractedConsumer {
                 .userId(event.userId())
                 .ticker(event.ticker())
                 .tradeDate(event.tradeDate())
+                .side(event.side() != null ? event.side() : "COMPRA")
                 .quantity(event.quantity())
                 .price(event.price())
                 .broker(event.broker())
