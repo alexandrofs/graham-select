@@ -36,6 +36,7 @@ public class FastExcelB3TradeRowParser {
         DATA("data", true, java.util.List.of("data", "data do negocio")),
         QUANTIDADE("quantidade", true, java.util.List.of("quantidade", "qtd")),
         PRECO("preco", true, java.util.List.of("preco", "preco unitario", "valor unitario")),
+        SIDE("side", false, java.util.List.of("side", "tipo de movimentacao", "movimentacao", "compra/venda", "operacao")),
         CORRETORA("corretora", false, java.util.List.of("corretora", "instituicao"));
 
         private final String normalizedName;
@@ -132,6 +133,11 @@ public class FastExcelB3TradeRowParser {
         BigDecimal quantity = parseNumericCell(row, headerIndexes.get(B3Header.QUANTIDADE), "Quantidade inválida");
         BigDecimal price = parseNumericCell(row, headerIndexes.get(B3Header.PRECO), "Preço inválido");
         
+        String side = "COMPRA";
+        if (headerIndexes.containsKey(B3Header.SIDE)) {
+            side = parseSide(row.getCellText(headerIndexes.get(B3Header.SIDE)));
+        }
+
         String broker = null;
         if (headerIndexes.containsKey(B3Header.CORRETORA)) {
             broker = emptyToNull(row.getCellText(headerIndexes.get(B3Header.CORRETORA)));
@@ -141,10 +147,22 @@ public class FastExcelB3TradeRowParser {
                 row.getRowNum(),
                 ticker,
                 tradeDate,
+                side,
                 quantity,
                 price,
                 broker
         );
+    }
+
+    private String parseSide(String rawSide) {
+        if (rawSide == null || rawSide.isBlank()) {
+            return "COMPRA";
+        }
+        String normalized = rawSide.trim().toLowerCase(Locale.ROOT);
+        if (normalized.contains("venda") || normalized.equals("v")) {
+            return "VENDA";
+        }
+        return "COMPRA";
     }
 
     private BigDecimal parseNumericCell(Row row, Integer index, String errorMessage) {

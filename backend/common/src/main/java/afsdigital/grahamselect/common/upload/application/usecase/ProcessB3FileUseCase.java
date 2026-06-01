@@ -40,6 +40,7 @@ public class ProcessB3FileUseCase {
                 .lineNumber(tradeRow.lineNumber())
                 .ticker(tradeRow.ticker())
                 .tradeDate(tradeRow.tradeDate())
+                .side(tradeRow.side())
                 .quantity(tradeRow.quantity())
                 .price(tradeRow.price())
                 .broker(tradeRow.broker())
