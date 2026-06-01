@@ -4,6 +4,7 @@ import afsdigital.grahamselect.common.upload.application.repository.B3ImportStat
 import afsdigital.grahamselect.common.upload.application.usecase.UploadB3FileUseCase;
 import afsdigital.grahamselect.common.upload.domain.events.FileUploadedEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/upload/b3")
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class B3UploadController {
     @PostMapping
     public ResponseEntity<B3UploadAcceptedResponse> upload(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt) throws IOException {
         if (file.isEmpty() || file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".xlsx")) {
+            log.error("Erro na validação do arquivo B3: Formato não suportado ou vazio. Nome do arquivo: {}", file.getOriginalFilename());
             throw new B3UploadValidationException("Apenas arquivos .xlsx (Excel) da B3 são suportados no momento.");
         }
 
@@ -80,20 +83,46 @@ public class B3UploadController {
             try (Stream<Row> rows = sheet.openStream()) {
                 Optional<Row> firstRow = rows.findFirst();
                 if (firstRow.isEmpty()) {
+                    log.error("Erro na validação do arquivo B3: A primeira planilha está vazia.");
                     throw new B3UploadValidationException("Arquivo vazio");
                 }
                 List<String> headers = firstRow.get().stream()
                         .map(Cell::asString)
                         .filter(java.util.Objects::nonNull)
-                        .map(String::trim)
-                        .map(String::toLowerCase)
+                        .map(this::normalize)
+                        .map(this::mapToCanonicalHeader)
                         .toList();
 
-                List<String> requiredHeaders = List.of("ticker", "data", "quantidade", "preço");
+                List<String> requiredHeaders = List.of("ticker", "data", "quantidade", "preco");
                 if (!headers.containsAll(requiredHeaders)) {
+                    log.error("Erro na validação do arquivo B3: Colunas obrigatórias não encontradas. Cabeçalhos encontrados: {}, Cabeçalhos esperados: {}", headers, requiredHeaders);
                     throw new B3UploadValidationException("Arquivo inválido: Colunas obrigatórias não encontradas.");
                 }
             }
         }
+    }
+
+    private String mapToCanonicalHeader(String normalizedHeader) {
+        if (normalizedHeader == null) {
+            return "";
+        }
+        return switch (normalizedHeader) {
+            case "codigo de negociacao", "codigo", "ticker" -> "ticker";
+            case "data do negocio", "data" -> "data";
+            case "quantidade", "qtd" -> "quantidade";
+            case "preco", "preco unitario", "valor unitario" -> "preco";
+            case "instituicao", "corretora" -> "corretora";
+            default -> normalizedHeader;
+        };
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return "";
+        }
+        return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .trim()
+                .toLowerCase(java.util.Locale.ROOT);
     }
 }
