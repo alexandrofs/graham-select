@@ -81,9 +81,10 @@ so that o cálculo do Filtro de Graham nas histórias subsequentes (4.3) use dad
 - [ ] **Task 6: Implementar `CustodyTickerRepositoryImpl`** (AC: 1)
   - [ ] Criar `CustodyTickerRepositoryImpl` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/CustodyTickerRepositoryImpl.java`
   - [ ] Implementa `CustodyTickerPort`
-  - [ ] Injeta `TradeJpaRepository` existente (ou criar query JPQL em novo `@Repository`)
-  - [ ] Query: `SELECT DISTINCT t.ticker FROM trade_transaction t WHERE t.user_id IS NOT NULL AND t.side = 'BUY'`
-  - [ ] Usar o `TradeJpaRepository` existente em `api/ingestion/infrastructure/persistence/jpa/repository/`
+  - [ ] Injeta o `TradeJpaRepository` existente em `api/src/.../portfolio/infrastructure/persistence/jpa/repository/`
+  - [ ] Query JPQL: `SELECT DISTINCT t.ticker FROM TradeEntity t` (tabela real: `trades`; entidade: `TradeEntity`)
+  - [ ] Campos reais do `TradeEntity`: `id` (UUID), `userId` (String), `ticker` (String, max 20), `side` (String — `"BUY"`/`"SELL"`), `tradeDate`, `quantity`, `price`, `broker`, `createdAt`
+  - [ ] **NÃO** usar `trade_transaction` — essa tabela não existe; a tabela correta é `trades`
 
 - [ ] **Task 7: Implementar `KafkaMarketDataEventPublisher`** (AC: 2)
   - [ ] Criar `KafkaMarketDataEventPublisher` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/kafka/KafkaMarketDataEventPublisher.java`
@@ -407,6 +408,8 @@ O scheduler de Market Data é **agnóstico a usuário** — ele sincroniza dados
 
 O isolamento por userId só é necessário nas histórias 4.2 e 4.3 (metas e recomendações individuais).
 
+> **⚠️ Nome real da tabela**: A tabela de operações se chama **`trades`** (entidade `TradeEntity`), localizada em `api/src/.../portfolio/infrastructure/persistence/jpa/entities/TradeEntity.java`. O nome `trade_transaction` **não existe** no schema atual.
+
 ---
 
 ### 12. Checklist de Segurança — BRAPI_TOKEN
@@ -423,7 +426,7 @@ O isolamento por userId só é necessário nas histórias 4.2 e 4.3 (metas e rec
 - **Pacotes backend**: `afsdigital.grahamselect.api.{feature}.{camada}` conforme architecture.md#D12
 - **Naming conventions**: `{Verbo}{Substantivo}UseCase`, `{Feature}Repository`, `{Feature}Adapter` — conforme architecture.md#Convenções
 - **Tabela `stock_price`**: já existente (criada nas histórias anteriores); `StockPriceEntity` e `StockPriceJpaRepository` já implementados no `valuation-service`
-- **Tabela `trade_transaction`**: já existente no `api` — usar `TradeJpaRepository` para query de tickers
+- **Tabela `trades`** (entidade `TradeEntity`): já existente no `api` desde o Épico 2 — usar `TradeJpaRepository` em `api/.../portfolio/infrastructure/persistence/jpa/repository/` para query de tickers distintos
 - **`ValuationServiceConfiguration.java`**: NÃO modificar — é do `valuation-service`, que é independente
 - **Scheduler**: habilitar `@EnableScheduling` na `ApiServiceApplication.java` se não estiver habilitado
 - **Varredura de componentes**: verificar se o package `afsdigital.grahamselect.api.valuation` está coberto pelo `@SpringBootApplication` scan da `ApiServiceApplication`
