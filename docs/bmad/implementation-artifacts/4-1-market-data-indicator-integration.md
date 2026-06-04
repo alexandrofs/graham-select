@@ -1,6 +1,9 @@
+---
+baseline_commit: 8d96e833af23c5fb1327b89ba858582e217918ce
+---
 # Story 4.1: Integração de Market Data (Cotações & Indicadores)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -39,102 +42,102 @@ so that o cálculo do Filtro de Graham nas histórias subsequentes (4.3) use dad
 
 ### Backend — Módulo `common` (Domain + Application — POJOs puros, sem Spring)
 
-- [ ] **Task 1: Criar Port `MarketDataPort` em `common`** (AC: 1, 2)
-  - [ ] Criar interface `MarketDataPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/MarketDataPort.java`
-  - [ ] Método `List<MarketDataResult> fetchMarketData(List<String> tickers)`
-  - [ ] Criar record `MarketDataResult` em `common/.../valuation/application/dto/` com campos: `ticker`, `price` (BigDecimal), `dividendYield` (Double), `priceEarnings` (Double), `priceToBook` (Double), `earningsPerShare` (Double), `bookValuePerShare` (Double)
-  - [ ] **SEM** importações Spring nesta camada (POJO puro)
+- [x] **Task 1: Criar Port `MarketDataPort` em `common`** (AC: 1, 2)
+  - [x] Criar interface `MarketDataPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/MarketDataPort.java`
+  - [x] Método `List<MarketDataResult> fetchMarketData(List<String> tickers)`
+  - [x] Criar record `MarketDataResult` em `common/.../valuation/application/dto/` com campos: `ticker`, `price` (BigDecimal), `dividendYield` (Double), `priceEarnings` (Double), `priceToBook` (Double), `earningsPerShare` (Double), `bookValuePerShare` (Double)
+  - [x] **SEM** importações Spring nesta camada (POJO puro)
 
-- [ ] **Task 2: Criar Use Case `SyncMarketDataUseCase` em `common`** (AC: 1, 2, 3, 4, 5)
-  - [ ] Criar `SyncMarketDataUseCase` em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SyncMarketDataUseCase.java` como POJO (sem `@Component`)
-  - [ ] Método `execute()` — sem parâmetros; obtém tickers via `CustodyTickerPort`
-  - [ ] Injeta `MarketDataPort`, `CustodyTickerPort`, `MarketDataEventPublisherPort`
-  - [ ] Para cada ticker com resultado bem-sucedido: chama `MarketDataEventPublisherPort.publish(FinancialDataEvent)` (montando o evento com os dados obtidos)
-  - [ ] Lógica de resiliência: try-catch por ticker individual (AC: 3, 4); log WARN em falha; continua para próximo
-  - [ ] Ao finalizar: log INFO com contagem (AC: 5)
-  - [ ] Lombok `@RequiredArgsConstructor` + `@Slf4j`
+- [x] **Task 2: Criar Use Case `SyncMarketDataUseCase` em `common`** (AC: 1, 2, 3, 4, 5)
+  - [x] Criar `SyncMarketDataUseCase` em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SyncMarketDataUseCase.java` como POJO (sem `@Component`)
+  - [x] Método `execute()` — sem parâmetros; obtém tickers via `CustodyTickerPort`
+  - [x] Injeta `MarketDataPort`, `CustodyTickerPort`, `MarketDataEventPublisherPort`
+  - [x] Para cada ticker com resultado bem-sucedido: chama `MarketDataEventPublisherPort.publish(FinancialDataEvent)` (montando o evento com os dados obtidos)
+  - [x] Lógica de resiliência: try-catch por ticker individual (AC: 3, 4); log WARN em falha; continua para próximo
+  - [x] Ao finalizar: log INFO com contagem (AC: 5)
+  - [x] Lombok `@RequiredArgsConstructor` + `@Slf4j`
 
-- [ ] **Task 3: Criar Port `CustodyTickerPort` em `common`** (AC: 1)
-  - [ ] Criar interface `CustodyTickerPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/CustodyTickerPort.java`
-  - [ ] Método `List<String> findDistinctActiveTickers()` — retorna tickers únicos de `trade_transaction` onde há posição aberta
+- [x] **Task 3: Criar Port `CustodyTickerPort` em `common`** (AC: 1)
+  - [x] Criar interface `CustodyTickerPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/CustodyTickerPort.java`
+  - [x] Método `List<String> findDistinctActiveTickers()` — retorna tickers únicos de `trade_transaction` onde há posição aberta
 
-- [ ] **Task 4: Criar Port `MarketDataEventPublisherPort` em `common`** (AC: 2)
-  - [ ] Criar interface `MarketDataEventPublisherPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/MarketDataEventPublisherPort.java`
-  - [ ] Método `void publish(FinancialDataEvent event)` — publica no tópico `financial-data`
+- [x] **Task 4: Criar Port `MarketDataEventPublisherPort` em `common`** (AC: 2)
+  - [x] Criar interface `MarketDataEventPublisherPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/MarketDataEventPublisherPort.java`
+  - [x] Método `void publish(FinancialDataEvent event)` — publica no tópico `financial-data`
 
 ---
 
 ### Backend — Módulo `api` (Infrastructure + Scheduler)
 
-- [ ] **Task 5: Implementar adapter Brapi `BrapiMarketDataAdapter`** (AC: 1, 2, 3, 4)
-  - [ ] Criar `BrapiMarketDataAdapter` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java`
-  - [ ] Implementa `MarketDataPort`
-  - [ ] Usar `RestClient` (Spring Boot 3.2+) — **NÃO** adicionar OpenFeign (evitar dependência extra)
-  - [ ] URL base: `https://brapi.dev/api`
-  - [ ] Endpoint: `GET /quote/{tickers}?modules=summaryProfile,financialData&token={token}`
-  - [ ] Passar múltiplos tickers numa única requisição separados por vírgula (ex: `PETR4,VALE3,ITUB4`)
-  - [ ] Token via `@Value("${brapi.token}")` — variável de ambiente `BRAPI_TOKEN`
-  - [ ] Timeout de conexão: 5s / leitura: 10s
-  - [ ] Cache com `@Cacheable(value = "market-data", key = "#ticker")` por ticker (AC: 3)
-  - [ ] Em caso de falha HTTP 4xx/5xx: retornar `Optional.empty()` e logar WARN
+- [x] **Task 5: Implementar adapter Brapi `BrapiMarketDataAdapter`** (AC: 1, 2, 3, 4)
+  - [x] Criar `BrapiMarketDataAdapter` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java`
+  - [x] Implementa `MarketDataPort`
+  - [x] Usar `RestClient` (Spring Boot 3.2+) — **NÃO** adicionar OpenFeign (evitar dependência extra)
+  - [x] URL base: `https://brapi.dev/api`
+  - [x] Endpoint: `GET /quote/{tickers}?modules=summaryProfile,financialData&token={token}`
+  - [x] Passar múltiplos tickers numa única requisição separados por vírgula (ex: `PETR4,VALE3,ITUB4`)
+  - [x] Token via `@Value("${brapi.token}")` — variável de ambiente `BRAPI_TOKEN`
+  - [x] Timeout de conexão: 5s / leitura: 10s
+  - [x] Cache com `@Cacheable(value = "market-data", key = "#ticker")` por ticker (AC: 3)
+  - [x] Em caso de falha HTTP 4xx/5xx: retornar `Optional.empty()` e logar WARN
 
-- [ ] **Task 6: Implementar `CustodyTickerRepositoryImpl`** (AC: 1)
-  - [ ] Criar `CustodyTickerRepositoryImpl` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/CustodyTickerRepositoryImpl.java`
-  - [ ] Implementa `CustodyTickerPort`
-  - [ ] Injeta o `TradeJpaRepository` existente em `api/src/.../portfolio/infrastructure/persistence/jpa/repository/`
-  - [ ] Query JPQL: `SELECT DISTINCT t.ticker FROM TradeEntity t` (tabela real: `trades`; entidade: `TradeEntity`)
-  - [ ] Campos reais do `TradeEntity`: `id` (UUID), `userId` (String), `ticker` (String, max 20), `side` (String — `"BUY"`/`"SELL"`), `tradeDate`, `quantity`, `price`, `broker`, `createdAt`
-  - [ ] **NÃO** usar `trade_transaction` — essa tabela não existe; a tabela correta é `trades`
+- [x] **Task 6: Implementar `CustodyTickerRepositoryImpl`** (AC: 1)
+  - [x] Criar `CustodyTickerRepositoryImpl` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/CustodyTickerRepositoryImpl.java`
+  - [x] Implementa `CustodyTickerPort`
+  - [x] Injeta o `TradeJpaRepository` existente em `api/src/.../portfolio/infrastructure/persistence/jpa/repository/`
+  - [x] Query JPQL: `SELECT DISTINCT t.ticker FROM TradeEntity t` (tabela real: `trades`; entidade: `TradeEntity`)
+  - [x] Campos reais do `TradeEntity`: `id` (UUID), `userId` (String), `ticker` (String, max 20), `side` (String — `"BUY"`/`"SELL"`), `tradeDate`, `quantity`, `price`, `broker`, `createdAt`
+  - [x] **NÃO** usar `trade_transaction` — essa tabela não existe; a tabela correta é `trades`
 
-- [ ] **Task 7: Implementar `KafkaMarketDataEventPublisher`** (AC: 2)
-  - [ ] Criar `KafkaMarketDataEventPublisher` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/kafka/KafkaMarketDataEventPublisher.java`
-  - [ ] Implementa `MarketDataEventPublisherPort`
-  - [ ] Injeta `KafkaTemplate<FinancialDataKey, FinancialDataEvent>`
-  - [ ] Publica no tópico `TopicConstants.FINANCIAL_DATA_TOPIC` (`"financial-data"`)
-  - [ ] Chave: `FinancialDataKey.builder().ticker(event.getTicker()).build()`
-  - [ ] Log INFO antes de publicar: `"Publishing market data event for ticker: {}"` (rastreabilidade de entrada Kafka)
+- [x] **Task 7: Implementar `KafkaMarketDataEventPublisher`** (AC: 2)
+  - [x] Criar `KafkaMarketDataEventPublisher` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/kafka/KafkaMarketDataEventPublisher.java`
+  - [x] Implementa `MarketDataEventPublisherPort`
+  - [x] Injeta `KafkaTemplate<FinancialDataKey, FinancialDataEvent>`
+  - [x] Publica no tópico `TopicConstants.FINANCIAL_DATA_TOPIC` (`"financial-data"`)
+  - [x] Chave: `FinancialDataKey.builder().ticker(event.getTicker()).build()`
+  - [x] Log INFO antes de publicar: `"Publishing market data event for ticker: {}"` (rastreabilidade de entrada Kafka)
 
-- [ ] **Task 8: Criar Scheduler `MarketDataScheduler`** (AC: 1, 5)
-  - [ ] Criar `MarketDataScheduler` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataScheduler.java`
-  - [ ] Anotar com `@Component` e `@Slf4j`
-  - [ ] Método `syncMarketData()` anotado com `@Scheduled(cron = "${market-data.sync.cron:0 0 20 * * MON-FRI}")`
-  - [ ] Cron padrão: 20h (horário de Brasília = 23h UTC), segunda a sexta — após fechamento do pregão
-  - [ ] Log INFO na entrada do scheduler: `"Starting market data sync at {}"` (rastreabilidade obrigatória)
-  - [ ] Delega para `syncMarketDataUseCase.execute()`
+- [x] **Task 8: Criar Scheduler `MarketDataScheduler`** (AC: 1, 5)
+  - [x] Criar `MarketDataScheduler` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataScheduler.java`
+  - [x] Anotar com `@Component` e `@Slf4j`
+  - [x] Método `syncMarketData()` anotado com `@Scheduled(cron = "${market-data.sync.cron:0 0 20 * * MON-FRI}")`
+  - [x] Cron padrão: 20h (horário de Brasília = 23h UTC), segunda a sexta — após fechamento do pregão
+  - [x] Log INFO na entrada do scheduler: `"Starting market data sync at {}"` (rastreabilidade obrigatória)
+  - [x] Delega para `syncMarketDataUseCase.execute()`
 
-- [ ] **Task 9: Registrar todos os beans em `@Configuration`** (AC: 1, 2)
-  - [ ] Criar `MarketDataServiceConfiguration` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataServiceConfiguration.java`
-  - [ ] Beans: `BrapiMarketDataAdapter`, `CustodyTickerRepositoryImpl`, `KafkaMarketDataEventPublisher`, `SyncMarketDataUseCase`
-  - [ ] Registrar cache `"market-data"` no `CacheManager` de Caffeine (TTL 24h) — verificar se `CaffeineCacheManager` já existe no projeto; se sim, apenas adicionar o cache name; se não, criar o bean
-  - [ ] Habilitar `@EnableScheduling` na configuração ou na classe principal `ApiServiceApplication`
+- [x] **Task 9: Registrar todos os beans em `@Configuration`** (AC: 1, 2)
+  - [x] Criar `MarketDataServiceConfiguration` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataServiceConfiguration.java`
+  - [x] Beans: `BrapiMarketDataAdapter`, `CustodyTickerRepositoryImpl`, `KafkaMarketDataEventPublisher`, `SyncMarketDataUseCase`
+  - [x] Registrar cache `"market-data"` no `CacheManager` de Caffeine (TTL 24h) — verificar se `CaffeineCacheManager` já existe no projeto; se sim, apenas adicionar o cache name; se não, criar o bean
+  - [x] Habilitar `@EnableScheduling` na configuração ou na classe principal `ApiServiceApplication`
 
-- [ ] **Task 10: Adicionar configurações em `application.properties`** (AC: 1, 3)
-  - [ ] `brapi.token=${BRAPI_TOKEN:}` — obrigatório via variável de ambiente
-  - [ ] `market-data.sync.cron=0 0 20 * * MON-FRI` — configurável via env
-  - [ ] `spring.cache.caffeine.spec=maximumSize=500,expireAfterWrite=86400s` — 24h TTL
+- [x] **Task 10: Adicionar configurações em `application.properties`** (AC: 1, 3)
+  - [x] `brapi.token=${BRAPI_TOKEN:}` — obrigatório via variável de ambiente
+  - [x] `market-data.sync.cron=0 0 20 * * MON-FRI` — configurável via env
+  - [x] `spring.cache.caffeine.spec=maximumSize=500,expireAfterWrite=86400s` — 24h TTL
 
 ---
 
 ### Testes
 
-- [ ] **Task 11: Testes unitários do Use Case** (AC: 1, 2, 3, 4, 5)
-  - [ ] Criar `SyncMarketDataUseCaseTest` em `common/src/test/java/afsdigital/grahamselect/valuation/application/usecase/SyncMarketDataUseCaseTest.java`
-  - [ ] Testar: sync bem-sucedido (todos os tickers processados)
-  - [ ] Testar: falha de API para 1 ticker → continua para os demais (AC: 3)
-  - [ ] Testar: ticker inválido → WARN logado, sem interrupção (AC: 4)
-  - [ ] Testar: log INFO de conclusão com contagens corretas (AC: 5)
-  - [ ] Usar Mockito para mockar `MarketDataPort`, `CustodyTickerPort`, `MarketDataEventPublisherPort`
+- [x] **Task 11: Testes unitários do Use Case** (AC: 1, 2, 3, 4, 5)
+  - [x] Criar `SyncMarketDataUseCaseTest` em `common/src/test/java/afsdigital/grahamselect/valuation/application/usecase/SyncMarketDataUseCaseTest.java`
+  - [x] Testar: sync bem-sucedido (todos os tickers processados)
+  - [x] Testar: falha de API para 1 ticker → continua para os demais (AC: 3)
+  - [x] Testar: ticker inválido → WARN logado, sem interrupção (AC: 4)
+  - [x] Testar: log INFO de conclusão com contagens corretas (AC: 5)
+  - [x] Usar Mockito para mockar `MarketDataPort`, `CustodyTickerPort`, `MarketDataEventPublisherPort`
 
-- [ ] **Task 12: Testes de integração do adapter Brapi** (AC: 1, 3)
-  - [ ] Criar `BrapiMarketDataAdapterTest` em `api/src/test/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapterTest.java`
-  - [ ] Usar `WireMock` (já disponível via Testcontainers) ou `MockRestServiceServer` para simular respostas Brapi
-  - [ ] Testar: resposta 200 com dados completos → `MarketDataResult` mapeado corretamente
-  - [ ] Testar: resposta 5xx → retorna `Optional.empty()`, WARN logado
-  - [ ] Testar: resposta com ticker inválido na lista → WARN logado, skipped
+- [x] **Task 12: Testes de integração do adapter Brapi** (AC: 1, 3)
+  - [x] Criar `BrapiMarketDataAdapterTest` em `api/src/test/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapterTest.java`
+  - [x] Usar `WireMock` (já disponível via Testcontainers) ou `MockRestServiceServer` para simular respostas Brapi
+  - [x] Testar: resposta 200 com dados completos → `MarketDataResult` mapeado corretamente
+  - [x] Testar: resposta 5xx → retorna `Optional.empty()`, WARN logado
+  - [x] Testar: resposta com ticker inválido na lista → WARN logado, skipped
 
-- [ ] **Task 13: Executar `mvn clean test` nos módulos `common` e `api`**
-  - [ ] Confirmar que `mvn clean test -pl common` passa sem falhas
-  - [ ] Confirmar que `mvn clean test -pl api` passa sem falhas
+- [x] **Task 13: Executar `mvn clean test` nos módulos `common` e `api`**
+  - [x] Confirmar que `mvn clean test -pl common` passa sem falhas
+  - [x] Confirmar que `mvn clean test -pl api` passa sem falhas
 
 ---
 
@@ -460,7 +463,7 @@ O isolamento por userId só é necessário nas histórias 4.2 e 4.3 (metas e rec
 
 ### Agent Model Used
 
-Claude Sonnet 4.6 (Thinking)
+Gemini 3.5 Flash
 
 ### Debug Log References
 
@@ -468,4 +471,32 @@ N/A
 
 ### Completion Notes List
 
+- Implementado `MarketDataPort`, `CustodyTickerPort` e `MarketDataEventPublisherPort` no módulo `common`
+- Implementado `SyncMarketDataUseCase` seguindo Clean Architecture, sem dependências Spring
+- Criado record `MarketDataResult` para transporte de dados fundamentalistas e cotação
+- Adicionado suporte a cache Caffeine em `api/pom.xml`
+- Implementado `BrapiMarketDataAdapter` consumindo a API Brapi com RestClient, com timeout de conexão (5s) e leitura (10s) e tratamento de erros 4xx/5xx com fallback automático no cache
+- Implementado `CustodyTickerRepositoryImpl` buscando tickers ativos via JPQL do `JpaTradeRepository`
+- Implementado `KafkaMarketDataEventPublisher` publicando no tópico `financial-data` usando serialização Jackson
+- Criado `MarketDataScheduler` rodando às 20h nos dias de semana (segunda a sexta) para sincronizar dados de mercado de todos os tickers em custódia
+- Adicionado testes unitários para o Use Case `SyncMarketDataUseCaseTest`
+- Adicionado testes de integração/unitários com `MockRestServiceServer` para o adapter Brapi `BrapiMarketDataAdapterTest`
+- Rodado todos os testes do projeto e verificado 100% de sucesso
+
 ### File List
+
+- backend/api/pom.xml
+- backend/common/src/main/java/afsdigital/grahamselect/valuation/application/dto/MarketDataResult.java
+- backend/common/src/main/java/afsdigital/grahamselect/valuation/application/repository/MarketDataPort.java
+- backend/common/src/main/java/afsdigital/grahamselect/valuation/application/repository/CustodyTickerPort.java
+- backend/common/src/main/java/afsdigital/grahamselect/valuation/application/repository/MarketDataEventPublisherPort.java
+- backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SyncMarketDataUseCase.java
+- backend/common/src/test/java/afsdigital/grahamselect/valuation/application/usecase/SyncMarketDataUseCaseTest.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/jpa/repositories/JpaTradeRepository.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/CustodyTickerRepositoryImpl.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/kafka/KafkaMarketDataEventPublisher.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataScheduler.java
+- backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataServiceConfiguration.java
+- backend/api/src/main/resources/application.yml
+- backend/api/src/test/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapterTest.java
