@@ -1,43 +1,49 @@
 installation:
-  version: 6.0.4
+  version: 6.8.0
   installDate: 2026-03-08T18:09:37.326Z
-  lastUpdated: 2026-03-08T18:09:37.326Z
+  lastUpdated: 2026-06-04T12:54:29.372Z
 modules:
   - name: core
-    version: 6.0.4
+    version: 6.8.0
     installDate: 2026-03-08T18:09:36.402Z
-    lastUpdated: 2026-03-08T18:09:36.402Z
+    lastUpdated: 2026-06-04T12:54:29.366Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: bmm
-    version: 6.0.4
+    version: 6.8.0
     installDate: 2026-03-08T18:09:28.461Z
-    lastUpdated: 2026-03-08T18:09:36.402Z
+    lastUpdated: 2026-06-04T12:54:29.367Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: bmb
-    version: 0.1.6
+    version: v1.8.1
     installDate: 2026-03-08T18:09:30.414Z
-    lastUpdated: 2026-03-08T18:09:36.708Z
+    lastUpdated: 2026-06-04T12:54:29.369Z
     source: external
     npmPackage: bmad-builder
     repoUrl: https://github.com/bmad-code-org/bmad-builder
+    channel: stable
+    sha: 3410d952eafe621f31fcdf4dd5efb2b06690a306
   - name: cis
-    version: 0.1.8
+    version: v0.2.1
     installDate: 2026-03-08T18:09:32.250Z
-    lastUpdated: 2026-03-08T18:09:37.019Z
+    lastUpdated: 2026-06-04T12:54:29.371Z
     source: external
     npmPackage: bmad-creative-intelligence-suite
     repoUrl: https://github.com/bmad-code-org/bmad-module-creative-intelligence-suite
+    channel: stable
+    sha: 07a8dd03d196a762f21c241d985293fe5b0f90e7
   - name: tea
-    version: 1.5.2
+    version: v1.19.0
     installDate: 2026-03-08T18:09:33.439Z
-    lastUpdated: 2026-03-08T18:09:37.326Z
+    lastUpdated: 2026-06-04T12:54:29.372Z
     source: external
     npmPackage: bmad-method-test-architecture-enterprise
     repoUrl: https://github.com/bmad-code-org/bmad-method-test-architecture-enterprise
+    channel: stable
+    sha: 8734d51f24071ddbcb3617390b5fcddb4128ef77
 ides:
   - antigravity
   - gemini
