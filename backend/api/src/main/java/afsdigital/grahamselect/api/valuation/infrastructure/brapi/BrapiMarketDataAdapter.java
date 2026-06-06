@@ -70,24 +70,32 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
             List<String> batch = tickersToSend.subList(i, Math.min(i + batchSize, tickersToSend.size()));
             String tickersParam = String.join(",", batch);
 
-            Optional<BrapiQuoteResponse> responseOpt = fetchFromApi(tickersParam);
+            try {
+                Optional<BrapiQuoteResponse> responseOpt = fetchFromApi(tickersParam);
+                if (responseOpt.isPresent()) {
+                    processQuoteResponse(responseOpt.get(), baseToOriginalMap, cache, results);
+                }
+            } catch (BrapiApiException e) {
+                log.error("Batch API call failed for tickers: {}. Error: {}", batch, e.getMessage());
 
-            if (responseOpt.isPresent()) {
-                processQuoteResponse(responseOpt.get(), baseToOriginalMap, cache, results);
-            } else {
-                log.warn("Batch API call failed for tickers: {}. Retrying individually...", batch);
-                // Retentativa individual apenas se houver mais de um ticker no lote falho
-                if (batch.size() > 1) {
+                // Retentar individualmente apenas para erros de cliente (como 400 Bad Request ou 404 Not Found),
+                // que indicam possíveis tickers inválidos no lote, e se houver mais de 1 ticker no lote.
+                boolean shouldRetryIndividually = (e.getStatusCode() == 400 || e.getStatusCode() == 404) && batch.size() > 1;
+
+                if (shouldRetryIndividually) {
+                    log.warn("Retrying individually to isolate invalid tickers: {}", batch);
                     for (String individualTicker : batch) {
-                        Optional<BrapiQuoteResponse> individualOpt = fetchFromApi(individualTicker);
-                        if (individualOpt.isPresent()) {
-                            processQuoteResponse(individualOpt.get(), baseToOriginalMap, cache, results);
-                        } else {
-                            log.warn("Individual API call also failed for ticker: {}", individualTicker);
+                        try {
+                            Optional<BrapiQuoteResponse> individualOpt = fetchFromApi(individualTicker);
+                            if (individualOpt.isPresent()) {
+                                processQuoteResponse(individualOpt.get(), baseToOriginalMap, cache, results);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Individual API call also failed for ticker: {}. Error: {}", individualTicker, ex.getMessage());
                         }
                     }
                 } else {
-                    log.warn("Batch of size 1 failed. Individual retry skipped to avoid duplicate requests.");
+                    log.warn("Individual retry skipped for batch: {}. Status code: {}", batch, e.getStatusCode());
                 }
             }
         }
@@ -111,19 +119,6 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
             }
         }
 
-        // Se todos os lotes falharam completamente ou a lista retornada estiver vazia, tentar fallback total no cache
-        if (results.isEmpty() && cache != null) {
-            log.warn("Brapi API failed or returned empty results. Falling back to cached data for tickers: {}", cleanTickers);
-            for (String ticker : cleanTickers) {
-                MarketDataResult cached = cache.get(ticker, MarketDataResult.class);
-                if (cached != null) {
-                    log.info("Using cached market data for ticker: {}", ticker);
-                    results.add(cached);
-                } else {
-                    log.warn("No cached data found for ticker: {}", ticker);
-                }
-            }
-        }
 
         return results;
     }
@@ -164,8 +159,9 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
             Double bvs = (res.defaultKeyStatistics() != null && res.defaultKeyStatistics().bookValue() != null)
                     ? res.defaultKeyStatistics().bookValue().raw() : null;
 
-            // Encontrar os tickers originais que mapearam para este ticker base
-            List<String> originalTickers = baseToOriginalMap.getOrDefault(res.symbol().toUpperCase(), List.of(res.symbol()));
+            // Encontrar os tickers originais que mapearam para este ticker base, sanitizando o símbolo retornado
+            String cleanSymbol = cleanApiResponseSymbol(res.symbol());
+            List<String> originalTickers = baseToOriginalMap.getOrDefault(cleanSymbol, List.of(res.symbol()));
 
             for (String originalTicker : originalTickers) {
                 MarketDataResult result = new MarketDataResult(
@@ -186,6 +182,17 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
         }
     }
 
+    private String cleanApiResponseSymbol(String symbol) {
+        if (symbol == null) {
+            return "";
+        }
+        String clean = symbol.trim().toUpperCase();
+        if (clean.endsWith(".SA")) {
+            clean = clean.substring(0, clean.length() - 3);
+        }
+        return clean;
+    }
+
     private Optional<BrapiQuoteResponse> fetchFromApi(String tickers) {
         try {
             BrapiQuoteResponse response = brapiRestClient.get()
@@ -196,14 +203,33 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
                             .build(tickers))
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, responseEntity) -> {
-                        // Lança exceção para evitar que o fluxo prossiga tentando desserializar corpo de erro
-                        throw new RuntimeException("Brapi API returned error status: " + responseEntity.getStatusCode());
+                        HttpStatusCode status = responseEntity.getStatusCode();
+                        throw new BrapiApiException("Brapi API returned error status: " + status, status.value());
                     })
                     .body(BrapiQuoteResponse.class);
             return Optional.ofNullable(response);
+        } catch (BrapiApiException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Brapi API communication failed for tickers: {}", tickers, e);
-            return Optional.empty();
+            throw new BrapiApiException("Brapi API communication failed for tickers: " + tickers, e);
+        }
+    }
+
+    private static class BrapiApiException extends RuntimeException {
+        private final int statusCode;
+
+        public BrapiApiException(String message, int statusCode) {
+            super(message);
+            this.statusCode = statusCode;
+        }
+
+        public BrapiApiException(String message, Throwable cause) {
+            super(message, cause);
+            this.statusCode = 0;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
         }
     }
 }
