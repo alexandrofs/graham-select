@@ -52,8 +52,8 @@ public class BrapiMarketDataAdapterTest {
                       "priceEarnings": 5.1,
                       "priceToBook": 1.8,
                       "defaultKeyStatistics": {
-                        "earningsPerShare": { "raw": 7.54 },
-                        "bookValue": { "raw": 21.36 }
+                        "earningsPerShare": 7.54,
+                        "bookValue": 21.36
                       }
                     }
                   ]
@@ -146,8 +146,8 @@ public class BrapiMarketDataAdapterTest {
                       "priceEarnings": 8.1,
                       "priceToBook": 5.4,
                       "defaultKeyStatistics": {
-                        "earningsPerShare": { "raw": 4.10 },
-                        "bookValue": { "raw": 6.20 }
+                        "earningsPerShare": 4.10,
+                        "bookValue": 6.20
                       }
                     }
                   ]
@@ -184,8 +184,8 @@ public class BrapiMarketDataAdapterTest {
                       "priceEarnings": 5.1,
                       "priceToBook": 1.8,
                       "defaultKeyStatistics": {
-                        "earningsPerShare": { "raw": 7.54 },
-                        "bookValue": { "raw": 21.36 }
+                        "earningsPerShare": 7.54,
+                        "bookValue": 21.36
                       }
                     }
                   ]

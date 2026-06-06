@@ -76,7 +76,7 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
                     processQuoteResponse(responseOpt.get(), baseToOriginalMap, cache, results);
                 }
             } catch (BrapiApiException e) {
-                log.error("Batch API call failed for tickers: {}. Error: {}", batch, e.getMessage());
+                log.error("Batch API call failed for tickers: {}. Error: {}", batch, e.getMessage(), e);
 
                 // Retentar individualmente apenas para erros de cliente (como 400 Bad Request ou 404 Not Found),
                 // que indicam possíveis tickers inválidos no lote, e se houver mais de 1 ticker no lote.
@@ -91,7 +91,7 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
                                 processQuoteResponse(individualOpt.get(), baseToOriginalMap, cache, results);
                             }
                         } catch (Exception ex) {
-                            log.error("Individual API call also failed for ticker: {}. Error: {}", individualTicker, ex.getMessage());
+                            log.error("Individual API call also failed for ticker: {}. Error: {}", individualTicker, ex.getMessage(), ex);
                         }
                     }
                 } else {
@@ -154,10 +154,10 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
                 continue;
             }
 
-            Double eps = (res.defaultKeyStatistics() != null && res.defaultKeyStatistics().earningsPerShare() != null)
-                    ? res.defaultKeyStatistics().earningsPerShare().raw() : null;
-            Double bvs = (res.defaultKeyStatistics() != null && res.defaultKeyStatistics().bookValue() != null)
-                    ? res.defaultKeyStatistics().bookValue().raw() : null;
+            Double eps = (res.defaultKeyStatistics() != null)
+                    ? res.defaultKeyStatistics().earningsPerShare() : null;
+            Double bvs = (res.defaultKeyStatistics() != null)
+                    ? res.defaultKeyStatistics().bookValue() : null;
 
             // Encontrar os tickers originais que mapearam para este ticker base, sanitizando o símbolo retornado
             String cleanSymbol = cleanApiResponseSymbol(res.symbol());
@@ -243,5 +243,4 @@ record BrapiResult(
         Double priceToBook,
         BrapiKeyStats defaultKeyStatistics
 ) {}
-record BrapiKeyStats(BrapiRaw earningsPerShare, BrapiRaw bookValue) {}
-record BrapiRaw(Double raw) {}
+record BrapiKeyStats(Double earningsPerShare, Double bookValue) {}
