@@ -23,9 +23,11 @@ import java.util.UUID;
 public class ManualTradeAuditEntity {
 
     @Id
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     @Column(name = "trade_id", nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID tradeId;
 
     @Column(name = "user_id", nullable = false)

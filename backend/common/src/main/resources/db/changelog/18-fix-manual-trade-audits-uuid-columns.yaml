@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 18-fix-manual-trade-audits-uuid-columns
+      author: alex
+      changes:
+        - modifyDataType:
+            tableName: manual_trade_audits
+            columnName: id
+            newDataType: CHAR(36)
+        - modifyDataType:
+            tableName: manual_trade_audits
+            columnName: trade_id
+            newDataType: CHAR(36)

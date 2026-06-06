@@ -131,4 +131,82 @@ public class BrapiMarketDataAdapterTest {
         assertTrue(results.isEmpty());
         verify(cache, never()).put(any(), any());
     }
+
+    @Test
+    public void shouldMapFractionalTickersToBaseTickersAndMapResultsBack() {
+        // Arrange
+        String responseJson = """
+                {
+                  "results": [
+                    {
+                      "symbol": "BBSE3",
+                      "regularMarketPrice": 33.40,
+                      "dividendYield": 9.5,
+                      "priceEarnings": 8.1,
+                      "priceToBook": 5.4,
+                      "defaultKeyStatistics": {
+                        "earningsPerShare": { "raw": 4.10 },
+                        "bookValue": { "raw": 6.20 }
+                      }
+                    }
+                  ]
+                }
+                """;
+
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/BBSE3?modules=summaryProfile,financialData&token=test-token"))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+        // Act
+        List<MarketDataResult> results = adapter.fetchMarketData(List.of("BBSE3F"));
+
+        // Assert
+        mockServer.verify();
+        assertEquals(1, results.size());
+        MarketDataResult res = results.get(0);
+        assertEquals("BBSE3F", res.ticker());
+        assertEquals(BigDecimal.valueOf(33.40), res.price());
+        assertEquals(9.5, res.dividendYield());
+
+        verify(cache).put(eq("BBSE3F"), any(MarketDataResult.class));
+    }
+
+    @Test
+    public void shouldRetryIndividuallyWhenBatchRequestFails() {
+        // Arrange
+        String petr4Response = """
+                {
+                  "results": [
+                    {
+                      "symbol": "PETR4",
+                      "regularMarketPrice": 38.45,
+                      "dividendYield": 8.2,
+                      "priceEarnings": 5.1,
+                      "priceToBook": 1.8,
+                      "defaultKeyStatistics": {
+                        "earningsPerShare": { "raw": 7.54 },
+                        "bookValue": { "raw": 21.36 }
+                      }
+                    }
+                  ]
+                }
+                """;
+
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4%2CVALE3?modules=summaryProfile,financialData&token=test-token"))
+                .andRespond(withServerError());
+
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData&token=test-token"))
+                .andRespond(withSuccess(petr4Response, MediaType.APPLICATION_JSON));
+
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/VALE3?modules=summaryProfile,financialData&token=test-token"))
+                .andRespond(withServerError());
+
+        // Act
+        List<MarketDataResult> results = adapter.fetchMarketData(List.of("PETR4", "VALE3"));
+
+        // Assert
+        mockServer.verify();
+        assertEquals(1, results.size());
+        assertEquals("PETR4", results.get(0).ticker());
+        assertEquals(BigDecimal.valueOf(38.45), results.get(0).price());
+    }
 }
