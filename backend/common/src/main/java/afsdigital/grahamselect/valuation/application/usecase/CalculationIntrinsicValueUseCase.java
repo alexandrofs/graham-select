@@ -36,10 +36,14 @@ public class CalculationIntrinsicValueUseCase {
 
         Company company = companyLookupService.findOrCreateCompany(financialDataEvent.getTicker());
 
+        BigDecimal finalIntrinsicValue = calculatedIntrinsicValue != null
+                ? BigDecimal.valueOf(calculatedIntrinsicValue).round(new MathContext(2))
+                : null;
+
         IntrinsicValue intrinsicValue = IntrinsicValue.builder()
                 .calculationDate(financialDataEvent.getResultDate())
                 .companyId(company.getId())
-                .value(BigDecimal.valueOf(calculatedIntrinsicValue).round(new MathContext(2)))
+                .value(finalIntrinsicValue)
                 .build();
 
         StockPrice stockPrice = StockPrice.builder()

@@ -198,7 +198,7 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
             BrapiQuoteResponse response = brapiRestClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/quote/{tickers}")
-                            .queryParam("modules", "summaryProfile,financialData")
+                            .queryParam("modules", "summaryProfile,financialData,defaultKeyStatistics")
                             .queryParam("token", token)
                             .build(tickers))
                     .retrieve()
