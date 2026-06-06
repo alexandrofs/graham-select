@@ -202,7 +202,7 @@ public class BrapiMarketDataAdapter implements MarketDataPort {
                     .body(BrapiQuoteResponse.class);
             return Optional.ofNullable(response);
         } catch (Exception e) {
-            log.warn("Brapi API communication failed for tickers {}. Reason: {}", tickers, e.getMessage());
+            log.error("Brapi API communication failed for tickers: {}", tickers, e);
             return Optional.empty();
         }
     }

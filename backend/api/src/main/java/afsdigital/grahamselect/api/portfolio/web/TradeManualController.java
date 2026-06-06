@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/trades")
 @RequiredArgsConstructor
+@Slf4j
 public class TradeManualController {
 
     private final CreateManualTradeUseCase createManualTradeUseCase;
@@ -35,6 +37,7 @@ public class TradeManualController {
             @Valid @RequestBody ManualTradeRequest request
     ) {
         String userId = jwt.getSubject();
+        log.info("REST API Request received to create manual trade for user: {}, ticker: {}", userId, request.ticker());
 
         Trade trade = Trade.builder()
                 .id(UUID.randomUUID())
