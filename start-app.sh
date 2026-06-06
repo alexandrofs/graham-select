@@ -43,15 +43,30 @@ cd ..
 # 3. Iniciar Serviços Backend e Frontend em Paralelo
 echo -e "${GREEN}[3/4] Iniciando Serviços Backend e Frontend...${NC}"
 
+# Função para matar processos nas portas do backend
+kill_backend_ports() {
+    local pids
+    pids=$(lsof -ti tcp:8080; lsof -ti tcp:8081) 2>/dev/null
+    if [ -n "$pids" ]; then
+        echo -e "${YELLOW}  Liberando portas 8080/8081 (PIDs: $(echo $pids | tr '\n' ' '))...${NC}"
+        echo "$pids" | xargs kill -9 2>/dev/null
+        sleep 1
+    fi
+}
+
 # Função para finalizar processos ao sair
 cleanup() {
     echo -e "\n${RED}Finalizando serviços...${NC}"
-    kill $API_PID $VALUATION_PID $FRONT_PID
+    kill $API_PID $VALUATION_PID $FRONT_PID 2>/dev/null
     docker-compose down
+    kill_backend_ports
     exit
 }
 
 trap cleanup SIGINT
+
+# Liberar portas antes de subir (evita conflito com processos órfãos)
+kill_backend_ports
 
 echo -e "${BLUE}Iniciando API Service na porta 8080...${NC}"
 cd backend && mvn spring-boot:run -pl api -Dspring-boot.run.profiles=local > ../api.log 2>&1 &
