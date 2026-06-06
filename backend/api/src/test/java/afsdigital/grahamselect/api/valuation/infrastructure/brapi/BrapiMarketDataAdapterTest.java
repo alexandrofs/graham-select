@@ -15,6 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -192,7 +193,7 @@ public class BrapiMarketDataAdapterTest {
                 """;
 
         mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4%2CVALE3?modules=summaryProfile,financialData&token=test-token"))
-                .andRespond(withServerError());
+                .andRespond(withBadRequest());
 
         mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData&token=test-token"))
                 .andRespond(withSuccess(petr4Response, MediaType.APPLICATION_JSON));
