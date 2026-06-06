@@ -48,8 +48,8 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
         ticker: _tickerController.text.toUpperCase(),
         side: _type,
         tradeDate: _selectedDate,
-        quantity: double.parse(_quantityController.text),
-        price: double.parse(_priceController.text),
+        quantity: double.parse(_quantityController.text.replaceAll(',', '.')),
+        price: double.parse(_priceController.text.replaceAll(',', '.')),
         broker: _brokerController.text,
       );
     }
@@ -59,22 +59,22 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
   Widget build(BuildContext context) {
     return Consumer<PortfolioProvider>(
       builder: (context, provider, child) {
-        if (provider.status == PortfolioStatus.success) {
+        if (provider.tradeStatus == TradeStatus.success) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Operação salva com sucesso!'), backgroundColor: Colors.green),
             );
-            provider.resetStatus();
+            provider.resetTradeStatus();
             Navigator.of(context).pop();
           });
         }
 
-        if (provider.status == PortfolioStatus.error) {
+        if (provider.tradeStatus == TradeStatus.error) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(provider.errorMessage ?? 'Erro ao salvar'), backgroundColor: Colors.red),
+              SnackBar(content: Text(provider.tradeError ?? 'Erro ao salvar'), backgroundColor: Colors.red),
             );
-            provider.resetStatus();
+            provider.resetTradeStatus();
           });
         }
 
@@ -121,6 +121,7 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
 
                   // Ticker Autocomplete
                   Autocomplete<String>(
+                    textEditingController: _tickerController,
                     optionsBuilder: (TextEditingValue textEditingValue) {
                       if (textEditingValue.text == '') {
                         return const Iterable<String>.empty();
@@ -154,12 +155,12 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
                       Expanded(
                         child: TextFormField(
                           controller: _quantityController,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: const InputDecoration(
                             labelText: 'Quantidade',
                             border: OutlineInputBorder(),
                           ),
-                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
                           validator: (value) => value == null || value.isEmpty ? 'Obrigatório' : null,
                         ),
                       ),
@@ -167,12 +168,12 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
                       Expanded(
                         child: TextFormField(
                           controller: _priceController,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: const InputDecoration(
                             labelText: 'Preço Médio (R\$)',
                             border: OutlineInputBorder(),
                           ),
-                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
                           validator: (value) => value == null || value.isEmpty ? 'Obrigatório' : null,
                         ),
                       ),
@@ -204,8 +205,8 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
                   const SizedBox(height: 32),
 
                   ElevatedButton(
-                    onPressed: provider.status == PortfolioStatus.loading ? null : _submit,
-                    child: provider.status == PortfolioStatus.loading
+                    onPressed: provider.tradeStatus == TradeStatus.loading ? null : _submit,
+                    child: provider.tradeStatus == TradeStatus.loading
                         ? const SizedBox(
                             height: 20,
                             width: 20,

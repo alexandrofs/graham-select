@@ -220,6 +220,87 @@ void main() {
       expect(provider.errorMessage, isNull);
     });
 
+    group('createManualTrade — tradeStatus independente', () {
+      test('estado inicial do tradeStatus deve ser initial', () {
+        expect(provider.tradeStatus, equals(TradeStatus.initial));
+        expect(provider.tradeError, isNull);
+      });
+
+      test('deve atualizar tradeStatus para success após salvar com sucesso', () async {
+        final future = provider.createManualTrade(
+          ticker: 'PETR4',
+          side: 'BUY',
+          tradeDate: DateTime(2026, 6, 6),
+          quantity: 10,
+          price: 40.89,
+          broker: 'XP',
+        );
+
+        expect(provider.tradeStatus, equals(TradeStatus.loading));
+
+        await future;
+
+        expect(provider.tradeStatus, equals(TradeStatus.success));
+        expect(provider.tradeError, isNull);
+      });
+
+      test('deve atualizar tradeStatus para error quando o repositório lança exceção', () async {
+        mockRepository.shouldThrow = true;
+
+        await provider.createManualTrade(
+          ticker: 'PETR4',
+          side: 'BUY',
+          tradeDate: DateTime(2026, 6, 6),
+          quantity: 10,
+          price: 40.89,
+          broker: 'XP',
+        );
+
+        expect(provider.tradeStatus, equals(TradeStatus.error));
+        expect(provider.tradeError, equals('Failed to create manual trade'));
+      });
+
+      test('resetTradeStatus deve limpar tradeStatus e tradeError', () async {
+        mockRepository.shouldThrow = true;
+        await provider.createManualTrade(
+          ticker: 'PETR4',
+          side: 'BUY',
+          tradeDate: DateTime(2026, 6, 6),
+          quantity: 10,
+          price: 40.89,
+          broker: 'XP',
+        );
+
+        expect(provider.tradeStatus, equals(TradeStatus.error));
+
+        provider.resetTradeStatus();
+
+        expect(provider.tradeStatus, equals(TradeStatus.initial));
+        expect(provider.tradeError, isNull);
+      });
+
+      test('tradeStatus não deve impactar o status global do dashboard', () async {
+        // Carrega o dashboard com sucesso primeiro
+        await provider.loadSummary();
+        expect(provider.status, equals(PortfolioStatus.success));
+
+        // Salva um trade com sucesso
+        await provider.createManualTrade(
+          ticker: 'VALE3',
+          side: 'BUY',
+          tradeDate: DateTime(2026, 6, 6),
+          quantity: 5,
+          price: 65.00,
+          broker: 'Clear',
+        );
+
+        // Trade status atualiza, mas status do dashboard permanece intacto
+        expect(provider.tradeStatus, equals(TradeStatus.success));
+        expect(provider.status, equals(PortfolioStatus.success));
+      });
+    });
+
+
     group('loadEvolutionData', () {
       test('deve carregar os dados de evolução com sucesso', () async {
         const tEvolution = PortfolioEvolution(
