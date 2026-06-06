@@ -52,12 +52,15 @@ public class ValuationRepositoryImpl implements ValuationRepository {
                      stockPrice.getCompanyId(), stockPrice.getDate());
         }
 
-        StockPriceEntity stockPriceEntity = StockPriceEntity.builder()
-                .id(UUID.randomUUID().toString())
-                .companyId(stockPrice.getCompanyId())
-                .priceDate(stockPrice.getDate())
-                .price(stockPrice.getPrice())
-                .build();
+        StockPriceEntity stockPriceEntity = stockPriceJpaRepository
+                .findFirstByCompanyIdAndPriceDate(stockPrice.getCompanyId(), stockPrice.getDate())
+                .orElseGet(() -> StockPriceEntity.builder()
+                        .id(UUID.randomUUID().toString())
+                        .companyId(stockPrice.getCompanyId())
+                        .priceDate(stockPrice.getDate())
+                        .build());
+        stockPriceEntity.setPrice(stockPrice.getPrice());
         stockPriceJpaRepository.save(stockPriceEntity);
+
     }
 }

@@ -7,6 +7,7 @@ import '../../domain/entities/monthly_evolution.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 
 enum PortfolioStatus { initial, loading, success, error }
+enum TradeStatus { initial, loading, success, error }
 
 class PortfolioProvider extends ChangeNotifier {
   final PortfolioRepository repository;
@@ -19,6 +20,13 @@ class PortfolioProvider extends ChangeNotifier {
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  // --- Estados independentes para criação de trade manual ---
+  TradeStatus _tradeStatus = TradeStatus.initial;
+  TradeStatus get tradeStatus => _tradeStatus;
+
+  String? _tradeError;
+  String? get tradeError => _tradeError;
 
   PortfolioSummary? _summary;
   PortfolioSummary? get summary => _summary;
@@ -46,8 +54,8 @@ class PortfolioProvider extends ChangeNotifier {
     required double price,
     required String broker,
   }) async {
-    _status = PortfolioStatus.loading;
-    _errorMessage = null;
+    _tradeStatus = TradeStatus.loading;
+    _tradeError = null;
     notifyListeners();
 
     try {
@@ -59,10 +67,10 @@ class PortfolioProvider extends ChangeNotifier {
         price: price,
         broker: broker,
       );
-      _status = PortfolioStatus.success;
+      _tradeStatus = TradeStatus.success;
     } catch (e) {
-      _status = PortfolioStatus.error;
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _tradeStatus = TradeStatus.error;
+      _tradeError = e.toString().replaceFirst('Exception: ', '');
     }
     notifyListeners();
   }
@@ -70,6 +78,12 @@ class PortfolioProvider extends ChangeNotifier {
   void resetStatus() {
     _status = PortfolioStatus.initial;
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  void resetTradeStatus() {
+    _tradeStatus = TradeStatus.initial;
+    _tradeError = null;
     notifyListeners();
   }
 
