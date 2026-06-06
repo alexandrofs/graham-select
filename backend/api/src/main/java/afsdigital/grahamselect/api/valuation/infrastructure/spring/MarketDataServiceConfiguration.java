@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
@@ -26,6 +27,9 @@ import java.util.List;
 @Configuration
 @EnableCaching
 public class MarketDataServiceConfiguration {
+
+    @Value("${brapi.token}")
+    private String token;
 
     @Bean
     public RestClient brapiRestClient() {
@@ -55,7 +59,7 @@ public class MarketDataServiceConfiguration {
 
     @Bean
     public MarketDataPort marketDataPort(RestClient brapiRestClient, CacheManager cacheManager) {
-        return new BrapiMarketDataAdapter(brapiRestClient, cacheManager);
+        return new BrapiMarketDataAdapter(brapiRestClient, cacheManager, token);
     }
 
     @Bean

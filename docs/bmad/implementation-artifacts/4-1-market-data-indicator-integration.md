@@ -3,7 +3,7 @@ baseline_commit: 8d96e833af23c5fb1327b89ba858582e217918ce
 ---
 # Story 4.1: Integração de Market Data (Cotações & Indicadores)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -138,6 +138,23 @@ so that o cálculo do Filtro de Graham nas histórias subsequentes (4.3) use dad
 - [x] **Task 13: Executar `mvn clean test` nos módulos `common` e `api`**
   - [x] Confirmar que `mvn clean test -pl common` passa sem falhas
   - [x] Confirmar que `mvn clean test -pl api` passa sem falhas
+
+---
+
+### Review Findings
+
+- [x] [Review][Decision] Distorção de Data (Data Futura) em fuso UTC próximo à meia-noite — O uso de LocalDate.now(ZoneOffset.UTC) em execuções de scheduler no fim do dia de Brasília pode registrar cotações com a data do dia seguinte. Devemos alinhar se usamos o fuso local America/Sao_Paulo para datas civis de pregão ou se mantemos UTC conforme regra geral.
+- [x] [Review][Decision] Query simplificada buscando ativos sem saldo em custódia (Zerados) — A query SELECT DISTINCT t.ticker FROM TradeEntity t traz ativos que o usuário já vendeu completamente. Isso conflita com a especificação original (AC 1: ativos em custódia onde há posição aberta). Devemos alinhar se mantemos a query simplificada da Task 6 ou se a aprimoramos para filtrar apenas ativos com saldo de custódia positivo.
+- [x] [Review][Decision] Nível de log para falhas em API de terceiros (WARN vs ERROR) — Conflito entre a orientação da história (log WARN para evitar alarmar monitoramento com instabilidade de API externa) e o padrão do AGENTS.md (log ERROR em qualquer captura de exceção).
+- [x] [Review][Patch] Injeção de @Value em bean construído de forma manual [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataServiceConfiguration.java]
+- [x] [Review][Patch] Timezone indefinido no cron do Scheduler [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataScheduler.java]
+- [x] [Review][Patch] Tratamento ineficiente de erros no RestClient [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java]
+- [x] [Review][Patch] Falta de loteamento (batching) na URL da API Brapi [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java]
+- [x] [Review][Patch] Envio assíncrono Kafka mascarando falhas de sincronização [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/kafka/KafkaMarketDataEventPublisher.java]
+- [x] [Review][Patch] Complexidade quadrática no pós-processamento do cache [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java]
+- [x] [Review][Patch] Validação de preços inválidos (NaN/Infinity) [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java]
+- [x] [Review][Patch] Sanitização da lista de tickers de entrada [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/brapi/BrapiMarketDataAdapter.java]
+- [x] [Review][Defer] Ausência de bloqueio distribuído no Scheduler (ShedLock) [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/MarketDataScheduler.java] — deferred, pre-existing
 
 ---
 

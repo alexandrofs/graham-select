@@ -28,15 +28,15 @@ public class KafkaMarketDataEventPublisher implements MarketDataEventPublisherPo
 
         FinancialDataKey key = new FinancialDataKey(event.getTicker(), event.getResultDate());
 
-        kafkaTemplate.send(TopicConstants.FINANCIAL_DATA_TOPIC, key, event)
-                .whenComplete((result, ex) -> {
-                    if (ex == null) {
-                        log.info("Successfully published market data event for ticker: {} with offset: {}",
-                                event.getTicker(), result.getRecordMetadata().offset());
-                    } else {
-                        log.error("Failed to publish market data event for ticker: {}. Error: {}",
-                                event.getTicker(), ex.getMessage(), ex);
-                    }
-                });
+        try {
+            var result = kafkaTemplate.send(TopicConstants.FINANCIAL_DATA_TOPIC, key, event)
+                    .get(5, java.util.concurrent.TimeUnit.SECONDS);
+            log.info("Successfully published market data event for ticker: {} with offset: {}",
+                    event.getTicker(), result.getRecordMetadata().offset());
+        } catch (Exception ex) {
+            log.error("Failed to publish market data event for ticker: {}. Error: {}",
+                    event.getTicker(), ex.getMessage(), ex);
+            throw new RuntimeException("Failed to publish market data event to Kafka", ex);
+        }
     }
 }

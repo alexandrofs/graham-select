@@ -64,7 +64,7 @@ public class SyncMarketDataUseCase {
                         .priceToBook(result.priceToBook())
                         .earningsPerShare(result.earningsPerShare())
                         .bookValuePerShare(result.bookValuePerShare())
-                        .resultDate(LocalDate.now(ZoneOffset.UTC))
+                        .resultDate(LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")))
                         .build();
 
                 marketDataEventPublisherPort.publish(event);

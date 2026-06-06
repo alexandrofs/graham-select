@@ -16,7 +16,7 @@ public class MarketDataScheduler {
 
     private final SyncMarketDataUseCase syncMarketDataUseCase;
 
-    @Scheduled(cron = "${market-data.sync.cron:0 0 20 * * MON-FRI}")
+    @Scheduled(cron = "${market-data.sync.cron:0 0 20 * * MON-FRI}", zone = "America/Sao_Paulo")
     public void syncMarketData() {
         log.info("Starting market data sync at {}", OffsetDateTime.now(ZoneOffset.UTC));
         syncMarketDataUseCase.execute();

@@ -35,8 +35,7 @@ public class BrapiMarketDataAdapterTest {
         cache = mock(Cache.class);
         when(cacheManager.getCache("market-data")).thenReturn(cache);
 
-        adapter = new BrapiMarketDataAdapter(restClient, cacheManager);
-        org.springframework.test.util.ReflectionTestUtils.setField(adapter, "token", "test-token");
+        adapter = new BrapiMarketDataAdapter(restClient, cacheManager, "test-token");
     }
 
     @Test
