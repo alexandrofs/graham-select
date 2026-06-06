@@ -60,7 +60,7 @@ public class BrapiMarketDataAdapterTest {
                 }
                 """;
 
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
         // Act
@@ -84,7 +84,7 @@ public class BrapiMarketDataAdapterTest {
     @Test
     public void shouldFallbackToCacheWhenApiFails() {
         // Arrange
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withServerError());
 
         MarketDataResult cachedResult = new MarketDataResult(
@@ -121,7 +121,7 @@ public class BrapiMarketDataAdapterTest {
                 }
                 """;
 
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
         // Act
@@ -154,7 +154,7 @@ public class BrapiMarketDataAdapterTest {
                 }
                 """;
 
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/BBSE3?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/BBSE3?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
         // Act
@@ -192,13 +192,13 @@ public class BrapiMarketDataAdapterTest {
                 }
                 """;
 
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4%2CVALE3?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4%2CVALE3?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withBadRequest());
 
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/PETR4?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withSuccess(petr4Response, MediaType.APPLICATION_JSON));
 
-        mockServer.expect(requestTo("https://brapi.dev/api/quote/VALE3?modules=summaryProfile,financialData&token=test-token"))
+        mockServer.expect(requestTo("https://brapi.dev/api/quote/VALE3?modules=summaryProfile,financialData,defaultKeyStatistics&token=test-token"))
                 .andRespond(withServerError());
 
         // Act

@@ -25,26 +25,31 @@ public class ValuationRepositoryImpl implements ValuationRepository {
     @Override
     @Transactional
     public void saveValuationData(IntrinsicValue intrinsicValue, StockPrice stockPrice) {
-        try {
-            Optional<IntrinsicValueEntity> existingIntrinsicValue = intrinsicValueJpaRepository
-                    .findByCompanyIdAndCalculationDate(intrinsicValue.getCompanyId(), intrinsicValue.getCalculationDate());
+        if (intrinsicValue != null && intrinsicValue.getValue() != null) {
+            try {
+                Optional<IntrinsicValueEntity> existingIntrinsicValue = intrinsicValueJpaRepository
+                        .findByCompanyIdAndCalculationDate(intrinsicValue.getCompanyId(), intrinsicValue.getCalculationDate());
 
-            IntrinsicValueEntity intrinsicValueEntity;
-            if (existingIntrinsicValue.isPresent()) {
-                intrinsicValueEntity = existingIntrinsicValue.get();
-                intrinsicValueEntity.setIntrinsicValue(intrinsicValue.getValue());
-            } else {
-                intrinsicValueEntity = IntrinsicValueEntity.builder()
-                        .id(UUID.randomUUID().toString())
-                        .companyId(intrinsicValue.getCompanyId())
-                        .calculationDate(intrinsicValue.getCalculationDate())
-                        .intrinsicValue(intrinsicValue.getValue())
-                        .build();
+                IntrinsicValueEntity intrinsicValueEntity;
+                if (existingIntrinsicValue.isPresent()) {
+                    intrinsicValueEntity = existingIntrinsicValue.get();
+                    intrinsicValueEntity.setIntrinsicValue(intrinsicValue.getValue());
+                } else {
+                    intrinsicValueEntity = IntrinsicValueEntity.builder()
+                            .id(UUID.randomUUID().toString())
+                            .companyId(intrinsicValue.getCompanyId())
+                            .calculationDate(intrinsicValue.getCalculationDate())
+                            .intrinsicValue(intrinsicValue.getValue())
+                            .build();
+                }
+                intrinsicValueJpaRepository.save(intrinsicValueEntity);
+            } catch (DataIntegrityViolationException e) {
+                log.warn("Concurrent insert detected for company {} on date {}: {}", 
+                         intrinsicValue.getCompanyId(), intrinsicValue.getCalculationDate(), e.getMessage());
             }
-            intrinsicValueJpaRepository.save(intrinsicValueEntity);
-        } catch (DataIntegrityViolationException e) {
-            log.warn("Concurrent insert detected for company {} on date {}: {}", 
-                     intrinsicValue.getCompanyId(), intrinsicValue.getCalculationDate(), e.getMessage());
+        } else {
+            log.info("Intrinsic value is null or empty. Skipping intrinsic value persistence for company {} on date {}.", 
+                     stockPrice.getCompanyId(), stockPrice.getDate());
         }
 
         StockPriceEntity stockPriceEntity = StockPriceEntity.builder()
