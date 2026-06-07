@@ -13,6 +13,7 @@ class ManualOperationEntry extends StatefulWidget {
 class _ManualOperationEntryState extends State<ManualOperationEntry> {
   final _formKey = GlobalKey<FormState>();
   final _tickerController = TextEditingController();
+  final _tickerFocusNode = FocusNode();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
   final _brokerController = TextEditingController();
@@ -22,6 +23,7 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
   @override
   void dispose() {
     _tickerController.dispose();
+    _tickerFocusNode.dispose();
     _quantityController.dispose();
     _priceController.dispose();
     _brokerController.dispose();
@@ -122,6 +124,7 @@ class _ManualOperationEntryState extends State<ManualOperationEntry> {
                   // Ticker Autocomplete
                   Autocomplete<String>(
                     textEditingController: _tickerController,
+                    focusNode: _tickerFocusNode,
                     optionsBuilder: (TextEditingValue textEditingValue) {
                       if (textEditingValue.text == '') {
                         return const Iterable<String>.empty();
