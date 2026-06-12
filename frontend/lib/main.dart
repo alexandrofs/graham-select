@@ -30,6 +30,10 @@ import 'src/features/ranking/data/repositories/ranking_repository_impl.dart';
 import 'src/features/ranking/domain/usecases/get_ranking_usecase.dart';
 import 'src/features/ranking/presentation/providers/ranking_provider.dart';
 import 'src/features/ranking/presentation/pages/ranking_page.dart';
+import 'src/features/ranking/data/datasources/graham_recommendation_remote_data_source.dart';
+import 'src/features/ranking/data/repositories/graham_recommendation_repository_impl.dart';
+import 'src/features/ranking/presentation/providers/graham_recommendation_provider.dart';
+import 'src/features/ranking/presentation/pages/graham_recommendations_page.dart';
 
 // Docs Feature Imports
 import 'src/features/docs/presentation/pages/docs_screen.dart';
@@ -111,6 +115,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final RankingRemoteDataSource rankingRemoteDataSource;
   late final RankingRepositoryImpl rankingRepository;
   late final GetRankingUseCase getRankingUseCase;
+  late final GrahamRecommendationRemoteDataSource grahamRecommendationRemoteDataSource;
+  late final GrahamRecommendationRepositoryImpl grahamRecommendationRepository;
 
   late final ProfileRepository profileRepository;
 
@@ -154,6 +160,13 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     rankingRemoteDataSource = RankingRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
     rankingRepository = RankingRepositoryImpl(rankingRemoteDataSource, effectiveAuthRepository);
     getRankingUseCase = GetRankingUseCase(rankingRepository);
+
+    // Graham Recommendations DI
+    grahamRecommendationRemoteDataSource = GrahamRecommendationRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
+    grahamRecommendationRepository = GrahamRecommendationRepositoryImpl(
+      remoteDataSource: grahamRecommendationRemoteDataSource,
+      authRepository: effectiveAuthRepository,
+    );
 
     // Profile Feature DI
     profileRepository = ProfileRepository(effectiveApiClient);
@@ -201,6 +214,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/evolution', builder: (context, state) => const EvolutionPage()),
             GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
             GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
+            GoRoute(path: '/graham-recommendations', builder: (context, state) => const GrahamRecommendationsPage()),
             GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
@@ -231,6 +245,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
           ),
         ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
+        ChangeNotifierProvider(
+          create: (_) => GrahamRecommendationProvider(repository: grahamRecommendationRepository),
+        ),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(

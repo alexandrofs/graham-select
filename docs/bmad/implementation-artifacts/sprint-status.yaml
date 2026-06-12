@@ -33,7 +33,7 @@
 # - SM typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: 2026-06-11
+generated: 2026-06-12
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -66,7 +66,7 @@ development_status:
   epic-4: in-progress
   4-1-market-data-indicator-integration: done
   4-2-premium-allocation-strategy-config: done
-  4-3-graham-valuation-engine: ready-for-dev
+  4-3-graham-valuation-engine: done
   4-4-explainable-ai-reasoning-box: backlog
   epic-4-retrospective: optional
   epic-5: backlog

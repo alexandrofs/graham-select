@@ -7,6 +7,5 @@ public class TopicConstants {
     public static final String TRADE_EXTRACTED_TOPIC = "trade-extracted";
     public static final String TRADE_EXTRACTED_DLQ_TOPIC = "trade-extracted-dlq";
     public static final String VALUATION_REQUESTED_TOPIC = "valuation-requested";
-
-
+    public static final String VALUATION_COMPLETED_TOPIC = "valuation-completed";
 }
