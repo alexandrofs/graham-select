@@ -3,6 +3,8 @@ package afsdigital.grahamselect.api.common.web;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionAlreadyPendingException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionNotFoundException;
 import afsdigital.grahamselect.api.upload.web.B3UploadValidationException;
+import afsdigital.grahamselect.valuation.application.usecase.exceptions.AllocationGoalValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,8 +13,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 /**
  * Global exception handler providing RFC 7807 ProblemDetail responses.
  */
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AllocationGoalValidationException.class)
+    public ProblemDetail handleAllocationGoalValidation(AllocationGoalValidationException ex) {
+        log.error("Allocation goal validation failed: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Allocation Goal Validation Error");
+        return problem;
+    }
 
     @ExceptionHandler(B3UploadValidationException.class)
     public ProblemDetail handleB3UploadValidation(B3UploadValidationException ex) {

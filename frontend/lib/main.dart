@@ -47,6 +47,12 @@ import 'src/features/portfolio/data/datasources/notification_service.dart';
 import 'src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'src/features/portfolio/presentation/pages/evolution_page.dart';
 
+// Allocation Feature Imports
+import 'src/features/allocation/data/datasources/allocation_remote_data_source.dart';
+import 'src/features/allocation/data/repositories/allocation_repository_impl.dart';
+import 'src/features/allocation/presentation/providers/allocation_provider.dart';
+import 'src/features/allocation/presentation/pages/allocation_strategy_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -111,6 +117,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final PortfolioRemoteDataSource portfolioRemoteDataSource;
   late final PortfolioRepositoryImpl portfolioRepository;
 
+  late final AllocationRemoteDataSource allocationRemoteDataSource;
+  late final AllocationRepositoryImpl allocationRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -153,6 +162,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     portfolioRemoteDataSource = PortfolioRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
     portfolioRepository = PortfolioRepositoryImpl(portfolioRemoteDataSource, effectiveAuthRepository);
 
+    // Allocation Feature DI
+    allocationRemoteDataSource = AllocationRemoteDataSource(apiClient: effectiveApiClient);
+    allocationRepository = AllocationRepositoryImpl(allocationRemoteDataSource, effectiveAuthRepository);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -188,6 +201,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/evolution', builder: (context, state) => const EvolutionPage()),
             GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
             GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
+            GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
           ],
@@ -218,6 +232,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
+        ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(
           create: (_) {
             final notificationService = NotificationService(effectiveApiClient);

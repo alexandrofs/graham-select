@@ -30,3 +30,4 @@ analyzer:
   errors:
     duplicate_ignore: ignore
     must_be_immutable: ignore
+    deprecated_member_use: ignore

@@ -42,8 +42,9 @@ class _Sidebar extends StatelessWidget {
       if (location.startsWith('/dashboard')) return 0;
       if (location.startsWith('/evolution')) return 1;
       if (location.startsWith('/ranking')) return 2;
-      if (location.startsWith('/upload')) return 3;
-      if (location.startsWith('/profile')) return 4;
+      if (location.startsWith('/allocation-strategy')) return 3;
+      if (location.startsWith('/upload')) return 4;
+      if (location.startsWith('/profile')) return 5;
       return 0;
     }
 
@@ -61,8 +62,10 @@ class _Sidebar extends StatelessWidget {
           case 2:
             context.go('/ranking');
           case 3:
-            context.go('/upload');
+            context.go('/allocation-strategy');
           case 4:
+            context.go('/upload');
+          case 5:
             context.go('/profile');
         }
       },
@@ -101,6 +104,11 @@ class _Sidebar extends StatelessWidget {
           label: Text('Ranking'),
         ),
         NavigationRailDestination(
+          icon: Icon(Icons.settings_suggest_outlined),
+          selectedIcon: Icon(Icons.settings_suggest),
+          label: Text('Estratégia'),
+        ),
+        NavigationRailDestination(
           icon: Icon(Icons.cloud_upload_outlined),
           selectedIcon: Icon(Icons.cloud_upload),
           label: Text('Importação'),
@@ -126,8 +134,9 @@ class _BottomNavBar extends StatelessWidget {
       if (location.startsWith('/dashboard')) return 0;
       if (location.startsWith('/evolution')) return 1;
       if (location.startsWith('/ranking')) return 2;
-      if (location.startsWith('/upload')) return 3;
-      if (location.startsWith('/profile')) return 4;
+      if (location.startsWith('/allocation-strategy')) return 3;
+      if (location.startsWith('/upload')) return 4;
+      if (location.startsWith('/profile')) return 5;
       return 0;
     }
 
@@ -142,8 +151,10 @@ class _BottomNavBar extends StatelessWidget {
           case 2:
             context.go('/ranking');
           case 3:
-            context.go('/upload');
+            context.go('/allocation-strategy');
           case 4:
+            context.go('/upload');
+          case 5:
             context.go('/profile');
         }
       },
@@ -159,6 +170,10 @@ class _BottomNavBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.star_outline),
           label: 'Ranking',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.settings_suggest_outlined),
+          label: 'Estratégia',
         ),
         NavigationDestination(
           icon: Icon(Icons.cloud_upload_outlined),
