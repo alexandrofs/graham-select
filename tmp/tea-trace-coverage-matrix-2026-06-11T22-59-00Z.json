@@ -1,0 +1,157 @@
+{
+  "phase": "PHASE_1_COMPLETE",
+  "generated_at": "2026-06-11T22:59:00Z",
+  "trace_target": {
+    "type": "epic",
+    "id": "3",
+    "label": "Portfólio & Dashboard Consolidado"
+  },
+  "collection_mode": "auto",
+  "allow_gate": true,
+  "coverage_basis": "acceptance_criteria",
+  "summary_confidence": "high",
+  "oracle": {
+    "resolution_mode": "formal_requirements",
+    "confidence": "high",
+    "sources": [
+      "docs/bmad/planning-artifacts/epics.md"
+    ],
+    "external_pointer_status": "not_used",
+    "synthetic": false
+  },
+  "requirements": [
+    {
+      "id": "Story 3.1",
+      "title": "Dashboard KPI (Componente PortfolioKpiCard)",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        { "id": "shouldCalculateSummaryCorrectly", "level": "unit" },
+        { "id": "shouldReturnPortfolioSummary", "level": "api" },
+        { "id": "should render title and formatted currency value", "level": "component" },
+        { "id": "should render percentage value", "level": "component" },
+        { "id": "should show loading indicator when isLoading is true", "level": "component" },
+        { "id": "should apply explicit valueColor", "level": "component" },
+        { "id": "should render all 4 KPI cards when summary is loaded", "level": "component" },
+        { "id": "should show error state and retry button", "level": "component" }
+      ]
+    },
+    {
+      "id": "Story 3.2",
+      "title": "Tabela de Custódia Atualizada (Componente FinancialDataTable)",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        { "id": "shouldCalculateCustodyPositionsCorrectly", "level": "unit" },
+        { "id": "shouldExcludeZeroOrNegativePositions", "level": "unit" },
+        { "id": "shouldFallbackToCacheAndAveragePriceWhenStockPriceNotFound", "level": "unit" },
+        { "id": "shouldMarkAsCacheIfStockPriceIsOld", "level": "unit" },
+        { "id": "shouldResetAveragePriceWhenPositionIsZeroedAndReboughtAndRespectChronologicalOrder", "level": "unit" },
+        { "id": "shouldReturnCustodyPositionsWithCorrectStructure", "level": "api" },
+        { "id": "shouldExcludeZeroedPositionsFromCustody", "level": "api" },
+        { "id": "deve retornar a lista de posições e o metadado priceUpdatedAt com status 200", "level": "unit" },
+        { "id": "deve carregar posições de custódia com sucesso", "level": "unit" },
+        { "id": "deve ordenar por ticker de forma ascendente por padrão", "level": "unit" },
+        { "id": "deve renderizar skeleton/shimmer no estado loading", "level": "component" },
+        { "id": "deve renderizar a tabela com dados no estado success com posições", "level": "component" },
+        { "id": "deve chamar sortBy ao clicar no header do Ticker", "level": "component" }
+      ]
+    },
+    {
+      "id": "Story 3.3",
+      "title": "Histórico de Proventos e Aportes",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        { "id": "shouldAggregateContributionsAndDividendsCorrectly", "level": "unit" },
+        { "id": "shouldReturnTwelveConsecutiveMonthsEvenIfEmpty", "level": "unit" },
+        { "id": "shouldReturnPortfolioEvolution", "level": "api" },
+        { "id": "deve carregar os dados de evolução com sucesso", "level": "unit" },
+        { "id": "deve exibir o gráfico de barras e legendas no estado success", "level": "component" },
+        { "id": "deve alternar para visualização de tabela e aplicar filtros", "level": "component" }
+      ]
+    },
+    {
+      "id": "Story 3.4",
+      "title": "Visualização de Alocação por Classe (Gráfico de Rosca)",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        { "id": "shouldInferAssetClassForAllCategoriesCorrectly", "level": "unit" },
+        { "id": "shouldInferAssetClassForFractionalTickersCorrectly", "level": "unit" },
+        { "id": "deve filtrar posições quando selecionado uma classe de ativos", "level": "unit" },
+        { "id": "deve retornar todas as posições ao limpar o filtro", "level": "unit" }
+      ]
+    },
+    {
+      "id": "Story 3.5",
+      "title": "Atualização em Tempo Real (Event-Driven UI)",
+      "priority": "P1",
+      "coverage": "FULL",
+      "tests": [
+        { "id": "shouldSendNotificationSuccessfully", "level": "unit" },
+        { "id": "shouldHandleRaceConditionAndDeduplicateTrades", "level": "api" },
+        { "id": "shouldReturnSseStream", "level": "api" },
+        { "id": "startListeningForUpdates", "level": "unit" }
+      ]
+    }
+  ],
+  "coverage_statistics": {
+    "total_requirements": 5,
+    "fully_covered": 5,
+    "partially_covered": 0,
+    "uncovered": 0,
+    "overall_coverage_percentage": 100,
+    "priority_breakdown": {
+      "P0": { "total": 0, "covered": 0, "percentage": 100 },
+      "P1": { "total": 5, "covered": 5, "percentage": 100 },
+      "P2": { "total": 0, "covered": 0, "percentage": 100 },
+      "P3": { "total": 0, "covered": 0, "percentage": 100 }
+    }
+  },
+  "gap_analysis": {
+    "critical_gaps": [],
+    "high_gaps": [],
+    "medium_gaps": [],
+    "low_gaps": [],
+    "partial_coverage_items": [],
+    "unit_only_items": []
+  },
+  "coverage_heuristics": {
+    "endpoint_gaps": [],
+    "auth_negative_path_gaps": [],
+    "happy_path_only_gaps": [],
+    "ui_journey_gaps": [],
+    "ui_state_gaps": [],
+    "counts": {
+      "endpoints_without_tests": 0,
+      "auth_missing_negative_paths": 0,
+      "happy_path_only_criteria": 0,
+      "ui_journeys_without_e2e": 0,
+      "ui_states_missing_coverage": 0
+    }
+  },
+  "test_inventory": {
+    "summary": {
+      "files": 14,
+      "cases": 37,
+      "skipped_cases": 0,
+      "fixme_cases": 0,
+      "pending_cases": 0,
+      "by_level": {
+        "e2e": { "tests": 0, "criteria_covered": 0 },
+        "api": { "tests": 9, "criteria_covered": 5 },
+        "component": { "tests": 15, "criteria_covered": 4 },
+        "unit": { "tests": 13, "criteria_covered": 5 }
+      }
+    }
+  },
+  "blockers": [],
+  "recommendations": [
+    {
+      "priority": "LOW",
+      "action": "Executar o pipeline de revisão estática e código adversarial via comando /bmad-code-review para validar conformidade do patch antes do merge.",
+      "requirements": []
+    }
+  ]
+}

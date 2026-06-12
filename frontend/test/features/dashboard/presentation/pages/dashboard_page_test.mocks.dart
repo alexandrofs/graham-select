@@ -67,6 +67,15 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i3.PortfolioStatus);
 
   @override
+  _i3.TradeStatus get tradeStatus =>
+      (super.noSuchMethod(
+            Invocation.getter(#tradeStatus),
+            returnValue: _i3.TradeStatus.initial,
+            returnValueForMissingStub: _i3.TradeStatus.initial,
+          )
+          as _i3.TradeStatus);
+
+  @override
   List<_i4.CustodyPosition> get rawCustodyPositions =>
       (super.noSuchMethod(
             Invocation.getter(#rawCustodyPositions),
@@ -179,6 +188,12 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   @override
   void resetStatus() => super.noSuchMethod(
     Invocation.method(#resetStatus, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void resetTradeStatus() => super.noSuchMethod(
+    Invocation.method(#resetTradeStatus, []),
     returnValueForMissingStub: null,
   );
 
