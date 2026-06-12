@@ -43,8 +43,9 @@ class _Sidebar extends StatelessWidget {
       if (location.startsWith('/evolution')) return 1;
       if (location.startsWith('/ranking')) return 2;
       if (location.startsWith('/allocation-strategy')) return 3;
-      if (location.startsWith('/upload')) return 4;
-      if (location.startsWith('/profile')) return 5;
+      if (location.startsWith('/graham-recommendations')) return 4;
+      if (location.startsWith('/upload')) return 5;
+      if (location.startsWith('/profile')) return 6;
       return 0;
     }
 
@@ -64,8 +65,10 @@ class _Sidebar extends StatelessWidget {
           case 3:
             context.go('/allocation-strategy');
           case 4:
-            context.go('/upload');
+            context.go('/graham-recommendations');
           case 5:
+            context.go('/upload');
+          case 6:
             context.go('/profile');
         }
       },
@@ -109,6 +112,11 @@ class _Sidebar extends StatelessWidget {
           label: Text('Estratégia'),
         ),
         NavigationRailDestination(
+          icon: Icon(Icons.recommend_outlined),
+          selectedIcon: Icon(Icons.recommend),
+          label: Text('Recomendações'),
+        ),
+        NavigationRailDestination(
           icon: Icon(Icons.cloud_upload_outlined),
           selectedIcon: Icon(Icons.cloud_upload),
           label: Text('Importação'),
@@ -135,8 +143,9 @@ class _BottomNavBar extends StatelessWidget {
       if (location.startsWith('/evolution')) return 1;
       if (location.startsWith('/ranking')) return 2;
       if (location.startsWith('/allocation-strategy')) return 3;
-      if (location.startsWith('/upload')) return 4;
-      if (location.startsWith('/profile')) return 5;
+      if (location.startsWith('/graham-recommendations')) return 4;
+      if (location.startsWith('/upload')) return 5;
+      if (location.startsWith('/profile')) return 6;
       return 0;
     }
 
@@ -153,8 +162,10 @@ class _BottomNavBar extends StatelessWidget {
           case 3:
             context.go('/allocation-strategy');
           case 4:
-            context.go('/upload');
+            context.go('/graham-recommendations');
           case 5:
+            context.go('/upload');
+          case 6:
             context.go('/profile');
         }
       },
@@ -174,6 +185,10 @@ class _BottomNavBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.settings_suggest_outlined),
           label: 'Estratégia',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.recommend_outlined),
+          label: 'Aportes',
         ),
         NavigationDestination(
           icon: Icon(Icons.cloud_upload_outlined),

@@ -1,0 +1,82 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20-create-graham-recommendations-table
+      author: codex
+      changes:
+        - createTable:
+            tableName: graham_recommendations
+            columns:
+              - column:
+                  name: id
+                  type: CHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ticker
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_price
+                  type: DECIMAL(18,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: intrinsic_value
+                  type: DECIMAL(18,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: margin_of_safety
+                  type: DECIMAL(8,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_allocation_pct
+                  type: DECIMAL(8,4)
+                  defaultValueNumeric: 0.0000
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_allocation_pct
+                  type: DECIMAL(8,4)
+                  defaultValueNumeric: 0.0000
+                  constraints:
+                    nullable: false
+              - column:
+                  name: allocation_gap
+                  type: DECIMAL(8,4)
+                  defaultValueNumeric: 0.0000
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recommendation_score
+                  type: DECIMAL(10,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: generated_at
+                  type: DATE
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: graham_recommendations
+            indexName: idx_graham_recommendations_user_id
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: graham_recommendations
+            indexName: idx_graham_recommendations_score
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: recommendation_score
+                  descending: true
