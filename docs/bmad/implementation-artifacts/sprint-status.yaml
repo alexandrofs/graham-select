@@ -67,7 +67,7 @@ development_status:
   4-1-market-data-indicator-integration: done
   4-2-premium-allocation-strategy-config: done
   4-3-graham-valuation-engine: done
-  4-4-explainable-ai-reasoning-box: backlog
+  4-4-explainable-ai-reasoning-box: ready-for-dev
   epic-4-retrospective: optional
   epic-5: backlog
   5-1-wealth-income-goal-setup: backlog
