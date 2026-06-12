@@ -1,6 +1,9 @@
+---
+baseline_commit: 70efad70b41c651da6b58594cbac523c7a5a498f
+---
 # Story 4.2: Configuração de Metas de Alocação (Tier Premium)
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -45,47 +48,47 @@ Status: ready-for-dev
 
 ### Backend — Módulo `common` (Domain + Application — POJOs puros, sem Spring)
 
-- [ ] **Task 1: Criar entidade de domínio `AllocationGoal`** (AC: 2, 3, 4)
-  - [ ] Criar `AllocationGoal` em `common/src/main/java/afsdigital/grahamselect/valuation/domain/entities/AllocationGoal.java`
-  - [ ] Campos: `id` (UUID), `userId` (String), `goalType` (String: `"ASSET_CLASS"` | `"TICKER"`), `targetKey` (String — nome da classe ou ticker), `targetPercentage` (BigDecimal — ex: 50.00)
-  - [ ] Usar Java record ou classe com Lombok `@Data @Builder @NoArgsConstructor @AllArgsConstructor`
-  - [ ] **SEM** anotações Spring ou JPA nesta camada (POJO puro)
+- [x] **Task 1: Criar entidade de domínio `AllocationGoal`** (AC: 2, 3, 4)
+  - [x] Criar `AllocationGoal` em `common/src/main/java/afsdigital/grahamselect/valuation/domain/entities/AllocationGoal.java`
+  - [x] Campos: `id` (UUID), `userId` (String), `goalType` (String: `"ASSET_CLASS"` | `"TICKER"`), `targetKey` (String — nome da classe ou ticker), `targetPercentage` (BigDecimal — ex: 50.00)
+  - [x] Usar Java record ou classe com Lombok `@Data @Builder @NoArgsConstructor @AllArgsConstructor`
+  - [x] **SEM** anotações Spring ou JPA nesta camada (POJO puro)
 
-- [ ] **Task 2: Criar Port `AllocationGoalPort`** (AC: 2, 3, 4)
-  - [ ] Criar interface `AllocationGoalPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/AllocationGoalPort.java`
-  - [ ] Métodos:
+- [x] **Task 2: Criar Port `AllocationGoalPort`** (AC: 2, 3, 4)
+  - [x] Criar interface `AllocationGoalPort` em `common/src/main/java/afsdigital/grahamselect/valuation/application/repository/AllocationGoalPort.java`
+  - [x] Métodos:
     - `void saveAllocationGoals(String userId, List<AllocationGoalDto> goals)` — salva/substitui (upsert) todas as metas do usuário
     - `List<AllocationGoalDto> findByUserId(String userId)` — carrega metas existentes
 
-- [ ] **Task 3: Criar DTO `AllocationGoalDto`** (AC: 2, 3, 4)
-  - [ ] Criar record `AllocationGoalDto` em `common/src/main/java/afsdigital/grahamselect/valuation/application/dto/AllocationGoalDto.java`
-  - [ ] Campos: `goalType` (String: `"ASSET_CLASS"` | `"TICKER"`), `targetKey` (String), `targetPercentage` (BigDecimal)
+- [x] **Task 3: Criar DTO `AllocationGoalDto`** (AC: 2, 3, 4)
+  - [x] Criar record `AllocationGoalDto` em `common/src/main/java/afsdigital/grahamselect/valuation/application/dto/AllocationGoalDto.java`
+  - [x] Campos: `goalType` (String: `"ASSET_CLASS"` | `"TICKER"`), `targetKey` (String), `targetPercentage` (BigDecimal)
 
-- [ ] **Task 4: Criar Use Case `SaveAllocationGoalsUseCase`** (AC: 2, 3, 5)
-  - [ ] Criar `SaveAllocationGoalsUseCase` em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java` como POJO (sem `@Component`)
-  - [ ] Método `execute(String userId, List<AllocationGoalDto> goals)` — sem anotações Spring
-  - [ ] **Validação obrigatória**: somar os `targetPercentage` onde `goalType = "ASSET_CLASS"` e verificar se a soma == 100.00 (com tolerância de 0.01 para precisão de ponto flutuante)
-  - [ ] Se soma ≠ 100%: lançar exceção de domínio `AllocationGoalValidationException` com mensagem clara
-  - [ ] Delega persistência para `AllocationGoalPort.saveAllocationGoals(userId, goals)`
-  - [ ] Lombok `@RequiredArgsConstructor` + `@Slf4j`
-  - [ ] Log INFO na entrada: `"Saving {} allocation goals for user {}"`
+- [x] **Task 4: Criar Use Case `SaveAllocationGoalsUseCase`** (AC: 2, 3, 5)
+  - [x] Criar `SaveAllocationGoalsUseCase` em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java` como POJO (sem `@Component`)
+  - [x] Método `execute(String userId, List<AllocationGoalDto> goals)` — sem anotações Spring
+  - [x] **Validação obrigatória**: somar os `targetPercentage` onde `goalType = "ASSET_CLASS"` e verificar se a soma == 100.00 (com tolerância de 0.01 para precisão de ponto flutuante)
+  - [x] Se soma ≠ 100%: lançar exceção de domínio `AllocationGoalValidationException` com mensagem clara
+  - [x] Delega persistência para `AllocationGoalPort.saveAllocationGoals(userId, goals)`
+  - [x] Lombok `@RequiredArgsConstructor` + `@Slf4j`
+  - [x] Log INFO na entrada: `"Saving {} allocation goals for user {}"`
 
-- [ ] **Task 5: Criar Use Case `GetAllocationGoalsUseCase`** (AC: 4)
-  - [ ] Criar `GetAllocationGoalsUseCase` em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GetAllocationGoalsUseCase.java` como POJO (sem `@Component`)
-  - [ ] Método `execute(String userId)` → retorna `List<AllocationGoalDto>`
-  - [ ] Log INFO na entrada: `"Fetching allocation goals for user {}"`
+- [x] **Task 5: Criar Use Case `GetAllocationGoalsUseCase`** (AC: 4)
+  - [x] Criar `GetAllocationGoalsUseCase` em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GetAllocationGoalsUseCase.java` como POJO (sem `@Component`)
+  - [x] Método `execute(String userId)` → retorna `List<AllocationGoalDto>`
+  - [x] Log INFO na entrada: `"Fetching allocation goals for user {}"`
 
-- [ ] **Task 6: Criar exceção de domínio `AllocationGoalValidationException`** (AC: 2)
-  - [ ] Criar em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/exceptions/AllocationGoalValidationException.java`
-  - [ ] Extends `RuntimeException` — **sem** anotações Spring
+- [x] **Task 6: Criar exceção de domínio `AllocationGoalValidationException`** (AC: 2)
+  - [x] Criar em `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/exceptions/AllocationGoalValidationException.java`
+  - [x] Extends `RuntimeException` — **sem** anotações Spring
 
 ---
 
 ### Backend — Módulo `api` (Infrastructure + Web)
 
-- [ ] **Task 7: Criar migration Liquibase para tabela `allocation_goals`** (AC: 2, 3, 4)
-  - [ ] Criar arquivo `backend/common/src/main/resources/db/changelog/19-create-allocation-goals-table.yaml`
-  - [ ] Schema da tabela `allocation_goals` (tipo UUID igual ao padrão `trades` e `manual_trade_audits`):
+- [x] **Task 7: Criar migration Liquibase para tabela `allocation_goals`** (AC: 2, 3, 4)
+  - [x] Criar arquivo `backend/common/src/main/resources/db/changelog/19-create-allocation-goals-table.yaml`
+  - [x] Schema da tabela `allocation_goals` (tipo UUID igual ao padrão `trades` e `manual_trade_audits`):
     ```yaml
     columns:
       - id: UUID PRIMARY KEY NOT NULL
@@ -98,142 +101,158 @@ Status: ready-for-dev
     - Unique constraint: uq_allocation_goals_user_type_key (user_id, goal_type, target_key)
     - Index: idx_allocation_goals_user_id (user_id)
     ```
-  - [ ] Incluir o arquivo no `db.changelog-master.yaml` (próxima entrada após `18-fix-manual-trade-audits-uuid-columns.yaml`)
+  - [x] Incluir o arquivo no `db.changelog-master.yaml` (próxima entrada após `18-fix-manual-trade-audits-uuid-columns.yaml`)
 
-- [ ] **Task 8: Criar entidade JPA `AllocationGoalEntity`** (AC: 2, 3, 4)
-  - [ ] Criar em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/entities/AllocationGoalEntity.java`
-  - [ ] Anotações: `@Entity @Table(name = "allocation_goals") @Data @Builder @NoArgsConstructor @AllArgsConstructor`
-  - [ ] Campo `id`: `UUID` com `@Id` + `@JdbcTypeCode(SqlTypes.VARCHAR)` — **padrão obrigatório do projeto** (ver `TradeEntity` e `ManualTradeAuditEntity`)
-  - [ ] Demais campos: `userId` (String), `goalType` (String), `targetKey` (String), `targetPercentage` (BigDecimal), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
+- [x] **Task 8: Criar entidade JPA `AllocationGoalEntity`** (AC: 2, 3, 4)
+  - [x] Criar em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/entities/AllocationGoalEntity.java`
+  - [x] Anotações: `@Entity @Table(name = "allocation_goals") @Data @Builder @NoArgsConstructor @AllArgsConstructor`
+  - [x] Campo `id`: `UUID` com `@Id` + `@JdbcTypeCode(SqlTypes.VARCHAR)` — **padrão obrigatório do projeto** (ver `TradeEntity` e `ManualTradeAuditEntity`)
+  - [x] Demais campos: `userId` (String), `goalType` (String), `targetKey` (String), `targetPercentage` (BigDecimal), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
 
-- [ ] **Task 9: Criar JPA Repository `AllocationGoalJpaRepository`** (AC: 2, 3, 4)
-  - [ ] Criar interface `AllocationGoalJpaRepository` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/repositories/AllocationGoalJpaRepository.java`
-  - [ ] Extends `JpaRepository<AllocationGoalEntity, UUID>` — ID é UUID, **não** Long
-  - [ ] Método: `List<AllocationGoalEntity> findByUserId(String userId)`
-  - [ ] Método: `void deleteByUserId(String userId)`
+- [x] **Task 9: Criar JPA Repository `AllocationGoalJpaRepository`** (AC: 2, 3, 4)
+  - [x] Criar interface `AllocationGoalJpaRepository` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/repositories/AllocationGoalJpaRepository.java`
+  - [x] Extends `JpaRepository<AllocationGoalEntity, UUID>` — ID é UUID, **não** Long
+  - [x] Método: `List<AllocationGoalEntity> findByUserId(String userId)`
+  - [x] Método: `void deleteByUserId(String userId)`
 
-- [ ] **Task 10: Criar adapter `AllocationGoalJpaAdapter`** (AC: 2, 3, 4)
-  - [ ] Criar `AllocationGoalJpaAdapter` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/AllocationGoalJpaAdapter.java`
-  - [ ] Implementa `AllocationGoalPort`
-  - [ ] `saveAllocationGoals`: **primeiro `deleteByUserId(userId)`**, depois salva todas as novas metas via `saveAll()` (upsert via delete+insert — abordagem simples e segura para MVP)
-  - [ ] Ao construir cada `AllocationGoalEntity` para insert: **gerar `UUID.randomUUID()`** para o campo `id` (o banco não gera automaticamente — padrão do projeto)
-  - [ ] `findByUserId`: busca e mapeia `AllocationGoalEntity` → `AllocationGoalDto`
-  - [ ] Setar `createdAt` e `updatedAt` com `LocalDateTime.now(ZoneOffset.UTC)` (**obrigatório**)
+- [x] **Task 10: Criar adapter `AllocationGoalJpaAdapter`** (AC: 2, 3, 4)
+  - [x] Criar `AllocationGoalJpaAdapter` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/AllocationGoalJpaAdapter.java`
+  - [x] Implementa `AllocationGoalPort`
+  - [x] `saveAllocationGoals`: **primeiro `deleteByUserId(userId)`**, depois salva todas as novas metas via `saveAll()` (upsert via delete+insert — abordagem simples e segura para MVP)
+  - [x] Ao construir cada `AllocationGoalEntity` para insert: **gerar `UUID.randomUUID()`** para o campo `id` (o banco não gera automaticamente — padrão do projeto)
+  - [x] `findByUserId`: busca e mapeia `AllocationGoalEntity` → `AllocationGoalDto`
+  - [x] Setar `createdAt` e `updatedAt` com `LocalDateTime.now(ZoneOffset.UTC)` (**obrigatório**)
 
-- [ ] **Task 11: Criar Controller `AllocationStrategyController`** (AC: 1, 2, 3, 4, 6)
-  - [ ] Criar em `api/src/main/java/afsdigital/grahamselect/api/valuation/web/AllocationStrategyController.java`
-  - [ ] `@RestController @RequestMapping("/api/v1/allocation-strategy") @RequiredArgsConstructor @Slf4j`
-  - [ ] **Anotar a classe com `@RequirePremium`** — garante acesso apenas para Premium/Trial em todos os endpoints
-  - [ ] **POST `/api/v1/allocation-strategy`**: salva/atualiza metas
+- [x] **Task 11: Criar Controller `AllocationStrategyController`** (AC: 1, 2, 3, 4, 6)
+  - [x] Criar em `api/src/main/java/afsdigital/grahamselect/api/valuation/web/AllocationStrategyController.java`
+  - [x] `@RestController @RequestMapping("/api/v1/allocation-strategy") @RequiredArgsConstructor @Slf4j`
+  - [x] **Anotar a classe com `@RequirePremium`** — garante acesso apenas para Premium/Trial em todos os endpoints
+  - [x] **POST `/api/v1/allocation-strategy`**: salva/atualiza metas
     - `@PostMapping` + `@AuthenticationPrincipal Jwt jwt`
     - Log INFO na entrada: `"Received request to save allocation strategy for user {}"`
     - `String userId = jwt.getSubject()`
     - Delega para `saveAllocationGoalsUseCase.execute(userId, goals)`
     - Captura `AllocationGoalValidationException` e relança como `ResponseStatusException(HttpStatus.BAD_REQUEST, message)` OU deixa o `@ControllerAdvice` global tratar
     - Retorna HTTP 204 (no content) em sucesso
-  - [ ] **GET `/api/v1/allocation-strategy`**: carrega metas existentes
+  - [x] **GET `/api/v1/allocation-strategy`**: carrega metas existentes
     - `@GetMapping` + `@AuthenticationPrincipal Jwt jwt`
     - Log INFO na entrada: `"Received request to get allocation strategy for user {}"`
     - Retorna `List<AllocationGoalDto>` com HTTP 200
-  - [ ] **Request/Response body**: `List<AllocationGoalDto>` serializado como JSON
+  - [x] **Request/Response body**: `List<AllocationGoalDto>` serializado como JSON
 
-- [ ] **Task 12: Tratar `AllocationGoalValidationException` no `@ControllerAdvice` global** (AC: 2)
-  - [ ] Localizar o `@ControllerAdvice` global do projeto (verificar se já existe em `api/src/main/java/...`)
-  - [ ] Adicionar handler para `AllocationGoalValidationException` → retorna `ProblemDetail` com status 400 e mensagem da exceção
-  - [ ] Log ERROR na captura: `"Allocation goal validation failed: {}"`
+- [x] **Task 12: Tratar `AllocationGoalValidationException` no `@ControllerAdvice` global** (AC: 2)
+  - [x] Localizar o `@ControllerAdvice` global do projeto (verificar se já existe em `api/src/main/java/...`)
+  - [x] Adicionar handler para `AllocationGoalValidationException` → retorna `ProblemDetail` com status 400 e mensagem da exceção
+  - [x] Log ERROR na captura: `"Allocation goal validation failed: {}"`
 
-- [ ] **Task 13: Registrar beans em `@Configuration`** (AC: 1, 2, 3, 4)
-  - [ ] Criar `AllocationStrategyConfiguration` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/AllocationStrategyConfiguration.java`
-  - [ ] Beans: `AllocationGoalJpaAdapter`, `SaveAllocationGoalsUseCase`, `GetAllocationGoalsUseCase`
-  - [ ] Padrão do projeto: Use Cases como POJOs wired via `@Bean` (ver `PortfolioSummaryConfiguration.java` como referência)
+- [x] **Task 13: Registrar beans em `@Configuration`** (AC: 1, 2, 3, 4)
+  - [x] Criar `AllocationStrategyConfiguration` em `api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/AllocationStrategyConfiguration.java`
+  - [x] Beans: `AllocationGoalJpaAdapter`, `SaveAllocationGoalsUseCase`, `GetAllocationGoalsUseCase`
+  - [x] Padrão do projeto: Use Cases como POJOs wired via `@Bean` (ver `PortfolioSummaryConfiguration.java` como referência)
 
 ---
 
 ### Frontend Flutter
 
-- [ ] **Task 14: Criar entidade `AllocationGoal` no domain** (AC: 1, 2, 3)
-  - [ ] Criar `frontend/lib/src/features/allocation/domain/entities/allocation_goal.dart`
-  - [ ] Campos: `goalType` (String: `'ASSET_CLASS'` | `'TICKER'`), `targetKey` (String), `targetPercentage` (double)
-  - [ ] Tipagem estrita Dart com null safety garantido
+- [x] **Task 14: Criar entidade `AllocationGoal` no domain** (AC: 1, 2, 3)
+  - [x] Criar `frontend/lib/src/features/allocation/domain/entities/allocation_goal.dart`
+  - [x] Campos: `goalType` (String: `'ASSET_CLASS'` | `'TICKER'`), `targetKey` (String), `targetPercentage` (double)
+  - [x] Tipagem estrita Dart com null safety garantido
 
-- [ ] **Task 15: Criar repository interface `AllocationRepository`** (AC: 1, 2, 3, 4)
-  - [ ] Criar `frontend/lib/src/features/allocation/domain/repositories/allocation_repository.dart`
-  - [ ] Métodos:
+- [x] **Task 15: Criar repository interface `AllocationRepository`** (AC: 1, 2, 3, 4)
+  - [x] Criar `frontend/lib/src/features/allocation/domain/repositories/allocation_repository.dart`
+  - [x] Métodos:
     - `Future<List<AllocationGoal>> getGoals()`
     - `Future<void> saveGoals(List<AllocationGoal> goals)`
 
-- [ ] **Task 16: Criar datasource `AllocationRemoteDataSource`** (AC: 1, 2, 3, 4)
-  - [ ] Criar `frontend/lib/src/features/allocation/data/datasources/allocation_remote_data_source.dart`
-  - [ ] `GET /api/v1/allocation-strategy` → retorna `List<AllocationGoal>`
-  - [ ] `POST /api/v1/allocation-strategy` → envia `List<AllocationGoal>`
-  - [ ] Usar cliente Dio existente do projeto (`core/api/`)
-  - [ ] Passar `Bearer {token}` no header Authorization
-  - [ ] Lançar `Exception` com mensagem clara em caso de erro HTTP
+- [x] **Task 16: Criar datasource `AllocationRemoteDataSource`** (AC: 1, 2, 3, 4)
+  - [x] Criar `frontend/lib/src/features/allocation/data/datasources/allocation_remote_data_source.dart`
+  - [x] `GET /api/v1/allocation-strategy` → retorna `List<AllocationGoal>`
+  - [x] `POST /api/v1/allocation-strategy` → envia `List<AllocationGoal>`
+  - [x] Usar cliente Dio existente do projeto (`core/api/`)
+  - [x] Passar `Bearer {token}` no header Authorization
+  - [x] Lançar `Exception` com mensagem clara em caso de erro HTTP
 
-- [ ] **Task 17: Criar `AllocationRepositoryImpl`** (AC: 1, 2, 3, 4)
-  - [ ] Criar `frontend/lib/src/features/allocation/data/repositories/allocation_repository_impl.dart`
-  - [ ] Injeta `AllocationRemoteDataSource` + `AuthRepository`
-  - [ ] Segue o mesmo padrão de `PortfolioRepositoryImpl` (buscar token, delegar ao datasource)
+- [x] **Task 17: Criar `AllocationRepositoryImpl`** (AC: 1, 2, 3, 4)
+  - [x] Criar `frontend/lib/src/features/allocation/data/repositories/allocation_repository_impl.dart`
+  - [x] Injeta `AllocationRemoteDataSource` + `AuthRepository`
+  - [x] Segue o mesmo padrão de `PortfolioRepositoryImpl` (buscar token, delegar ao datasource)
 
-- [ ] **Task 18: Criar `AllocationProvider`** (AC: 1, 2, 3, 4, 5)
-  - [ ] Criar `frontend/lib/src/features/allocation/presentation/providers/allocation_provider.dart`
-  - [ ] Extends `ChangeNotifier` — padrão do projeto (ver `PortfolioProvider`)
-  - [ ] Estados: `AllocationStatus { initial, loading, success, error }`
-  - [ ] Propriedades:
+- [x] **Task 18: Criar `AllocationProvider`** (AC: 1, 2, 3, 4, 5)
+  - [x] Criar `frontend/lib/src/features/allocation/presentation/providers/allocation_provider.dart`
+  - [x] Extends `ChangeNotifier` — padrão do projeto (ver `PortfolioProvider`)
+  - [x] Estados: `AllocationStatus { initial, loading, success, error }`
+  - [x] Propriedades:
     - `List<AllocationGoal> goals` — metas atuais
     - `AllocationStatus status`
     - `String? errorMessage`
     - `double get classGoalSum` — soma das metas `ASSET_CLASS` (para indicador de 100%)
-  - [ ] Métodos: `loadGoals()`, `saveGoals(List<AllocationGoal> goals)`, `resetStatus()`
+  - [x] Métodos: `loadGoals()`, `saveGoals(List<AllocationGoal> goals)`, `resetStatus()`
 
-- [ ] **Task 19: Criar tela `AllocationStrategyPage`** (AC: 1, 2, 3, 4, 5, 6)
-  - [ ] Criar `frontend/lib/src/features/allocation/presentation/pages/allocation_strategy_page.dart`
-  - [ ] Deve:
+- [x] **Task 19: Criar tela `AllocationStrategyPage`** (AC: 1, 2, 3, 4, 5, 6)
+  - [x] Criar `frontend/lib/src/features/allocation/presentation/pages/allocation_strategy_page.dart`
+  - [x] Deve:
     - Exibir lista de metas por classe com campos de percentual (campo numérico com máscara %)
     - Exibir lista de metas por ativo específico (ticker + percentual)
     - Mostrar **indicador de soma em tempo real**: `"X% alocados em classes, Y% restantes"` — cor verde quando = 100%, amarelo/vermelho quando ≠ 100%
     - Botão "Salvar Estratégia" (FilledButton) habilitado apenas quando a soma de classes = 100%
     - Skeleton Screen (shimmer) durante loading
     - Exibir `SnackBar` de sucesso ou erro após salvar
-  - [ ] Tela acessível via rota `/allocation-strategy`
-  - [ ] Se usuário Gratuito: exibir card "Funcionalidade Premium — Faça upgrade" em vez do formulário (tratar erro 403 da API)
+  - [x] Tela acessível via rota `/allocation-strategy`
+  - [x] Se usuário Gratuito: exibir card "Funcionalidade Premium — Faça upgrade" em vez do formulário (tratar erro 403 da API)
 
-- [ ] **Task 20: Registrar rota `/allocation-strategy` no GoRouter** (AC: 1)
-  - [ ] Localizar o arquivo de configuração de rotas (`core/routing/` ou similar)
-  - [ ] Adicionar rota para `AllocationStrategyPage`
-  - [ ] Adicionar link de navegação na sidebar/NavigationRail (item "Estratégia" ou "Metas de Alocação")
+- [x] **Task 20: Registrar rota `/allocation-strategy` no GoRouter** (AC: 1)
+  - [x] Localizar o arquivo de configuração de rotas (`core/routing/` ou similar)
+  - [x] Adicionar rota para `AllocationStrategyPage`
+  - [x] Adicionar link de navegação na sidebar/NavigationRail (item "Estratégia" ou "Metas de Alocação")
 
 ---
 
 ### Testes
 
-- [ ] **Task 21: Testes unitários de `SaveAllocationGoalsUseCase`** (AC: 2, 3, 5)
-  - [ ] Criar `common/src/test/java/.../valuation/application/usecase/SaveAllocationGoalsUseCaseTest.java`
-  - [ ] Testar: soma = 100% → salva com sucesso
-  - [ ] Testar: soma < 100% → lança `AllocationGoalValidationException`
-  - [ ] Testar: soma > 100% → lança `AllocationGoalValidationException`
-  - [ ] Testar: metas de TICKER sem validação de soma → salva com sucesso mesmo com soma ≠ 100%
-  - [ ] Testar: metas mistas (ASSET_CLASS + TICKER) → valida apenas ASSET_CLASS
-  - [ ] Usar Mockito para mockar `AllocationGoalPort`
+- [x] **Task 21: Testes unitários de `SaveAllocationGoalsUseCase`** (AC: 2, 3, 5)
+  - [x] Criar `common/src/test/java/.../valuation/application/usecase/SaveAllocationGoalsUseCaseTest.java`
+  - [x] Testar: soma = 100% → salva com sucesso
+  - [x] Testar: soma < 100% → lança `AllocationGoalValidationException`
+  - [x] Testar: soma > 100% → lança `AllocationGoalValidationException`
+  - [x] Testar: metas de TICKER sem validação de soma → salva com sucesso mesmo com soma ≠ 100%
+  - [x] Testar: metas mistas (ASSET_CLASS + TICKER) → valida apenas ASSET_CLASS
+  - [x] Usar Mockito para mockar `AllocationGoalPort`
 
-- [ ] **Task 22: Testes do Controller `AllocationStrategyController`** (AC: 1, 6)
-  - [ ] Criar `api/src/test/java/.../valuation/web/AllocationStrategyControllerTest.java`
-  - [ ] Usar `@WebMvcTest` com Spring Security mock
-  - [ ] Testar: usuário Premium → POST retorna 204
-  - [ ] Testar: usuário Gratuito → retorna 403
-  - [ ] Testar: soma de metas inválida → retorna 400 com ProblemDetail
+- [x] **Task 22: Testes do Controller `AllocationStrategyController`** (AC: 1, 6)
+  - [x] Criar `api/src/test/java/.../valuation/web/AllocationStrategyControllerTest.java`
+  - [x] Usar `@WebMvcTest` com Spring Security mock
+  - [x] Testar: usuário Premium → POST retorna 204
+  - [x] Testar: usuário Gratuito → retorna 403
+  - [x] Testar: soma de metas inválida → retorna 400 com ProblemDetail
 
-- [ ] **Task 23: Widget tests de `AllocationStrategyPage`** (AC: 5)
-  - [ ] Criar `frontend/test/features/allocation/presentation/pages/allocation_strategy_page_test.dart`
-  - [ ] Testar: indicador de soma em tempo real (0%, 70%, 100%)
-  - [ ] Testar: botão "Salvar" habilitado só quando soma = 100%
-  - [ ] Testar: Skeleton Screen durante loading
+- [x] **Task 23: Widget tests de `AllocationStrategyPage`** (AC: 5)
+  - [x] Criar `frontend/test/features/allocation/presentation/pages/allocation_strategy_page_test.dart`
+  - [x] Testar: indicador de soma em tempo real (0%, 70%, 100%)
+  - [x] Testar: botão "Salvar" habilitado só quando soma = 100%
+  - [x] Testar: Skeleton Screen durante loading
 
-- [ ] **Task 24: Executar `mvn clean test -pl common` e `mvn clean test -pl api`**
-  - [ ] Confirmar que todos os testes passam sem falha
+- [x] **Task 24: Executar `mvn clean test -pl common` e `mvn clean test -pl api`**
+  - [x] Confirmar que todos os testes passam sem falha
 
-- [ ] **Task 25: Executar `flutter analyze` e testes de widget**
-  - [ ] Confirmar zero lints e testes passando
+- [x] **Task 25: Executar `flutter analyze` e testes de widget**
+  - [x] Confirmar zero lints e testes passando
+
+### Review Findings
+
+- [x] [Review][Decision] Validar Presença Obrigatória de Classes de Ativos ao Salvar — Se o payload enviado contiver apenas metas de tickers (ou for vazio), a validação de soma de classes é ignorada, permitindo salvar uma estratégia sem classes de ativos definidas. Devemos obrigar que classes de ativos estejam presentes e somem 100% em todas as submissões de salvamento?
+- [x] [Review][Decision] Utilização da Entidade de Domínio `AllocationGoal` — A classe `AllocationGoal.java` no pacote de domínio não é utilizada pelos Use Cases, que lidam apenas com `AllocationGoalDto`. Queremos refatorar o código para utilizá-la ou podemos remover esse arquivo não utilizado?
+- [x] [Review][Patch] Permitir Entrada e Exibição de Decimais no Frontend [frontend/lib/src/features/allocation/presentation/pages/allocation_strategy_page.dart:1624]
+- [x] [Review][Patch] Substituir `Color.withValues` por `Color.withOpacity` para compatibilidade com Flutter 3.11 [frontend/lib/src/features/allocation/presentation/pages/allocation_strategy_page.dart:1852]
+- [x] [Review][Patch] Validar Valores Percentuais Negativos no Backend [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java:512]
+- [x] [Review][Patch] Validar Payload Nulo no Use Case (NPE Guard) [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java:505]
+- [x] [Review][Patch] Validar Campos Internos Nulos no DTO de Entrada [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java:512]
+- [x] [Review][Patch] Validar Metas Duplicadas (Mesmo Tipo/Chave) no Payload e no Frontend [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java:508]
+- [x] [Review][Patch] Remover Tolerância Matemática Desnecessária de 0.01 para BigDecimal [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java:426]
+- [x] [Review][Patch] Adicionar Log de Nível ERROR no Lançamento de AllocationGoalValidationException [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java:520]
+- [x] [Review][Patch] Tratamento Robusto de Resposta não-JSON no Datasource Flutter [frontend/lib/src/features/allocation/data/datasources/allocation_remote_data_source.dart:1507]
+- [x] [Review][Patch] Remover Listeners dos Controladores de Texto ao fazer Dispose no Flutter [frontend/lib/src/features/allocation/presentation/pages/allocation_strategy_page.dart:1752]
+- [x] [Review][Defer] Risco de Race Condition no Fluxo de Delete+Insert do JPA Adapter [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/AllocationGoalJpaAdapter.java:62] — deferred, pre-existing
 
 ---
 

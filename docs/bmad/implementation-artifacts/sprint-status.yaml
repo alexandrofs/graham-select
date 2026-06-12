@@ -65,7 +65,7 @@ development_status:
   epic-3-retrospective: done
   epic-4: in-progress
   4-1-market-data-indicator-integration: done
-  4-2-premium-allocation-strategy-config: ready-for-dev
+  4-2-premium-allocation-strategy-config: done
   4-3-graham-valuation-engine: backlog
   4-4-explainable-ai-reasoning-box: backlog
   epic-4-retrospective: optional

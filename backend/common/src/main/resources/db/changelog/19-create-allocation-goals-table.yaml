@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: 19-create-allocation-goals-table
+      author: codex
+      changes:
+        - createTable:
+            tableName: allocation_goals
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: goal_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_key
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_percentage
+                  type: DECIMAL(8,4)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            columnNames: user_id, goal_type, target_key
+            constraintName: uq_allocation_goals_user_type_key
+            tableName: allocation_goals
+        - createIndex:
+            tableName: allocation_goals
+            indexName: idx_allocation_goals_user_id
+            columns:
+              - column:
+                  name: user_id
