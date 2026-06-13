@@ -54,4 +54,10 @@ public class GrahamRecommendationEntity {
     @Column(name = "generated_at", nullable = false)
     private LocalDate generatedAt;
 
+    @Column(name = "eps_used", precision = 18, scale = 4)
+    private BigDecimal epsUsed;
+
+    @Column(name = "bvps_used", precision = 18, scale = 4)
+    private BigDecimal bvpsUsed;
+
 }

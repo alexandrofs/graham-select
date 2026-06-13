@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/graham_recommendation_provider.dart';
 import '../../domain/entities/graham_recommendation.dart';
+import '../widgets/reasoning_box.dart';
 
 class GrahamRecommendationsPage extends StatefulWidget {
   const GrahamRecommendationsPage({super.key});
@@ -335,6 +336,30 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
                     fontSize: 11,
                     color: rec.allocationGap > 0 ? Theme.of(context).colorScheme.primary : Colors.grey,
                   ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (context) => DraggableScrollableSheet(
+                        expand: false,
+                        initialChildSize: 0.6,
+                        minChildSize: 0.4,
+                        maxChildSize: 0.9,
+                        builder: (_, controller) => SingleChildScrollView(
+                          controller: controller,
+                          padding: const EdgeInsets.all(24),
+                          child: ReasoningBox(recommendation: rec),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.info_outline, size: 16),
+                  label: const Text('Por que comprar?'),
                 ),
               ],
             ),

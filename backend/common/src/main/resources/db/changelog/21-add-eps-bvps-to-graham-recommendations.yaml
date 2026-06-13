@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 21-add-eps-bvps-to-graham-recommendations
+      author: ant-gravity
+      changes:
+        - addColumn:
+            tableName: graham_recommendations
+            columns:
+              - column:
+                  name: eps_used
+                  type: DECIMAL(18,4)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: bvps_used
+                  type: DECIMAL(18,4)
+                  constraints:
+                    nullable: true

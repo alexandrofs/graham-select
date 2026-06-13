@@ -36,6 +36,8 @@ public class GrahamRecommendationRepositoryImpl implements GrahamRecommendationP
                         .allocationGap(r.getAllocationGap())
                         .recommendationScore(r.getRecommendationScore())
                         .generatedAt(r.getGeneratedAt())
+                        .epsUsed(r.getEpsUsed())
+                        .bvpsUsed(r.getBvpsUsed())
                         .build())
                 .toList();
 
@@ -71,6 +73,8 @@ public class GrahamRecommendationRepositoryImpl implements GrahamRecommendationP
                 .allocationGap(entity.getAllocationGap())
                 .recommendationScore(entity.getRecommendationScore())
                 .generatedAt(entity.getGeneratedAt())
+                .epsUsed(entity.getEpsUsed())
+                .bvpsUsed(entity.getBvpsUsed())
                 .build();
     }
 }

@@ -39,4 +39,6 @@ databaseChangeLog:
       file: db/changelog/19-create-allocation-goals-table.yaml
   - include:
       file: db/changelog/20-create-graham-recommendations-table.yaml
+  - include:
+      file: db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml
 
