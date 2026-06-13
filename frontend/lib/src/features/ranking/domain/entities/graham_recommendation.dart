@@ -7,6 +7,8 @@ class GrahamRecommendation {
   final double targetAllocationPct;
   final double allocationGap;
   final double recommendationScore;
+  final double? epsUsed;
+  final double? bvpsUsed;
 
   const GrahamRecommendation({
     required this.ticker,
@@ -17,5 +19,7 @@ class GrahamRecommendation {
     required this.targetAllocationPct,
     required this.allocationGap,
     required this.recommendationScore,
+    this.epsUsed,
+    this.bvpsUsed,
   });
 }

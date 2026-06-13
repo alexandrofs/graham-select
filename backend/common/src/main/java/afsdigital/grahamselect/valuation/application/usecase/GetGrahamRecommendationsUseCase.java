@@ -29,7 +29,9 @@ public class GetGrahamRecommendationsUseCase {
                         r.getCurrentAllocationPct(),
                         r.getTargetAllocationPct(),
                         r.getAllocationGap(),
-                        r.getRecommendationScore()
+                        r.getRecommendationScore(),
+                        r.getEpsUsed(),
+                        r.getBvpsUsed()
                 ))
                 .toList();
     }

@@ -10,6 +10,8 @@ class GrahamRecommendationModel extends GrahamRecommendation {
     required super.targetAllocationPct,
     required super.allocationGap,
     required super.recommendationScore,
+    super.epsUsed,
+    super.bvpsUsed,
   });
 
   factory GrahamRecommendationModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,8 @@ class GrahamRecommendationModel extends GrahamRecommendation {
       targetAllocationPct: (json['targetAllocationPct'] as num?)?.toDouble() ?? 0.0,
       allocationGap: (json['allocationGap'] as num?)?.toDouble() ?? 0.0,
       recommendationScore: (json['recommendationScore'] as num?)?.toDouble() ?? 0.0,
+      epsUsed: (json['epsUsed'] as num?)?.toDouble(),
+      bvpsUsed: (json['bvpsUsed'] as num?)?.toDouble(),
     );
   }
 }

@@ -103,12 +103,16 @@ public class GenerateGrahamRecommendationsUseCaseTest {
         assertTrue(new BigDecimal("20.00").compareTo(petrRec.getTargetAllocationPct()) == 0);
         assertTrue(new BigDecimal("15.00").compareTo(petrRec.getAllocationGap()) == 0);
         assertTrue(new BigDecimal("0.2580").compareTo(petrRec.getRecommendationScore()) == 0);
+        assertNull(petrRec.getEpsUsed());
+        assertNull(petrRec.getBvpsUsed());
  
         GrahamRecommendation valeRec = result.get(1);
         assertTrue(new BigDecimal("8.00").compareTo(valeRec.getCurrentAllocationPct()) == 0);
         assertTrue(new BigDecimal("10.00").compareTo(valeRec.getTargetAllocationPct()) == 0);
         assertTrue(new BigDecimal("2.00").compareTo(valeRec.getAllocationGap()) == 0);
         assertTrue(new BigDecimal("0.0920").compareTo(valeRec.getRecommendationScore()) == 0);
+        assertNull(valeRec.getEpsUsed());
+        assertNull(valeRec.getBvpsUsed());
  
         verify(grahamRecommendationPort, times(1)).saveRecommendations(eq(userId), anyList());
     }
@@ -140,6 +144,8 @@ public class GenerateGrahamRecommendationsUseCaseTest {
         assertTrue(BigDecimal.ZERO.compareTo(rec.getTargetAllocationPct()) == 0);
         assertTrue(BigDecimal.ZERO.compareTo(rec.getCurrentAllocationPct()) == 0);
         assertTrue(BigDecimal.ZERO.compareTo(rec.getAllocationGap()) == 0);
+        assertNull(rec.getEpsUsed());
+        assertNull(rec.getBvpsUsed());
     }
 
     @Test

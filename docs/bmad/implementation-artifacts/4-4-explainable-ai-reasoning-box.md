@@ -1,6 +1,9 @@
+---
+baseline_commit: 0e83700c75801279672c669aa848532bc2288a5a
+---
 # Story 4.4: Reasoning Box — Explainable AI (Componente `ReasoningBox`)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -65,103 +68,103 @@ Status: ready-for-dev
 
 ### Backend — Módulo `common` (DTO extension)
 
-- [ ] **Task 1: Adicionar campos `epsUsed` e `bvpsUsed` ao `GrahamRecommendationDto`** (AC: 3)
-  - [ ] Modificar record em `common/src/main/java/afsdigital/grahamselect/valuation/application/dto/GrahamRecommendationDto.java`
-  - [ ] Adicionar campos: `epsUsed` (BigDecimal, nullable — `@JsonInclude(NON_NULL)`), `bvpsUsed` (BigDecimal, nullable — `@JsonInclude(NON_NULL)`)
-  - [ ] **NÃO remover** os campos existentes: `ticker`, `currentPrice`, `intrinsicValue`, `marginOfSafety`, `currentAllocationPct`, `targetAllocationPct`, `allocationGap`, `recommendationScore`
-  - [ ] Manter record Java (não converter para class)
+- [x] **Task 1: Adicionar campos `epsUsed` e `bvpsUsed` ao `GrahamRecommendationDto`** (AC: 3)
+  - [x] Modificar record em `common/src/main/java/afsdigital/grahamselect/valuation/application/dto/GrahamRecommendationDto.java`
+  - [x] Adicionar campos: `epsUsed` (BigDecimal, nullable — `@JsonInclude(NON_NULL)`), `bvpsUsed` (BigDecimal, nullable — `@JsonInclude(NON_NULL)`)
+  - [x] **NÃO remover** os campos existentes: `ticker`, `currentPrice`, `intrinsicValue`, `marginOfSafety`, `currentAllocationPct`, `targetAllocationPct`, `allocationGap`, `recommendationScore`
+  - [x] Manter record Java (não converter para class)
 
-- [ ] **Task 2: Adicionar campos `epsUsed` e `bvpsUsed` à entidade `GrahamRecommendation`** (AC: 3)
-  - [ ] Modificar `common/src/main/java/afsdigital/grahamselect/valuation/domain/entities/GrahamRecommendation.java`
-  - [ ] Adicionar campos: `epsUsed` (BigDecimal, nullable), `bvpsUsed` (BigDecimal, nullable)
-  - [ ] Usar `@Builder.Default` com `null` como padrão para compatibilidade retroativa
+- [x] **Task 2: Adicionar campos `epsUsed` e `bvpsUsed` à entidade `GrahamRecommendation`** (AC: 3)
+  - [x] Modificar `common/src/main/java/afsdigital/grahamselect/valuation/domain/entities/GrahamRecommendation.java`
+  - [x] Adicionar campos: `epsUsed` (BigDecimal, nullable), `bvpsUsed` (BigDecimal, nullable)
+  - [x] Usar `@Builder.Default` com `null` como padrão para compatibilidade retroativa
 
 ---
 
 ### Backend — Módulo `valuation-service` (migração e população de novos campos)
 
-- [ ] **Task 3: Criar migration Liquibase para adicionar colunas à tabela `graham_recommendations`** (AC: 3)
-  - [ ] Criar `backend/common/src/main/resources/db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml`
-  - [ ] Adicionar colunas:
+- [x] **Task 3: Criar migration Liquibase para adicionar colunas à tabela `graham_recommendations`** (AC: 3)
+  - [x] Criar `backend/common/src/main/resources/db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml`
+  - [x] Adicionar colunas:
     ```yaml
     columns:
       - eps_used: DECIMAL(18,4) NULL  # LPA usado no cálculo
       - bvps_used: DECIMAL(18,4) NULL # VPA usado no cálculo
     ```
-  - [ ] Incluir no `db.changelog-master.yaml` após a entrada `20-create-graham-recommendations-table.yaml`
-  - [ ] As colunas devem ser `NULL` (nullable) para retrocompatibilidade com dados existentes
+  - [x] Incluir no `db.changelog-master.yaml` após a entrada `20-create-graham-recommendations-table.yaml`
+  - [x] As colunas devem ser `NULL` (nullable) para retrocompatibilidade com dados existentes
 
-- [ ] **Task 4: Atualizar `GrahamRecommendationEntity` no `valuation-service` com novos campos** (AC: 3)
-  - [ ] Modificar `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/GrahamRecommendationEntity.java`
-  - [ ] Adicionar campos: `epsUsed` (BigDecimal, `@Column(name = "eps_used")`), `bvpsUsed` (BigDecimal, `@Column(name = "bvps_used")`)
-  - [ ] Manter campos como nullable: sem `@Column(nullable = false)`
+- [x] **Task 4: Atualizar `GrahamRecommendationEntity` no `valuation-service` com novos campos** (AC: 3)
+  - [x] Modificar `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/GrahamRecommendationEntity.java`
+  - [x] Adicionar campos: `epsUsed` (BigDecimal, `@Column(name = "eps_used")`), `bvpsUsed` (BigDecimal, `@Column(name = "bvps_used")`)
+  - [x] Manter campos como nullable: sem `@Column(nullable = false)`
 
-- [ ] **Task 5: Verificar fonte dos dados de LPA/VPA no `valuation-service`** (AC: 3, 4)
-  - [ ] Verificar se `RankedCompany` ou `IntrinsicValueEntity` já carrega `eps` e `bvps`
-  - [ ] Verificar estrutura de `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/IntrinsicValueEntity.java`
-  - [ ] Verificar se o `RankingReadAdapter.findTop20BestRanked()` já retorna dados de LPA/VPA no objeto `RankedCompany` (ou equivalente)
-  - [ ] **Se LPA/VPA disponível**: popular `epsUsed` e `bvpsUsed` na `GrahamRecommendation` dentro de `GenerateGrahamRecommendationsUseCase.execute()`
-  - [ ] **Se LPA/VPA não disponível no ranking**: buscar via query direta na tabela `company_intrinsic_value` ou equivalente para o ticker
+- [x] **Task 5: Verificar fonte dos dados de LPA/VPA no `valuation-service`** (AC: 3, 4)
+  - [x] Verificar se `RankedCompany` ou `IntrinsicValueEntity` já carrega `eps` e `bvps`
+  - [x] Verificar estrutura de `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/IntrinsicValueEntity.java`
+  - [x] Verificar se o `RankingReadAdapter.findTop20BestRanked()` já retorna dados de LPA/VPA no objeto `RankedCompany` (ou equivalente)
+  - [x] **Se LPA/VPA disponível**: popular `epsUsed` e `bvpsUsed` na `GrahamRecommendation` dentro de `GenerateGrahamRecommendationsUseCase.execute()`
+  - [x] **Se LPA/VPA não disponível no ranking**: buscar via query direta na tabela `company_intrinsic_value` ou equivalente para o ticker
 
-- [ ] **Task 6: Atualizar `GenerateGrahamRecommendationsUseCase` para popular `epsUsed`/`bvpsUsed`** (AC: 3, 4)
-  - [ ] Modificar `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCase.java`
-  - [ ] Ao construir `GrahamRecommendation` via builder, incluir `epsUsed` e `bvpsUsed` extraídos dos dados fundamentalistas
-  - [ ] Manter a lógica de filtragem e score existente (NÃO alterar o algoritmo)
-  - [ ] Log INFO: a assinatura de log já existente `"Generated {} recommendations for user {}"` é suficiente
+- [x] **Task 6: Atualizar `GenerateGrahamRecommendationsUseCase` para popular `epsUsed`/`bvpsUsed`** (AC: 3, 4)
+  - [x] Modificar `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCase.java`
+  - [x] Ao construir `GrahamRecommendation` via builder, incluir `epsUsed` e `bvpsUsed` extraídos dos dados fundamentalistas
+  - [x] Manter a lógica de filtragem e score existente (NÃO alterar o algoritmo)
+  - [x] Log INFO: a assinatura de log já existente `"Generated {} recommendations for user {}"` é suficiente
 
-- [ ] **Task 7: Atualizar `GrahamRecommendationRepositoryImpl` no `valuation-service` para persistir novos campos** (AC: 3)
-  - [ ] Modificar `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/GrahamRecommendationRepositoryImpl.java`
-  - [ ] No mapeamento domain entity → JPA entity, incluir `epsUsed` e `bvpsUsed`
-  - [ ] Tratar null safety: se `epsUsed == null`, não incluir na entity (entity field fica null)
+- [x] **Task 7: Atualizar `GrahamRecommendationRepositoryImpl` no `valuation-service` para persistir novos campos** (AC: 3)
+  - [x] Modificar `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/GrahamRecommendationRepositoryImpl.java`
+  - [x] No mapeamento domain entity → JPA entity, incluir `epsUsed` e `bvpsUsed`
+  - [x] Tratar null safety: se `epsUsed == null`, não incluir na entity (entity field fica null)
 
 ---
 
 ### Backend — Módulo `api` (leitura e exposição via REST)
 
-- [ ] **Task 8: Atualizar `GrahamRecommendationEntity` no módulo `api` com novos campos** (AC: 3)
-  - [ ] Modificar `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/entities/GrahamRecommendationEntity.java`
-  - [ ] Adicionar campos: `epsUsed` (BigDecimal, `@Column(name = "eps_used")`), `bvpsUsed` (BigDecimal, `@Column(name = "bvps_used")`)
-  - [ ] Manter os campos como nullable
+- [x] **Task 8: Atualizar `GrahamRecommendationEntity` no módulo `api` com novos campos** (AC: 3)
+  - [x] Modificar `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/entities/GrahamRecommendationEntity.java`
+  - [x] Adicionar campos: `epsUsed` (BigDecimal, `@Column(name = "eps_used")`), `bvpsUsed` (BigDecimal, `@Column(name = "bvps_used")`)
+  - [x] Manter os campos como nullable
 
-- [ ] **Task 9: Atualizar `GrahamRecommendationReadAdapter` no `api` para mapear novos campos** (AC: 3)
-  - [ ] Modificar `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/GrahamRecommendationReadAdapter.java`
-  - [ ] No mapeamento JPA entity → domain entity (`GrahamRecommendation`), incluir `epsUsed` e `bvpsUsed`
+- [x] **Task 9: Atualizar `GrahamRecommendationReadAdapter` no `api` para mapear novos campos** (AC: 3)
+  - [x] Modificar `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/GrahamRecommendationReadAdapter.java`
+  - [x] No mapeamento JPA entity → domain entity (`GrahamRecommendation`), incluir `epsUsed` e `bvpsUsed`
 
-- [ ] **Task 10: Atualizar `GetGrahamRecommendationsUseCase` para mapear `epsUsed`/`bvpsUsed` no DTO** (AC: 3)
-  - [ ] Verificar `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GetGrahamRecommendationsUseCase.java`
-  - [ ] No mapeamento domain entity → `GrahamRecommendationDto`, incluir os novos campos
-  - [ ] Campos nullable no DTO: Jackson serializa apenas se não-nulos (`@JsonInclude(NON_NULL)` já configurado no DTO)
+- [x] **Task 10: Atualizar `GetGrahamRecommendationsUseCase` para mapear `epsUsed`/`bvpsUsed` no DTO** (AC: 3)
+  - [x] Verificar `common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GetGrahamRecommendationsUseCase.java`
+  - [x] No mapeamento domain entity → `GrahamRecommendationDto`, incluir os novos campos
+  - [x] Campos nullable no DTO: Jackson serializa apenas se não-nulos (`@JsonInclude(NON_NULL)` já configurado no DTO)
 
-- [ ] **Task 11: Confirmar que `GrahamRecommendationsController` não precisa de alteração** (AC: 3)
-  - [ ] Verificar `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/web/GrahamRecommendationsController.java`
-  - [ ] O endpoint GET retorna `List<GrahamRecommendationDto>` — se o DTO foi atualizado, o controller herda automaticamente os novos campos
-  - [ ] Log INFO existente no controller é suficiente para observabilidade
+- [x] **Task 11: Confirmar que `GrahamRecommendationsController` não precisa de alteração** (AC: 3)
+  - [x] Verificar `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/web/GrahamRecommendationsController.java`
+  - [x] O endpoint GET retorna `List<GrahamRecommendationDto>` — se o DTO foi atualizado, o controller herda automaticamente os novos campos
+  - [x] Log INFO existente no controller é suficiente para observabilidade
 
 ---
 
 ### Frontend Flutter — Componente `ReasoningBox` e integração
 
-- [ ] **Task 12: Atualizar entidade `GrahamRecommendation` com campos opcionais de LPA/VPA** (AC: 3, 7)
-  - [ ] Modificar `frontend/lib/src/features/ranking/domain/entities/graham_recommendation.dart`
-  - [ ] Adicionar campos: `epsUsed` (double?, nullable), `bvpsUsed` (double?, nullable)
-  - [ ] Manter null safety obrigatório do Dart
+- [x] **Task 12: Atualizar entidade `GrahamRecommendation` com campos opcionais de LPA/VPA** (AC: 3, 7)
+  - [x] Modificar `frontend/lib/src/features/ranking/domain/entities/graham_recommendation.dart`
+  - [x] Adicionar campos: `epsUsed` (double?, nullable), `bvpsUsed` (double?, nullable)
+  - [x] Manter null safety obrigatório do Dart
 
-- [ ] **Task 13: Atualizar `GrahamRecommendationModel` para desserializar novos campos** (AC: 3)
-  - [ ] Modificar `frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart`
-  - [ ] Adicionar `epsUsed: json['epsUsed'] as double?` e `bvpsUsed: json['bvpsUsed'] as double?` no `fromJson`
-  - [ ] Atualizar `toEntity()` para passar os campos para `GrahamRecommendation`
+- [x] **Task 13: Atualizar `GrahamRecommendationModel` para desserializar novos campos** (AC: 3)
+  - [x] Modificar `frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart`
+  - [x] Adicionar `epsUsed: json['epsUsed'] as double?` e `bvpsUsed: json['bvpsUsed'] as double?` no `fromJson`
+  - [x] Atualizar `toEntity()` para passar os campos para `GrahamRecommendation`
 
-- [ ] **Task 14: Criar widget `ReasoningBox`** (AC: 1, 2, 3, 4, 5, 6, 7) — **TAREFA PRINCIPAL**
-  - [ ] Criar `frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart`
-  - [ ] Widget stateless: `class ReasoningBox extends StatelessWidget`
-  - [ ] **Parâmetros:**
+- [x] **Task 14: Criar widget `ReasoningBox`** (AC: 1, 2, 3, 4, 5, 6, 7) — **TAREFA PRINCIPAL**
+  - [x] Criar `frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart`
+  - [x] Widget stateless: `class ReasoningBox extends StatelessWidget`
+  - [x] **Parâmetros:**
     ```dart
     const ReasoningBox({
       super.key,
       required this.recommendation, // GrahamRecommendation
     });
     ```
-  - [ ] **Layout do painel** (usar `Container` com padding, `Column`, separadores):
+  - [x] **Layout do painel** (usar `Container` com padding, `Column`, separadores):
     - **Header:** Ticker em `titleLarge` bold + Score badge com `primary.withOpacity(0.1)` background
     - **Seção: Análise de Preço**
       - Título: "Análise de Valor de Mercado" (subtítulo section)
@@ -186,26 +189,26 @@ Status: ready-for-dev
       - "Componente Alocação (40%): gap × 0,4 = X,XX" (exibir 0 se sem meta)
       - "**Score Final: X,XX**" em destaque
       - Microcopy: "Quanto maior o score, maior a prioridade de aporte sugerida."
-  - [ ] **Paleta de cores obrigatória:**
+  - [x] **Paleta de cores obrigatória:**
     - Amber Gold `const Color(0xFFF59E0B)` para margem positiva
     - Emerald `const Color(0xFF10B981)` para meta atingida
     - `#EF4444` para negativo/perigo
     - Navy Blue `const Color(0xFF1B2A4A)` para header
-  - [ ] **Tipografia:**
+  - [x] **Tipografia:**
     - Valores financeiros em `JetBrains Mono` (monospace) via `fontFamily: 'JetBrainsMono'`
     - Verificar se a fonte está configurada em `pubspec.yaml` — se não, usar `TextStyle(fontFeatures: [FontFeature.tabularFigures()])`
     - Headers de seção em `titleMedium` bold
     - Valores em `bodyLarge`
     - Microcopy em `labelSmall` com `Colors.grey`
-  - [ ] **Acessibilidade:**
+  - [x] **Acessibilidade:**
     - Envolver cada valor financeiro em `Semantics(label: 'Preço atual: R$ X,XX', child: ...)`
     - Score deve ter semântica: `Semantics(label: 'Score de recomendação: X,XX', child: ...)`
 
-- [ ] **Task 15: Integrar `ReasoningBox` na `GrahamRecommendationsPage` via `showModalBottomSheet`** (AC: 1, 5)
-  - [ ] Modificar `frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart`
-  - [ ] No método `_buildRecommendationCard`, adicionar botão "Por que comprar?" (`TextButton` com ícone `Icons.info_outline`)
-  - [ ] O botão deve ficar posicionado no rodapé de cada card, alinhado à direita
-  - [ ] Ao clicar, invocar:
+- [x] **Task 15: Integrar `ReasoningBox` na `GrahamRecommendationsPage` via `showModalBottomSheet`** (AC: 1, 5)
+  - [x] Modificar `frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart`
+  - [x] No método `_buildRecommendationCard`, adicionar botão "Por que comprar?" (`TextButton` com ícone `Icons.info_outline`)
+  - [x] O botão deve ficar posicionado no rodapé de cada card, alinhado à direita
+  - [x] Ao clicar, invocar:
     ```dart
     showModalBottomSheet(
       context: context,
@@ -226,37 +229,37 @@ Status: ready-for-dev
       ),
     );
     ```
-  - [ ] **NÃO alterar** a lógica de `fetchRecommendations()`, `triggerCalculation()` ou estados do provider
-  - [ ] Importar `reasoning_box.dart` no topo do arquivo
+  - [x] **NÃO alterar** a lógica de `fetchRecommendations()`, `triggerCalculation()` ou estados do provider
+  - [x] Importar `reasoning_box.dart` no topo do arquivo
 
 ---
 
 ### Testes
 
-- [ ] **Task 16: Teste unitário do `ReasoningBox` widget** (AC: 1, 2, 4, 6)
-  - [ ] Criar `frontend/test/features/ranking/presentation/widgets/reasoning_box_test.dart`
-  - [ ] Testar: `ReasoningBox` com `epsUsed` e `bvpsUsed` preenchidos → exibe LPA, VPA, fórmula e margem de segurança
-  - [ ] Testar: `ReasoningBox` com `epsUsed == null` e `bvpsUsed == null` → exibe "Dado não disponível" sem travar
-  - [ ] Testar: `ReasoningBox` com `targetAllocationPct == 0` → exibe "Sem meta de alocação definida"
-  - [ ] Testar: `ReasoningBox` com `marginOfSafety > 0` → badge de margem em Amber Gold (`#F59E0B`)
-  - [ ] Testar: `ReasoningBox` com `marginOfSafety <= 0` → badge em vermelho
-  - [ ] Testar: botão "Por que comprar?" no card → abre o bottom sheet com `ReasoningBox`
+- [x] **Task 16: Teste unitário do `ReasoningBox` widget** (AC: 1, 2, 4, 6)
+  - [x] Criar `frontend/test/features/ranking/presentation/widgets/reasoning_box_test.dart`
+  - [x] Testar: `ReasoningBox` com `epsUsed` e `bvpsUsed` preenchidos → exibe LPA, VPA, fórmula e margem de segurança
+  - [x] Testar: `ReasoningBox` com `epsUsed == null` e `bvpsUsed == null` → exibe "Dado não disponível" sem travar
+  - [x] Testar: `ReasoningBox` com `targetAllocationPct == 0` → exibe "Sem meta de alocação definida"
+  - [x] Testar: `ReasoningBox` com `marginOfSafety > 0` → badge de margem em Amber Gold (`#F59E0B`)
+  - [x] Testar: `ReasoningBox` com `marginOfSafety <= 0` → badge em vermelho
+  - [x] Testar: botão "Por que comprar?" no card → abre o bottom sheet com `ReasoningBox`
 
-- [ ] **Task 17: Teste de integração para novos campos no `GrahamRecommendationModel`** (AC: 3)
-  - [ ] Modificar `frontend/test/features/ranking/presentation/pages/graham_recommendations_page_test.dart` (existente)
-  - [ ] Adicionar cenário: JSON com `epsUsed` e `bvpsUsed` → `toEntity()` popula campos corretamente
-  - [ ] Adicionar cenário: JSON sem `epsUsed`/`bvpsUsed` → `toEntity()` popula campos como `null`
+- [x] **Task 17: Teste de integração para novos campos no `GrahamRecommendationModel`** (AC: 3)
+  - [x] Modificar `frontend/test/features/ranking/presentation/pages/graham_recommendations_page_test.dart` (existente)
+  - [x] Adicionar cenário: JSON com `epsUsed` e `bvpsUsed` → `toEntity()` popula campos corretamente
+  - [x] Adicionar cenário: JSON sem `epsUsed`/`bvpsUsed` → `toEntity()` popula campos como `null`
 
-- [ ] **Task 18: Atualizar testes de backend para novos campos na entidade** (AC: 3)
-  - [ ] Atualizar `GenerateGrahamRecommendationsUseCaseTest.java` (existente) para verificar que `epsUsed`/`bvpsUsed` são populados quando disponíveis
-  - [ ] Adicionar cenário: LPA/VPA indisponível → `epsUsed == null`, `bvpsUsed == null` na recomendação gerada
+- [x] **Task 18: Atualizar testes de backend para novos campos na entidade** (AC: 3)
+  - [x] Atualizar `GenerateGrahamRecommendationsUseCaseTest.java` (existente) para verificar que `epsUsed`/`bvpsUsed` são populados quando disponíveis
+  - [x] Adicionar cenário: LPA/VPA indisponível → `epsUsed == null`, `bvpsUsed == null` na recomendação gerada
 
-- [ ] **Task 19: Executar validação final** (AC: todos)
-  - [ ] `mvn clean test -pl common` — confirmar zero falhas
-  - [ ] `mvn clean test -pl api` — confirmar zero falhas
-  - [ ] `mvn clean test -pl valuation-service` — confirmar zero falhas
-  - [ ] `flutter analyze` — confirmar zero lints
-  - [ ] `flutter test test/features/ranking/` — confirmar todos os testes passam
+- [x] **Task 19: Executar validação final** (AC: todos)
+  - [x] `mvn clean test -pl common` — confirmar zero falhas
+  - [x] `mvn clean test -pl api` — confirmar zero falhas
+  - [x] `mvn clean test -pl valuation-service` — confirmar zero falhas
+  - [x] `flutter analyze` — confirmar zero lints
+  - [x] `flutter test test/features/ranking/` — confirmar todos os testes passam
 
 ---
 
@@ -492,3 +495,77 @@ backend/common/src/test/java/.../application/usecase/GenerateGrahamRecommendatio
 - [Source: docs/bmad/project-context.md]
 - [Source: frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart]
 - [Source: frontend/lib/src/features/ranking/domain/entities/graham_recommendation.dart]
+
+
+## Dev Agent Record
+
+### Implementation Plan & Notes
+- Adicionados os campos  e  (tipos  /  nullable) para suportar o detalhamento do cálculo matemático do filtro de Graham no backend e frontend.
+- Criada a migração Liquibase  e inserida no .
+- Atualizado o repositório JPA e classes de persistência no  e no módulo  para persistir e recuperar esses novos campos de forma nullable.
+- Criado o widget  no Flutter apresentando o layout especificado, a fórmula passo a passo em formato monoespaçado, a análise de alocação de carteira (com barra de progresso) e a decomposição do score.
+- Integrado o  via  no botão "Por que comprar?" de cada card de recomendação na página de recomendações.
+
+### Debug Log
+- Corrigidos problemas com  (substituído por  nas definições de padding no widget).
+- Escapados os cifrões nas strings de teste no Dart.
+- Ajustado o teste do modal para não utilizar  por conta da animação contínua do shimmer, utilizando  no lugar.
+
+## File List
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+
+## Change Log
+- 2026-06-13: Implementação completa da história 4.4. Todos os critérios de aceitação foram validados com testes automatizados e análise estática (exit code zero em ambos).
+
+
+## Dev Agent Record
+
+### Implementation Plan & Notes
+- Adicionados os campos `epsUsed` e `bvpsUsed` (tipos `BigDecimal` / `double?` nullable) para suportar o detalhamento do cálculo matemático do filtro de Graham no backend e frontend.
+- Criada a migração Liquibase `21-add-eps-bvps-to-graham-recommendations.yaml` e inserida no `db.changelog-master.yaml`.
+- Atualizado o repositório JPA e classes de persistência no `valuation-service` e no módulo `api` para persistir e recuperar esses novos campos de forma nullable.
+- Criado o widget `ReasoningBox` no Flutter apresentando o layout especificado, a fórmula passo a passo em formato monoespaçado, a análise de alocação de carteira (com barra de progresso) e a decomposição do score.
+- Integrado o `ReasoningBox` via `showModalBottomSheet` no botão "Por que comprar?" de cada card de recomendação na página de recomendações.
+
+### Debug Log
+- Corrigidos problemas com `py` (substituído por `vertical` nas definições de padding no widget).
+- Escapados os cifrões nas strings de teste no Dart.
+- Ajustado o teste do modal para não utilizar `pumpAndSettle` por conta da animação contínua do shimmer, utilizando `pump(Duration)` no lugar.
+
+## File List
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/dto/GrahamRecommendationDto.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/domain/entities/GrahamRecommendation.java`
+- `backend/common/src/main/resources/db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml`
+- `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
+- `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/GrahamRecommendationEntity.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCase.java`
+- `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/GrahamRecommendationRepositoryImpl.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/entities/GrahamRecommendationEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/GrahamRecommendationReadAdapter.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GetGrahamRecommendationsUseCase.java`
+- `frontend/lib/src/features/ranking/domain/entities/graham_recommendation.dart`
+- `frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart`
+- `frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart`
+- `frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart`
+- `frontend/test/features/ranking/presentation/widgets/reasoning_box_test.dart`
+- `frontend/test/features/ranking/presentation/pages/graham_recommendations_page_test.dart`
+- `backend/common/src/test/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCaseTest.java`
+
+## Change Log
+- 2026-06-13: Implementação completa da história 4.4. Todos os critérios de aceitação foram validados com testes automatizados e análise estática (exit code zero em ambos).

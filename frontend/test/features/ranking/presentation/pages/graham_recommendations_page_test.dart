@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/src/features/ranking/domain/entities/graham_recommendation.dart';
+import 'package:frontend/src/features/ranking/data/models/graham_recommendation_model.dart';
 import 'package:frontend/src/features/ranking/domain/repositories/graham_recommendation_repository.dart';
 import 'package:frontend/src/features/ranking/presentation/pages/graham_recommendations_page.dart';
 import 'package:frontend/src/features/ranking/presentation/providers/graham_recommendation_provider.dart';
+import 'package:frontend/src/features/ranking/presentation/widgets/reasoning_box.dart';
 
 class ManualMockGrahamRecommendationRepository implements GrahamRecommendationRepository {
   List<GrahamRecommendation> recommendations = [];
@@ -120,6 +122,76 @@ void main() {
       expect(find.text('+33.0% Margem'), findsOneWidget);
       expect(find.text('R\$ 30.00'), findsOneWidget);
       expect(find.text('R\$ 40.00'), findsOneWidget);
+    });
+
+    testWidgets('should open reasoning box modal when clicking "Por que comprar?"', (tester) async {
+      mockRepository.recommendations = [
+        const GrahamRecommendation(
+          ticker: 'PETR4',
+          currentPrice: 30.0,
+          intrinsicValue: 40.0,
+          marginOfSafety: 0.33,
+          currentAllocationPct: 5.0,
+          targetAllocationPct: 20.0,
+          allocationGap: 15.0,
+          recommendationScore: 6.198,
+        )
+      ];
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Por que comprar?'), findsOneWidget);
+
+      await tester.tap(find.text('Por que comprar?'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // O widget ReasoningBox deve estar visível
+      expect(find.byType(ReasoningBox), findsOneWidget);
+    });
+  });
+
+  group('GrahamRecommendationModel Tests', () {
+    test('should populate epsUsed and bvpsUsed from JSON when available', () {
+      final json = {
+        'ticker': 'PETR4',
+        'currentPrice': 30.0,
+        'intrinsicValue': 40.0,
+        'marginOfSafety': 0.33,
+        'currentAllocationPct': 5.0,
+        'targetAllocationPct': 20.0,
+        'allocationGap': 15.0,
+        'recommendationScore': 6.198,
+        'epsUsed': 4.52,
+        'bvpsUsed': 31.80,
+      };
+
+      final model = GrahamRecommendationModel.fromJson(json);
+
+      expect(model.ticker, 'PETR4');
+      expect(model.epsUsed, 4.52);
+      expect(model.bvpsUsed, 31.80);
+    });
+
+    test('should set epsUsed and bvpsUsed to null when absent in JSON', () {
+      final json = {
+        'ticker': 'PETR4',
+        'currentPrice': 30.0,
+        'intrinsicValue': 40.0,
+        'marginOfSafety': 0.33,
+        'currentAllocationPct': 5.0,
+        'targetAllocationPct': 20.0,
+        'allocationGap': 15.0,
+        'recommendationScore': 6.198,
+      };
+
+      final model = GrahamRecommendationModel.fromJson(json);
+
+      expect(model.ticker, 'PETR4');
+      expect(model.epsUsed, isNull);
+      expect(model.bvpsUsed, isNull);
     });
   });
 }

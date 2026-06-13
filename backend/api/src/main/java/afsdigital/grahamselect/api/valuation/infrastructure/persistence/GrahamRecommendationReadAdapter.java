@@ -44,6 +44,8 @@ public class GrahamRecommendationReadAdapter implements GrahamRecommendationPort
                 .allocationGap(entity.getAllocationGap())
                 .recommendationScore(entity.getRecommendationScore())
                 .generatedAt(entity.getGeneratedAt())
+                .epsUsed(entity.getEpsUsed())
+                .bvpsUsed(entity.getBvpsUsed())
                 .build();
     }
 }

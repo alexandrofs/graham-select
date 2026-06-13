@@ -27,4 +27,9 @@ public class GrahamRecommendation {
     private BigDecimal recommendationScore;
     private LocalDate generatedAt;
 
+    @Builder.Default
+    private BigDecimal epsUsed = null;
+    @Builder.Default
+    private BigDecimal bvpsUsed = null;
+
 }
