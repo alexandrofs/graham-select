@@ -149,7 +149,7 @@ A fundação tecnológica não parte de um starter template genérico porque:
 D1 (Modelagem), D2 (Migrations), D4 (Auth), D7 (API Design), D9 (Kafka Topics), D12 (Estrutura Flutter)
 
 **Decisões Importantes (Moldam Arquitetura):**
-D3 (Cache), D5 (Autorização), D6 (Proteção API), D8 (Error Handling), D10 (HTTP Client), D13 (CI/CD), D14 (Observabilidade)
+D3 (Cache), D5 (Autorização), D6 (Proteção API), D8 (Error Handling), D10 (HTTP Client), D13 (CI/CD), D14 (Observabilidade), D16 (Event-Driven UI)
 
 **Decisões Adiáveis (Pós-MVP):**
 D11 (Offline avançado), D15 (Deploy produção escalável)
@@ -265,6 +265,21 @@ lib/
 - Migração futura para ECS/EKS ou Cloud Run se necessário
 - Rationale: Simples, barato, suficiente para validação de produto
 
+**D16 - Event-Driven UI (Push Backend → Flutter):** Server-Sent Events (SSE) via Spring
+- **Protocolo:** SSE (`text/event-stream`) usando `SseEmitter` do Spring MVC
+- **Endpoint:** `GET /api/v1/events/stream` — autenticado via JWT, mantém conexão aberta por usuário
+- **Fluxo:** Kafka consumer (`api` module) recebe `trade-extracted` → publica no `SseEmitter` do usuário correspondente
+- **Eventos publicados:**
+  - `upload-progress` — progresso do processamento do arquivo B3 (Stories 2.1, 2.2)
+  - `upload-completed` — conclusão com resumo (novas operações, duplicatas) (Story 2.3, FR8)
+  - `portfolio-updated` — sinal de recarga do dashboard após processamento (Story 3.5)
+- **Reconexão automática:** O cliente Flutter (via Dio + EventSource polyfill ou `http` package com stream) deve implementar retry automático com backoff de 5s ao detectar desconexão
+- **Isolamento por usuário:** Um `SseEmitter` por sessão autenticada, mapeado por `userId` em `ConcurrentHashMap` no Spring. Sem vazamento entre tenants.
+- **Timeout:** Emitter com timeout de 10 minutos (`SseEmitter(10 * 60 * 1000L)`); Flutter reconecta automaticamente
+- **Fallback:** Se SSE não disponível (rede corporativa bloqueando streaming), Flutter faz polling do endpoint `GET /api/v1/imports/{fileId}/status` a cada 3s até status terminal
+- **Não substituir Kafka:** SSE é apenas a "última milha" de notificação frontend. O processamento real continua via Kafka (D9). SSE lê o resultado final e propaga ao cliente.
+- Rationale: SSE é unidirecional (server → client), sem overhead de WebSocket bidirecional. Suficiente para os casos de uso de notificação de progresso e atualização de dashboard. Suportado nativamente pelo Spring MVC sem dependência adicional.
+
 ### Análise de Impacto das Decisões
 
 **Sequência de Implementação:**
@@ -272,13 +287,16 @@ lib/
 2. D4 (Google Auth) + D5 (Autorização) → Segurança
 3. D7 (REST) + D8 (Error Handling) → API foundation
 4. D9 (Kafka Topics) → Event infrastructure
-5. D12 (Flutter structure) + D10 (Dio) → Frontend foundation
-6. D13 (GitHub Actions) → CI/CD
+5. D16 (SSE Event-Driven UI) → Push de eventos para o Flutter
+6. D12 (Flutter structure) + D10 (Dio) → Frontend foundation
+7. D13 (GitHub Actions) → CI/CD
 
 **Dependências entre Decisões:**
 - D4 (Google Auth) → D5 (Autorização depende do modelo de auth)
 - D9 (Kafka Topics) → D1 (Schema precisa refletir eventos)
+- D9 (Kafka Topics) → D16 (SSE consome resultados do Kafka)
 - D12 (Flutter structure) → D10 (Dio configurado no core/)
+- D12 (Flutter structure) → D16 (cliente SSE configurado no core/api/)
 - D3 (Cache) → D1 (Cache de rankings depende do schema)
 
 ## Padrões de Implementação & Regras de Consistência
@@ -535,12 +553,13 @@ Flutter ──HTTP──► api ──MySQL──► Query Rankings
 
 ### Validação de Prontidão — ✅ APROVADA
 
-- [x] 15/15 decisões críticas documentadas
+- [x] 16/16 decisões documentadas (D1–D16)
 - [x] Padrões de naming completos (DB, API, Java, Dart, Kafka)
 - [x] Clean Architecture mapeada com tabela de camadas
 - [x] Boundaries entre módulos Maven definidos
 - [x] 5 features mapeadas para packages/directories
 - [x] 9 regras mandatórias para agentes de IA
+- [x] Protocolo de Event-Driven UI definido (D16 — SSE)
 
 ### Gap Analysis
 

@@ -96,14 +96,14 @@ Este documento fornece a decomposição completa de épicos e histórias para o 
 | FR5 | Epic 1 | Exclusão LGPD |
 | FR6 | Epic 2 | Upload B3 |
 | FR7 | Epic 2 | Processamento assíncrono |
-| FR8 | Epic 2 | Notificação processamento |
+| FR8 | Epic 2 (Story 2.2) | Notificação processamento |
 | FR9 | Epic 9 | Notas corretagem (Post-MVP) |
 | FR10 | Epic 9 | Internacional/Cripto (Post-MVP) |
 | FR11 | Epic 9 | Open Finance (Post-MVP) |
 | FR12 | Epic 3 | Custódia atualizada |
 | FR13 | Epic 3 | Histórico proventos |
-| FR14 | Epic 8 | Tags de Carteira (Post-MVP) |
-| FR15 | Epic 8 | Filtros por Tags (Post-MVP) |
+| FR14 | Epic 8 (Story 8.1) | Tags de Carteira (Post-MVP) |
+| FR15 | Epic 8 (Story 8.2) | Filtros por Tags (Post-MVP) |
 | FR16 | Epic 2 | CRUD operações manuais |
 | FR17 | Epic 2 | Trilha de auditoria |
 | FR18 | Epic 4 | Cotações API |
@@ -117,6 +117,14 @@ Este documento fornece a decomposição completa de épicos e histórias para o 
 | FR26 | Epic 6 | Painel admin |
 | FR27 | Epic 6 | Reprocessamento lote |
 
+### Stories Adicionais (sem FR próprio no PRD)
+
+> Estas stories não mapeiam diretamente a um FR do PRD mas são necessárias para completar a experiência do produto ou suportar outros FRs.
+
+| Story | Épico | Descrição | Vinculação |
+|-------|-------|-----------|------------|
+| Story 1.5 | Epic 1 | Perfil do Investidor (KYC/Suitability) | Calibra FR20 (meta de alocação) e FR21 (motor Graham) com o perfil de risco do usuário |
+
 ## Epic List
 
 ### Épicos MVP
@@ -126,6 +134,7 @@ O usuário consegue criar conta, fazer login via Google e ter seu perfil provisi
 
 **FRs cobertos:** FR1, FR2, FR3, FR5
 **NFRs impactados:** NFR4 (isolamento tenant), NFR6 (criptografia)
+**Stories adicionais:** Story 1.5 (KYC/Suitability — sem FR próprio; calibra o motor de alocação do Epic 4)
 **Notas:** Google Sign-In via Firebase Auth. Auto-provisioning no primeiro acesso. Subscription tier logic (Gratuito/Premium/Trial) e exclusão LGPD.
 
 ---
@@ -255,7 +264,7 @@ Alertas via Web Push e WhatsApp (Post-MVP).
 
 #### Story 1.3: Restrição de Funcionalidades por Tier
 
-**Related FRs/NFRs:** FR5
+**Related FRs/NFRs:** FR3
 
 **As a** sistema,
 **I want** controlar o acesso a funcionalidades Premium baseado no tier do usuário,
@@ -299,6 +308,8 @@ Alertas via Web Push e WhatsApp (Post-MVP).
 
 #### Story 1.5: Perfil do Investidor (KYC/Suitability)
 
+**Related FRs/NFRs:** _(Story adicional — sem FR próprio no PRD. Calibra FR20 e FR21 via perfil de risco do usuário)_
+
 **As a** investidor,
 **I want** responder um questionário rápido sobre meus objetivos e tolerância a risco,
 **So that** as recomendações do sistema sejam adequadas ao meu perfil.
@@ -331,22 +342,51 @@ Alertas via Web Push e WhatsApp (Post-MVP).
 
 #### Story 2.2: Processamento Assíncrono e Splitter (Worker)
 
-**Related FRs/NFRs:** FR7, NFR1, NFR7
+**Related FRs/NFRs:** FR7, FR8, NFR1, NFR7
 
 **As a** sistema,
-**I want** processar o arquivo Excel em segundo plano, fragmentando-o em operações individuais,
-**So that** grandes volumes de dados não bloqueiem a interface e sejam tolerantes a falhas.
+**I want** processar o arquivo Excel em segundo plano, fragmentando-o em operações individuais e notificando o usuário sobre cada etapa do progresso,
+**So that** grandes volumes de dados não bloqueiem a interface, sejam tolerantes a falhas e o usuário saiba exatamente o que está acontecendo com o seu arquivo.
 
 **Acceptance Criteria:**
+
+**Cenário 1 — Processamento com sucesso total**
 - **Given** um evento `file-uploaded` no Kafka
 - **When** o `ingestion-service` consome o evento e lê o arquivo (Streaming via FastExcel)
 - **Then** fragmenta o arquivo (Splitter Pattern) em eventos `trade-extracted` (um por linha)
 - **And** envia linhas corrompidas para o tópico `trade-extracted-dlq` (DLQ)
-- **And** o status da importação é atualizado via WebSocket/Polling
+- **And** ao concluir o processamento, publica evento `upload-completed` via SSE (D16) com payload: `{ status: "SUCCESS", total: N, imported: N, duplicates: 0, errors: 0 }`
+- **And** o Flutter exibe notificação in-app: ✅ "Importação concluída! {N} operações carregadas com sucesso."
 
-#### Story 2.3: Deduplicação de Operações
+**Cenário 2 — Progresso em tempo real durante o processamento (NFR1)**
+- **Given** que o usuário está com a tela de upload aberta após enviar o arquivo
+- **When** o `ingestion-service` processa as linhas do arquivo em lote
+- **Then** publica eventos `upload-progress` via SSE (D16) a cada 10% de progresso com payload: `{ status: "PROCESSING", processed: X, total: N, percent: P }`
+- **And** o Flutter atualiza a barra de progresso orgânica progressivamente (sem tela em branco)
 
-**Related FRs/NFRs:** FR8
+**Cenário 3 — Processamento concluído com erros parciais**
+- **Given** que o arquivo possui algumas linhas corrompidas ou inválidas
+- **When** o `ingestion-service` conclui o processamento com parte das linhas enviadas para a DLQ
+- **Then** publica evento `upload-completed` via SSE com payload: `{ status: "PARTIAL", total: N, imported: X, duplicates: D, errors: E }`
+- **And** o Flutter exibe notificação: ⚠️ "Importação concluída com atenção: {X} operações carregadas, {E} linhas não puderam ser lidas."
+- **And** exibe link "Ver detalhes" que navega para o Histórico de Importação (Story 2.5)
+
+**Cenário 4 — Falha crítica no processamento**
+- **Given** que o `ingestion-service` encontra um erro crítico irrecuperável ao processar o arquivo (ex: arquivo corrompido, formato não reconhecido)
+- **When** o processamento é abortado após 3 tentativas com backoff exponencial
+- **Then** publica evento `upload-completed` via SSE com payload: `{ status: "FAILED", errorCode: "PARSE_ERROR", message: "descrição do erro" }`
+- **And** o Flutter exibe notificação: ❌ "Não foi possível processar o arquivo. Verifique se é o arquivo correto da B3 e tente novamente."
+- **And** registra log de nível ERROR: `[INGESTION] Falha crítica ao processar arquivo {fileId} para usuário {userId}: {erro}`
+
+**Cenário 5 — Usuário não está com a tela aberta (notificação assíncrona)**
+- **Given** que o processamento é concluído (sucesso ou parcial) enquanto o usuário não está com o dashboard aberto
+- **When** o usuário retorna ao dashboard
+- **Then** o sistema exibe um banner de "Nova importação disponível" no topo do dashboard com o resumo do resultado
+- **And** o badge de notificação na navegação indica a presença de uma atualização pendente
+
+#### Story 2.3: Dedução de Operações
+
+**Related FRs/NFRs:** FR7
 
 **As a** investidor,
 **I want** que o sistema identifique e ignore operações que eu já importei anteriormente,
@@ -356,7 +396,7 @@ Alertas via Web Push e WhatsApp (Post-MVP).
 - **Given** uma operação extraída do Excel
 - **When** o sistema verifica se já existe uma operação idêntica (Ticker + Data + Qtd + Preço + Corretora) para o usuário
 - **Then** ignora a duplicata e registra apenas as novas operações
-- **And** informa o total de "novas operações" vs "duplicadas" no final do processo
+- **And** o total de "duplicatas" é incluído no payload do evento `upload-completed` (Story 2.2, Cenário 1)
 
 #### Story 2.4: Cadastro Manual de Operação (Fallback)
 
@@ -508,20 +548,54 @@ Alertas via Web Push e WhatsApp (Post-MVP).
 
 #### Story 4.3: Motor do Filtro de Graham (`valuation-service`)
 
-**Related FRs/NFRs:** FR21, NFR3
+**Related FRs/NFRs:** FR21, NFR3, NFR8
 
 **As a** sistema,
 **I want** processar o algoritmo de Graham cruzando cotação, indicadores e metas do usuário,
-**So that** eu gere sugestões de compra precisas.
+**So that** eu gere sugestões de compra precisas e confiáveis, bloqueando automaticamente recomendações baseadas em dados corrompidos ou desatualizados.
 
 **Acceptance Criteria:**
 
+**Cenário 1 — Happy Path: Cálculo com dados íntegros**
 - **Given** um gatilho de cálculo de valuation
-- **When** o `valuation-service` consome as cotações e indicadores
+- **When** o `valuation-service` consome cotações e indicadores com dados completos e dentro dos thresholds de integridade
 - **Then** aplica o Filtro de Graham (Valor Intrínseco vs Preço Atual)
-- **And** identifica ativos que estão abaixo do Valor Intrínseco e abaixo da meta de alocação
+- **And** identifica ativos que estão abaixo do Valor Intrínseco e abaixo da meta de alocação do usuário
 - **And** gera a recomendação de aporte em < 2 segundos (NFR3)
-- **And** publica o evento `valuation-completed` no Kafka
+- **And** publica o evento `valuation-completed` no Kafka com o payload de recomendações
+
+**Cenário 2 — Dados Fundamentalistas Ausentes (Circuit Breaker)**
+- **Given** um gatilho de cálculo de valuation
+- **When** o `valuation-service` detecta que um ou mais indicadores obrigatórios (P/L, P/VP, DY) estão ausentes ou nulos para um ativo
+- **Then** exclui esse ativo específico do ranking de recomendações
+- **And** registra log de nível WARN: `[VALUATION] Ativo {ticker} excluído do ranking — indicadores ausentes: {lista}`
+- **And** prossegue normalmente com os demais ativos que possuem dados íntegros
+- **And** o payload do `valuation-completed` inclui uma lista `excludedTickers` com os ativos excluídos e o motivo
+
+**Cenário 3 — Dados Fundamentalistas Desatualizados (Stale Data)**
+- **Given** um gatilho de cálculo de valuation
+- **When** o `valuation-service` detecta que os indicadores de um ativo têm `updatedAt` superior a 7 dias corridos
+- **Then** exclui esse ativo do ranking de recomendações por dado desatualizado
+- **And** registra log de nível WARN: `[VALUATION] Ativo {ticker} excluído — dados fundamentalistas desatualizados ({dias} dias)`
+- **And** inclui o ativo na lista `excludedTickers` com motivo `STALE_DATA`
+
+**Cenário 4 — Outlier de Preço / Falso-Positivo (Circuit Breaker de Valuation)**
+- **Given** um gatilho de cálculo de valuation
+- **When** o `valuation-service` calcula o Valor Intrínseco de Graham e o resultado indica desconto superior a 80% em relação ao preço de mercado atual
+- **Then** aciona o circuit breaker de outlier: suspende a recomendação desse ativo
+- **And** registra log de nível ERROR: `[VALUATION] Circuit breaker ativado para {ticker} — desconto calculado de {X}% excede threshold de 80%. Possível dado corrompido.`
+- **And** exclui o ativo do ranking de recomendações com motivo `OUTLIER_PRICE`
+- **And** NÃO publica recomendação de compra para esse ativo até que os dados sejam validados e o cache invalidado
+
+**Cenário 5 — Falha total de dados de mercado**
+- **Given** um gatilho de cálculo de valuation
+- **When** o `valuation-service` não consegue obter cotações nem do provider primário nem do cache (NFR8)
+- **Then** aborta o cálculo de valuation completamente
+- **And** registra log de nível ERROR: `[VALUATION] Cálculo abortado — sem cotações disponíveis (primário e cache indisponíveis)`
+- **And** NÃO publica evento `valuation-completed` para evitar recomendações com dados zerados
+- **And** publica evento `valuation-failed` no Kafka para que o `api` module notifique o usuário via SSE (D16) com mensagem: "Recomendações temporariamente indisponíveis. Tente novamente em alguns minutos."
+
+
 
 #### Story 4.4: Reasoning Box — Explainable AI (Componente `ReasoningBox`)
 
@@ -675,18 +749,65 @@ Alertas via Web Push e WhatsApp (Post-MVP).
 ### Epic 8: Tags de Carteira & Visões Personalizadas
 **Related PRD Requirements:** FR14, FR15
 
-**Goal:** Permitir que o usuário organize seus ativos em categorias lógicas personalizadas.
+**Goal:** Permitir que o usuário organize seus ativos em categorias lógicas personalizadas e visualize consolidações, rentabilidade e recomendações de IA filtradas por essas tags.
+
+**FRs cobertos:** FR14, FR15
 
 #### Story 8.1: Criação e Associação de Tags
+
+**Related FRs/NFRs:** FR14
+
 **As a** investidor,
 **I want** criar etiquetas como "Aposentadoria" ou "Longo Prazo" e associar aos meus ativos,
 **So that** eu veja a rentabilidade separada por estratégia.
 
 **Acceptance Criteria:**
+
 - **Given** que o usuário está na tela de ativos
 - **When** ele seleciona um ativo e cria/associa uma Tag
-- **Then** o sistema persiste a relação ativo-tag-usuário
-- **And** atualiza os filtros de dashboard para incluir essa nova tag.
+- **Then** o sistema persiste a relação ativo-tag-usuário (isolado por `userId`)
+- **And** atualiza os filtros de dashboard para incluir essa nova tag
+- **And** permite associar um mesmo ativo a múltiplas tags simultaneamente
+
+- **Given** que o usuário quer renomear ou excluir uma Tag
+- **When** ele acessa a tela de gerência de Tags
+- **Then** o sistema permite renomear (refletindo em todos os ativos vinculados) ou excluir (desassociando os ativos sem excluí-los)
+
+#### Story 8.2: Filtros de Dashboard e Recomendações por Tag
+
+**Related FRs/NFRs:** FR15, NFR2, NFR3
+
+**As a** investidor,
+**I want** filtrar todo o dashboard — consolidação, rentabilidade e recomendações de IA — por uma Tag de Carteira específica,
+**So that** eu analise cada estratégia de investimento de forma isolada, sem misturar carteiras com objetivos distintos.
+
+**Acceptance Criteria:**
+
+- **Given** que o usuário possui ativos com Tags associadas (Story 8.1 concluída)
+- **When** ele seleciona uma Tag no seletor de "Lente Analítica" (`AnalyticalLensTabs`)
+- **Then** o dashboard exibe apenas os ativos vinculados àquela Tag
+- **And** os KPIs (Patrimônio Total, Rendimento, DY) são recalculados considerando somente esses ativos
+- **And** a transição visual ocorre em crossfade de 250ms (NFR2)
+
+- **Given** que o filtro por Tag está ativo
+- **When** o usuário acessa a seção de Recomendações (Epic 4)
+- **Then** o Motor de Graham considera apenas o saldo e a alocação dos ativos da Tag selecionada
+- **And** as sugestões de aporte levam em conta somente a meta percentual configurada para aquela Tag (se definida)
+- **And** o cálculo responde em < 2 segundos (NFR3)
+
+- **Given** que o filtro por Tag está ativo
+- **When** o usuário acessa o histórico de proventos e aportes
+- **Then** são exibidos apenas os eventos relacionados aos ativos da Tag
+- **And** um badge visível indica "Visualizando: [Nome da Tag]" para evitar confusão com a visão global
+
+- **Given** que o usuário quer voltar à visão completa
+- **When** ele seleciona "Visão Geral" no seletor de Lente
+- **Then** o dashboard retorna a consolidação de todos os ativos sem filtro ativo
+
+- **Given** que o usuário possui ativos sem Tag associada
+- **When** ele aplica qualquer filtro de Tag
+- **Then** esses ativos sem Tag não aparecem na visão filtrada
+- **And** um aviso sutil indica "X ativos sem tag não estão sendo exibidos" com link para associar
 
 ### Epic 9: Expansão de Ingestão de Dados (Post-MVP)
 **Related PRD Requirements:** FR9, FR10, FR11
