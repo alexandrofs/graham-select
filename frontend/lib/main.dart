@@ -57,6 +57,12 @@ import 'src/features/allocation/data/repositories/allocation_repository_impl.dar
 import 'src/features/allocation/presentation/providers/allocation_provider.dart';
 import 'src/features/allocation/presentation/pages/allocation_strategy_page.dart';
 
+// Goals Feature Imports
+import 'src/features/goals/data/datasources/goals_remote_datasource.dart';
+import 'src/features/goals/data/repositories/goals_repository_impl.dart';
+import 'src/features/goals/presentation/providers/goals_provider.dart';
+import 'src/features/goals/presentation/pages/goals_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -126,6 +132,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final AllocationRemoteDataSource allocationRemoteDataSource;
   late final AllocationRepositoryImpl allocationRepository;
 
+  late final GoalsRemoteDatasource goalsRemoteDatasource;
+  late final GoalsRepositoryImpl goalsRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -179,6 +188,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     allocationRemoteDataSource = AllocationRemoteDataSource(apiClient: effectiveApiClient);
     allocationRepository = AllocationRepositoryImpl(allocationRemoteDataSource, effectiveAuthRepository);
 
+    // Goals Feature DI
+    goalsRemoteDatasource = GoalsRemoteDatasource(apiClient: effectiveApiClient);
+    goalsRepository = GoalsRepositoryImpl(remoteDatasource: goalsRemoteDatasource);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -218,6 +231,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
+            GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
           ],
         ),
       ],
@@ -250,6 +264,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
+        ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(
           create: (_) {
             final notificationService = NotificationService(effectiveApiClient);

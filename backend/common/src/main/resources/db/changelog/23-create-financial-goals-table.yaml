@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: 23-create-financial-goals-table
+      author: graham-select-dev
+      changes:
+        - createTable:
+            tableName: financial_goals
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: goal_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_value
+                  type: DECIMAL(18,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: monthly_contribution
+                  type: DECIMAL(18,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estimated_years
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_financial_goals_user_id
+            tableName: financial_goals
+            columns:
+              - column:
+                  name: user_id
+        - addUniqueConstraint:
+            tableName: financial_goals
+            columnNames: user_id
+            constraintName: uq_financial_goals_user_id

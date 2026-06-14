@@ -22,3 +22,6 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - Ausência de Rollback nas Migrações Liquibase [backend/common/src/main/resources/db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml:1] — A migração adicionando colunas não possui instruções de rollback declaradas.
 - Rolagem Conflitante no Bottom Sheet [frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart:1] — Conflito potencial de gestos entre o SingleChildScrollView interno e a folha deslizável nativa.
 
+## Deferred from: code review of 5-1-wealth-income-goal-setup.md (2026-06-13)
+
+- Falta de controle de múltiplos cliques (Debounce) no formulário do Frontend [frontend/lib/src/features/goals/presentation/pages/goals_page.dart:1456] — O botão de salvar é desabilitado ao entrar no estado loading, mas cliques simultâneos extremamente rápidos podem disparar requisições concorrentes antes da atualização de estado.

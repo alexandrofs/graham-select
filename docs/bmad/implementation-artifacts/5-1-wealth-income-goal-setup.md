@@ -1,6 +1,10 @@
+---
+baseline_commit: 310100c521ed1bd296df02c00cd2a07cab605524
+---
+
 # Story 5.1: Configuração de Metas de Patrimônio e Renda
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -361,6 +365,21 @@ Status: ready-for-dev
   - [ ] `mvn clean test -pl api` → zero falhas
   - [ ] `flutter analyze` → zero lints
   - [ ] `flutter test test/features/goals/` → todos os testes passam
+
+### Review Findings
+
+- [x] [Review][Patch] Erro conceitual de cálculo na meta de Renda Mensal Alvo no Frontend [frontend/lib/src/features/goals/presentation/widgets/goal_summary_card.dart:29-30] — aplicado
+- [x] [Review][Patch] Formato de resposta do endpoint GET violando especificação (Objeto vs. Array) [backend/api/src/main/java/afsdigital/grahamselect/api/goals/web/FinancialGoalsController.java:270-276] — aplicado
+- [x] [Review][Patch] Uso incorreto do campo de patrimônio acumulado no Frontend [frontend/lib/src/features/goals/presentation/pages/goals_page.dart:1456] — dismissed, totalValue é erro na especificação (campo correto é totalEquity)
+- [x] [Review][Patch] Violação de ZoneOffset.UTC nos testes unitários do backend [backend/common/src/test/java/afsdigital/grahamselect/goals/application/usecase/CreateFinancialGoalUseCaseTest.java:708-709] — aplicado
+- [x] [Review][Patch] Risco de erro 500 (Unique Key Violation) na criação de meta [backend/common/src/main/java/afsdigital/grahamselect/goals/application/usecase/CreateFinancialGoalUseCase.java:38] — aplicado
+- [x] [Review][Patch] Conversão insegura de Enum no repository JPA do backend [backend/api/src/main/java/afsdigital/grahamselect/api/goals/infrastructure/persistence/FinancialGoalRepositoryImpl.java:43] — aplicado
+- [x] [Review][Patch] Log de nível ERROR para exceções de negócio no GlobalExceptionHandler [backend/api/src/main/java/afsdigital/grahamselect/api/common/web/GlobalExceptionHandler.java:30] — dismissed, logs de nível ERROR em handlers são exigidos por AGENTS.md
+- [x] [Review][Patch] Ausência de tela de Shimmer no carregamento da tela de metas no Frontend [frontend/lib/src/features/goals/presentation/pages/goals_page.dart:1448-1454] — aplicado
+- [x] [Review][Patch] Validação fraca do goalType na requisição do Backend [backend/common/src/main/java/afsdigital/grahamselect/goals/application/dto/CreateFinancialGoalRequest.java:15] — aplicado
+- [x] [Review][Patch] Ausência de log de nível ERROR nos lançamentos de exceções no Use Case [backend/common/src/main/java/afsdigital/grahamselect/goals/application/usecase/UpdateFinancialGoalUseCase.java:504-506] — aplicado
+- [x] [Review][Patch] Ausência de log de sucesso concluído na criação de meta [backend/common/src/main/java/afsdigital/grahamselect/goals/application/usecase/CreateFinancialGoalUseCase.java:400-401] — aplicado
+- [x] [Review][Defer] Falta de controle de múltiplos cliques (Debounce) no formulário do Frontend [frontend/lib/src/features/goals/presentation/pages/goals_page.dart:1456] — deferred, pre-existing
 
 ---
 
