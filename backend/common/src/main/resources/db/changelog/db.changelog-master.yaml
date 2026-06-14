@@ -43,6 +43,5 @@ databaseChangeLog:
       file: db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml
   - include:
       file: db/changelog/22-add-eps-bvps-to-company-intrinsic-value.yaml
-
+  - include:
       file: db/changelog/23-create-financial-goals-table.yaml
-
