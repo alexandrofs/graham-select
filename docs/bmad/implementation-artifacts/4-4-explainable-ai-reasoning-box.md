@@ -3,7 +3,7 @@ baseline_commit: 0e83700c75801279672c669aa848532bc2288a5a
 ---
 # Story 4.4: Reasoning Box — Explainable AI (Componente `ReasoningBox`)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -569,3 +569,21 @@ backend/common/src/test/java/.../application/usecase/GenerateGrahamRecommendatio
 
 ## Change Log
 - 2026-06-13: Implementação completa da história 4.4. Todos os critérios de aceitação foram validados com testes automatizados e análise estática (exit code zero em ambos).
+
+### Review Findings
+
+- [x] [Review][Decision] Animação de Fechamento do Modal Divergente — Resolvido: Aceito o slide down nativo do showModalBottomSheet do Flutter.
+- [x] [Review][Patch] Geração do Backend Hardcodeia LPA/VPA como Nulos [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCase.java:109]
+- [x] [Review][Patch] Exibição Incorreta do Componente de Alocação para Ativos Sem Meta [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:907]
+- [x] [Review][Patch] Divergência de Textos e Fórmulas nos Passos de Exibição [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:104]
+- [x] [Review][Patch] Ausência de Separadores Visuais Sequenciais entre os Passos [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:103]
+- [x] [Review][Patch] Ausência da Explicação Acessível para Casos Sem Dados LPA/VPA [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:136]
+- [x] [Review][Patch] Contraste e Ilegibilidade de Títulos no Modo Escuro [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:667]
+- [x] [Review][Patch] Erro de Asserção no Teste de Widget [frontend/test/features/ranking/presentation/widgets/reasoning_box_test.dart:1239]
+- [x] [Review][Patch] Risco de Erros Fatais com Valores Não Finitos (NaN / Infinity) [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:19]
+- [x] [Review][Patch] Tratamento Inconsistente de Gaps Próximos de Zero [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:1022]
+- [x] [Review][Patch] Leitura Redundante em Leitores de Tela (Acessibilidade) [frontend/lib/src/features/ranking/presentation/widgets/reasoning_box.dart:1]
+- [x] [Review][Defer] Risco de Quebra em Tempo de Execução na Desserialização do JSON [frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart:584] — deferred, pre-existing
+- [x] [Review][Defer] Ausência de Rollback nas Migrações Liquibase [backend/common/src/main/resources/db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml:1] — deferred, pre-existing
+- [x] [Review][Defer] Rolagem Conflitante no Bottom Sheet [frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart:1] — deferred, pre-existing
+

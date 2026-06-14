@@ -14,5 +14,7 @@ public class RankedCompany {
     private BigDecimal intrinsicValue;
     private BigDecimal currentPrice;
     private BigDecimal marginOfSafety;
+    private BigDecimal eps;
+    private BigDecimal bvps;
 
 }

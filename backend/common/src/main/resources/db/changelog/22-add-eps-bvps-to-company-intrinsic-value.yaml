@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 22-add-eps-bvps-to-company-intrinsic-value
+      author: ant-gravity
+      changes:
+        - addColumn:
+            tableName: company_intrinsic_value
+            columns:
+              - column:
+                  name: eps
+                  type: DECIMAL(18,4)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: bvps
+                  type: DECIMAL(18,4)
+                  constraints:
+                    nullable: true

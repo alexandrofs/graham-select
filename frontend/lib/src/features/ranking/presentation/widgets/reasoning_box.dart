@@ -6,7 +6,6 @@ class ReasoningBox extends StatelessWidget {
   final GrahamRecommendation recommendation;
 
   // Paleta de cores obrigatória
-  static const Color navyBlue = Color(0xFF1B2A4A);
   static const Color emerald = Color(0xFF10B981);
   static const Color amberGold = Color(0xFFF59E0B);
   static const Color errorRed = Color(0xFFEF4444);
@@ -17,10 +16,12 @@ class ReasoningBox extends StatelessWidget {
   });
 
   String _formatCurrency(double value) {
+    if (!value.isFinite) return 'R\$ N/A';
     return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
   }
 
   String _formatPercentage(double value) {
+    if (!value.isFinite) return 'N/A';
     return '${value.toStringAsFixed(2).replaceAll('.', ',')}%';
   }
 
@@ -49,6 +50,7 @@ class ReasoningBox extends StatelessWidget {
 
     return Semantics(
       label: 'Painel de raciocínio de investimento para o ativo ${recommendation.ticker}',
+      excludeSemantics: false,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,11 +63,12 @@ class ReasoningBox extends StatelessWidget {
                 recommendation.ticker,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: navyBlue,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               Semantics(
                 label: 'Score de recomendação: ${recommendation.recommendationScore.toStringAsFixed(2)}',
+                excludeSemantics: true,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -93,7 +96,7 @@ class ReasoningBox extends StatelessWidget {
             '📊 Análise de Valor de Mercado',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: navyBlue,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
@@ -104,32 +107,32 @@ class ReasoningBox extends StatelessWidget {
               _formatCurrency(recommendation.epsUsed!),
               theme,
             ),
-            const SizedBox(height: 8),
+            _buildDivider(theme),
             _buildStepRow(
               'Passo 2',
-              'VPA (Valor Patrimonial):',
+              'VPA (Valor Patrimonial por Ação):',
               _formatCurrency(recommendation.bvpsUsed!),
               theme,
             ),
-            const SizedBox(height: 8),
+            _buildDivider(theme),
             _buildStepRow(
               'Passo 3',
-              'VI Graham = √(22,5 × LPA × VPA):',
+              'Valor Intrínseco Graham = √(22,5 × LPA × VPA) =',
               _formatCurrency(recommendation.intrinsicValue),
               theme,
               isFormula: true,
             ),
-            const SizedBox(height: 8),
+            _buildDivider(theme),
             _buildStepRow(
               'Passo 4',
               'Preço Atual:',
               _formatCurrency(recommendation.currentPrice),
               theme,
             ),
-            const SizedBox(height: 12),
+            _buildDivider(theme),
             _buildStepRow(
               'Passo 5',
-              'Margem de Segurança:',
+              'Margem de Segurança: (Intrínseco/Preço - 1) =',
               '$mosSign${_formatPercentage(mosPercent)}',
               theme,
               valueColor: mosColor,
@@ -158,16 +161,23 @@ class ReasoningBox extends StatelessWidget {
               _formatCurrency(recommendation.currentPrice),
               theme,
             ),
-            const SizedBox(height: 8),
+            _buildDivider(theme),
             _buildStepRow(
               'Margem de Segurança',
-              'Diferença vs Intrínseco:',
+              'Margem de Segurança: (Intrínseco/Preço - 1) =',
               '$mosSign${_formatPercentage(mosPercent)}',
               theme,
               valueColor: mosColor,
               isBadge: true,
             ),
           ],
+          const SizedBox(height: 12),
+          Text(
+            recommendation.marginOfSafety > 0
+                ? 'Este ativo está ${_formatPercentage(mosPercent)} abaixo do valor intrínseco calculado pelo Filtro de Graham.'
+                : 'Este ativo está ${_formatPercentage(mosPercent.abs())} acima do valor intrínseco calculado pelo Filtro de Graham.',
+            style: theme.textTheme.bodyMedium,
+          ),
           
           const SizedBox(height: 16),
           const Divider(),
@@ -178,7 +188,7 @@ class ReasoningBox extends StatelessWidget {
             '📈 Análise de Alocação na Carteira',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: navyBlue,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
@@ -196,6 +206,7 @@ class ReasoningBox extends StatelessWidget {
               children: [
                 Semantics(
                   label: 'Alocação Atual: ${_formatPercentage(recommendation.currentAllocationPct)}',
+                  excludeSemantics: true,
                   child: Text(
                     'Atual: ${_formatPercentage(recommendation.currentAllocationPct)}',
                     style: theme.textTheme.bodyMedium?.copyWith(fontFamily: 'JetBrainsMono'),
@@ -203,6 +214,7 @@ class ReasoningBox extends StatelessWidget {
                 ),
                 Semantics(
                   label: 'Meta de Alocação: ${_formatPercentage(recommendation.targetAllocationPct)}',
+                  excludeSemantics: true,
                   child: Text(
                     'Meta: ${_formatPercentage(recommendation.targetAllocationPct)}',
                     style: theme.textTheme.bodyMedium?.copyWith(fontFamily: 'JetBrainsMono'),
@@ -235,23 +247,32 @@ class ReasoningBox extends StatelessWidget {
             '🎯 Como é Calculado o Score',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: navyBlue,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
-          _buildScoreRow(
-            'Componente Graham (60%):',
-            'marginOfSafety × 0,6',
-            mosScoreComponent.toStringAsFixed(3),
-            theme,
-          ),
-          const SizedBox(height: 6),
-          _buildScoreRow(
-            'Componente Alocação (40%):',
-            'gap × 0,4',
-            allocationScoreComponent.toStringAsFixed(3),
-            theme,
-          ),
+          if (hasAllocationGoal) ...[
+            _buildScoreRow(
+              'Componente Graham (60%):',
+              'marginOfSafety × 0,6',
+              mosScoreComponent.toStringAsFixed(3),
+              theme,
+            ),
+            const SizedBox(height: 6),
+            _buildScoreRow(
+              'Componente Alocação (40%):',
+              'gap × 0,4',
+              allocationScoreComponent.toStringAsFixed(3),
+              theme,
+            ),
+          ] else ...[
+            _buildScoreRow(
+              'Componente Graham (100%):',
+              'marginOfSafety × 0,6',
+              mosScoreComponent.toStringAsFixed(3),
+              theme,
+            ),
+          ],
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
@@ -283,6 +304,7 @@ class ReasoningBox extends StatelessWidget {
           const SizedBox(height: 8),
           Semantics(
             label: 'Nota explicativa: Quanto maior o score, maior a prioridade de aporte sugerida.',
+            excludeSemantics: true,
             child: Text(
               'Quanto maior o score, maior a prioridade de aporte sugerida.',
               style: theme.textTheme.labelSmall?.copyWith(
@@ -291,6 +313,17 @@ class ReasoningBox extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDivider(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Divider(
+        height: 1,
+        thickness: 0.5,
+        color: theme.colorScheme.outlineVariant.withAlpha((0.5 * 255).round()),
       ),
     );
   }
@@ -307,12 +340,13 @@ class ReasoningBox extends StatelessWidget {
     final textStyle = TextStyle(
       fontFamily: 'JetBrainsMono',
       fontWeight: isFormula || isBadge ? FontWeight.bold : FontWeight.normal,
-      color: valueColor ?? (isFormula ? navyBlue : theme.colorScheme.onSurface),
+      color: valueColor ?? (isFormula ? theme.colorScheme.primary : theme.colorScheme.onSurface),
       fontFeatures: const [FontFeature.tabularFigures()],
     );
 
     Widget valueWidget = Semantics(
       label: '$description $value',
+      excludeSemantics: true,
       child: Text(
         value,
         style: textStyle,
@@ -362,17 +396,10 @@ class ReasoningBox extends StatelessWidget {
   }
 
   Widget _buildAllocationGapText(double gap, ThemeData theme) {
-    if (gap > 0) {
-      return Semantics(
-        label: 'Falta ${gap.toStringAsFixed(1)}% para atingir a meta',
-        child: Text(
-          'Falta ${gap.toStringAsFixed(1).replaceAll('.', ',')}% para atingir a meta',
-          style: theme.textTheme.bodySmall?.copyWith(color: amberGold),
-        ),
-      );
-    } else if (gap == 0) {
+    if (gap.abs() < 0.05) {
       return Semantics(
         label: 'Meta atingida',
+        excludeSemantics: true,
         child: Row(
           children: [
             const Icon(Icons.check_circle_outline, size: 14, color: emerald),
@@ -384,10 +411,20 @@ class ReasoningBox extends StatelessWidget {
           ],
         ),
       );
+    } else if (gap > 0) {
+      return Semantics(
+        label: 'Falta ${gap.toStringAsFixed(1)}% para atingir a meta',
+        excludeSemantics: true,
+        child: Text(
+          'Falta ${gap.toStringAsFixed(1).replaceAll('.', ',')}% para atingir a meta',
+          style: theme.textTheme.bodySmall?.copyWith(color: amberGold),
+        ),
+      );
     } else {
       final overAlloc = gap.abs();
       return Semantics(
         label: 'Sobre-alocado em ${overAlloc.toStringAsFixed(1)}%',
+        excludeSemantics: true,
         child: Text(
           'Sobre-alocado em ${overAlloc.toStringAsFixed(1).replaceAll('.', ',')}%',
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
@@ -420,6 +457,7 @@ class ReasoningBox extends StatelessWidget {
         ),
         Semantics(
           label: '$label calculado: $value',
+          excludeSemantics: true,
           child: Text(
             value,
             style: const TextStyle(

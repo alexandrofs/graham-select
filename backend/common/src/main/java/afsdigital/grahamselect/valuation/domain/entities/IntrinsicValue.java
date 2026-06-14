@@ -13,5 +13,8 @@ public class IntrinsicValue {
     private LocalDate calculationDate;
     private String companyId;
     private BigDecimal value;
+    private BigDecimal eps;
+    private BigDecimal bvps;
+
 
 }

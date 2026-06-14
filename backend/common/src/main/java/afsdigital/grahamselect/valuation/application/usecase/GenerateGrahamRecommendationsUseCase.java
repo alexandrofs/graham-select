@@ -106,8 +106,8 @@ public class GenerateGrahamRecommendationsUseCase {
                             .allocationGap(allocationGap)
                             .recommendationScore(score)
                             .generatedAt(LocalDate.now(ZoneOffset.UTC))
-                            .epsUsed(null)
-                            .bvpsUsed(null)
+                            .epsUsed(c.getEps())
+                            .bvpsUsed(c.getBvps())
                             .build();
                 })
                 .filter(r -> {

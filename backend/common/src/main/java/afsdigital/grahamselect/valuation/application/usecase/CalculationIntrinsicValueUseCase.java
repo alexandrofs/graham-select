@@ -40,10 +40,19 @@ public class CalculationIntrinsicValueUseCase {
                 ? BigDecimal.valueOf(calculatedIntrinsicValue).round(new MathContext(2))
                 : null;
 
+        BigDecimal epsDecimal = financialDataEvent.getEarningsPerShare() != null
+                ? BigDecimal.valueOf(financialDataEvent.getEarningsPerShare())
+                : null;
+        BigDecimal bvpsDecimal = financialDataEvent.getBookValuePerShare() != null
+                ? BigDecimal.valueOf(financialDataEvent.getBookValuePerShare())
+                : null;
+
         IntrinsicValue intrinsicValue = IntrinsicValue.builder()
                 .calculationDate(financialDataEvent.getResultDate())
                 .companyId(company.getId())
                 .value(finalIntrinsicValue)
+                .eps(epsDecimal)
+                .bvps(bvpsDecimal)
                 .build();
 
         StockPrice stockPrice = StockPrice.builder()

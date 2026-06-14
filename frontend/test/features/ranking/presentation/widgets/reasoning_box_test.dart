@@ -42,11 +42,11 @@ void main() {
       // Verificar LPA e VPA
       expect(find.text('LPA (Lucro Por Ação):'), findsOneWidget);
       expect(find.text('R\$ 4,52'), findsOneWidget);
-      expect(find.text('VPA (Valor Patrimonial):'), findsOneWidget);
+      expect(find.text('VPA (Valor Patrimonial por Ação):'), findsOneWidget);
       expect(find.text('R\$ 31,80'), findsOneWidget);
 
       // Verificar fórmula de Graham e valor intrínseco
-      expect(find.text('VI Graham = √(22,5 × LPA × VPA):'), findsOneWidget);
+      expect(find.text('Valor Intrínseco Graham = √(22,5 × LPA × VPA) ='), findsOneWidget);
       expect(find.text('R\$ 40,00'), findsOneWidget);
 
       // Verificar preço atual e margem de segurança
@@ -72,13 +72,13 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest(recommendation));
       await tester.pump();
 
-      // Verificar Ticker e Score
+      // Verificar Ticker
       expect(find.text('PETR4'), findsOneWidget);
 
       // Verificar mensagem de dados indisponíveis
       expect(find.text('Dados de LPA/VPA não disponíveis'), findsOneWidget);
 
-      // Ainda deve exibir preço e margem de segurança
+      // Ainda deve exibir preço e margem de segurança com a fórmula do AC 4
       expect(find.text('Valor atual de mercado:'), findsOneWidget);
       expect(find.text('R\$ 30,00'), findsOneWidget);
       expect(find.text('+33,00%'), findsOneWidget);
@@ -150,6 +150,48 @@ void main() {
       // Validar a cor do texto do widget
       final textWidget = tester.widget<Text>(textFinder);
       expect(textWidget.style?.color, ReasoningBox.errorRed);
+    });
+
+    testWidgets('should display "Meta atingida ✓" when allocationGap is near zero (e.g. < 0.05%)', (WidgetTester tester) async {
+      const recommendation = GrahamRecommendation(
+        ticker: 'PETR4',
+        currentPrice: 30.00,
+        intrinsicValue: 40.00,
+        marginOfSafety: 0.33,
+        currentAllocationPct: 19.98,
+        targetAllocationPct: 20.00,
+        allocationGap: 0.02, // 0.02% < 0.05%
+        recommendationScore: 6.198,
+      );
+
+      await tester.pumpWidget(createWidgetUnderTest(recommendation));
+      await tester.pump();
+
+      // Deve exibir a mensagem de meta atingida
+      expect(find.text('Meta atingida ✓'), findsOneWidget);
+    });
+
+    testWidgets('should handle non-finite (NaN/Infinity) values gracefully without throwing UnsupportedError', (WidgetTester tester) async {
+      const recommendation = GrahamRecommendation(
+        ticker: 'PETR4',
+        currentPrice: double.nan,
+        intrinsicValue: double.infinity,
+        marginOfSafety: double.nan,
+        currentAllocationPct: 5.00,
+        targetAllocationPct: 20.00,
+        allocationGap: 15.00,
+        recommendationScore: 6.198,
+        epsUsed: double.nan,
+        bvpsUsed: double.nan,
+      );
+
+      // Não deve lançar exceção ao renderizar
+      await tester.pumpWidget(createWidgetUnderTest(recommendation));
+      expect(tester.takeException(), isNull);
+
+      // Deve exibir o fallback de moeda/porcentagem 'N/A'
+      expect(find.text('R\$ N/A'), findsWidgets);
+      expect(find.text('N/A'), findsWidgets);
     });
   });
 }
