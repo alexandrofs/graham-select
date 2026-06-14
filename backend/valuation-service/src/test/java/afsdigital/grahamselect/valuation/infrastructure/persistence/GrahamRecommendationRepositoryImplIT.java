@@ -43,6 +43,8 @@ public class GrahamRecommendationRepositoryImplIT extends BaseRepositoryIT {
                 .targetAllocationPct(new BigDecimal("20.00"))
                 .allocationGap(new BigDecimal("15.00"))
                 .recommendationScore(new BigDecimal("0.2580"))
+                .epsUsed(new BigDecimal("4.5200"))
+                .bvpsUsed(new BigDecimal("31.8000"))
                 .generatedAt(LocalDate.now())
                 .build();
 
@@ -62,11 +64,24 @@ public class GrahamRecommendationRepositoryImplIT extends BaseRepositoryIT {
 
         List<GrahamRecommendationEntity> entities = grahamRecommendationJpaRepository.findAll();
         assertThat(entities).hasSize(2);
+        
+        // Find entities.get(0) which is PETR4
+        GrahamRecommendationEntity petrEntity = entities.stream()
+                .filter(e -> "PETR4".equals(e.getTicker()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(petrEntity.getEpsUsed()).isEqualByComparingTo(new BigDecimal("4.5200"));
+        assertThat(petrEntity.getBvpsUsed()).isEqualByComparingTo(new BigDecimal("31.8000"));
 
         List<GrahamRecommendation> retrieved = grahamRecommendationRepository.findByUserId(userId);
         assertThat(retrieved).hasSize(2);
         assertThat(retrieved.get(0).getTicker()).isEqualTo("PETR4"); // High score first
+        assertThat(retrieved.get(0).getEpsUsed()).isEqualByComparingTo(new BigDecimal("4.5200"));
+        assertThat(retrieved.get(0).getBvpsUsed()).isEqualByComparingTo(new BigDecimal("31.8000"));
+        
         assertThat(retrieved.get(1).getTicker()).isEqualTo("VALE3");
+        assertThat(retrieved.get(1).getEpsUsed()).isNull();
+        assertThat(retrieved.get(1).getBvpsUsed()).isNull();
 
         // Test delete on save recommendations with empty list
         grahamRecommendationRepository.saveRecommendations(userId, List.of());
