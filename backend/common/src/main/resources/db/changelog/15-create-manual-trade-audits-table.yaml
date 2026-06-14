@@ -8,13 +8,13 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: UUID
+                  type: CHAR(36)
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
                   name: trade_id
-                  type: UUID
+                  type: CHAR(36)
                   constraints:
                     nullable: false
               - column:
