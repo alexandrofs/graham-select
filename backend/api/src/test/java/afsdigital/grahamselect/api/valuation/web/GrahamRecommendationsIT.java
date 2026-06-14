@@ -96,6 +96,8 @@ class GrahamRecommendationsIT extends BaseRepositoryIT {
                 .targetAllocationPct(new BigDecimal("20.0000"))
                 .allocationGap(new BigDecimal("15.0000"))
                 .recommendationScore(new BigDecimal("6.1980"))
+                .epsUsed(new BigDecimal("4.5200"))
+                .bvpsUsed(new BigDecimal("31.8000"))
                 .generatedAt(LocalDate.now())
                 .build());
 
@@ -120,8 +122,12 @@ class GrahamRecommendationsIT extends BaseRepositoryIT {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].ticker").value("PETR4"))
                 .andExpect(jsonPath("$[0].recommendationScore").value(6.198))
+                .andExpect(jsonPath("$[0].epsUsed").value(4.52))
+                .andExpect(jsonPath("$[0].bvpsUsed").value(31.80))
                 .andExpect(jsonPath("$[1].ticker").value("VALE3"))
-                .andExpect(jsonPath("$[1].recommendationScore").value(0.084));
+                .andExpect(jsonPath("$[1].recommendationScore").value(0.084))
+                .andExpect(jsonPath("$[1].epsUsed").doesNotExist())
+                .andExpect(jsonPath("$[1].bvpsUsed").doesNotExist());
     }
 
     @Test
