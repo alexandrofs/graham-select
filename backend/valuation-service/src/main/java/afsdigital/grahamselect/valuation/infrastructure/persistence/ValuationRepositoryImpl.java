@@ -34,12 +34,16 @@ public class ValuationRepositoryImpl implements ValuationRepository {
                 if (existingIntrinsicValue.isPresent()) {
                     intrinsicValueEntity = existingIntrinsicValue.get();
                     intrinsicValueEntity.setIntrinsicValue(intrinsicValue.getValue());
+                    intrinsicValueEntity.setEps(intrinsicValue.getEps());
+                    intrinsicValueEntity.setBvps(intrinsicValue.getBvps());
                 } else {
                     intrinsicValueEntity = IntrinsicValueEntity.builder()
                             .id(UUID.randomUUID().toString())
                             .companyId(intrinsicValue.getCompanyId())
                             .calculationDate(intrinsicValue.getCalculationDate())
                             .intrinsicValue(intrinsicValue.getValue())
+                            .eps(intrinsicValue.getEps())
+                            .bvps(intrinsicValue.getBvps())
                             .build();
                 }
                 intrinsicValueJpaRepository.save(intrinsicValueEntity);

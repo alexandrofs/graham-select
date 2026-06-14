@@ -50,6 +50,8 @@ public class GenerateGrahamRecommendationsUseCaseTest {
                 .intrinsicValue(new BigDecimal("40.00"))
                 .currentPrice(new BigDecimal("30.00"))
                 .marginOfSafety(new BigDecimal("0.33")) // 33%
+                .eps(new BigDecimal("4.52"))
+                .bvps(new BigDecimal("31.80"))
                 .build();
 
         RankedCompany vale3 = RankedCompany.builder()
@@ -103,8 +105,8 @@ public class GenerateGrahamRecommendationsUseCaseTest {
         assertTrue(new BigDecimal("20.00").compareTo(petrRec.getTargetAllocationPct()) == 0);
         assertTrue(new BigDecimal("15.00").compareTo(petrRec.getAllocationGap()) == 0);
         assertTrue(new BigDecimal("0.2580").compareTo(petrRec.getRecommendationScore()) == 0);
-        assertNull(petrRec.getEpsUsed());
-        assertNull(petrRec.getBvpsUsed());
+        assertEquals(new BigDecimal("4.52"), petrRec.getEpsUsed());
+        assertEquals(new BigDecimal("31.80"), petrRec.getBvpsUsed());
  
         GrahamRecommendation valeRec = result.get(1);
         assertTrue(new BigDecimal("8.00").compareTo(valeRec.getCurrentAllocationPct()) == 0);

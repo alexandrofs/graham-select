@@ -30,8 +30,8 @@ class RankingReadAdapterTest {
 
     @Test
     void shouldFindTop20BestRankedCorrectly() {
-        Object[] row1 = new Object[]{"PETR4", "Petrobras", new BigDecimal("40.00"), new BigDecimal("30.00"), new BigDecimal("0.3333")};
-        Object[] row2 = new Object[]{"VALE3", "Vale", new BigDecimal("80.00"), new BigDecimal("70.00"), new BigDecimal("0.1428")};
+        Object[] row1 = new Object[]{"PETR4", "Petrobras", new BigDecimal("40.00"), new BigDecimal("30.00"), new BigDecimal("0.3333"), new BigDecimal("4.52"), new BigDecimal("31.80")};
+        Object[] row2 = new Object[]{"VALE3", "Vale", new BigDecimal("80.00"), new BigDecimal("70.00"), new BigDecimal("0.1428"), null, null};
         List<Object[]> results = List.of(row1, row2);
 
         when(entityManager.createNativeQuery(anyString())).thenReturn(queryMock);
@@ -45,5 +45,9 @@ class RankingReadAdapterTest {
         assertThat(ranked.get(0).getIntrinsicValue()).isEqualByComparingTo("40.00");
         assertThat(ranked.get(0).getCurrentPrice()).isEqualByComparingTo("30.00");
         assertThat(ranked.get(0).getMarginOfSafety()).isEqualByComparingTo("0.3333");
+        assertThat(ranked.get(0).getEps()).isEqualByComparingTo("4.52");
+        assertThat(ranked.get(0).getBvps()).isEqualByComparingTo("31.80");
+        assertThat(ranked.get(1).getEps()).isNull();
+        assertThat(ranked.get(1).getBvps()).isNull();
     }
 }

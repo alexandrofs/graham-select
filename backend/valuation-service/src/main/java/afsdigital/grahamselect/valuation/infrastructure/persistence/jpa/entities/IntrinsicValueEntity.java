@@ -36,6 +36,12 @@ public class IntrinsicValueEntity {
     @Column(name = "intrinsic_value", nullable = false, precision = 19, scale = 2)
     private BigDecimal intrinsicValue;
 
+    @Column(name = "eps", precision = 18, scale = 4)
+    private BigDecimal eps;
+
+    @Column(name = "bvps", precision = 18, scale = 4)
+    private BigDecimal bvps;
+
     @ManyToOne
     @JoinColumn(name = "company_id", referencedColumnName = "id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_company"))
     private CompanyEntity company;
