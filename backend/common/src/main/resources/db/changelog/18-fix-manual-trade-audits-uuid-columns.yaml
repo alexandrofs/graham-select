@@ -1,5 +1,41 @@
 databaseChangeLog:
   - changeSet:
+      id: 18-fix-manual-trade-audits-uuid-columns-cleanup-id-temp
+      author: alex
+      dbms: mysql
+      preConditions:
+        - onFail: MARK_RAN
+        - and:
+            - columnExists:
+                tableName: manual_trade_audits
+                columnName: id_temp
+            - columnExists:
+                tableName: manual_trade_audits
+                columnName: id
+      changes:
+        - dropColumn:
+            tableName: manual_trade_audits
+            columnName: id_temp
+
+  - changeSet:
+      id: 18-fix-manual-trade-audits-uuid-columns-cleanup-trade-id-temp
+      author: alex
+      dbms: mysql
+      preConditions:
+        - onFail: MARK_RAN
+        - and:
+            - columnExists:
+                tableName: manual_trade_audits
+                columnName: trade_id_temp
+            - columnExists:
+                tableName: manual_trade_audits
+                columnName: trade_id
+      changes:
+        - dropColumn:
+            tableName: manual_trade_audits
+            columnName: trade_id_temp
+
+  - changeSet:
       id: 18-fix-manual-trade-audits-uuid-columns-mysql
       author: alex
       dbms: mysql
