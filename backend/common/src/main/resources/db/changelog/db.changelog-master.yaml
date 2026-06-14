@@ -44,4 +44,5 @@ databaseChangeLog:
   - include:
       file: db/changelog/22-add-eps-bvps-to-company-intrinsic-value.yaml
 
+      file: db/changelog/23-create-financial-goals-table.yaml
 

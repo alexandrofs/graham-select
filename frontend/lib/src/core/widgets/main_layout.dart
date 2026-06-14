@@ -45,7 +45,8 @@ class _Sidebar extends StatelessWidget {
       if (location.startsWith('/allocation-strategy')) return 3;
       if (location.startsWith('/graham-recommendations')) return 4;
       if (location.startsWith('/upload')) return 5;
-      if (location.startsWith('/profile')) return 6;
+      if (location.startsWith('/metas')) return 6;
+      if (location.startsWith('/profile')) return 7;
       return 0;
     }
 
@@ -69,6 +70,8 @@ class _Sidebar extends StatelessWidget {
           case 5:
             context.go('/upload');
           case 6:
+            context.go('/metas');
+          case 7:
             context.go('/profile');
         }
       },
@@ -122,6 +125,11 @@ class _Sidebar extends StatelessWidget {
           label: Text('Importação'),
         ),
         NavigationRailDestination(
+          icon: Icon(Icons.flag_outlined),
+          selectedIcon: Icon(Icons.flag),
+          label: Text('Metas'),
+        ),
+        NavigationRailDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person),
           label: Text('Meu Perfil'),
@@ -145,7 +153,8 @@ class _BottomNavBar extends StatelessWidget {
       if (location.startsWith('/allocation-strategy')) return 3;
       if (location.startsWith('/graham-recommendations')) return 4;
       if (location.startsWith('/upload')) return 5;
-      if (location.startsWith('/profile')) return 6;
+      if (location.startsWith('/metas')) return 6;
+      if (location.startsWith('/profile')) return 7;
       return 0;
     }
 
@@ -166,6 +175,8 @@ class _BottomNavBar extends StatelessWidget {
           case 5:
             context.go('/upload');
           case 6:
+            context.go('/metas');
+          case 7:
             context.go('/profile');
         }
       },
@@ -193,6 +204,10 @@ class _BottomNavBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.cloud_upload_outlined),
           label: 'Upload',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.flag_outlined),
+          label: 'Metas',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outline),

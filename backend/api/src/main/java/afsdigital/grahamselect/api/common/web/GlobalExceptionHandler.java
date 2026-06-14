@@ -3,6 +3,7 @@ package afsdigital.grahamselect.api.common.web;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionAlreadyPendingException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionNotFoundException;
 import afsdigital.grahamselect.api.upload.web.B3UploadValidationException;
+import afsdigital.grahamselect.goals.application.service.exceptions.FinancialGoalNotFoundException;
 import afsdigital.grahamselect.valuation.application.usecase.exceptions.AllocationGoalValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,22 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleDeletionNotFound(DeletionNotFoundException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Deletion Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(FinancialGoalNotFoundException.class)
+    public ProblemDetail handleFinancialGoalNotFound(FinancialGoalNotFoundException ex) {
+        log.error("Financial goal not found or access denied: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+        problem.setTitle("Financial Goal Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+        log.error("Invalid argument or business rule violation: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Bad Request");
         return problem;
     }
 }
