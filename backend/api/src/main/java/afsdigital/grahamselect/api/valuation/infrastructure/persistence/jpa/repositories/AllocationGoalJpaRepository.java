@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface AllocationGoalJpaRepository extends JpaRepository<AllocationGoalEntity, UUID> {
     List<AllocationGoalEntity> findByUserId(String userId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM AllocationGoalEntity a WHERE a.userId = :userId")
     void deleteByUserId(@Param("userId") String userId);
 }
