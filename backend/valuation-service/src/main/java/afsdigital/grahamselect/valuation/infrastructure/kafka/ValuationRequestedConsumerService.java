@@ -2,9 +2,10 @@ package afsdigital.grahamselect.valuation.infrastructure.kafka;
 
 import afsdigital.grahamselect.common.domain.entities.TopicConstants;
 import afsdigital.grahamselect.common.domain.entities.ValuationCompletedEvent;
+import afsdigital.grahamselect.common.domain.entities.ValuationFailedEvent;
 import afsdigital.grahamselect.common.domain.entities.ValuationRequestedEvent;
+import afsdigital.grahamselect.valuation.application.dto.GenerationResult;
 import afsdigital.grahamselect.valuation.application.usecase.GenerateGrahamRecommendationsUseCase;
-import afsdigital.grahamselect.valuation.domain.entities.GrahamRecommendation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -42,11 +42,12 @@ public class ValuationRequestedConsumerService {
         log.info("Consumed valuation-requested event for userId: {}", userId);
 
         try {
-            List<GrahamRecommendation> recommendations = generateGrahamRecommendationsUseCase.execute(userId);
+            GenerationResult result = generateGrahamRecommendationsUseCase.execute(userId);
 
             ValuationCompletedEvent completedEvent = new ValuationCompletedEvent(
                     userId,
-                    recommendations.size(),
+                    result.recommendations().size(),
+                    result.excludedTickers(),
                     OffsetDateTime.now(ZoneOffset.UTC).toString(),
                     UUID.randomUUID()
             );
@@ -55,8 +56,18 @@ public class ValuationRequestedConsumerService {
             log.info("Successfully processed valuation request and published completion for userId: {}", userId);
 
         } catch (Exception e) {
-            log.error("Error processing valuation-requested for userId: {}. Error: {}", userId, e.getMessage(), e);
-            throw new RuntimeException("Failed to process valuation requested event", e);
+            log.error("[VALUATION] Fatal error processing valuation-requested for userId: {}. Error: {}", userId, e.getMessage(), e);
+
+            ValuationFailedEvent failedEvent = new ValuationFailedEvent(
+                    userId,
+                    "VALUATION_CALCULATION_ERROR",
+                    "Ocorreu um erro ao calcular o valuation. Por favor, tente novamente mais tarde.",
+                    OffsetDateTime.now(ZoneOffset.UTC).toString(),
+                    UUID.randomUUID()
+            );
+
+            kafkaTemplate.send(TopicConstants.VALUATION_FAILED_TOPIC, userId, failedEvent);
         }
+
     }
 }

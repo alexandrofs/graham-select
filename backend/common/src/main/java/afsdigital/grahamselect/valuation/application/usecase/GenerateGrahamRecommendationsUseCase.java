@@ -1,6 +1,9 @@
 package afsdigital.grahamselect.valuation.application.usecase;
 
+import afsdigital.grahamselect.common.domain.entities.ExcludedTicker;
+import afsdigital.grahamselect.common.domain.entities.ValuationCompletedEvent;
 import afsdigital.grahamselect.valuation.application.dto.AllocationGoalDto;
+import afsdigital.grahamselect.valuation.application.dto.GenerationResult;
 import afsdigital.grahamselect.valuation.application.repository.AllocationGoalPort;
 import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationPort;
 import afsdigital.grahamselect.valuation.application.repository.PortfolioSnapshotPort;
@@ -14,6 +17,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +34,13 @@ public class GenerateGrahamRecommendationsUseCase {
     private final PortfolioSnapshotPort portfolioSnapshotPort;
     private final GrahamRecommendationPort grahamRecommendationPort;
 
-    public List<GrahamRecommendation> execute(String userId) {
+    public GenerationResult execute(String userId) {
         log.info("Generating Graham recommendations for user {}", userId);
 
         List<RankedCompany> rankedCompanies = rankingRepository.findTop20BestRanked();
         if (rankedCompanies == null || rankedCompanies.isEmpty()) {
             log.warn("No ranked companies found. Returning empty recommendations for user {}", userId);
-            return List.of();
+            return new GenerationResult(List.of(), List.of());
         }
 
         List<AllocationGoalDto> userGoals = allocationGoalPort.findByUserId(userId);
@@ -68,8 +73,42 @@ public class GenerateGrahamRecommendationsUseCase {
         final Map<String, BigDecimal> finalGoalsByTicker = goalsByTicker;
         final Map<String, BigDecimal> finalGoalsByClass = goalsByClass;
 
+        List<ExcludedTicker> excludedTickers = new ArrayList<>();
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+
         List<GrahamRecommendation> recommendations = rankedCompanies.stream()
-                .filter(c -> c.getMarginOfSafety() != null && c.getMarginOfSafety().compareTo(BigDecimal.ZERO) > 0)
+                .filter(c -> {
+                    // 1. Stale Data Check
+                    LocalDate updatedAt = c.getIntrinsicValueUpdatedAt();
+                    if (updatedAt == null) {
+                        log.warn("[VALUATION] No update date found for ticker {}. Treating as stale.", c.getSymbol());
+                        excludedTickers.add(new ExcludedTicker(c.getSymbol(), "STALE_DATA", "No update date found"));
+                        return false;
+                    }
+                    
+                    long daysOld = ChronoUnit.DAYS.between(updatedAt, now);
+                    if (daysOld > ValuationCompletedEvent.STALE_DATA_THRESHOLD_DAYS) {
+                        log.warn("[VALUATION] Stale data detected for ticker {}: {} days old. Threshold is {}",
+                                c.getSymbol(), daysOld, ValuationCompletedEvent.STALE_DATA_THRESHOLD_DAYS);
+                        excludedTickers.add(new ExcludedTicker(c.getSymbol(), "STALE_DATA", daysOld + " days old"));
+                        return false;
+                    }
+
+                    // 2. Margin of Safety Integrity Check
+                    if (c.getMarginOfSafety() == null || c.getMarginOfSafety().compareTo(BigDecimal.ZERO) <= 0) {
+                        return false;
+                    }
+
+                    // 3. Outlier Circuit Breaker
+                    if (c.getMarginOfSafety().compareTo(ValuationCompletedEvent.OUTLIER_MARGIN_THRESHOLD) > 0) {
+                        log.error("[VALUATION-CB] Outlier detected for ticker {}: marginOfSafety={}", c.getSymbol(), c.getMarginOfSafety());
+                        excludedTickers.add(new ExcludedTicker(c.getSymbol(), "OUTLIER_PRICE", 
+                                c.getMarginOfSafety().multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP) + "% margin"));
+                        return false;
+                    }
+
+                    return true;
+                })
                 .map(c -> {
                     String ticker = c.getSymbol().trim().toUpperCase();
                     String assetClass = inferAssetClass(ticker);
@@ -120,8 +159,13 @@ public class GenerateGrahamRecommendationsUseCase {
                 .toList();
 
         grahamRecommendationPort.saveRecommendations(userId, recommendations);
-        log.info("Generated {} recommendations for user {}", recommendations.size(), userId);
-        return recommendations;
+        log.info("Generated {} recommendations for user {}. Excluded {} tickers.", recommendations.size(), userId, excludedTickers.size());
+        
+        if (recommendations.isEmpty() && !rankedCompanies.isEmpty() && !excludedTickers.isEmpty()) {
+            log.warn("All ranked companies excluded from recommendations for user {}", userId);
+        }
+
+        return new GenerationResult(recommendations, excludedTickers);
     }
 
     private String inferAssetClass(String ticker) {
@@ -130,7 +174,7 @@ public class GenerateGrahamRecommendationsUseCase {
         }
         String t = ticker.trim().toUpperCase();
 
-        if (t.endsWith("F") && t.length() > 4 && Character.isDigit(t.charAt(t.length() - 2))) {
+        if (t.length() >= 5 && t.endsWith("F") && Character.isDigit(t.charAt(t.length() - 2))) {
             t = t.substring(0, t.length() - 1);
         }
 

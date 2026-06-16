@@ -18,38 +18,52 @@ public class SseNotificationAdapter implements NotificationPort {
     private final Map<String, List<SseEmitter>> userEmitters = new ConcurrentHashMap<>();
     
     public SseEmitter createEmitter(String userId) {
+        if (userId == null) return new SseEmitter();
+        String key = userId.trim().toLowerCase();
         SseEmitter emitter = new SseEmitter(0L); // sem timeout
-        userEmitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(emitter);
-        emitter.onCompletion(() -> removeEmitter(userId, emitter));
-        emitter.onTimeout(() -> removeEmitter(userId, emitter));
-        emitter.onError(e -> removeEmitter(userId, emitter));
+        userEmitters.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()).add(emitter);
+        emitter.onCompletion(() -> removeEmitter(key, emitter));
+        emitter.onTimeout(() -> removeEmitter(key, emitter));
+        emitter.onError(e -> removeEmitter(key, emitter));
+        log.info("Created SSE emitter for user: {}. Total for user: {}", userId, userEmitters.get(key).size());
         return emitter;
     }
     
     @Override
     public void sendPortfolioUpdate(String userId) {
-        List<SseEmitter> emitters = userEmitters.getOrDefault(userId, List.of());
-        log.info("Sending portfolio update to {} emitters for user: {}", emitters.size(), userId);
+        sendNotification(userId, "PORTFOLIO_UPDATED", Map.of("userId", userId != null ? userId : "unknown", "timestamp", OffsetDateTime.now().toString()));
+    }
+
+    @Override
+    public void sendNotification(String userId, String eventName, Object payload) {
+        if (userId == null) return;
+        String key = userId.trim().toLowerCase();
+        List<SseEmitter> emitters = userEmitters.getOrDefault(key, List.of());
+        log.info("Sending notification '{}' to {} emitters for user: {}", eventName, emitters.size(), userId);
+        
+        // CopyOnWriteArrayList is thread-safe for iteration
         emitters.forEach(emitter -> {
             try {
                 emitter.send(SseEmitter.event()
-                    .name("PORTFOLIO_UPDATED")
-                    .data(Map.of("userId", userId, "timestamp", OffsetDateTime.now().toString()))
+                        .name(eventName)
+                        .data(payload)
                 );
             } catch (IOException e) {
-                log.warn("Failed to send SSE event to user {}: {}", userId, e.getMessage());
-                removeEmitter(userId, emitter);
+                log.warn("Failed to send SSE event '{}' to user {}: {}", eventName, userId, e.getMessage());
+                removeEmitter(key, emitter);
             }
         });
     }
     
-    private void removeEmitter(String userId, SseEmitter emitter) {
-        List<SseEmitter> emitters = userEmitters.get(userId);
+    private void removeEmitter(String key, SseEmitter emitter) {
+        if (key == null) return;
+        List<SseEmitter> emitters = userEmitters.get(key);
         if (emitters != null) {
             emitters.remove(emitter);
             if (emitters.isEmpty()) {
-                userEmitters.remove(userId);
+                userEmitters.remove(key);
             }
+            log.info("Removed SSE emitter for key: {}. Remaining for user: {}", key, emitters.size());
         }
     }
 }
