@@ -54,25 +54,29 @@ class FlowMockGrahamRecommendationRepository implements GrahamRecommendationRepo
 class FlowMockGrahamRecommendationProvider extends GrahamRecommendationProvider {
   FlowMockGrahamRecommendationProvider({required super.repository});
 
-  bool manualIsTriggering = false;
-  RecommendationState manualState = RecommendationState.success;
-  List<GrahamRecommendation> manualRecommendations = [];
-  String? manualErrorMessage;
+  bool _manualIsTriggering = false;
+  RecommendationState _manualState = RecommendationState.success;
+  List<GrahamRecommendation> _manualRecommendations = [];
+  String? _manualErrorMessage;
 
   @override
-  bool get isTriggering => manualIsTriggering;
+  bool get isTriggering => _manualIsTriggering;
+  set manualIsTriggering(bool v) { _manualIsTriggering = v; notifyListeners(); }
 
   @override
-  RecommendationState get state => manualState;
+  RecommendationState get state => _manualState;
+  set manualState(RecommendationState v) { _manualState = v; notifyListeners(); }
 
   @override
-  List<GrahamRecommendation> get recommendations => manualRecommendations;
+  List<GrahamRecommendation> get recommendations => _manualRecommendations;
+  set manualRecommendations(List<GrahamRecommendation> v) { _manualRecommendations = v; notifyListeners(); }
 
   @override
-  String? get errorMessage => manualErrorMessage;
-
+  String? get errorMessage => _manualErrorMessage;
   @override
-  set errorMessage(String? value) => manualErrorMessage = value;
+  set errorMessage(String? v) { _manualErrorMessage = v; notifyListeners(); }
+  
+  set manualErrorMessage(String? v) { _manualErrorMessage = v; notifyListeners(); }
 
   @override
   Future<void> fetchRecommendations() async {
@@ -82,11 +86,10 @@ class FlowMockGrahamRecommendationProvider extends GrahamRecommendationProvider 
   @override
   Future<void> triggerCalculation(String userId) async {
     manualIsTriggering = true;
-    notifyListeners();
-    // Simulate the async update that would come from SSE
+    // Simulate the async update
     Future.delayed(const Duration(milliseconds: 500), () {
-      manualIsTriggering = false;
-      manualRecommendations = [
+      _manualIsTriggering = false;
+      _manualRecommendations = [
         const GrahamRecommendation(
           ticker: 'PETR4',
           currentPrice: 30.0,
@@ -108,6 +111,7 @@ class FlowMockGrahamRecommendationProvider extends GrahamRecommendationProvider 
           recommendationScore: 8.300,
         )
       ];
+      _manualState = RecommendationState.success;
       notifyListeners();
     });
   }
@@ -256,7 +260,7 @@ void main() {
 
       await tester.tap(reloadButtonFinder);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100)); // Garantir rebuild
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Falha ao carregar recomendações:'), findsNothing);
       expect(find.text('PETR4'), findsOneWidget);
