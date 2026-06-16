@@ -24,16 +24,27 @@ public class AllocationGoalJpaAdapter implements AllocationGoalPort {
     @Override
     @Transactional
     public void saveAllocationGoals(String userId, List<AllocationGoalDto> goals) {
-        userRepository.findByGoogleSubForWrite(userId);
+        userRepository.findByGoogleSubForWrite(userId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         repository.deleteByUserId(userId);
 
         if (goals == null || goals.isEmpty()) {
             return;
         }
 
+        List<AllocationGoalDto> uniqueGoals = goals.stream()
+            .collect(java.util.stream.Collectors.toMap(
+                dto -> dto.goalType() + "#" + dto.targetKey(),
+                dto -> dto,
+                (existing, replacement) -> replacement
+            ))
+            .values()
+            .stream()
+            .toList();
+
         LocalDateTime nowUtc = LocalDateTime.now(ZoneOffset.UTC);
 
-        List<AllocationGoalEntity> entities = goals.stream()
+        List<AllocationGoalEntity> entities = uniqueGoals.stream()
             .map(dto -> AllocationGoalEntity.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
