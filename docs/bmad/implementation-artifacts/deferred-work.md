@@ -8,7 +8,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 4-2-premium-allocation-strategy-config.md (2026-06-08)
 
-- Risco de Race Condition no Fluxo de Delete+Insert do JPA Adapter [backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/AllocationGoalJpaAdapter.java:62] — A abordagem de deletar todas as metas de um usuário e depois inserir as novas pode sofrer com condições de corrida se duas transações concorrentes executarem para o mesmo userId simultaneamente.
+(Nenhum item pendente)
 
 ## Deferred from: code review of 4-3-graham-valuation-engine.md (2026-06-12)
 
@@ -19,7 +19,6 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 ## Deferred from: code review of 4-4-explainable-ai-reasoning-box.md (2026-06-13)
 
 - Risco de Quebra em Tempo de Execução na Desserialização do JSON [frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart:584] — O cast direto do JSON num? as double? pode falhar se o Java serializar como String.
-- Ausência de Rollback nas Migrações Liquibase [backend/common/src/main/resources/db/changelog/21-add-eps-bvps-to-graham-recommendations.yaml:1] — A migração adicionando colunas não possui instruções de rollback declaradas.
 - Rolagem Conflitante no Bottom Sheet [frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart:1] — Conflito potencial de gestos entre o SingleChildScrollView interno e a folha deslizável nativa.
 
 ## Deferred from: code review of 5-1-wealth-income-goal-setup.md (2026-06-13)

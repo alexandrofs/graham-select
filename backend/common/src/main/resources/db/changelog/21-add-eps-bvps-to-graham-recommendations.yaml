@@ -16,3 +16,10 @@ databaseChangeLog:
                   type: DECIMAL(18,4)
                   constraints:
                     nullable: true
+      rollback:
+        - dropColumn:
+            tableName: graham_recommendations
+            columnName: eps_used
+        - dropColumn:
+            tableName: graham_recommendations
+            columnName: bvps_used
