@@ -18,6 +18,8 @@ import 'package:frontend/src/features/portfolio/domain/entities/monthly_evolutio
 class ManualMockGoalsRepository implements GoalsRepository {
   FinancialGoal? goal;
   bool shouldThrowError = false;
+  int createGoalCallCount = 0;
+  int updateGoalCallCount = 0;
 
   @override
   Future<FinancialGoal?> fetchGoal() async {
@@ -29,6 +31,7 @@ class ManualMockGoalsRepository implements GoalsRepository {
 
   @override
   Future<FinancialGoal> createGoal(FinancialGoal newGoal) async {
+    createGoalCallCount++;
     if (shouldThrowError) {
       throw Exception('Erro ao criar');
     }
@@ -38,6 +41,7 @@ class ManualMockGoalsRepository implements GoalsRepository {
 
   @override
   Future<FinancialGoal> updateGoal(String id, FinancialGoal updatedGoal) async {
+    updateGoalCallCount++;
     if (shouldThrowError) {
       throw Exception('Erro ao atualizar');
     }
@@ -234,6 +238,29 @@ void main() {
       expect(find.text('O prazo deve estar entre 1 e 50 anos'), findsOneWidget);
 
       // Desmonta a árvore para limpar o foco e os timers dos cursores dos TextFields
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('should prevent duplicate submissions when Save Button is tapped multiple times quickly', (tester) async {
+      // Act
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Enter valid values
+      await tester.enterText(find.widgetWithText(TextFormField, 'Valor Alvo'), '20000000');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Aporte Mensal Pretendido'), '100000');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Prazo Estimado (em anos)'), '15');
+      await tester.pump();
+
+      // Tap multiple times quickly
+      await tester.tap(find.text('Salvar Meta'));
+      await tester.tap(find.text('Salvar Meta'));
+      await tester.pump(); // Start execution but don't settle yet
+
+      // Verify that createGoal was only called once
+      expect(mockGoalsRepository.createGoalCallCount, 1);
+
+      await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox());
     });
   });
