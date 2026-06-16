@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Builder
 @Data
@@ -16,5 +17,6 @@ public class RankedCompany {
     private BigDecimal marginOfSafety;
     private BigDecimal eps;
     private BigDecimal bvps;
+    private LocalDate intrinsicValueUpdatedAt;
 
 }

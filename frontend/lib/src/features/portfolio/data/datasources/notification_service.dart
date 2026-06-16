@@ -21,12 +21,15 @@ class NotificationService {
     return _controller!.stream;
   }
 
+  String _buffer = '';
+
   Future<void> connect() async {
     if (_isDisposed) return;
     
     // Cancela inscrição anterior se houver
     await _subscription?.cancel();
     _subscription = null;
+    _buffer = '';
 
     try {
       final response = await _apiClient.dio.get<ResponseBody>(
@@ -48,31 +51,15 @@ class NotificationService {
       _subscription = response.data?.stream.listen(
         (data) {
           final text = utf8.decode(data);
-          // O formato SSE do Spring SseEmitter envia eventos linha por linha:
-          // event:PORTFOLIO_UPDATED
-          // data:{"userId":"...","timestamp":"..."}
-          // Vamos verificar se a mensagem contém PORTFOLIO_UPDATED
-          if (text.contains('PORTFOLIO_UPDATED')) {
-            String userId = '';
-            try {
-              final lines = text.split('\n');
-              for (final line in lines) {
-                if (line.startsWith('data:')) {
-                  final dataJson = line.substring(5).trim();
-                  final parsed = jsonDecode(dataJson);
-                  userId = parsed['userId'] as String? ?? '';
-                  break;
-                }
-              }
-            } catch (_) {
-              // Fallback
-            }
-
-            _controller?.add(PortfolioNotificationEvent(
-              userId: userId,
-              event: 'PORTFOLIO_UPDATED',
-              timestamp: DateTime.now(),
-            ));
+          _buffer += text;
+          
+          // Processa eventos completos separados por duas quebras de linha
+          while (_buffer.contains('\n\n')) {
+            final eventEnd = _buffer.indexOf('\n\n');
+            final eventBlock = _buffer.substring(0, eventEnd);
+            _buffer = _buffer.substring(eventEnd + 2);
+            
+            _processEventBlock(eventBlock);
           }
         },
         onError: (err) {
@@ -87,6 +74,34 @@ class NotificationService {
     } catch (_) {
       _isConnected = false;
       _handleReconnect();
+    }
+  }
+
+  void _processEventBlock(String block) {
+    final lines = block.split('\n');
+    String? currentEvent;
+    
+    for (final line in lines) {
+      if (line.startsWith('event:')) {
+        currentEvent = line.substring(6).trim();
+      } else if (line.startsWith('data:')) {
+        final dataJson = line.substring(5).trim();
+        try {
+          final parsed = jsonDecode(dataJson);
+          final userId = parsed['userId'] as String? ?? '';
+          
+          if (currentEvent != null) {
+            _controller?.add(PortfolioNotificationEvent(
+              userId: userId,
+              event: currentEvent,
+              timestamp: DateTime.now(),
+              payload: parsed,
+            ));
+          }
+        } catch (_) {
+          // Log or ignore malformed JSON
+        }
+      }
     }
   }
 

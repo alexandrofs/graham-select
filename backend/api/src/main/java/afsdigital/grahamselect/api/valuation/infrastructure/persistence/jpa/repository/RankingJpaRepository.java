@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface RankingJpaRepository extends JpaRepository<RankedCompanyEntity, String> {
 
-    @Query(value = "SELECT c.ticker as symbol, c.name, iv.intrinsic_value as intrinsic_value, sp.price as current_price, (iv.intrinsic_value / sp.price) - 1 as margin_of_safety "
+    @Query(value = "SELECT c.ticker as symbol, c.name, iv.intrinsic_value as intrinsic_value, sp.price as current_price, (iv.intrinsic_value / sp.price) - 1 as margin_of_safety, iv.calculation_date as intrinsic_value_updated_at "
             +
             "FROM company_intrinsic_value iv " +
             "JOIN (SELECT company_id, MAX(calculation_date) as latest_date FROM company_intrinsic_value GROUP BY company_id) latest_iv " +

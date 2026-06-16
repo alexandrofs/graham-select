@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../auth/data/auth_repository.dart';
 import '../providers/graham_recommendation_provider.dart';
 import '../../domain/entities/graham_recommendation.dart';
 import '../widgets/reasoning_box.dart';
@@ -400,17 +401,98 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
     );
   }
 
+  Widget _buildExcludedTickersBanner(GrahamRecommendationProvider provider) {
+    if (provider.excludedTickers.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.amber, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '${provider.excludedTickers.length} ativos foram ocultados devido a dados obsoletos ou preços inconsistentes.',
+              style: const TextStyle(fontSize: 12, color: Colors.amber),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _showExcludedDetails(provider.excludedTickers);
+            },
+            child: const Text('Detalhes', style: TextStyle(fontSize: 12)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showExcludedDetails(List<dynamic> excluded) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ativos Excluídos do Valuation',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Os seguintes ativos foram removidos do ranking para garantir a integridade da sua análise:',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: excluded.length,
+                  itemBuilder: (context, index) {
+                    final item = excluded[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                      title: Text(item['ticker'] ?? 'Unknown'),
+                      subtitle: Text('${item['reason']}: ${item['detail']}'),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildContent(GrahamRecommendationProvider provider) {
-    if (provider.recommendations.isEmpty) {
+    if (provider.recommendations.isEmpty && provider.excludedTickers.isEmpty) {
       return _buildEmptyState();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: provider.recommendations.length,
-      itemBuilder: (context, index) {
-        return _buildRecommendationCard(provider.recommendations[index]);
-      },
+    return Column(
+      children: [
+        _buildExcludedTickersBanner(provider),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            itemCount: provider.recommendations.length,
+            itemBuilder: (context, index) {
+              return _buildRecommendationCard(provider.recommendations[index]);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -483,7 +565,8 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
               onPressed: provider.isTriggering
                   ? null
                   : () {
-                      provider.triggerCalculation();
+                      final userId = context.read<AuthRepository>().currentUser?.uid ?? '';
+                      provider.triggerCalculation(userId);
                     },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

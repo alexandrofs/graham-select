@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -22,5 +23,6 @@ public class RankedCompanyEntity {
     private BigDecimal intrinsicValue;
     private BigDecimal currentPrice;
     private BigDecimal marginOfSafety;
+    private LocalDate intrinsicValueUpdatedAt;
 
 }

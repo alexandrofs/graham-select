@@ -259,16 +259,25 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
           ),
         ),
         ChangeNotifierProvider(create: (_) => RankingProvider(getRankingUseCase)),
+        Provider<NotificationService>(
+          create: (_) => NotificationService(effectiveApiClient),
+          dispose: (_, service) => service.dispose(),
+        ),
         ChangeNotifierProvider(
-          create: (_) => GrahamRecommendationProvider(repository: grahamRecommendationRepository),
+          create: (context) => GrahamRecommendationProvider(
+            repository: grahamRecommendationRepository,
+            notificationService: context.read<NotificationService>(),
+          ),
         ),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(
-          create: (_) {
-            final notificationService = NotificationService(effectiveApiClient);
-            final provider = PortfolioProvider(portfolioRepository, notificationService);
+          create: (context) {
+            final provider = PortfolioProvider(
+              portfolioRepository, 
+              context.read<NotificationService>(),
+            );
             provider.startListeningForUpdates();
             return provider;
           },

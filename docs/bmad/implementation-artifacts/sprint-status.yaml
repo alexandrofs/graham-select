@@ -68,6 +68,7 @@ development_status:
   4-2-premium-allocation-strategy-config: done
   4-3-graham-valuation-engine: done
   4-4-explainable-ai-reasoning-box: done
+  spec-fix-valuation-circuit-breaker: done
   epic-4-retrospective: optional
   epic-5: in-progress
   5-1-wealth-income-goal-setup: done
