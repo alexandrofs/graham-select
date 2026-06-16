@@ -2,6 +2,7 @@ package afsdigital.grahamselect.api.valuation.infrastructure.persistence;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities.AllocationGoalEntity;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repositories.AllocationGoalJpaRepository;
+import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import afsdigital.grahamselect.valuation.application.dto.AllocationGoalDto;
 import afsdigital.grahamselect.valuation.application.repository.AllocationGoalPort;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,12 @@ import java.util.UUID;
 public class AllocationGoalJpaAdapter implements AllocationGoalPort {
 
     private final AllocationGoalJpaRepository repository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
     public void saveAllocationGoals(String userId, List<AllocationGoalDto> goals) {
+        userRepository.findByGoogleSubForWrite(userId);
         repository.deleteByUserId(userId);
 
         if (goals == null || goals.isEmpty()) {
