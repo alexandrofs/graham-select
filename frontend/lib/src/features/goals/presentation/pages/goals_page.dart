@@ -49,6 +49,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
 
   String _goalType = 'PATRIMONY_TARGET';
   bool _initialized = false;
+  bool _isSubmitting = false;
   late GoalsProvider _goalsProvider;
   late AnimationController _shimmerController;
   late Animation<double> _shimmerAnimation;
@@ -112,41 +113,54 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
   }
 
   Future<void> _submitForm() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final double targetValue = _parseMoneyValue(_targetValueController.text);
-    final double monthlyContribution = _parseMoneyValue(_contributionController.text);
-    final int estimatedYears = int.parse(_yearsController.text);
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    final goalsProvider = context.read<GoalsProvider>();
-    await goalsProvider.saveGoal(
-      goalType: _goalType,
-      targetValue: targetValue,
-      monthlyContribution: monthlyContribution,
-      estimatedYears: estimatedYears,
-    );
+    try {
+      final double targetValue = _parseMoneyValue(_targetValueController.text);
+      final double monthlyContribution = _parseMoneyValue(_contributionController.text);
+      final int estimatedYears = int.parse(_yearsController.text);
 
-    if (!mounted) return;
-
-    if (goalsProvider.status == GoalsStatus.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Meta salva com sucesso ✅'),
-          backgroundColor: Color(0xFF10B981),
-          duration: Duration(seconds: 1),
-        ),
+      final goalsProvider = context.read<GoalsProvider>();
+      await goalsProvider.saveGoal(
+        goalType: _goalType,
+        targetValue: targetValue,
+        monthlyContribution: monthlyContribution,
+        estimatedYears: estimatedYears,
       );
-      // Recarrega o sumário do portfólio para atualizar o cálculo de diferença
-      context.read<PortfolioProvider>().loadSummary();
-    } else if (goalsProvider.status == GoalsStatus.error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(goalsProvider.errorMessage ?? 'Erro ao salvar meta'),
-          backgroundColor: const Color(0xFFEF4444),
-        ),
-      );
+
+      if (!mounted) return;
+
+      if (goalsProvider.status == GoalsStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Meta salva com sucesso ✅'),
+            backgroundColor: Color(0xFF10B981),
+            duration: Duration(seconds: 1),
+          ),
+        );
+        // Recarrega o sumário do portfólio para atualizar o cálculo de diferença
+        context.read<PortfolioProvider>().loadSummary();
+      } else if (goalsProvider.status == GoalsStatus.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(goalsProvider.errorMessage ?? 'Erro ao salvar meta'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -309,7 +323,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                         width: double.infinity,
                         height: 48,
                         child: FilledButton(
-                          onPressed: goalsProvider.status == GoalsStatus.loading
+                          onPressed: (goalsProvider.status == GoalsStatus.loading || _isSubmitting)
                               ? null
                               : _submitForm,
                           style: FilledButton.styleFrom(
@@ -318,7 +332,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: goalsProvider.status == GoalsStatus.loading
+                          child: (goalsProvider.status == GoalsStatus.loading || _isSubmitting)
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
