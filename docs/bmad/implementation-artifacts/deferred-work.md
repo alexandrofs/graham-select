@@ -24,4 +24,4 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 5-1-wealth-income-goal-setup.md (2026-06-13)
 
-- Falta de controle de múltiplos cliques (Debounce) no formulário do Frontend [frontend/lib/src/features/goals/presentation/pages/goals_page.dart:1456] — O botão de salvar é desabilitado ao entrar no estado loading, mas cliques simultâneos extremamente rápidos podem disparar requisições concorrentes antes da atualização de estado.
+(Nenhum item pendente)
