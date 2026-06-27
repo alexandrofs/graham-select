@@ -17,5 +17,6 @@ public abstract class BaseRepositoryIT {
         registry.add("spring.liquibase.enabled", () -> true);
         registry.add("spring.liquibase.change-log", () -> "classpath:db/changelog/db.changelog-master.yaml");
         registry.add("spring.kafka.listener.auto-startup", () -> false);
+        registry.add("spring.kafka.consumer.group-id", () -> "test-group");
     }
 }
