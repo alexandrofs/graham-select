@@ -8,7 +8,6 @@ import 'package:frontend/src/features/ranking/presentation/pages/graham_recommen
 import 'package:frontend/src/features/ranking/presentation/providers/graham_recommendation_provider.dart';
 import 'package:frontend/src/features/auth/data/auth_repository.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 class MockAuthRepository extends Mock implements AuthRepository {
@@ -73,7 +72,6 @@ class FlowMockGrahamRecommendationProvider extends GrahamRecommendationProvider 
 
   @override
   String? get errorMessage => _manualErrorMessage;
-  @override
   set errorMessage(String? v) { _manualErrorMessage = v; notifyListeners(); }
   
   set manualErrorMessage(String? v) { _manualErrorMessage = v; notifyListeners(); }
