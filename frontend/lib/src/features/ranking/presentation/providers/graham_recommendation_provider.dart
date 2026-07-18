@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../../../portfolio/data/datasources/notification_service.dart';
 import '../../domain/entities/graham_recommendation.dart';
 import '../../domain/repositories/graham_recommendation_repository.dart';
 
@@ -6,13 +8,18 @@ enum RecommendationState { idle, loading, success, error }
 
 class GrahamRecommendationProvider extends ChangeNotifier {
   final GrahamRecommendationRepository repository;
+  final NotificationService? notificationService;
 
   RecommendationState _state = RecommendationState.idle;
   List<GrahamRecommendation> _recommendations = [];
   String? _errorMessage;
   bool _isTriggering = false;
+  StreamSubscription? _notificationSubscription;
 
-  GrahamRecommendationProvider({required this.repository});
+  GrahamRecommendationProvider({
+    required this.repository,
+    this.notificationService,
+  });
 
   RecommendationState get state => _state;
   List<GrahamRecommendation> get recommendations => _recommendations;
@@ -31,61 +38,87 @@ class GrahamRecommendationProvider extends ChangeNotifier {
       _setState(RecommendationState.error);
     }
   }
+List<dynamic> _excludedTickers = [];
+List<dynamic> get excludedTickers => _excludedTickers;
 
-  Future<void> triggerCalculation() async {
-    _isTriggering = true;
-    _errorMessage = null;
-    notifyListeners();
- 
-    try {
-      await repository.triggerCalculation();
-      
-      final oldRecs = List<GrahamRecommendation>.from(_recommendations);
-      List<GrahamRecommendation> freshRecs = oldRecs;
- 
-      for (int i = 0; i < 5; i++) {
-        await Future.delayed(const Duration(seconds: 1));
-        freshRecs = await repository.getRecommendations();
-        if (!_areListsEqual(oldRecs, freshRecs)) {
-          break;
+Future<void> triggerCalculation(String currentUserId) async {
+  if (_isTriggering) return;
+
+  _isTriggering = true;
+  _errorMessage = null;
+  _excludedTickers = [];
+  notifyListeners();
+
+  try {
+    final completer = Completer<void>();
+
+    // 1. Subscreve ANTES de disparar o trigger (Decision 3)
+    if (notificationService != null && notificationService!.isConnected) {
+      _notificationSubscription?.cancel();
+      _notificationSubscription = notificationService!.notificationStream.listen((event) {
+        // 2. Filtra por userId (Achado #5) - Comparação insensível a maiúsculas/minúsculas
+        if (event.userId.trim().toLowerCase() != currentUserId.trim().toLowerCase()) return;
+
+        if (event.event == 'VALUATION_COMPLETED') {
+          _excludedTickers = event.payload?['excludedTickers'] ?? [];
+          if (!completer.isCompleted) completer.complete();
+        } else if (event.event == 'VALUATION_FAILED') {
+          // 5. Extrai mensagem do payload (Acceptance Auditor finding)
+          final msg = event.payload?['message'] ?? 'O recálculo do valuation falhou. Tente novamente mais tarde.';
+          if (!completer.isCompleted) completer.completeError(msg);
         }
-      }
- 
-      _recommendations = freshRecs;
-      _setState(RecommendationState.success);
-    } catch (e) {
-      _errorMessage = e.toString();
-      _setState(RecommendationState.error);
-    } finally {
-      _isTriggering = false;
-      notifyListeners();
+      });
     }
-  }
- 
-  bool _areListsEqual(List<GrahamRecommendation> a, List<GrahamRecommendation> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i].ticker != b[i].ticker ||
-          a[i].currentPrice != b[i].currentPrice ||
-          a[i].intrinsicValue != b[i].intrinsicValue ||
-          a[i].marginOfSafety != b[i].marginOfSafety ||
-          a[i].recommendationScore != b[i].recommendationScore) {
-        return false;
-      }
+
+    // 2. Dispara o cálculo
+    await repository.triggerCalculation();
+
+    if (notificationService != null && notificationService!.isConnected) {
+      // 3. Aguarda evento via SSE com timeout de 30s
+      await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          _notificationSubscription?.cancel();
+          throw TimeoutException('O processamento está demorando mais que o esperado. As recomendações serão atualizadas automaticamente em breve.');
+        },
+      );
+      await fetchRecommendations();
+    } else {
+      // 4. Fallback caso SSE não esteja disponível (Achado #6)
+      await Future.delayed(const Duration(seconds: 3)); // Fix to 3s
+      await fetchRecommendations();
     }
-    return true;
+
+    _setState(RecommendationState.success);
+  } catch (e) {
+    _errorMessage = e.toString().replaceFirst('Exception: ', '');
+    _setState(RecommendationState.error);
+  } finally {
+    _isTriggering = false;
+    _notificationSubscription?.cancel();
+    _notificationSubscription = null;
+    notifyListeners();
   }
- 
+}
+
   void reset() {
     _state = RecommendationState.idle;
     _recommendations = [];
     _errorMessage = null;
     _isTriggering = false;
+    _notificationSubscription?.cancel();
+    _notificationSubscription = null;
     notifyListeners();
   }
  
   void _setState(RecommendationState newState) {
     _state = newState;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
   }
 }
