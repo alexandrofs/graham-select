@@ -2,7 +2,7 @@
 title: 'Circuit Breaker e Validação de Integridade no Motor de Valuation Graham'
 type: 'enhancement'
 created: '2026-06-13T16:46:00-03:00'
-status: 'review'
+status: 'done'
 baseline_commit: 310100c521ed1bd296df02c00cd2a07cab605524
 context:
   - '{project-root}/docs/bmad/project-context.md'
@@ -118,6 +118,23 @@ context:
   - Todos os ativos excluídos → `GenerationResult.recommendations` vazio; `excludedTickers` com todos os ativos
 - [x] `ValuationRequestedConsumerServiceTest.java` — Adicionar teste: exceção no use case → evento `valuation-failed` publicado; log ERROR verificado.
 
+### Review Findings
+
+- [x] [Review][Decision] Inclusão de arquivos e alterações do módulo de Metas (Goals Feature) nesta branch — Resolvido pelo usuário (decidido manter na branch)
+- [x] [Review][Patch] Condição de corrida e orfandade de conexões no cleanup de emissores SSE [SseNotificationAdapter.java:58-68]
+- [x] [Review][Patch] Captura e ocultação de exceção (swallowing) no consumer do Kafka [ValuationRequestedConsumerService.java:42-56]
+- [x] [Review][Patch] Efeitos colaterais (mutação de estado) dentro do Stream filter do Use Case [GenerateGrahamRecommendationsUseCase.java:322-381]
+- [x] [Review][Patch] Ausência de mapeamento dos campos eps e bvps no repositório de ranking do banco de dados [RankingRepositoryImpl.java]
+- [x] [Review][Patch] Filtro de ID de usuário sensível a maiúsculas/minúsculas no listener do frontend [graham_recommendation_provider.dart:1035]
+- [x] [Review][Patch] Possível vazamento de recursos com userId nulo em SseNotificationAdapter.createEmitter [SseNotificationAdapter.java:8-9]
+- [x] [Review][Patch] Código morto (dead code) na chamada a sendNotification em sendPortfolioUpdate [SseNotificationAdapter.java:28-33]
+- [x] [Review][Patch] Ausência de finalização explícita do SseEmitter após erro de escrita (IOException) [SseNotificationAdapter.java:47-52]
+- [x] [Review][Patch] Risco de quebra de caracteres multi-byte UTF-8 no streaming SSE do Flutter [notification_service.dart:53]
+- [x] [Review][Patch] Risco de divisão por zero na query nativa de ranking [RankingJpaRepository.java:179-183]
+- [x] [Review][Patch] Inclusão e ordenação de registros com margem de segurança nula no topo do ranking [RankingJpaRepository.java:179-183]
+- [x] [Review][Patch] Inconsistência de casing e espaços no cruzamento de alocações por ticker [GenerateGrahamRecommendationsUseCase.java:356-360]
+- [x] [Review][Patch] Risco de crash no app Flutter devido ao compartilhamento de Stream de conexão única [notification_service.dart]
+
 ## Dev Agent Record
 
 ### Implementation Plan
@@ -164,4 +181,4 @@ context:
 
 ## Status
 
-**Current Status:** review
+**Current Status:** done

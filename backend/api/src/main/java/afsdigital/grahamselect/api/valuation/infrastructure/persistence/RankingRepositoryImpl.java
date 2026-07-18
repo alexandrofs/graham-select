@@ -27,6 +27,8 @@ public class RankingRepositoryImpl implements RankingRepository {
                         .currentPrice(entity.getCurrentPrice())
                         .marginOfSafety(entity.getMarginOfSafety())
                         .intrinsicValueUpdatedAt(entity.getIntrinsicValueUpdatedAt())
+                        .eps(entity.getEps())
+                        .bvps(entity.getBvps())
                         .build())
                 .toList();
     }

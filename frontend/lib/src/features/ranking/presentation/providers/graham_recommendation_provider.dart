@@ -56,8 +56,8 @@ Future<void> triggerCalculation(String currentUserId) async {
     if (notificationService != null && notificationService!.isConnected) {
       _notificationSubscription?.cancel();
       _notificationSubscription = notificationService!.notificationStream.listen((event) {
-        // 2. Filtra por userId (Achado #5)
-        if (event.userId != currentUserId) return;
+        // 2. Filtra por userId (Achado #5) - Comparação insensível a maiúsculas/minúsculas
+        if (event.userId.trim().toLowerCase() != currentUserId.trim().toLowerCase()) return;
 
         if (event.event == 'VALUATION_COMPLETED') {
           _excludedTickers = event.payload?['excludedTickers'] ?? [];

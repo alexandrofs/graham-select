@@ -24,5 +24,7 @@ public class RankedCompanyEntity {
     private BigDecimal currentPrice;
     private BigDecimal marginOfSafety;
     private LocalDate intrinsicValueUpdatedAt;
+    private BigDecimal eps;
+    private BigDecimal bvps;
 
 }

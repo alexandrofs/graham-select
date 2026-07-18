@@ -70,45 +70,48 @@ public class GenerateGrahamRecommendationsUseCase {
                     ));
         }
 
-        final Map<String, BigDecimal> finalGoalsByTicker = goalsByTicker;
-        final Map<String, BigDecimal> finalGoalsByClass = goalsByClass;
-
         List<ExcludedTicker> excludedTickers = new ArrayList<>();
         LocalDate now = LocalDate.now(ZoneOffset.UTC);
 
-        List<GrahamRecommendation> recommendations = rankedCompanies.stream()
-                .filter(c -> {
-                    // 1. Stale Data Check
-                    LocalDate updatedAt = c.getIntrinsicValueUpdatedAt();
-                    if (updatedAt == null) {
-                        log.warn("[VALUATION] No update date found for ticker {}. Treating as stale.", c.getSymbol());
-                        excludedTickers.add(new ExcludedTicker(c.getSymbol(), "STALE_DATA", "No update date found"));
-                        return false;
-                    }
-                    
-                    long daysOld = ChronoUnit.DAYS.between(updatedAt, now);
-                    if (daysOld > ValuationCompletedEvent.STALE_DATA_THRESHOLD_DAYS) {
-                        log.warn("[VALUATION] Stale data detected for ticker {}: {} days old. Threshold is {}",
-                                c.getSymbol(), daysOld, ValuationCompletedEvent.STALE_DATA_THRESHOLD_DAYS);
-                        excludedTickers.add(new ExcludedTicker(c.getSymbol(), "STALE_DATA", daysOld + " days old"));
-                        return false;
-                    }
+        List<RankedCompany> filteredCompanies = new ArrayList<>();
+        for (RankedCompany c : rankedCompanies) {
+            if (c == null) continue;
+            // 1. Stale Data Check
+            LocalDate updatedAt = c.getIntrinsicValueUpdatedAt();
+            if (updatedAt == null) {
+                log.warn("[VALUATION] No update date found for ticker {}. Treating as stale.", c.getSymbol());
+                excludedTickers.add(new ExcludedTicker(c.getSymbol(), "STALE_DATA", "No update date found"));
+                continue;
+            }
+            
+            long daysOld = ChronoUnit.DAYS.between(updatedAt, now);
+            if (daysOld > ValuationCompletedEvent.STALE_DATA_THRESHOLD_DAYS) {
+                log.warn("[VALUATION] Stale data detected for ticker {}: {} days old. Threshold is {}",
+                        c.getSymbol(), daysOld, ValuationCompletedEvent.STALE_DATA_THRESHOLD_DAYS);
+                excludedTickers.add(new ExcludedTicker(c.getSymbol(), "STALE_DATA", daysOld + " days old"));
+                continue;
+            }
 
-                    // 2. Margin of Safety Integrity Check
-                    if (c.getMarginOfSafety() == null || c.getMarginOfSafety().compareTo(BigDecimal.ZERO) <= 0) {
-                        return false;
-                    }
+            // 2. Margin of Safety Integrity Check
+            if (c.getMarginOfSafety() == null || c.getMarginOfSafety().compareTo(BigDecimal.ZERO) <= 0) {
+                continue;
+            }
 
-                    // 3. Outlier Circuit Breaker
-                    if (c.getMarginOfSafety().compareTo(ValuationCompletedEvent.OUTLIER_MARGIN_THRESHOLD) > 0) {
-                        log.error("[VALUATION-CB] Outlier detected for ticker {}: marginOfSafety={}", c.getSymbol(), c.getMarginOfSafety());
-                        excludedTickers.add(new ExcludedTicker(c.getSymbol(), "OUTLIER_PRICE", 
-                                c.getMarginOfSafety().multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP) + "% margin"));
-                        return false;
-                    }
+            // 3. Outlier Circuit Breaker
+            if (c.getMarginOfSafety().compareTo(ValuationCompletedEvent.OUTLIER_MARGIN_THRESHOLD) > 0) {
+                log.error("[VALUATION-CB] Outlier detected for ticker {}: marginOfSafety={}", c.getSymbol(), c.getMarginOfSafety());
+                excludedTickers.add(new ExcludedTicker(c.getSymbol(), "OUTLIER_PRICE", 
+                        c.getMarginOfSafety().multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP) + "% margin"));
+                continue;
+            }
 
-                    return true;
-                })
+            filteredCompanies.add(c);
+        }
+
+        final Map<String, BigDecimal> finalGoalsByTicker = goalsByTicker;
+        final Map<String, BigDecimal> finalGoalsByClass = goalsByClass;
+
+        List<GrahamRecommendation> recommendations = filteredCompanies.stream()
                 .map(c -> {
                     String ticker = c.getSymbol().trim().toUpperCase();
                     String assetClass = inferAssetClass(ticker);
@@ -122,7 +125,7 @@ public class GenerateGrahamRecommendationsUseCase {
                         }
                     }
 
-                    BigDecimal currentPct = currentAllocation.getOrDefault(c.getSymbol(), BigDecimal.ZERO);
+                    BigDecimal currentPct = currentAllocation.getOrDefault(ticker, BigDecimal.ZERO);
                     BigDecimal allocationGap = targetPct.subtract(currentPct);
                     BigDecimal maxGap = allocationGap.max(BigDecimal.ZERO);
 

@@ -67,6 +67,7 @@ public class ValuationRequestedConsumerService {
             );
 
             kafkaTemplate.send(TopicConstants.VALUATION_FAILED_TOPIC, userId, failedEvent);
+            throw new RuntimeException("Failed to process valuation requested event", e);
         }
 
     }

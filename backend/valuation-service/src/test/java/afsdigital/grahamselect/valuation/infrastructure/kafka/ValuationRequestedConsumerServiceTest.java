@@ -60,7 +60,9 @@ public class ValuationRequestedConsumerServiceTest {
 
         when(generateGrahamRecommendationsUseCase.execute(userId)).thenThrow(new RuntimeException("Fatal error"));
 
-        valuationRequestedConsumerService.consume(record);
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            valuationRequestedConsumerService.consume(record);
+        });
 
         verify(kafkaTemplate).send(eq(TopicConstants.VALUATION_FAILED_TOPIC), eq(userId), argThat(payload -> {
             ValuationFailedEvent failedEvent = (ValuationFailedEvent) payload;

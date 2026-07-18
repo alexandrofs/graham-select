@@ -7,7 +7,7 @@ import '../../domain/entities/portfolio_notification_event.dart';
 class NotificationService {
   final ApiClient _apiClient;
   StreamController<PortfolioNotificationEvent>? _controller;
-  StreamSubscription<List<int>>? _subscription;
+  StreamSubscription? _subscription;
   bool _isConnected = false;
   int _reconnectDelay = 2; // Inicia com 2 segundos
   bool _isDisposed = false;
@@ -48,9 +48,11 @@ class NotificationService {
       _isConnected = true;
       _reconnectDelay = 2; // Reseta o delay de reconexão ao conectar com sucesso
 
-      _subscription = response.data?.stream.listen(
-        (data) {
-          final text = utf8.decode(data);
+      _subscription = response.data?.stream
+          .cast<List<int>>()
+          .transform(utf8.decoder)
+          .listen(
+        (text) {
           _buffer += text;
           
           // Processa eventos completos separados por duas quebras de linha

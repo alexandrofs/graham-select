@@ -18,7 +18,9 @@ public class SseNotificationAdapter implements NotificationPort {
     private final Map<String, List<SseEmitter>> userEmitters = new ConcurrentHashMap<>();
     
     public SseEmitter createEmitter(String userId) {
-        if (userId == null) return new SseEmitter();
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("User ID cannot be null or blank");
+        }
         String key = userId.trim().toLowerCase();
         SseEmitter emitter = new SseEmitter(0L); // sem timeout
         userEmitters.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()).add(emitter);
@@ -31,7 +33,8 @@ public class SseNotificationAdapter implements NotificationPort {
     
     @Override
     public void sendPortfolioUpdate(String userId) {
-        sendNotification(userId, "PORTFOLIO_UPDATED", Map.of("userId", userId != null ? userId : "unknown", "timestamp", OffsetDateTime.now().toString()));
+        if (userId == null) return;
+        sendNotification(userId, "PORTFOLIO_UPDATED", Map.of("userId", userId, "timestamp", OffsetDateTime.now().toString()));
     }
 
     @Override
@@ -48,8 +51,13 @@ public class SseNotificationAdapter implements NotificationPort {
                         .name(eventName)
                         .data(payload)
                 );
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.warn("Failed to send SSE event '{}' to user {}: {}", eventName, userId, e.getMessage());
+                try {
+                    emitter.completeWithError(e);
+                } catch (Exception ex) {
+                    // Ignore exception on completion
+                }
                 removeEmitter(key, emitter);
             }
         });
@@ -57,13 +65,14 @@ public class SseNotificationAdapter implements NotificationPort {
     
     private void removeEmitter(String key, SseEmitter emitter) {
         if (key == null) return;
-        List<SseEmitter> emitters = userEmitters.get(key);
-        if (emitters != null) {
+        userEmitters.computeIfPresent(key, (k, emitters) -> {
             emitters.remove(emitter);
             if (emitters.isEmpty()) {
-                userEmitters.remove(key);
+                log.info("Removed SSE emitter list for key: {}", key);
+                return null;
             }
             log.info("Removed SSE emitter for key: {}. Remaining for user: {}", key, emitters.size());
-        }
+            return emitters;
+        });
     }
 }
