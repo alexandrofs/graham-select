@@ -1,0 +1,7 @@
+[workflow]
+persistent_facts = [
+  "PADRÃO DETERMINÍSTICO DE HISTÓRIAS: Toda história gerada deve ter seu identificador canônico no formato '{epic_num}.{story_num}' (ex: '1.4') e sua chave de arquivo no formato '{epic_num}-{story_num}-{slug}' (ex: '1-4-adicao-da-coluna-repository-no-event-store').",
+  "PADRÃO DETERMINÍSTICO DE ISSUES GITHUB: Toda issue associada à história deve conter no cabeçalho os metadados: Story ID, Story Key e o caminho exato do arquivo de especificação em '_bmad-output/implementation-artifacts/{story_key}.md'."
+]
+
+on_complete = "Após salvar o arquivo da história e atualizar o sprint-status.yaml, verificar as configurações do repositório alvo (.aidev.yaml se existir) e criar a Issue correspondente no GitHub com a label 'Ready for AI Dev', título padronizado 'feat(story-{{epic_num}}.{{story_num}}): {{story_title}}' e corpo com o link explícito para '_bmad-output/implementation-artifacts/{{story_key}}.md'."

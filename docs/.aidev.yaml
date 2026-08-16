@@ -1,0 +1,14 @@
+version: "1"
+
+github:
+  repository: "alexandrofs/graham-select"
+  project_number: 1                  # Número do GitHub Projects v2
+  project_id: "PVT_kwHOAMe08s4AnlmE"  # ID GraphQL do Project v2 (opcional)
+  base_branch: "main"
+  ready_label: "Ready for AI Dev"
+  review_label: "In Review"
+
+workflow:
+  phases:
+    - "coding"                       # OpenCode executa bmad-dev-story (TDD/testes nativos do projeto)
+    - "review"                       # OpenCode executa bmad-code-review (auto-auditoria de qualidade)
