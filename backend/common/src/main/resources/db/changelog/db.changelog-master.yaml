@@ -47,5 +47,7 @@ databaseChangeLog:
       file: db/changelog/24-create-shedlock-table.yaml
   - include:
       file: db/changelog/25-add-role-to-users.yaml
+  - include:
+      file: db/changelog/26-create-dlq-messages-table.yaml
 
 

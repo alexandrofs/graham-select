@@ -61,6 +61,9 @@
                                 <!-- remove the unwanted generated testcases by the spring generator of openapi -->
                                 <delete dir="${project.build.directory}/generated-sources/openapi/src/test" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/org/openapitools/OpenApiGeneratorApplication.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/AdminApi.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/AdminApiController.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/AdminApiDelegate.java" />
                             </target>
                         </configuration>
                     </execution>

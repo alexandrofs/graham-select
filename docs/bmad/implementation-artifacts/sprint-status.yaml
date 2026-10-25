@@ -78,7 +78,7 @@ development_status:
   epic-5-retrospective: optional
   epic-6: in-progress
   6-1-admin-observability-dashboard: done
-  6-2-failed-ingestion-dlq-management: backlog
+  6-2-failed-ingestion-dlq-management: done
   6-3-master-data-ticker-management: backlog
   epic-6-retrospective: optional
   epic-7: backlog

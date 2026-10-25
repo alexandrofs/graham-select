@@ -322,16 +322,7 @@ public class AdminObservabilityService {
     }
 
     public String anonymizeUserId(String rawUserId) {
-        String safeInput = (rawUserId == null || rawUserId.isBlank()) ? "anonymous" : rawUserId.trim();
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(safeInput.getBytes(StandardCharsets.UTF_8));
-            String hex = HexFormat.of().formatHex(hashBytes);
-            return "usr_***" + hex.substring(0, 4).toLowerCase(Locale.ROOT);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("SHA-256 algorithm not available for userId anonymization", e);
-            return "usr_***0000";
-        }
+        return afsdigital.grahamselect.api.admin.util.AdminAnonymizationUtils.anonymizeUserId(rawUserId);
     }
 
     public String sanitizeFileName(String rawFileName) {
