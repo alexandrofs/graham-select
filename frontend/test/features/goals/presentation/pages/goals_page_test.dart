@@ -10,6 +10,7 @@ import 'package:frontend/src/features/goals/presentation/providers/goals_provide
 import 'package:frontend/src/features/goals/presentation/pages/goals_page.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/goal_summary_card.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/motivational_clock_card.dart';
+import 'package:frontend/src/features/goals/presentation/widgets/what_if_simulator_card.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
@@ -157,6 +158,7 @@ void main() {
 
       // Assert summary card and motivational clock card are now displayed
       expect(find.byType(MotivationalClockCard), findsOneWidget);
+      expect(find.byType(WhatIfSimulatorCard), findsOneWidget);
       expect(find.byType(GoalSummaryCard), findsOneWidget);
       expect(find.text('R\$ 200.000,00'), findsNWidgets(2));
 
@@ -214,6 +216,7 @@ void main() {
       expect(yearsField.controller?.text, '10');
 
       // Summary card should be visible
+      expect(find.byType(WhatIfSimulatorCard), findsOneWidget);
       expect(find.byType(GoalSummaryCard), findsOneWidget);
       expect(find.text('R\$ 300.000,00'), findsNWidgets(2)); // in input and in summary card
     });

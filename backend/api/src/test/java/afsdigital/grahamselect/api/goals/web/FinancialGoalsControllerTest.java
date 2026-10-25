@@ -4,10 +4,13 @@ import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepo
 import afsdigital.grahamselect.goals.application.dto.CreateFinancialGoalRequest;
 import afsdigital.grahamselect.goals.application.dto.FinancialGoalDto;
 import afsdigital.grahamselect.goals.application.dto.GoalProjectionDto;
+import afsdigital.grahamselect.goals.application.dto.GoalSimulationDto;
+import afsdigital.grahamselect.goals.application.dto.SimulateGoalProjectionRequest;
 import afsdigital.grahamselect.goals.application.service.exceptions.FinancialGoalNotFoundException;
 import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
+import afsdigital.grahamselect.goals.application.usecase.SimulateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +53,9 @@ class FinancialGoalsControllerTest extends BaseRepositoryIT {
 
     @MockBean
     private CalculateGoalProjectionUseCase calculateGoalProjectionUseCase;
+
+    @MockBean
+    private SimulateGoalProjectionUseCase simulateGoalProjectionUseCase;
 
     @Test
     void shouldCreateGoalSuccessfully() throws Exception {
@@ -179,5 +185,74 @@ class FinancialGoalsControllerTest extends BaseRepositoryIT {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(nullValue()));
+    }
+
+    @Test
+    void shouldSimulateProjectionSuccessfully() throws Exception {
+        String userId = "user-123";
+        GoalProjectionDto baselineDto = new GoalProjectionDto(
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.50"),
+                142,
+                11,
+                10,
+                OffsetDateTime.of(2038, 8, 25, 10, 0, 0, 0, ZoneOffset.UTC),
+                new BigDecimal("15.00"),
+                false,
+                false
+        );
+        GoalProjectionDto simulatedDto = new GoalProjectionDto(
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                new BigDecimal("3500.00"),
+                new BigDecimal("12.00"),
+                106,
+                8,
+                10,
+                OffsetDateTime.of(2035, 8, 25, 10, 0, 0, 0, ZoneOffset.UTC),
+                new BigDecimal("15.00"),
+                false,
+                false
+        );
+        GoalSimulationDto simulationDto = new GoalSimulationDto(baselineDto, simulatedDto, 36);
+
+        when(simulateGoalProjectionUseCase.execute(eq(userId), any(SimulateGoalProjectionRequest.class)))
+                .thenReturn(Optional.of(simulationDto));
+
+        mockMvc.perform(post("/api/v1/financial-goals/projection/simulate")
+                        .with(jwt().jwt(builder -> builder.subject(userId)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"simulatedMonthlyContribution\":3500.00,\"simulatedAnnualYieldPercentage\":12.00}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.baselineProjection.totalMonths").value(142))
+                .andExpect(jsonPath("$.data.simulatedProjection.totalMonths").value(106))
+                .andExpect(jsonPath("$.data.simulatedProjection.monthlyContribution").value(3500.00))
+                .andExpect(jsonPath("$.data.simulatedProjection.annualYieldPercentage").value(12.00))
+                .andExpect(jsonPath("$.data.monthsDifference").value(36));
+    }
+
+    @Test
+    void shouldReturnNullDataWhenNoGoalExistsForSimulateProjection() throws Exception {
+        String userId = "user-123";
+        when(simulateGoalProjectionUseCase.execute(eq(userId), any(SimulateGoalProjectionRequest.class)))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/v1/financial-goals/projection/simulate")
+                        .with(jwt().jwt(builder -> builder.subject(userId)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"simulatedMonthlyContribution\":3500.00,\"simulatedAnnualYieldPercentage\":12.00}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(nullValue()));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenSimulateProjectionInputIsInvalid() throws Exception {
+        mockMvc.perform(post("/api/v1/financial-goals/projection/simulate")
+                        .with(jwt().jwt(builder -> builder.subject("user-123")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"simulatedMonthlyContribution\":-100.00,\"simulatedAnnualYieldPercentage\":12.00}"))
+                .andExpect(status().isBadRequest());
     }
 }

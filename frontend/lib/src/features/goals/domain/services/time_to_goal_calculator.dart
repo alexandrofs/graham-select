@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import '../entities/goal_projection.dart';
+import '../entities/goal_simulation_result.dart';
 
 class TimeToGoalCalculator {
   static const double defaultAnnualYieldRate = 0.06;
@@ -136,6 +137,128 @@ class TimeToGoalCalculator {
       isAchieved: false,
       isUnreachable: false,
     );
+  }
+
+  static GoalSimulationResult simulate({
+    String goalType = 'PATRIMONY_TARGET',
+    required double targetValue,
+    required double currentEquity,
+    required double baselineMonthlyContribution,
+    required double baselineAnnualYieldPercentage,
+    required double simulatedMonthlyContribution,
+    required double simulatedAnnualYieldPercentage,
+    DateTime? referenceDate,
+  }) {
+    final GoalProjection baselineProjection = calculate(
+      goalType: goalType,
+      targetValue: targetValue,
+      currentEquity: currentEquity,
+      monthlyContribution: baselineMonthlyContribution,
+      annualYieldPercentage: baselineAnnualYieldPercentage,
+      referenceDate: referenceDate,
+    );
+
+    final GoalProjection simulatedProjection = calculate(
+      goalType: 'PATRIMONY_TARGET',
+      targetValue: baselineProjection.targetValue,
+      currentEquity: currentEquity,
+      monthlyContribution: simulatedMonthlyContribution,
+      annualYieldPercentage: simulatedAnnualYieldPercentage,
+      referenceDate: referenceDate,
+    );
+
+    int monthsDifference = 0;
+    if (!baselineProjection.isUnreachable && !simulatedProjection.isUnreachable) {
+      monthsDifference = baselineProjection.totalMonths - simulatedProjection.totalMonths;
+    }
+
+    int horizonMonths;
+    if (!baselineProjection.isUnreachable && !simulatedProjection.isUnreachable) {
+      final int maxMonths = math.max(baselineProjection.totalMonths, simulatedProjection.totalMonths);
+      horizonMonths = maxMonths > 0 ? maxMonths : 120;
+    } else if (!baselineProjection.isUnreachable) {
+      horizonMonths = baselineProjection.totalMonths > 0 ? baselineProjection.totalMonths : 120;
+    } else if (!simulatedProjection.isUnreachable) {
+      horizonMonths = simulatedProjection.totalMonths > 0 ? simulatedProjection.totalMonths : 120;
+    } else {
+      horizonMonths = 120;
+    }
+
+    final double fv = baselineProjection.targetValue;
+    final double pv = currentEquity.isFinite && currentEquity > 0 ? currentEquity : 0.0;
+    final double maxChartEquity = math.max(fv * 1.25, pv * 1.5);
+
+    final List<ProjectionCurvePoint> baselineCurve = generateEvolutionCurve(
+      initialEquity: pv,
+      monthlyContribution: baselineMonthlyContribution,
+      annualYieldPercentage: baselineAnnualYieldPercentage,
+      horizonMonths: horizonMonths,
+      maxCapEquity: maxChartEquity,
+    );
+
+    final List<ProjectionCurvePoint> simulatedCurve = generateEvolutionCurve(
+      initialEquity: pv,
+      monthlyContribution: simulatedMonthlyContribution,
+      annualYieldPercentage: simulatedAnnualYieldPercentage,
+      horizonMonths: horizonMonths,
+      maxCapEquity: maxChartEquity,
+    );
+
+    return GoalSimulationResult(
+      baselineProjection: baselineProjection,
+      simulatedProjection: simulatedProjection,
+      monthsDifference: monthsDifference,
+      baselineCurve: baselineCurve,
+      simulatedCurve: simulatedCurve,
+    );
+  }
+
+  static List<ProjectionCurvePoint> generateEvolutionCurve({
+    required double initialEquity,
+    required double monthlyContribution,
+    required double annualYieldPercentage,
+    required int horizonMonths,
+    required double maxCapEquity,
+  }) {
+    final int safeHorizon = horizonMonths > 0 ? horizonMonths : 120;
+    final double pv = initialEquity.isFinite && initialEquity > 0 ? initialEquity : 0.0;
+    final double pmt = monthlyContribution.isFinite && monthlyContribution > 0 ? monthlyContribution : 0.0;
+    final double r = annualYieldPercentage.isFinite ? (annualYieldPercentage / (12.0 * 100.0)) : 0.0;
+    final double cap = (maxCapEquity.isFinite && maxCapEquity > 0) ? maxCapEquity : 1e12;
+
+    const int maxSteps = 20;
+    final int steps = math.min(safeHorizon, maxSteps);
+    final List<ProjectionCurvePoint> points = [];
+
+    for (int i = 0; i <= steps; i++) {
+      final int m = ((i * safeHorizon) / steps).round();
+      if (points.isNotEmpty && points.last.monthIndex == m) {
+        continue;
+      }
+
+      double equityAtMonth;
+      if (r > 0) {
+        final double compoundFactor = math.pow(1.0 + r, m).toDouble();
+        equityAtMonth = pv * compoundFactor + pmt * ((compoundFactor - 1.0) / r);
+      } else {
+        equityAtMonth = pv + pmt * m;
+      }
+
+      if (!equityAtMonth.isFinite || equityAtMonth < 0) {
+        equityAtMonth = cap;
+      } else if (equityAtMonth > cap) {
+        equityAtMonth = cap;
+      }
+
+      points.add(
+        ProjectionCurvePoint(
+          monthIndex: m,
+          equity: (equityAtMonth * 100.0).round() / 100.0,
+        ),
+      );
+    }
+
+    return points;
   }
 
   static DateTime _addMonthsUtc(DateTime date, int monthsToAdd) {

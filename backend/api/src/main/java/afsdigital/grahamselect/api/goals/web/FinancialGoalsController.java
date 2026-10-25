@@ -3,9 +3,12 @@ package afsdigital.grahamselect.api.goals.web;
 import afsdigital.grahamselect.goals.application.dto.CreateFinancialGoalRequest;
 import afsdigital.grahamselect.goals.application.dto.FinancialGoalDto;
 import afsdigital.grahamselect.goals.application.dto.GoalProjectionDto;
+import afsdigital.grahamselect.goals.application.dto.GoalSimulationDto;
+import afsdigital.grahamselect.goals.application.dto.SimulateGoalProjectionRequest;
 import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
+import afsdigital.grahamselect.goals.application.usecase.SimulateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class FinancialGoalsController {
     private final UpdateFinancialGoalUseCase updateUseCase;
     private final GetFinancialGoalUseCase getUseCase;
     private final CalculateGoalProjectionUseCase calculateGoalProjectionUseCase;
+    private final SimulateGoalProjectionUseCase simulateGoalProjectionUseCase;
 
     @PostMapping
     public ResponseEntity<?> create(
@@ -71,6 +75,16 @@ public class FinancialGoalsController {
         String userId = jwt.getSubject();
         log.info("Received request to get time-to-goal projection for user {}", userId);
         Optional<GoalProjectionDto> result = calculateGoalProjectionUseCase.execute(userId);
+        return ResponseEntity.ok(Collections.singletonMap("data", result.orElse(null)));
+    }
+
+    @PostMapping("/projection/simulate")
+    public ResponseEntity<?> simulateProjection(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody SimulateGoalProjectionRequest request) {
+        String userId = jwt.getSubject();
+        log.info("Received request to simulate time-to-goal projection for user {}", userId);
+        Optional<GoalSimulationDto> result = simulateGoalProjectionUseCase.execute(userId, request);
         return ResponseEntity.ok(Collections.singletonMap("data", result.orElse(null)));
     }
 }
