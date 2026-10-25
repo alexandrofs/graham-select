@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/src/core/widgets/main_layout.dart';
 import 'package:frontend/src/features/admin/data/datasources/admin_remote_datasource.dart';
+import 'package:frontend/src/features/admin/domain/entities/admin_dlq_message.dart';
 import 'package:frontend/src/features/admin/domain/entities/admin_observability.dart';
 import 'package:frontend/src/features/admin/domain/repositories/admin_repository.dart';
 import 'package:frontend/src/features/admin/presentation/pages/admin_dashboard_page.dart';
@@ -37,6 +38,15 @@ class _ControllableAdminRepository implements AdminRepository {
     }
     return Future.value(immediateResult!);
   }
+
+  @override
+  Future<List<AdminDlqMessage>> getDlqFailures({String status = 'PENDING'}) async => [];
+
+  @override
+  Future<void> reprocessDlqMessage(int id) async {}
+
+  @override
+  Future<Map<String, dynamic>> reprocessBatchDlqMessages(List<int> ids) async => {};
 }
 
 void main() {

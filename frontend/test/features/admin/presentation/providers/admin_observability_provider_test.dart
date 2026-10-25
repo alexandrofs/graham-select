@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/src/features/admin/data/datasources/admin_remote_datasource.dart';
+import 'package:frontend/src/features/admin/domain/entities/admin_dlq_message.dart';
 import 'package:frontend/src/features/admin/domain/entities/admin_observability.dart';
 import 'package:frontend/src/features/admin/domain/repositories/admin_repository.dart';
 import 'package:frontend/src/features/admin/presentation/providers/admin_observability_provider.dart';
@@ -15,6 +16,15 @@ class _FakeAdminRepository implements AdminRepository {
     }
     return result!;
   }
+
+  @override
+  Future<List<AdminDlqMessage>> getDlqFailures({String status = 'PENDING'}) async => [];
+
+  @override
+  Future<void> reprocessDlqMessage(int id) async {}
+
+  @override
+  Future<Map<String, dynamic>> reprocessBatchDlqMessages(List<int> ids) async => {};
 }
 
 void main() {

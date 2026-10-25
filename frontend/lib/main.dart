@@ -66,8 +66,10 @@ import 'src/features/goals/presentation/pages/goals_page.dart';
 // Admin Feature Imports
 import 'src/features/admin/data/datasources/admin_remote_datasource.dart';
 import 'src/features/admin/data/repositories/admin_repository_impl.dart';
+import 'src/features/admin/presentation/providers/admin_dlq_provider.dart';
 import 'src/features/admin/presentation/providers/admin_observability_provider.dart';
 import 'src/features/admin/presentation/pages/admin_dashboard_page.dart';
+import 'src/features/admin/presentation/pages/admin_dlq_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -246,6 +248,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
             GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
             GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
+            GoRoute(path: '/admin/dlq', builder: (context, state) => const AdminDlqPage()),
           ],
         ),
       ],
@@ -287,6 +290,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
+        ChangeNotifierProvider(create: (_) => AdminDlqProvider(repository: adminRepository)),
         ChangeNotifierProvider(
           create: (context) {
             final provider = PortfolioProvider(

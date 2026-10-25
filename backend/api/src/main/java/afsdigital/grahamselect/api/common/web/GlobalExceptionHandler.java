@@ -42,8 +42,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DeletionNotFoundException.class)
     public ProblemDetail handleDeletionNotFound(DeletionNotFoundException ex) {
+        log.error("Deletion not found: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Deletion Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(afsdigital.grahamselect.api.dlq.application.service.exceptions.DlqMessageNotFoundException.class)
+    public ProblemDetail handleDlqMessageNotFound(afsdigital.grahamselect.api.dlq.application.service.exceptions.DlqMessageNotFoundException ex) {
+        log.error("DLQ message not found: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("DLQ Message Not Found");
         return problem;
     }
 

@@ -16,6 +16,8 @@ servers:
 tags:
   - name: Financial Data
     description: Dados financeiros das empresas
+  - name: Admin - DLQ
+    description: Gestão da fila de falhas de ingestão (Dead Letter Queue)
 paths:
   /upload-financial-data:
     post:
@@ -191,6 +193,119 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /admin/dlq:
+    get:
+      summary: Lista as falhas de ingestão na Dead Letter Queue
+      description: Retorna itens da DLQ ordenados por data decrescente com anonimização de usuário.
+      tags:
+        - Admin - DLQ
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, REPROCESSING, RESOLVED, FAILED]
+            default: PENDING
+      responses:
+        '200':
+          description: Lista de falhas retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DlqMessageDto'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /admin/dlq/{id}/reprocess:
+    post:
+      summary: Reprocessa manualmente um item individual da DLQ
+      description: Reconstrói o evento de domínio e republica no tópico trade-extracted.
+      tags:
+        - Admin - DLQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resultado do reprocessamento
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DlqReprocessResultDto'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Item da DLQ não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /admin/dlq/reprocess-batch:
+    post:
+      summary: Reprocessa em lote itens da DLQ
+      description: Executa o reprocessamento com isolamento de falhas para múltiplos registros.
+      tags:
+        - Admin - DLQ
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DlqBatchReprocessRequest'
+      responses:
+        '200':
+          description: Relatório consolidado do reprocessamento em lote
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DlqBatchReprocessResultDto'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
 components:
   schemas:
@@ -285,3 +400,66 @@ components:
         instance:
           type: string
           format: uri
+    DlqMessageDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        eventId:
+          type: string
+        correlationId:
+          type: string
+        anonymizedUserId:
+          type: string
+          example: "usr_***a1b2"
+        fileName:
+          type: string
+        lineNumber:
+          type: integer
+          format: int64
+        errorMessage:
+          type: string
+        originalTopic:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, REPROCESSING, RESOLVED, FAILED]
+        timestamp:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+    DlqReprocessResultDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [PENDING, REPROCESSING, RESOLVED, FAILED]
+        message:
+          type: string
+    DlqBatchReprocessRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            format: int64
+    DlqBatchReprocessResultDto:
+      type: object
+      properties:
+        totalProcessed:
+          type: integer
+        successCount:
+          type: integer
+        failureCount:
+          type: integer
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/DlqReprocessResultDto'
