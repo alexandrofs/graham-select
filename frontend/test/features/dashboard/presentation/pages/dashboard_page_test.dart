@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/src/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:frontend/src/features/goals/domain/entities/financial_goal.dart';
+import 'package:frontend/src/features/goals/domain/entities/goal_projection.dart';
+import 'package:frontend/src/features/goals/domain/repositories/goals_repository.dart';
+import 'package:frontend/src/features/goals/presentation/providers/goals_provider.dart';
+import 'package:frontend/src/features/goals/presentation/widgets/motivational_clock_card.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/data/models/portfolio_summary_model.dart';
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart';
@@ -9,6 +14,23 @@ import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
 import 'dashboard_page_test.mocks.dart';
+
+class _FakeGoalsRepository implements GoalsRepository {
+  FinancialGoal? goal;
+  GoalProjection? projection;
+
+  @override
+  Future<FinancialGoal?> fetchGoal() async => goal;
+
+  @override
+  Future<GoalProjection?> fetchProjection() async => projection;
+
+  @override
+  Future<FinancialGoal> createGoal(FinancialGoal goal) async => goal;
+
+  @override
+  Future<FinancialGoal> updateGoal(String id, FinancialGoal goal) async => goal;
+}
 
 @GenerateNiceMocks([
   MockSpec<PortfolioProvider>(),
@@ -33,6 +55,7 @@ void main() {
     when(mockPortfolioProvider.selectedAssetClassFilter).thenReturn(null);
     when(mockPortfolioProvider.custodyError).thenReturn(null);
     when(mockPortfolioProvider.loadCustodyPositions()).thenAnswer((_) async {});
+    when(mockPortfolioProvider.loadSummary()).thenAnswer((_) async {});
     when(mockPortfolioProvider.isReceivingLiveUpdates).thenReturn(false);
   });
 
@@ -82,5 +105,24 @@ void main() {
     await tester.tap(find.text('Tentar novamente'));
     // É chamado uma vez no initState e outra no clique do botão
     verify(mockPortfolioProvider.loadSummary()).called(2);
+  });
+
+  testWidgets('should render MotivationalClockCard in empty state when GoalsProvider has no goal', (tester) async {
+    final goalsProvider = GoalsProvider(repository: _FakeGoalsRepository());
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PortfolioProvider>.value(value: mockPortfolioProvider),
+          ChangeNotifierProvider<ProfileProvider>.value(value: mockProfileProvider),
+          ChangeNotifierProvider<GoalsProvider>.value(value: goalsProvider),
+        ],
+        child: const MaterialApp(home: DashboardPage()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(MotivationalClockCard), findsOneWidget);
+    expect(find.text('Defina sua Meta Financeira para desbloquear o Relógio Time-to-Goal'), findsOneWidget);
   });
 }

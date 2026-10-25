@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../goals/domain/entities/goal_projection.dart';
+import '../../../goals/domain/services/time_to_goal_calculator.dart';
+import '../../../goals/presentation/providers/goals_provider.dart';
+import '../../../goals/presentation/widgets/motivational_clock_card.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
@@ -19,15 +23,29 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final portfolioProvider = context.read<PortfolioProvider>();
+      final goalsProvider = Provider.of<GoalsProvider?>(context, listen: false);
       context.read<ProfileProvider>().fetchProfile();
-      context.read<PortfolioProvider>().loadSummary();
-      context.read<PortfolioProvider>().loadCustodyPositions();
+      portfolioProvider.loadCustodyPositions();
+      await Future.wait([
+        portfolioProvider.loadSummary(),
+        if (goalsProvider != null) goalsProvider.loadGoal(),
+      ]);
+      if (!mounted) return;
+      if (goalsProvider != null && goalsProvider.currentGoal != null && portfolioProvider.summary != null) {
+        goalsProvider.recalculateLocalProjection(
+          currentEquity: portfolioProvider.summary!.totalEquity,
+          grossYieldPercentage: portfolioProvider.summary!.grossYieldPercentage,
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final goalsProvider = Provider.of<GoalsProvider?>(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
@@ -47,6 +65,18 @@ class _DashboardPageState extends State<DashboardPage> {
         padding: const EdgeInsets.all(24.0),
         child: Consumer<PortfolioProvider>(
           builder: (context, provider, child) {
+            final currentGoal = goalsProvider?.currentGoal;
+            GoalProjection? effectiveProjection = goalsProvider?.projection;
+            if (currentGoal != null && effectiveProjection == null) {
+              effectiveProjection = TimeToGoalCalculator.calculate(
+                goalType: currentGoal.goalType,
+                targetValue: currentGoal.targetValue,
+                currentEquity: provider.summary?.totalEquity ?? 0.0,
+                monthlyContribution: currentGoal.monthlyContribution,
+                annualYieldPercentage: provider.summary?.grossYieldPercentage ?? 0.0,
+              );
+            }
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -85,6 +115,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   duration: const Duration(milliseconds: 250),
                   child: _buildKpiSection(context, provider),
                 ),
+                if (goalsProvider != null) ...[
+                  const SizedBox(height: 32),
+                  MotivationalClockCard(
+                    goal: currentGoal,
+                    projection: effectiveProjection,
+                  ),
+                ],
                 const SizedBox(height: 32),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
