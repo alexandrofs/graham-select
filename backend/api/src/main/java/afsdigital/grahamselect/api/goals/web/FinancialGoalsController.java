@@ -2,11 +2,13 @@ package afsdigital.grahamselect.api.goals.web;
 
 import afsdigital.grahamselect.goals.application.dto.CreateFinancialGoalRequest;
 import afsdigital.grahamselect.goals.application.dto.FinancialGoalDto;
+import afsdigital.grahamselect.goals.application.dto.GoalHealthAssessmentDto;
 import afsdigital.grahamselect.goals.application.dto.GoalProjectionDto;
 import afsdigital.grahamselect.goals.application.dto.GoalSimulationDto;
 import afsdigital.grahamselect.goals.application.dto.SimulateGoalProjectionRequest;
 import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
+import afsdigital.grahamselect.goals.application.usecase.EvaluateGoalHealthUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.SimulateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
@@ -40,6 +42,7 @@ public class FinancialGoalsController {
     private final GetFinancialGoalUseCase getUseCase;
     private final CalculateGoalProjectionUseCase calculateGoalProjectionUseCase;
     private final SimulateGoalProjectionUseCase simulateGoalProjectionUseCase;
+    private final EvaluateGoalHealthUseCase evaluateGoalHealthUseCase;
 
     @PostMapping
     public ResponseEntity<?> create(
@@ -85,6 +88,14 @@ public class FinancialGoalsController {
         String userId = jwt.getSubject();
         log.info("Received request to simulate time-to-goal projection for user {}", userId);
         Optional<GoalSimulationDto> result = simulateGoalProjectionUseCase.execute(userId, request);
+        return ResponseEntity.ok(Collections.singletonMap("data", result.orElse(null)));
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<?> getGoalHealth(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        log.info("Received request to evaluate financial goal health for user {}", userId);
+        Optional<GoalHealthAssessmentDto> result = evaluateGoalHealthUseCase.execute(userId);
         return ResponseEntity.ok(Collections.singletonMap("data", result.orElse(null)));
     }
 }

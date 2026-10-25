@@ -1,5 +1,7 @@
 package afsdigital.grahamselect.goals.domain.services;
 
+import afsdigital.grahamselect.goals.domain.entities.GoalHealthAssessment;
+import afsdigital.grahamselect.goals.domain.entities.GoalHealthStatus;
 import afsdigital.grahamselect.goals.domain.entities.GoalProjection;
 import afsdigital.grahamselect.goals.domain.entities.GoalSimulationResult;
 import afsdigital.grahamselect.goals.domain.entities.GoalType;
@@ -225,5 +227,132 @@ class TimeToGoalCalculatorTest {
 
         assertTrue(unreachableSim.getSimulatedProjection().isUnreachable());
         assertEquals(0, unreachableSim.getMonthsDifference());
+    }
+
+    @Test
+    void shouldEvaluateHealthAsOffTrackWhenProjectionExceedsEstimatedYears() {
+        // FV = 1,000,000, PV = 150,000, PMT = 2,000, annualYield = 10.50%, estimatedYears = 10 (120 months)
+        // Projected months is 136 > 120 -> OFF_TRACK
+        GoalHealthAssessment assessment = calculator.evaluateHealth(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("1000000.00"),
+                10,
+                new BigDecimal("150000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.50"),
+                referenceDate
+        );
+
+        assertEquals(GoalHealthStatus.OFF_TRACK, assessment.getStatus());
+        assertFalse(assessment.isOnTrack());
+        assertEquals(120, assessment.getEstimatedTargetMonths());
+        assertEquals(136, assessment.getProjectedTotalMonths());
+        assertEquals(16, assessment.getMonthsDelay());
+        assertTrue(assessment.getAdditionalMonthlyContributionNeeded().compareTo(BigDecimal.ZERO) > 0);
+        assertEquals(
+                new BigDecimal("2000.00").add(assessment.getAdditionalMonthlyContributionNeeded()),
+                assessment.getRequiredMonthlyContribution()
+        );
+        assertTrue(assessment.getRequiredAnnualYieldPercentage().compareTo(new BigDecimal("10.50")) > 0);
+        assertEquals(2, assessment.getActionSuggestions().size());
+        assertTrue(assessment.getActionSuggestions().get(0).startsWith("Aumente seu aporte em R$ "));
+        assertTrue(assessment.getActionSuggestions().get(0).endsWith(" para voltar ao trilho"));
+        assertTrue(assessment.getActionSuggestions().get(1).startsWith("Revise seu yield alvo para "));
+
+        // Verify that applying requiredMonthlyContribution puts the goal back on track (<= 120 months)
+        GoalProjection adjustedProjection = calculator.calculate(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                assessment.getRequiredMonthlyContribution(),
+                new BigDecimal("10.50"),
+                referenceDate
+        );
+        assertFalse(adjustedProjection.isUnreachable());
+        assertTrue(adjustedProjection.getTotalMonths() <= 120);
+
+        // Verify that applying requiredAnnualYieldPercentage puts the goal back on track (<= 120 months)
+        GoalProjection adjustedYieldProjection = calculator.calculate(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                new BigDecimal("2000.00"),
+                assessment.getRequiredAnnualYieldPercentage(),
+                referenceDate
+        );
+        assertFalse(adjustedYieldProjection.isUnreachable());
+        assertTrue(adjustedYieldProjection.getTotalMonths() <= 120);
+    }
+
+    @Test
+    void shouldEvaluateHealthAsOnTrackWhenProjectionIsWithinEstimatedYears() {
+        GoalHealthAssessment assessment = calculator.evaluateHealth(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("1000000.00"),
+                15,
+                new BigDecimal("150000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.50"),
+                referenceDate
+        );
+
+        assertEquals(GoalHealthStatus.ON_TRACK, assessment.getStatus());
+        assertTrue(assessment.isOnTrack());
+        assertEquals(180, assessment.getEstimatedTargetMonths());
+        assertEquals(136, assessment.getProjectedTotalMonths());
+        assertEquals(0, assessment.getMonthsDelay());
+        assertEquals(new BigDecimal("0.00"), assessment.getAdditionalMonthlyContributionNeeded());
+        assertEquals(new BigDecimal("2000.00"), assessment.getRequiredMonthlyContribution());
+        assertEquals(new BigDecimal("10.50"), assessment.getRequiredAnnualYieldPercentage());
+        assertEquals(
+                java.util.List.of("Mantenha a consistência dos seus aportes mensais para seguir no trilho."),
+                assessment.getActionSuggestions()
+        );
+    }
+
+    @Test
+    void shouldEvaluateHealthAsAchievedWhenEquityMeetsOrExceedsTarget() {
+        GoalHealthAssessment assessment = calculator.evaluateHealth(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("500000.00"),
+                10,
+                new BigDecimal("550000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.00"),
+                referenceDate
+        );
+
+        assertEquals(GoalHealthStatus.ACHIEVED, assessment.getStatus());
+        assertTrue(assessment.isOnTrack());
+        assertEquals(120, assessment.getEstimatedTargetMonths());
+        assertEquals(0, assessment.getProjectedTotalMonths());
+        assertEquals(0, assessment.getMonthsDelay());
+        assertEquals(new BigDecimal("0.00"), assessment.getAdditionalMonthlyContributionNeeded());
+        assertEquals(
+                java.util.List.of("Parabéns! Sua meta financeira já foi atingida."),
+                assessment.getActionSuggestions()
+        );
+    }
+
+    @Test
+    void shouldEvaluateHealthAsOffTrackWhenGoalIsUnreachable() {
+        GoalHealthAssessment assessment = calculator.evaluateHealth(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("240000.00"),
+                10,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                referenceDate
+        );
+
+        assertEquals(GoalHealthStatus.OFF_TRACK, assessment.getStatus());
+        assertFalse(assessment.isOnTrack());
+        assertEquals(120, assessment.getEstimatedTargetMonths());
+        assertEquals(-1, assessment.getProjectedTotalMonths());
+        assertEquals(-1, assessment.getMonthsDelay());
+        assertEquals(new BigDecimal("2000.00"), assessment.getAdditionalMonthlyContributionNeeded());
+        assertEquals(new BigDecimal("2000.00"), assessment.getRequiredMonthlyContribution());
+        assertEquals(new BigDecimal("12.00"), assessment.getRequiredAnnualYieldPercentage());
     }
 }

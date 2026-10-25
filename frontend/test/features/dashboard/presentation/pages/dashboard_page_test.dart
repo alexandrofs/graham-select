@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:frontend/src/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:frontend/src/features/goals/domain/entities/financial_goal.dart';
 import 'package:frontend/src/features/goals/domain/entities/goal_projection.dart';
 import 'package:frontend/src/features/goals/domain/repositories/goals_repository.dart';
 import 'package:frontend/src/features/goals/presentation/providers/goals_provider.dart';
+import 'package:frontend/src/features/goals/presentation/widgets/goal_health_checklist_card.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/motivational_clock_card.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/data/models/portfolio_summary_model.dart';
@@ -39,6 +41,10 @@ class _FakeGoalsRepository implements GoalsRepository {
 void main() {
   late MockPortfolioProvider mockPortfolioProvider;
   late MockProfileProvider mockProfileProvider;
+
+  setUpAll(() async {
+    await initializeDateFormatting('pt_BR', null);
+  });
 
   setUp(() {
     mockPortfolioProvider = MockPortfolioProvider();
@@ -123,6 +129,45 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MotivationalClockCard), findsOneWidget);
+    expect(find.byType(GoalHealthChecklistCard), findsNothing);
     expect(find.text('Defina sua Meta Financeira para desbloquear o Relógio Time-to-Goal'), findsOneWidget);
+  });
+
+  testWidgets('should render GoalHealthChecklistCard when GoalsProvider has an active goal', (tester) async {
+    final fakeRepo = _FakeGoalsRepository()
+      ..goal = const FinancialGoal(
+        id: 'goal-1',
+        goalType: 'PATRIMONY_TARGET',
+        targetValue: 500000.0,
+        monthlyContribution: 2000.0,
+        estimatedYears: 10,
+      );
+    final goalsProvider = GoalsProvider(repository: fakeRepo);
+
+    final summary = PortfolioSummaryModel(
+      totalEquity: 100000.0,
+      grossYieldPercentage: 10.0,
+      accumulatedDividends: 1200.0,
+      monthlyProjection: 450.0,
+    );
+    when(mockPortfolioProvider.status).thenReturn(PortfolioStatus.success);
+    when(mockPortfolioProvider.summary).thenReturn(summary);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PortfolioProvider>.value(value: mockPortfolioProvider),
+          ChangeNotifierProvider<ProfileProvider>.value(value: mockProfileProvider),
+          ChangeNotifierProvider<GoalsProvider>.value(value: goalsProvider),
+        ],
+        child: const MaterialApp(home: DashboardPage()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(MotivationalClockCard), findsOneWidget);
+    expect(find.byType(GoalHealthChecklistCard), findsOneWidget);
+    expect(find.text('Checklist de Saúde da Meta'), findsOneWidget);
   });
 }
