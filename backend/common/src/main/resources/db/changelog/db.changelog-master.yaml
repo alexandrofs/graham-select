@@ -45,5 +45,7 @@ databaseChangeLog:
       file: db/changelog/23-create-financial-goals-table.yaml
   - include:
       file: db/changelog/24-create-shedlock-table.yaml
+  - include:
+      file: db/changelog/25-add-role-to-users.yaml
 
 

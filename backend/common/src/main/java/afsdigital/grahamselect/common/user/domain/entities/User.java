@@ -53,6 +53,11 @@ public class User {
     @Column(name = "investor_profile")
     private InvestorProfile investorProfile;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    @Builder.Default
+    private UserRole role = UserRole.USER;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -60,4 +65,11 @@ public class User {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void ensureDefaults() {
+        if (this.role == null) {
+            this.role = UserRole.USER;
+        }
+    }
 }

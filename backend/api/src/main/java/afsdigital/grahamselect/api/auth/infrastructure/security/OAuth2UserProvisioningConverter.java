@@ -2,6 +2,7 @@ package afsdigital.grahamselect.api.auth.infrastructure.security;
 
 import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
 import afsdigital.grahamselect.common.user.domain.entities.User;
+import afsdigital.grahamselect.common.user.domain.entities.UserRole;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -32,15 +34,21 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
         String sub = jwt.getSubject();
         String email = jwt.getClaimAsString("email");
         String name = jwt.getClaimAsString("name");
+        boolean jwtHasAdmin = hasAdminClaim(jwt);
 
         try {
             User user = userRepository.findByGoogleSub(sub)
                     .map(existingUser -> {
+                        boolean changed = false;
                         if (name != null && !name.equals(existingUser.getFullName())) {
                             existingUser.setFullName(name);
-                            return userRepository.save(existingUser);
+                            changed = true;
                         }
-                        return existingUser;
+                        if (jwtHasAdmin && existingUser.getRole() != UserRole.ADMIN) {
+                            existingUser.setRole(UserRole.ADMIN);
+                            changed = true;
+                        }
+                        return changed ? userRepository.save(existingUser) : existingUser;
                     })
                     .orElseGet(() -> {
                         if (email == null) {
@@ -51,21 +59,43 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
                                 .email(email)
                                 .fullName(name)
                                 .tier(SubscriptionTier.TRIAL)
+                                .role(jwtHasAdmin ? UserRole.ADMIN : UserRole.USER)
                                 .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).plusDays(30))
                                 .build();
                         log.info("Provisioning new user from OAuth2: {}", email);
                         return userRepository.save(newUser);
                     });
 
-            Collection<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
+            boolean isAdmin = jwtHasAdmin || user.getRole() == UserRole.ADMIN;
+            Collection<GrantedAuthority> authorities = buildAuthorities(isAdmin);
             return new JwtAuthenticationToken(jwt, authorities, user.getId().toString());
         } catch (Exception e) {
             log.error("Error during user provisioning for sub: {}. Retrying lookup.", sub, e);
             // Fallback: search again in case of race condition (another thread saved it)
             User user = userRepository.findByGoogleSub(sub)
                     .orElseThrow(() -> new RuntimeException("User provisioning failed and record not found", e));
-            Collection<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
+            boolean isAdmin = jwtHasAdmin || user.getRole() == UserRole.ADMIN;
+            Collection<GrantedAuthority> authorities = buildAuthorities(isAdmin);
             return new JwtAuthenticationToken(jwt, authorities, user.getId().toString());
         }
+    }
+
+    private boolean hasAdminClaim(Jwt jwt) {
+        String roleClaim = jwt.getClaimAsString("role");
+        if ("ADMIN".equalsIgnoreCase(roleClaim) || "ROLE_ADMIN".equalsIgnoreCase(roleClaim)) {
+            return true;
+        }
+        List<String> rolesClaim = jwt.getClaimAsStringList("roles");
+        if (rolesClaim != null) {
+            return rolesClaim.stream()
+                    .anyMatch(r -> "ADMIN".equalsIgnoreCase(r) || "ROLE_ADMIN".equalsIgnoreCase(r));
+        }
+        return false;
+    }
+
+    private Collection<GrantedAuthority> buildAuthorities(boolean isAdmin) {
+        return isAdmin
+                ? Set.of(new SimpleGrantedAuthority("ROLE_USER"), new SimpleGrantedAuthority("ROLE_ADMIN"))
+                : Set.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 }

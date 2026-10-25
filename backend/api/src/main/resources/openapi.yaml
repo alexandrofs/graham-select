@@ -213,6 +213,10 @@ components:
           format: date-time
         daysRemaining:
           type: integer
+        role:
+          type: string
+          enum: [USER, ADMIN]
+          example: "USER"
     UpdateProfileRequest:
       type: object
       properties:
