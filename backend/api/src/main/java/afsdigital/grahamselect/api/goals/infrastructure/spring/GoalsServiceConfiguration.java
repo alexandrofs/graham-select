@@ -5,6 +5,7 @@ import afsdigital.grahamselect.goals.application.repository.FinancialGoalReposit
 import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
+import afsdigital.grahamselect.goals.application.usecase.SimulateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.domain.services.TimeToGoalCalculator;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,19 @@ public class GoalsServiceConfiguration {
             TimeToGoalCalculator timeToGoalCalculator
     ) {
         return new CalculateGoalProjectionUseCase(
+                financialGoalRepository,
+                getPortfolioSummaryUseCase,
+                timeToGoalCalculator
+        );
+    }
+
+    @Bean
+    public SimulateGoalProjectionUseCase simulateGoalProjectionUseCase(
+            FinancialGoalRepository financialGoalRepository,
+            GetPortfolioSummaryUseCase getPortfolioSummaryUseCase,
+            TimeToGoalCalculator timeToGoalCalculator
+    ) {
+        return new SimulateGoalProjectionUseCase(
                 financialGoalRepository,
                 getPortfolioSummaryUseCase,
                 timeToGoalCalculator

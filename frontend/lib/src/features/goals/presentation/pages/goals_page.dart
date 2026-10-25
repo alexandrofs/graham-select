@@ -7,6 +7,7 @@ import '../../domain/services/time_to_goal_calculator.dart';
 import '../providers/goals_provider.dart';
 import '../widgets/goal_summary_card.dart';
 import '../widgets/motivational_clock_card.dart';
+import '../widgets/what_if_simulator_card.dart';
 
 class MoneyInputFormatter extends TextInputFormatter {
   @override
@@ -382,6 +383,12 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                       monthlyContribution: goalsProvider.currentGoal!.monthlyContribution,
                       annualYieldPercentage: grossYieldPercentage,
                     ),
+              ),
+              const SizedBox(height: 24),
+              WhatIfSimulatorCard(
+                goal: goalsProvider.currentGoal!,
+                currentEquity: currentPatrimony,
+                baselineYieldPercentage: grossYieldPercentage,
               ),
               const SizedBox(height: 24),
               GoalSummaryCard(

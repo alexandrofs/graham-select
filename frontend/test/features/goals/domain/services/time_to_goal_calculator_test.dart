@@ -101,5 +101,72 @@ void main() {
       expect(projection.targetDate, isNull);
       expect(projection.progressPercentage, 20.0);
     });
+
+    test('should simulate positive, negative and zero monthsDifference and generate evolution curves', () {
+      final positiveSim = TimeToGoalCalculator.simulate(
+        goalType: 'PATRIMONY_TARGET',
+        targetValue: 1000000.0,
+        currentEquity: 150000.0,
+        baselineMonthlyContribution: 2000.0,
+        baselineAnnualYieldPercentage: 10.5,
+        simulatedMonthlyContribution: 3500.0,
+        simulatedAnnualYieldPercentage: 12.0,
+        referenceDate: referenceDate,
+      );
+
+      expect(positiveSim.monthsDifference, greaterThan(0));
+      expect(
+        positiveSim.monthsDifference,
+        positiveSim.baselineProjection.totalMonths - positiveSim.simulatedProjection.totalMonths,
+      );
+      expect(positiveSim.baselineCurve, isNotEmpty);
+      expect(positiveSim.simulatedCurve, isNotEmpty);
+      expect(positiveSim.baselineCurve.first.monthIndex, 0);
+      expect(positiveSim.baselineCurve.first.equity, 150000.0);
+      expect(positiveSim.simulatedCurve.last.equity, greaterThan(positiveSim.simulatedCurve.first.equity));
+
+      final negativeSim = TimeToGoalCalculator.simulate(
+        goalType: 'PATRIMONY_TARGET',
+        targetValue: 1000000.0,
+        currentEquity: 150000.0,
+        baselineMonthlyContribution: 3500.0,
+        baselineAnnualYieldPercentage: 12.0,
+        simulatedMonthlyContribution: 2000.0,
+        simulatedAnnualYieldPercentage: 10.5,
+        referenceDate: referenceDate,
+      );
+
+      expect(negativeSim.monthsDifference, lessThan(0));
+
+      final neutralSim = TimeToGoalCalculator.simulate(
+        goalType: 'PATRIMONY_TARGET',
+        targetValue: 1000000.0,
+        currentEquity: 150000.0,
+        baselineMonthlyContribution: 2000.0,
+        baselineAnnualYieldPercentage: 10.5,
+        simulatedMonthlyContribution: 2000.0,
+        simulatedAnnualYieldPercentage: 10.5,
+        referenceDate: referenceDate,
+      );
+
+      expect(neutralSim.monthsDifference, 0);
+    });
+
+    test('should keep fixed targetValue in simulate when goalType is MONTHLY_INCOME_TARGET', () {
+      final sim = TimeToGoalCalculator.simulate(
+        goalType: 'MONTHLY_INCOME_TARGET',
+        targetValue: 5000.0,
+        currentEquity: 60000.0,
+        baselineMonthlyContribution: 2000.0,
+        baselineAnnualYieldPercentage: 10.0,
+        simulatedMonthlyContribution: 2000.0,
+        simulatedAnnualYieldPercentage: 15.0,
+        referenceDate: referenceDate,
+      );
+
+      expect(sim.baselineProjection.targetValue, 600000.0);
+      expect(sim.simulatedProjection.targetValue, 600000.0);
+      expect(sim.monthsDifference, greaterThan(0));
+    });
   });
 }

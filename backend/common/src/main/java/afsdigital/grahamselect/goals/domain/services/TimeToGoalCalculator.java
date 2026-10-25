@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.goals.domain.services;
 
 import afsdigital.grahamselect.goals.domain.entities.GoalProjection;
+import afsdigital.grahamselect.goals.domain.entities.GoalSimulationResult;
 import afsdigital.grahamselect.goals.domain.entities.GoalType;
 
 import java.math.BigDecimal;
@@ -135,6 +136,46 @@ public class TimeToGoalCalculator {
                 .progressPercentage(progressPercentage)
                 .isAchieved(false)
                 .isUnreachable(false)
+                .build();
+    }
+
+    public GoalSimulationResult simulate(
+            GoalType goalType,
+            BigDecimal rawTargetValue,
+            BigDecimal currentEquity,
+            BigDecimal baselineMonthlyContribution,
+            BigDecimal baselineAnnualYieldPercentage,
+            BigDecimal simulatedMonthlyContribution,
+            BigDecimal simulatedAnnualYieldPercentage,
+            OffsetDateTime referenceDate
+    ) {
+        GoalProjection baselineProjection = calculate(
+                goalType,
+                rawTargetValue,
+                currentEquity,
+                baselineMonthlyContribution,
+                baselineAnnualYieldPercentage,
+                referenceDate
+        );
+
+        GoalProjection simulatedProjection = calculate(
+                GoalType.PATRIMONY_TARGET,
+                baselineProjection.getTargetValue(),
+                currentEquity,
+                simulatedMonthlyContribution,
+                simulatedAnnualYieldPercentage,
+                referenceDate
+        );
+
+        int monthsDifference = 0;
+        if (!baselineProjection.isUnreachable() && !simulatedProjection.isUnreachable()) {
+            monthsDifference = baselineProjection.getTotalMonths() - simulatedProjection.getTotalMonths();
+        }
+
+        return GoalSimulationResult.builder()
+                .baselineProjection(baselineProjection)
+                .simulatedProjection(simulatedProjection)
+                .monthsDifference(monthsDifference)
                 .build();
     }
 

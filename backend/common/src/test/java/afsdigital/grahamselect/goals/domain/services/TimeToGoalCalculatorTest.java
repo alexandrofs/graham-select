@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.goals.domain.services;
 
 import afsdigital.grahamselect.goals.domain.entities.GoalProjection;
+import afsdigital.grahamselect.goals.domain.entities.GoalSimulationResult;
 import afsdigital.grahamselect.goals.domain.entities.GoalType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,5 +146,84 @@ class TimeToGoalCalculatorTest {
         assertEquals(-1, projection.getMonths());
         assertNull(projection.getTargetDate());
         assertEquals(new BigDecimal("20.00"), projection.getProgressPercentage());
+    }
+
+    @Test
+    void shouldSimulatePositiveMonthsDifferenceWhenContributionOrYieldIncreases() {
+        GoalSimulationResult simulation = calculator.simulate(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.50"),
+                new BigDecimal("3500.00"),
+                new BigDecimal("12.00"),
+                referenceDate
+        );
+
+        assertNotNull(simulation);
+        assertFalse(simulation.getBaselineProjection().isUnreachable());
+        assertFalse(simulation.getSimulatedProjection().isUnreachable());
+        assertTrue(simulation.getMonthsDifference() > 0);
+        assertEquals(
+                simulation.getBaselineProjection().getTotalMonths() - simulation.getSimulatedProjection().getTotalMonths(),
+                simulation.getMonthsDifference()
+        );
+    }
+
+    @Test
+    void shouldSimulateNegativeMonthsDifferenceWhenContributionOrYieldDecreases() {
+        GoalSimulationResult simulation = calculator.simulate(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                new BigDecimal("3500.00"),
+                new BigDecimal("12.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.50"),
+                referenceDate
+        );
+
+        assertNotNull(simulation);
+        assertTrue(simulation.getMonthsDifference() < 0);
+        assertEquals(
+                simulation.getBaselineProjection().getTotalMonths() - simulation.getSimulatedProjection().getTotalMonths(),
+                simulation.getMonthsDifference()
+        );
+    }
+
+    @Test
+    void shouldSimulateKeepingFixedTargetValueForMonthlyIncomeTargetAndHandleUnreachable() {
+        // Monthly income target: 5000 / month at 10% a.a. -> baseline FV = 600,000.00
+        // Simulated yield increases to 15% a.a. -> simulated FV MUST remain 600,000.00
+        GoalSimulationResult simulation = calculator.simulate(
+                GoalType.MONTHLY_INCOME_TARGET,
+                new BigDecimal("5000.00"),
+                new BigDecimal("60000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("15.00"),
+                referenceDate
+        );
+
+        assertEquals(new BigDecimal("600000.00"), simulation.getBaselineProjection().getTargetValue());
+        assertEquals(new BigDecimal("600000.00"), simulation.getSimulatedProjection().getTargetValue());
+        assertTrue(simulation.getMonthsDifference() > 0);
+
+        // Unreachable case -> monthsDifference == 0
+        GoalSimulationResult unreachableSim = calculator.simulate(
+                GoalType.PATRIMONY_TARGET,
+                new BigDecimal("500000.00"),
+                new BigDecimal("100000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.00"),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                referenceDate
+        );
+
+        assertTrue(unreachableSim.getSimulatedProjection().isUnreachable());
+        assertEquals(0, unreachableSim.getMonthsDifference());
     }
 }
