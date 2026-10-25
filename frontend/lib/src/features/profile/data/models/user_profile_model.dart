@@ -6,6 +6,7 @@ class UserProfile {
   final String? investorProfile; // CONSERVATIVE, MODERATE, AGGRESSIVE
   final DateTime? trialEndsAt;
   final int? daysRemaining;
+  final String role; // USER, ADMIN
 
   UserProfile({
     required this.id,
@@ -15,6 +16,7 @@ class UserProfile {
     this.investorProfile,
     this.trialEndsAt,
     this.daysRemaining,
+    this.role = 'USER',
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class UserProfile {
           ? DateTime.parse(json['trialEndsAt']) 
           : null,
       daysRemaining: json['daysRemaining'],
+      role: json['role'] as String? ?? 'USER',
     );
   }
 
@@ -40,6 +43,7 @@ class UserProfile {
       'investorProfile': investorProfile,
       'trialEndsAt': trialEndsAt?.toIso8601String(),
       'daysRemaining': daysRemaining,
+      'role': role,
     };
   }
 
@@ -54,7 +58,8 @@ class UserProfile {
           tier == other.tier &&
           investorProfile == other.investorProfile &&
           trialEndsAt == other.trialEndsAt &&
-          daysRemaining == other.daysRemaining;
+          daysRemaining == other.daysRemaining &&
+          role == other.role;
 
   @override
   int get hashCode =>
@@ -64,5 +69,6 @@ class UserProfile {
       tier.hashCode ^
       investorProfile.hashCode ^
       trialEndsAt.hashCode ^
-      daysRemaining.hashCode;
+      daysRemaining.hashCode ^
+      role.hashCode;
 }

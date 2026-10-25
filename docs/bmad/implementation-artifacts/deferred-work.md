@@ -24,3 +24,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 ## Deferred from: code review of 5-1-wealth-income-goal-setup.md (2026-06-13)
 
 (Nenhum item pendente)
+
+## Deferred from: code review of 6-1-admin-observability-dashboard.md (2026-10-25)
+
+- Validação de `sub` e `email` nulos na conversão OAuth2 [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:34] — Comportamento pré-existente da Story 1.1 na extração de claims do JWT.
+- Recuperação de concorrência dentro da mesma transação em `OAuth2UserProvisioningConverter.convert()` [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:72] — Bloco catch pré-existente da Story 1.1 dentro de método anotado com `@Transactional`.

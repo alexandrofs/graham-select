@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../theme/app_theme.dart';
 
 class MainLayout extends StatelessWidget {
@@ -223,6 +225,9 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profileProvider = Provider.of<ProfileProvider?>(context);
+    final isAdmin = profileProvider?.profile?.role == 'ADMIN';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
@@ -236,6 +241,25 @@ class _TopBar extends StatelessWidget {
         child: Row(
           children: [
             const Spacer(),
+            if (isAdmin) ...[
+              TextButton.icon(
+                key: const Key('admin_dashboard_nav_button'),
+                onPressed: () => context.go('/admin/dashboard'),
+                icon: const Icon(
+                  Icons.admin_panel_settings_outlined,
+                  size: 18,
+                  color: AppTheme.accentColor,
+                ),
+                label: const Text(
+                  'Painel Admin',
+                  style: TextStyle(
+                    color: AppTheme.accentColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.notifications_outlined),

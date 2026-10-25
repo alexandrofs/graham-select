@@ -63,6 +63,12 @@ import 'src/features/goals/data/repositories/goals_repository_impl.dart';
 import 'src/features/goals/presentation/providers/goals_provider.dart';
 import 'src/features/goals/presentation/pages/goals_page.dart';
 
+// Admin Feature Imports
+import 'src/features/admin/data/datasources/admin_remote_datasource.dart';
+import 'src/features/admin/data/repositories/admin_repository_impl.dart';
+import 'src/features/admin/presentation/providers/admin_observability_provider.dart';
+import 'src/features/admin/presentation/pages/admin_dashboard_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -135,6 +141,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final GoalsRemoteDatasource goalsRemoteDatasource;
   late final GoalsRepositoryImpl goalsRepository;
 
+  late final AdminRemoteDatasource adminRemoteDatasource;
+  late final AdminRepositoryImpl adminRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -192,6 +201,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     goalsRemoteDatasource = GoalsRemoteDatasource(apiClient: effectiveApiClient);
     goalsRepository = GoalsRepositoryImpl(remoteDatasource: goalsRemoteDatasource);
 
+    // Admin Feature DI
+    adminRemoteDatasource = AdminRemoteDatasource(apiClient: effectiveApiClient);
+    adminRepository = AdminRepositoryImpl(remoteDatasource: adminRemoteDatasource);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -232,6 +245,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
             GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
+            GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
           ],
         ),
       ],
@@ -272,6 +286,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
+        ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
         ChangeNotifierProvider(
           create: (context) {
             final provider = PortfolioProvider(
