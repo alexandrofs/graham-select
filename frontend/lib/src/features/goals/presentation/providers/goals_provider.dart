@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/financial_goal.dart';
+import '../../domain/entities/goal_projection.dart';
 import '../../domain/repositories/goals_repository.dart';
+import '../../domain/services/time_to_goal_calculator.dart';
 
 enum GoalsStatus { initial, loading, success, error }
 
@@ -18,6 +20,9 @@ class GoalsProvider extends ChangeNotifier {
   FinancialGoal? _currentGoal;
   FinancialGoal? get currentGoal => _currentGoal;
 
+  GoalProjection? _projection;
+  GoalProjection? get projection => _projection;
+
   Future<void> loadGoal() async {
     _status = GoalsStatus.loading;
     _errorMessage = null;
@@ -25,11 +30,66 @@ class GoalsProvider extends ChangeNotifier {
 
     try {
       _currentGoal = await repository.fetchGoal();
+      if (_currentGoal != null) {
+        await loadProjection();
+      } else {
+        _projection = null;
+      }
       _status = GoalsStatus.success;
     } catch (e) {
       _status = GoalsStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
     }
+    notifyListeners();
+  }
+
+  Future<void> loadProjection({double? currentEquity, double? grossYieldPercentage}) async {
+    try {
+      final remoteProjection = await repository.fetchProjection();
+      if (remoteProjection != null) {
+        _projection = remoteProjection;
+      } else if (_currentGoal != null) {
+        _projection = TimeToGoalCalculator.calculate(
+          goalType: _currentGoal!.goalType,
+          targetValue: _currentGoal!.targetValue,
+          currentEquity: currentEquity ?? _projection?.currentEquity ?? 0.0,
+          monthlyContribution: _currentGoal!.monthlyContribution,
+          annualYieldPercentage: grossYieldPercentage ?? _projection?.annualYieldPercentage ?? 0.0,
+        );
+      } else {
+        _projection = null;
+      }
+      notifyListeners();
+    } catch (_) {
+      if (_currentGoal != null) {
+        _projection = TimeToGoalCalculator.calculate(
+          goalType: _currentGoal!.goalType,
+          targetValue: _currentGoal!.targetValue,
+          currentEquity: currentEquity ?? _projection?.currentEquity ?? 0.0,
+          monthlyContribution: _currentGoal!.monthlyContribution,
+          annualYieldPercentage: grossYieldPercentage ?? _projection?.annualYieldPercentage ?? 0.0,
+        );
+        notifyListeners();
+      }
+    }
+  }
+
+  void recalculateLocalProjection({
+    required double currentEquity,
+    required double grossYieldPercentage,
+  }) {
+    if (_currentGoal == null) {
+      _projection = null;
+      notifyListeners();
+      return;
+    }
+    _projection = TimeToGoalCalculator.calculate(
+      goalType: _currentGoal!.goalType,
+      targetValue: _currentGoal!.targetValue,
+      currentEquity: currentEquity,
+      monthlyContribution: _currentGoal!.monthlyContribution,
+      annualYieldPercentage: grossYieldPercentage,
+    );
     notifyListeners();
   }
 
@@ -60,6 +120,7 @@ class GoalsProvider extends ChangeNotifier {
       }
 
       _currentGoal = savedGoal;
+      await loadProjection();
       _status = GoalsStatus.success;
     } catch (e) {
       _status = GoalsStatus.error;

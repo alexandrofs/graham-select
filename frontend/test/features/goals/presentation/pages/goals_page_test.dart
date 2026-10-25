@@ -4,10 +4,12 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/src/features/goals/domain/entities/financial_goal.dart';
+import 'package:frontend/src/features/goals/domain/entities/goal_projection.dart';
 import 'package:frontend/src/features/goals/domain/repositories/goals_repository.dart';
 import 'package:frontend/src/features/goals/presentation/providers/goals_provider.dart';
 import 'package:frontend/src/features/goals/presentation/pages/goals_page.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/goal_summary_card.dart';
+import 'package:frontend/src/features/goals/presentation/widgets/motivational_clock_card.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
@@ -17,6 +19,7 @@ import 'package:frontend/src/features/portfolio/domain/entities/monthly_evolutio
 
 class ManualMockGoalsRepository implements GoalsRepository {
   FinancialGoal? goal;
+  GoalProjection? projection;
   bool shouldThrowError = false;
   int createGoalCallCount = 0;
   int updateGoalCallCount = 0;
@@ -27,6 +30,14 @@ class ManualMockGoalsRepository implements GoalsRepository {
       throw Exception('Erro de rede');
     }
     return goal;
+  }
+
+  @override
+  Future<GoalProjection?> fetchProjection() async {
+    if (shouldThrowError) {
+      throw Exception('Erro de rede');
+    }
+    return projection;
   }
 
   @override
@@ -144,7 +155,8 @@ void main() {
       // Assert success SnackBar
       expect(find.text('Meta salva com sucesso ✅'), findsOneWidget);
 
-      // Assert summary card is now displayed
+      // Assert summary card and motivational clock card are now displayed
+      expect(find.byType(MotivationalClockCard), findsOneWidget);
       expect(find.byType(GoalSummaryCard), findsOneWidget);
       expect(find.text('R\$ 200.000,00'), findsNWidgets(2));
 

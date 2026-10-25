@@ -1,4 +1,5 @@
 import '../../domain/entities/financial_goal.dart';
+import '../../domain/entities/goal_projection.dart';
 import '../../domain/repositories/goals_repository.dart';
 import '../datasources/goals_remote_datasource.dart';
 import '../models/financial_goal_model.dart';
@@ -11,6 +12,12 @@ class GoalsRepositoryImpl implements GoalsRepository {
   @override
   Future<FinancialGoal?> fetchGoal() async {
     final model = await remoteDatasource.fetchGoal();
+    return model?.toEntity();
+  }
+
+  @override
+  Future<GoalProjection?> fetchProjection() async {
+    final model = await remoteDatasource.fetchProjection();
     return model?.toEntity();
   }
 

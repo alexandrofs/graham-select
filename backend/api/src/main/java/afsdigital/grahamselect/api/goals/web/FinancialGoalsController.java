@@ -2,6 +2,8 @@ package afsdigital.grahamselect.api.goals.web;
 
 import afsdigital.grahamselect.goals.application.dto.CreateFinancialGoalRequest;
 import afsdigital.grahamselect.goals.application.dto.FinancialGoalDto;
+import afsdigital.grahamselect.goals.application.dto.GoalProjectionDto;
+import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
@@ -33,6 +35,7 @@ public class FinancialGoalsController {
     private final CreateFinancialGoalUseCase createUseCase;
     private final UpdateFinancialGoalUseCase updateUseCase;
     private final GetFinancialGoalUseCase getUseCase;
+    private final CalculateGoalProjectionUseCase calculateGoalProjectionUseCase;
 
     @PostMapping
     public ResponseEntity<?> create(
@@ -61,5 +64,13 @@ public class FinancialGoalsController {
         log.info("Received request to get financial goal for user {}", userId);
         Optional<FinancialGoalDto> result = getUseCase.execute(userId);
         return ResponseEntity.ok(Map.of("data", result.map(java.util.List::of).orElse(java.util.List.of())));
+    }
+
+    @GetMapping("/projection")
+    public ResponseEntity<?> getProjection(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        log.info("Received request to get time-to-goal projection for user {}", userId);
+        Optional<GoalProjectionDto> result = calculateGoalProjectionUseCase.execute(userId);
+        return ResponseEntity.ok(Collections.singletonMap("data", result.orElse(null)));
     }
 }

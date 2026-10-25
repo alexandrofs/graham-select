@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../../core/api/api_client.dart';
 import '../models/financial_goal_model.dart';
+import '../models/goal_projection_model.dart';
 
 class GoalsRemoteDatasource {
   final ApiClient apiClient;
@@ -22,6 +23,32 @@ class GoalsRemoteDatasource {
         return FinancialGoalModel.fromJson(data as Map<String, dynamic>);
       } else {
         throw Exception('Erro ao buscar metas financeiras: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      String? detail;
+      final responseData = e.response?.data;
+      if (responseData is Map) {
+        detail = responseData['detail']?.toString();
+      }
+      throw Exception(detail ?? 'Erro de conexão com o servidor.');
+    }
+  }
+
+  Future<GoalProjectionModel?> fetchProjection() async {
+    try {
+      final response = await apiClient.get('/api/v1/financial-goals/projection');
+      if (response.statusCode == 200) {
+        if (response.data is! Map<String, dynamic>) {
+          return null;
+        }
+        final Map<String, dynamic> responseData = response.data as Map<String, dynamic>;
+        final dynamic data = responseData['data'];
+        if (data is! Map<String, dynamic>) {
+          return null;
+        }
+        return GoalProjectionModel.fromJson(data);
+      } else {
+        throw Exception('Erro ao buscar projeção de meta: ${response.statusCode}');
       }
     } on DioException catch (e) {
       String? detail;

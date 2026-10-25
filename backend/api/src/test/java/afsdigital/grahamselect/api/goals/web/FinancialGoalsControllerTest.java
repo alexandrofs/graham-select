@@ -3,7 +3,9 @@ package afsdigital.grahamselect.api.goals.web;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
 import afsdigital.grahamselect.goals.application.dto.CreateFinancialGoalRequest;
 import afsdigital.grahamselect.goals.application.dto.FinancialGoalDto;
+import afsdigital.grahamselect.goals.application.dto.GoalProjectionDto;
 import afsdigital.grahamselect.goals.application.service.exceptions.FinancialGoalNotFoundException;
+import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
@@ -20,6 +22,7 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -44,6 +47,9 @@ class FinancialGoalsControllerTest extends BaseRepositoryIT {
 
     @MockBean
     private GetFinancialGoalUseCase getUseCase;
+
+    @MockBean
+    private CalculateGoalProjectionUseCase calculateGoalProjectionUseCase;
 
     @Test
     void shouldCreateGoalSuccessfully() throws Exception {
@@ -128,5 +134,50 @@ class FinancialGoalsControllerTest extends BaseRepositoryIT {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void shouldReturnProjectionWhenGoalExists() throws Exception {
+        String userId = "user-123";
+        GoalProjectionDto projectionDto = new GoalProjectionDto(
+                new BigDecimal("1000000.00"),
+                new BigDecimal("150000.00"),
+                new BigDecimal("2000.00"),
+                new BigDecimal("10.50"),
+                142,
+                11,
+                10,
+                OffsetDateTime.of(2038, 4, 16, 15, 0, 0, 0, ZoneOffset.UTC),
+                new BigDecimal("15.00"),
+                false,
+                false
+        );
+
+        when(calculateGoalProjectionUseCase.execute(userId)).thenReturn(Optional.of(projectionDto));
+
+        mockMvc.perform(get("/api/v1/financial-goals/projection")
+                        .with(jwt().jwt(builder -> builder.subject(userId)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.targetValue").value(1000000.00))
+                .andExpect(jsonPath("$.data.currentEquity").value(150000.00))
+                .andExpect(jsonPath("$.data.totalMonths").value(142))
+                .andExpect(jsonPath("$.data.years").value(11))
+                .andExpect(jsonPath("$.data.months").value(10))
+                .andExpect(jsonPath("$.data.progressPercentage").value(15.00))
+                .andExpect(jsonPath("$.data.isAchieved").value(false))
+                .andExpect(jsonPath("$.data.isUnreachable").value(false));
+    }
+
+    @Test
+    void shouldReturnNullDataWhenNoGoalExistsForProjection() throws Exception {
+        String userId = "user-123";
+        when(calculateGoalProjectionUseCase.execute(userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/financial-goals/projection")
+                        .with(jwt().jwt(builder -> builder.subject(userId)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(nullValue()));
     }
 }

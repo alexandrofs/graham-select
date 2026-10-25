@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
+import '../../domain/services/time_to_goal_calculator.dart';
 import '../providers/goals_provider.dart';
 import '../widgets/goal_summary_card.dart';
+import '../widgets/motivational_clock_card.dart';
 
 class MoneyInputFormatter extends TextInputFormatter {
   @override
@@ -71,10 +73,19 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
       CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _goalsProvider.loadGoal();
-        context.read<PortfolioProvider>().loadSummary();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final portfolioProvider = context.read<PortfolioProvider>();
+      await Future.wait([
+        _goalsProvider.loadGoal(),
+        portfolioProvider.loadSummary(),
+      ]);
+      if (!mounted) return;
+      if (_goalsProvider.currentGoal != null && portfolioProvider.summary != null) {
+        _goalsProvider.recalculateLocalProjection(
+          currentEquity: portfolioProvider.summary!.totalEquity,
+          grossYieldPercentage: portfolioProvider.summary!.grossYieldPercentage,
+        );
       }
     });
   }
@@ -146,7 +157,15 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
           ),
         );
         // Recarrega o sumário do portfólio para atualizar o cálculo de diferença
-        context.read<PortfolioProvider>().loadSummary();
+        final portfolioProvider = context.read<PortfolioProvider>();
+        await portfolioProvider.loadSummary();
+        if (!mounted) return;
+        if (portfolioProvider.summary != null) {
+          goalsProvider.recalculateLocalProjection(
+            currentEquity: portfolioProvider.summary!.totalEquity,
+            grossYieldPercentage: portfolioProvider.summary!.grossYieldPercentage,
+          );
+        }
       } else if (goalsProvider.status == GoalsStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -179,6 +198,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
     }
 
     final double currentPatrimony = portfolioProvider.summary?.totalEquity ?? 0.0;
+    final double grossYieldPercentage = portfolioProvider.summary?.grossYieldPercentage ?? 0.0;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -350,12 +370,25 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
               ),
             ),
             const SizedBox(height: 24),
-            // Exibir resumo da meta se houver meta salva e não estiver carregando
-            if (goalsProvider.currentGoal != null)
+            // Exibir Relógio Motivacional e resumo da meta se houver meta salva e não estiver carregando
+            if (goalsProvider.currentGoal != null) ...[
+              MotivationalClockCard(
+                goal: goalsProvider.currentGoal,
+                projection: goalsProvider.projection ??
+                    TimeToGoalCalculator.calculate(
+                      goalType: goalsProvider.currentGoal!.goalType,
+                      targetValue: goalsProvider.currentGoal!.targetValue,
+                      currentEquity: currentPatrimony,
+                      monthlyContribution: goalsProvider.currentGoal!.monthlyContribution,
+                      annualYieldPercentage: grossYieldPercentage,
+                    ),
+              ),
+              const SizedBox(height: 24),
               GoalSummaryCard(
                 goal: goalsProvider.currentGoal!,
                 currentPatrimony: currentPatrimony,
               ),
+            ],
           ],
         ),
       ),
