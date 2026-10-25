@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../goals/domain/entities/goal_projection.dart';
 import '../../../goals/domain/services/time_to_goal_calculator.dart';
 import '../../../goals/presentation/providers/goals_provider.dart';
+import '../../../goals/presentation/widgets/goal_health_checklist_card.dart';
 import '../../../goals/presentation/widgets/motivational_clock_card.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
@@ -121,6 +122,14 @@ class _DashboardPageState extends State<DashboardPage> {
                     goal: currentGoal,
                     projection: effectiveProjection,
                   ),
+                  if (currentGoal != null) ...[
+                    const SizedBox(height: 24),
+                    GoalHealthChecklistCard(
+                      goal: currentGoal,
+                      currentEquity: provider.summary?.totalEquity ?? 0.0,
+                      annualYieldPercentage: provider.summary?.grossYieldPercentage ?? 0.0,
+                    ),
+                  ],
                 ],
                 const SizedBox(height: 32),
                 AnimatedSwitcher(

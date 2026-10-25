@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../domain/services/time_to_goal_calculator.dart';
 import '../providers/goals_provider.dart';
+import '../widgets/goal_health_checklist_card.dart';
 import '../widgets/goal_summary_card.dart';
 import '../widgets/motivational_clock_card.dart';
 import '../widgets/what_if_simulator_card.dart';
@@ -383,6 +384,12 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                       monthlyContribution: goalsProvider.currentGoal!.monthlyContribution,
                       annualYieldPercentage: grossYieldPercentage,
                     ),
+              ),
+              const SizedBox(height: 24),
+              GoalHealthChecklistCard(
+                goal: goalsProvider.currentGoal!,
+                currentEquity: currentPatrimony,
+                annualYieldPercentage: grossYieldPercentage,
               ),
               const SizedBox(height: 24),
               WhatIfSimulatorCard(

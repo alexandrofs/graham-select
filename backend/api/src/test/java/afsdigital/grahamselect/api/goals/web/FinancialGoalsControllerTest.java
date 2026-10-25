@@ -3,12 +3,14 @@ package afsdigital.grahamselect.api.goals.web;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
 import afsdigital.grahamselect.goals.application.dto.CreateFinancialGoalRequest;
 import afsdigital.grahamselect.goals.application.dto.FinancialGoalDto;
+import afsdigital.grahamselect.goals.application.dto.GoalHealthAssessmentDto;
 import afsdigital.grahamselect.goals.application.dto.GoalProjectionDto;
 import afsdigital.grahamselect.goals.application.dto.GoalSimulationDto;
 import afsdigital.grahamselect.goals.application.dto.SimulateGoalProjectionRequest;
 import afsdigital.grahamselect.goals.application.service.exceptions.FinancialGoalNotFoundException;
 import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
+import afsdigital.grahamselect.goals.application.usecase.EvaluateGoalHealthUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.SimulateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
@@ -56,6 +58,9 @@ class FinancialGoalsControllerTest extends BaseRepositoryIT {
 
     @MockBean
     private SimulateGoalProjectionUseCase simulateGoalProjectionUseCase;
+
+    @MockBean
+    private EvaluateGoalHealthUseCase evaluateGoalHealthUseCase;
 
     @Test
     void shouldCreateGoalSuccessfully() throws Exception {
@@ -254,5 +259,53 @@ class FinancialGoalsControllerTest extends BaseRepositoryIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"simulatedMonthlyContribution\":-100.00,\"simulatedAnnualYieldPercentage\":12.00}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnGoalHealthWhenGoalExists() throws Exception {
+        String userId = "user-123";
+        GoalHealthAssessmentDto healthDto = new GoalHealthAssessmentDto(
+                "OFF_TRACK",
+                false,
+                120,
+                142,
+                22,
+                new BigDecimal("685.00"),
+                new BigDecimal("2685.00"),
+                new BigDecimal("12.85"),
+                java.util.List.of(
+                        "Aumente seu aporte em R$ 685,00 para voltar ao trilho",
+                        "Revise seu yield alvo para 12,85% a.a. para atingir a meta no prazo estimado"
+                )
+        );
+
+        when(evaluateGoalHealthUseCase.execute(userId)).thenReturn(Optional.of(healthDto));
+
+        mockMvc.perform(get("/api/v1/financial-goals/health")
+                        .with(jwt().jwt(builder -> builder.subject(userId)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("OFF_TRACK"))
+                .andExpect(jsonPath("$.data.isOnTrack").value(false))
+                .andExpect(jsonPath("$.data.estimatedTargetMonths").value(120))
+                .andExpect(jsonPath("$.data.projectedTotalMonths").value(142))
+                .andExpect(jsonPath("$.data.monthsDelay").value(22))
+                .andExpect(jsonPath("$.data.additionalMonthlyContributionNeeded").value(685.00))
+                .andExpect(jsonPath("$.data.requiredMonthlyContribution").value(2685.00))
+                .andExpect(jsonPath("$.data.requiredAnnualYieldPercentage").value(12.85))
+                .andExpect(jsonPath("$.data.actionSuggestions[0]").value("Aumente seu aporte em R$ 685,00 para voltar ao trilho"))
+                .andExpect(jsonPath("$.data.actionSuggestions[1]").value("Revise seu yield alvo para 12,85% a.a. para atingir a meta no prazo estimado"));
+    }
+
+    @Test
+    void shouldReturnNullDataWhenNoGoalExistsForHealth() throws Exception {
+        String userId = "user-123";
+        when(evaluateGoalHealthUseCase.execute(userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/financial-goals/health")
+                        .with(jwt().jwt(builder -> builder.subject(userId)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(nullValue()));
     }
 }

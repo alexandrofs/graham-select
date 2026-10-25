@@ -4,6 +4,7 @@ import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolio
 import afsdigital.grahamselect.goals.application.repository.FinancialGoalRepository;
 import afsdigital.grahamselect.goals.application.usecase.CalculateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.CreateFinancialGoalUseCase;
+import afsdigital.grahamselect.goals.application.usecase.EvaluateGoalHealthUseCase;
 import afsdigital.grahamselect.goals.application.usecase.GetFinancialGoalUseCase;
 import afsdigital.grahamselect.goals.application.usecase.SimulateGoalProjectionUseCase;
 import afsdigital.grahamselect.goals.application.usecase.UpdateFinancialGoalUseCase;
@@ -54,6 +55,19 @@ public class GoalsServiceConfiguration {
             TimeToGoalCalculator timeToGoalCalculator
     ) {
         return new SimulateGoalProjectionUseCase(
+                financialGoalRepository,
+                getPortfolioSummaryUseCase,
+                timeToGoalCalculator
+        );
+    }
+
+    @Bean
+    public EvaluateGoalHealthUseCase evaluateGoalHealthUseCase(
+            FinancialGoalRepository financialGoalRepository,
+            GetPortfolioSummaryUseCase getPortfolioSummaryUseCase,
+            TimeToGoalCalculator timeToGoalCalculator
+    ) {
+        return new EvaluateGoalHealthUseCase(
                 financialGoalRepository,
                 getPortfolioSummaryUseCase,
                 timeToGoalCalculator

@@ -8,6 +8,7 @@ import 'package:frontend/src/features/goals/domain/entities/goal_projection.dart
 import 'package:frontend/src/features/goals/domain/repositories/goals_repository.dart';
 import 'package:frontend/src/features/goals/presentation/providers/goals_provider.dart';
 import 'package:frontend/src/features/goals/presentation/pages/goals_page.dart';
+import 'package:frontend/src/features/goals/presentation/widgets/goal_health_checklist_card.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/goal_summary_card.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/motivational_clock_card.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/what_if_simulator_card.dart';
@@ -158,6 +159,7 @@ void main() {
 
       // Assert summary card and motivational clock card are now displayed
       expect(find.byType(MotivationalClockCard), findsOneWidget);
+      expect(find.byType(GoalHealthChecklistCard), findsOneWidget);
       expect(find.byType(WhatIfSimulatorCard), findsOneWidget);
       expect(find.byType(GoalSummaryCard), findsOneWidget);
       expect(find.text('R\$ 200.000,00'), findsNWidgets(2));
@@ -188,6 +190,7 @@ void main() {
       expect(yearsField.controller?.text, isEmpty);
 
       // Goal summary card should not be displayed
+      expect(find.byType(GoalHealthChecklistCard), findsNothing);
       expect(find.byType(GoalSummaryCard), findsNothing);
     });
 
@@ -216,6 +219,7 @@ void main() {
       expect(yearsField.controller?.text, '10');
 
       // Summary card should be visible
+      expect(find.byType(GoalHealthChecklistCard), findsOneWidget);
       expect(find.byType(WhatIfSimulatorCard), findsOneWidget);
       expect(find.byType(GoalSummaryCard), findsOneWidget);
       expect(find.text('R\$ 300.000,00'), findsNWidgets(2)); // in input and in summary card
