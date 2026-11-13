@@ -26,4 +26,6 @@ public interface JpaTradeRepository extends JpaRepository<TradeEntity, UUID> {
 
     @Query("SELECT t.ticker FROM TradeEntity t GROUP BY t.ticker HAVING SUM(CASE WHEN t.side = 'COMPRA' THEN t.quantity ELSE -t.quantity END) > 0")
     List<String> findDistinctTickers();
+
+    boolean existsByTickerIgnoreCase(String ticker);
 }

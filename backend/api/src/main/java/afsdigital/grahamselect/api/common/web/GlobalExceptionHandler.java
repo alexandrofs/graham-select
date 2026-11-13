@@ -6,10 +6,15 @@ import afsdigital.grahamselect.api.upload.web.B3UploadValidationException;
 import afsdigital.grahamselect.goals.application.service.exceptions.FinancialGoalNotFoundException;
 import afsdigital.grahamselect.valuation.application.usecase.exceptions.AllocationGoalValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler providing RFC 7807 ProblemDetail responses.
@@ -64,11 +69,52 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(afsdigital.grahamselect.api.admin.application.service.exceptions.DuplicateResourceException.class)
+    public ProblemDetail handleDuplicateResource(afsdigital.grahamselect.api.admin.application.service.exceptions.DuplicateResourceException ex) {
+        log.error("Duplicate resource error: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("Duplicate Resource");
+        return problem;
+    }
+
+    @ExceptionHandler(afsdigital.grahamselect.api.admin.application.service.exceptions.ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFound(afsdigital.grahamselect.api.admin.application.service.exceptions.ResourceNotFoundException ex) {
+        log.error("Resource not found error: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Resource Not Found");
+        return problem;
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
-        log.error("Invalid argument or business rule violation: {}", ex.getMessage());
+        log.error("Invalid argument or business rule violation: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setTitle("Bad Request");
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        String detail = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining("; "));
+        if (detail.isBlank()) {
+            detail = "Dados de entrada inválidos.";
+        }
+        log.error("Request validation failed: {}", detail, ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        problem.setTitle("Validation Error");
+        return problem;
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.error("Database integrity violation: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                "Operação bloqueada por conflito ou vínculo de integridade referencial."
+        );
+        problem.setTitle("Data Integrity Violation");
         return problem;
     }
 }

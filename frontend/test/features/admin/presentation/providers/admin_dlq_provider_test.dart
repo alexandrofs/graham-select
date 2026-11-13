@@ -39,6 +39,9 @@ class _MockAdminRepository implements AdminRepository {
     if (batchError != null) throw batchError!;
     return batchResult;
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

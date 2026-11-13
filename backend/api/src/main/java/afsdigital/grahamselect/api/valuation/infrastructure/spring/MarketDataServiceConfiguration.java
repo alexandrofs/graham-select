@@ -53,8 +53,11 @@ public class MarketDataServiceConfiguration {
     }
 
     @Bean
-    public CustodyTickerPort custodyTickerPort(JpaTradeRepository jpaTradeRepository) {
-        return new CustodyTickerRepositoryImpl(jpaTradeRepository);
+    public CustodyTickerPort custodyTickerPort(
+            JpaTradeRepository jpaTradeRepository,
+            afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository companyJpaRepository
+    ) {
+        return new CustodyTickerRepositoryImpl(jpaTradeRepository, companyJpaRepository);
     }
 
     @Bean

@@ -12,6 +12,7 @@ public class RankedCompany {
 
     private String symbol;
     private String name;
+    private String assetClass;
     private BigDecimal intrinsicValue;
     private BigDecimal currentPrice;
     private BigDecimal marginOfSafety;

@@ -377,4 +377,73 @@ class GetCustodyPositionsUseCaseTest {
         assertEquals("Renda Fixa", inferredClasses.get("TESOURO_IPCA"));
         assertEquals("Outros", inferredClasses.get("OUTRO_ATIVO"));
     }
+
+    @Test
+    void shouldUseMasterDataAssetClassWhenDefinedOverridingInference() {
+        String userId = "user-etf";
+        String ticker = "BOVA11";
+        Trade trade = Trade.builder()
+                .userId(userId)
+                .ticker(ticker)
+                .side(TradeSide.COMPRA.name())
+                .quantity(BigDecimal.TEN)
+                .price(new BigDecimal("100.00"))
+                .build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(trade));
+
+        Company company = Company.builder()
+                .id("id-bova")
+                .ticker(ticker)
+                .name("iShares Ibovespa")
+                .assetClass("ETFs")
+                .build();
+        when(companyRepository.findByTicker(ticker)).thenReturn(company);
+
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Map.of(
+                "id-bova", StockPrice.builder().companyId("id-bova").price(new BigDecimal("105.00")).date(today).build()
+        ));
+
+        List<CustodyPositionDTO> result = useCase.execute(userId);
+
+        assertEquals(1, result.size());
+        assertEquals("BOVA11", result.get(0).ticker());
+        assertEquals("ETFs", result.get(0).assetClass());
+    }
+
+    @Test
+    void shouldFallbackToBaseTickerForFractionalMasterDataAssetClass() {
+        String userId = "user-frac";
+        Trade trade = Trade.builder()
+                .userId(userId)
+                .ticker("BOVA11F")
+                .side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("5"))
+                .price(new BigDecimal("100.00"))
+                .build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(trade));
+
+        Company baseCompany = Company.builder()
+                .id("id-bova")
+                .ticker("BOVA11")
+                .name("iShares Ibovespa")
+                .assetClass("ETFs")
+                .build();
+        when(companyRepository.findByTicker("BOVA11F")).thenReturn(null);
+        when(companyRepository.findByTicker("BOVA11")).thenReturn(baseCompany);
+
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Map.of(
+                "id-bova", StockPrice.builder().companyId("id-bova").price(new BigDecimal("110.00")).date(today).build()
+        ));
+
+        List<CustodyPositionDTO> result = useCase.execute(userId);
+
+        assertEquals(1, result.size());
+        assertEquals("BOVA11F", result.get(0).ticker());
+        assertEquals("ETFs", result.get(0).assetClass());
+        assertEquals(new BigDecimal("110.00"), result.get(0).currentPrice());
+    }
 }

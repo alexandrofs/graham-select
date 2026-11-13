@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface RankingJpaRepository extends JpaRepository<RankedCompanyEntity, String> {
 
-    @Query(value = "SELECT c.ticker as symbol, c.name, iv.intrinsic_value as intrinsic_value, sp.price as current_price, "
+    @Query(value = "SELECT c.ticker as symbol, c.name, c.asset_class as asset_class, iv.intrinsic_value as intrinsic_value, sp.price as current_price, "
             + "CASE WHEN sp.price IS NULL OR sp.price = 0 THEN 0 ELSE (iv.intrinsic_value / sp.price) - 1 END as margin_of_safety, "
             + "iv.calculation_date as intrinsic_value_updated_at, iv.eps as eps, iv.bvps as bvps "
             + "FROM company_intrinsic_value iv "
