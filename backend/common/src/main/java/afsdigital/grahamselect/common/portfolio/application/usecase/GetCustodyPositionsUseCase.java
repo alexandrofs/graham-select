@@ -74,11 +74,20 @@ public class GetCustodyPositionsUseCase {
             return Collections.emptyList();
         }
 
-        // 2. Map Tickers to Companies
-        Map<String, Company> tickerToCompany = activeTickers.stream()
-                .map(companyRepository::findByTicker)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(Company::getTicker, c -> c));
+        // 2. Map Tickers to Companies (with fractional suffix fallback, e.g. BOVA11F -> BOVA11)
+        Map<String, Company> tickerToCompany = new HashMap<>();
+        for (String activeTicker : activeTickers) {
+            Company company = companyRepository.findByTicker(activeTicker);
+            if (company == null) {
+                String baseTicker = stripFractionalSuffix(activeTicker);
+                if (!baseTicker.equalsIgnoreCase(activeTicker)) {
+                    company = companyRepository.findByTicker(baseTicker);
+                }
+            }
+            if (company != null) {
+                tickerToCompany.putIfAbsent(activeTicker, company);
+            }
+        }
 
         List<String> companyIds = tickerToCompany.values().stream()
                 .map(Company::getId)
@@ -137,6 +146,10 @@ public class GetCustodyPositionsUseCase {
                         .multiply(BigDecimal.valueOf(100));
             }
 
+            String assetClass = (company != null && company.getAssetClass() != null && !company.getAssetClass().isBlank())
+                    ? company.getAssetClass()
+                    : inferAssetClass(ticker);
+
             result.add(new CustodyPositionDTO(
                     ticker,
                     quantity.setScale(2, RoundingMode.HALF_UP),
@@ -146,23 +159,29 @@ public class GetCustodyPositionsUseCase {
                     gainLossPercentage.setScale(2, RoundingMode.HALF_UP),
                     priceSource,
                     priceUpdatedAt,
-                    inferAssetClass(ticker)
+                    assetClass
             ));
         }
 
         return result;
     }
 
+    private String stripFractionalSuffix(String ticker) {
+        if (ticker == null || ticker.isBlank()) {
+            return "";
+        }
+        String t = ticker.trim().toUpperCase();
+        if (t.endsWith("F") && t.length() > 4 && Character.isDigit(t.charAt(t.length() - 2))) {
+            return t.substring(0, t.length() - 1);
+        }
+        return t;
+    }
+
     private String inferAssetClass(String ticker) {
         if (ticker == null || ticker.isBlank()) {
             return "Outros";
         }
-        String t = ticker.trim().toUpperCase();
-        
-        // Remove sufixo 'F' de mercado fracionário (ex: PETR4F -> PETR4, MXRF11F -> MXRF11, AAPL34F -> AAPL34)
-        if (t.endsWith("F") && t.length() > 4 && Character.isDigit(t.charAt(t.length() - 2))) {
-            t = t.substring(0, t.length() - 1);
-        }
+        String t = stripFractionalSuffix(ticker);
 
         // Renda Fixa
         if (t.startsWith("TESOURO") || t.startsWith("CDB") || t.startsWith("LCI") 

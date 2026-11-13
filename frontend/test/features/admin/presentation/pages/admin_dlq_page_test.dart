@@ -49,6 +49,9 @@ class _ControllableAdminRepository implements AdminRepository {
       'details': ids.map((id) => {'id': id, 'status': 'RESOLVED'}).toList(),
     };
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

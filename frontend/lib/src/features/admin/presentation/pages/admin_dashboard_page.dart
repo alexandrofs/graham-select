@@ -259,6 +259,19 @@ class _AdminDashboardContent extends StatelessWidget {
                 ),
               ),
               ElevatedButton.icon(
+                key: const Key('admin_nav_tickers_button'),
+                onPressed: () => context.go('/admin/tickers'),
+                icon: const Icon(Icons.candlestick_chart_outlined, size: 18),
+                label: const Text('Gestão de Tickers'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
                 key: const Key('admin_nav_dlq_button'),
                 onPressed: () => context.go('/admin/dlq'),
                 icon: const Icon(Icons.sync_problem_outlined, size: 18),

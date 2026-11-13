@@ -306,6 +306,244 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
+  /admin/tickers:
+    get:
+      summary: Lista tickers cadastrados no mestre de dados
+      description: Retorna ativos cadastrados no dicionário mestre com filtros opcionais.
+      tags:
+        - Admin - Tickers
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: assetClass
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de tickers retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminTickerDto'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+    post:
+      summary: Cadastra um novo ticker no mestre de dados
+      description: Cria novo registro de ativo no mestre global e invalida cache de cotação.
+      tags:
+        - Admin - Tickers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminTickerRequest'
+      responses:
+        '201':
+          description: Ticker cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AdminTickerDto'
+        '400':
+          description: Dados inválidos
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Ticker já cadastrado no dicionário mestre
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /admin/tickers/{id}:
+    put:
+      summary: Atualiza dados de um ticker existente
+      description: Atualiza nome, classe e setor de um ticker no mestre de dados.
+      tags:
+        - Admin - Tickers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdminTickerRequest'
+      responses:
+        '200':
+          description: Ticker atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AdminTickerDto'
+        '400':
+          description: Dados inválidos
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Ticker não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+    delete:
+      summary: Remove um ticker do mestre de dados
+      description: Exclui o ticker cadastrado caso não possua vínculos impeditivos.
+      tags:
+        - Admin - Tickers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Ticker removido com sucesso
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Ticker não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Ticker possui vínculos de integridade referencial impeditivos
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /admin/tickers/cache/clear:
+    post:
+      summary: Limpa todo o cache de Market Data
+      description: Invalida integralmente as cotações em memória forçando recarregamento da API externa.
+      tags:
+        - Admin - Tickers
+      responses:
+        '200':
+          description: Cache limpo com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CacheEvictionResultDto'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+  /admin/tickers/{ticker}/cache/evict:
+    post:
+      summary: Invalida cache de Market Data para um ticker específico
+      description: Força remoção seletiva da cotação em memória do ticker informado.
+      tags:
+        - Admin - Tickers
+      parameters:
+        - name: ticker
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cache do ticker invalidado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CacheEvictionResultDto'
+        '401':
+          description: Não autenticado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Acesso restrito a administradores
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
 components:
   schemas:
@@ -463,3 +701,65 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DlqReprocessResultDto'
+    AdminTickerDto:
+      type: object
+      properties:
+        id:
+          type: string
+        ticker:
+          type: string
+          example: "PETR4"
+        name:
+          type: string
+          example: "Petrobras PN"
+        assetClass:
+          type: string
+          example: "Ações"
+        sector:
+          type: string
+          example: "Petróleo e Gás"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateAdminTickerRequest:
+      type: object
+      required:
+        - ticker
+      properties:
+        ticker:
+          type: string
+          example: "BBAS3"
+        name:
+          type: string
+          example: "Banco do Brasil S.A."
+        assetClass:
+          type: string
+          example: "Ações"
+        sector:
+          type: string
+          example: "Financeiro"
+    UpdateAdminTickerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Banco do Brasil S.A."
+        assetClass:
+          type: string
+          example: "Ações"
+        sector:
+          type: string
+          example: "Financeiro"
+    CacheEvictionResultDto:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Cache de Market Data limpo com sucesso."
+        timestamp:
+          type: string
+          format: date-time
+

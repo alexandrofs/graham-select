@@ -23,6 +23,7 @@ public class RankingRepositoryImpl implements RankingRepository {
                 .map(entity -> RankedCompany.builder()
                         .symbol(entity.getSymbol())
                         .name(entity.getName())
+                        .assetClass(entity.getAssetClass())
                         .intrinsicValue(entity.getIntrinsicValue())
                         .currentPrice(entity.getCurrentPrice())
                         .marginOfSafety(entity.getMarginOfSafety())

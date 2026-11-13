@@ -20,6 +20,7 @@ public class RankedCompanyEntity {
     @Id
     private String symbol;
     private String name;
+    private String assetClass;
     private BigDecimal intrinsicValue;
     private BigDecimal currentPrice;
     private BigDecimal marginOfSafety;

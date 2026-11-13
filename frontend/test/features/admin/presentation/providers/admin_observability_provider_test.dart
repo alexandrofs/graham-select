@@ -25,6 +25,9 @@ class _FakeAdminRepository implements AdminRepository {
 
   @override
   Future<Map<String, dynamic>> reprocessBatchDlqMessages(List<int> ids) async => {};
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

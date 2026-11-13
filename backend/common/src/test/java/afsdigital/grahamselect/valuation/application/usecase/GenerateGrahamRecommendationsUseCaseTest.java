@@ -277,4 +277,34 @@ public class GenerateGrahamRecommendationsUseCaseTest {
         assertEquals("ABCD4", generationResult.excludedTickers().get(0).ticker());
         assertEquals("STALE_DATA", generationResult.excludedTickers().get(0).reason());
     }
+
+    @Test
+    public void shouldUseMasterDataAssetClassOverRegexInferenceForRecommendations() {
+        String userId = "user-etf";
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+
+        RankedCompany bova11 = RankedCompany.builder()
+                .symbol("BOVA11")
+                .name("iShares Ibovespa")
+                .assetClass("ETFs")
+                .intrinsicValue(new BigDecimal("140.00"))
+                .currentPrice(new BigDecimal("100.00"))
+                .marginOfSafety(new BigDecimal("0.40"))
+                .intrinsicValueUpdatedAt(now)
+                .build();
+
+        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(bova11));
+        when(allocationGoalPort.findByUserId(userId)).thenReturn(List.of(
+                new AllocationGoalDto("ASSET_CLASS", "ETFs", new BigDecimal("25.00"))
+        ));
+        when(portfolioSnapshotPort.getCurrentAllocationByUserId(userId)).thenReturn(Map.of("BOVA11", new BigDecimal("5.00")));
+
+        GenerationResult generationResult = generateGrahamRecommendationsUseCase.execute(userId);
+        List<GrahamRecommendation> result = generationResult.recommendations();
+
+        assertEquals(1, result.size());
+        assertEquals("BOVA11", result.get(0).getTicker());
+        assertTrue(new BigDecimal("25.00").compareTo(result.get(0).getTargetAllocationPct()) == 0);
+        assertTrue(new BigDecimal("20.00").compareTo(result.get(0).getAllocationGap()) == 0);
+    }
 }

@@ -21,7 +21,7 @@ public class RankingReadAdapter implements RankingRepository {
     public List<RankedCompany> findTop20BestRanked() {
         log.info("Fetching top 20 best ranked companies for valuation");
 
-        String sql = "SELECT c.ticker as symbol, c.name, iv.intrinsic_value as intrinsic_value, sp.price as current_price, (iv.intrinsic_value / NULLIF(sp.price, 0)) - 1 as margin_of_safety, iv.eps, iv.bvps "
+        String sql = "SELECT c.ticker as symbol, c.name, iv.intrinsic_value as intrinsic_value, sp.price as current_price, (iv.intrinsic_value / NULLIF(sp.price, 0)) - 1 as margin_of_safety, iv.eps, iv.bvps, c.asset_class as asset_class "
                 + "FROM company_intrinsic_value iv "
                 + "JOIN (SELECT company_id, MAX(calculation_date) as latest_date FROM company_intrinsic_value GROUP BY company_id) latest_iv "
                 + "ON iv.company_id = latest_iv.company_id AND iv.calculation_date = latest_iv.latest_date "
@@ -42,10 +42,12 @@ public class RankingReadAdapter implements RankingRepository {
                     BigDecimal marginSafety = toBigDecimal(row[4]);
                     BigDecimal eps = toBigDecimal(row[5]);
                     BigDecimal bvps = toBigDecimal(row[6]);
+                    String assetClass = (row.length > 7 && row[7] != null) ? row[7].toString() : null;
 
                     return RankedCompany.builder()
                             .symbol((String) row[0])
                             .name((String) row[1])
+                            .assetClass(assetClass)
                             .intrinsicValue(intrinsicVal)
                             .currentPrice(currentPr)
                             .marginOfSafety(marginSafety)

@@ -47,6 +47,9 @@ class _ControllableAdminRepository implements AdminRepository {
 
   @override
   Future<Map<String, dynamic>> reprocessBatchDlqMessages(List<int> ids) async => {};
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -124,6 +127,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('admin_active_users_card')), findsOneWidget);
+    expect(find.byKey(const Key('admin_nav_tickers_button')), findsOneWidget);
+    expect(find.byKey(const Key('admin_nav_dlq_button')), findsOneWidget);
     expect(find.text('Usuários Ativos (24h)'), findsOneWidget);
     expect(find.text('24'), findsOneWidget);
 
@@ -143,6 +148,7 @@ void main() {
     expect(find.text('usr_***9f8a'), findsOneWidget);
     expect(find.text('extrato_b3_***.xlsx'), findsOneWidget);
     expect(find.text('Patrimônio: ***'), findsOneWidget);
+    expect(find.byKey(const Key('admin_nav_tickers_button')), findsOneWidget);
   });
 
   testWidgets('renders Access Restricted state when status is accessDenied',

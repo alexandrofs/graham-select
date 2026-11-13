@@ -64,7 +64,7 @@ public class GenerateGrahamRecommendationsUseCase {
                     .filter(g -> g != null && g.targetKey() != null && g.targetPercentage() != null)
                     .filter(g -> "ASSET_CLASS".equals(g.goalType()))
                     .collect(Collectors.toMap(
-                            g -> g.targetKey().trim().toUpperCase(),
+                            g -> normalizeAssetClassKey(g.targetKey()),
                             AllocationGoalDto::targetPercentage,
                             (a, b) -> a
                     ));
@@ -110,11 +110,18 @@ public class GenerateGrahamRecommendationsUseCase {
 
         final Map<String, BigDecimal> finalGoalsByTicker = goalsByTicker;
         final Map<String, BigDecimal> finalGoalsByClass = goalsByClass;
+        final Map<String, String> resolvedClassByTicker = filteredCompanies.stream()
+                .filter(c -> c.getSymbol() != null && !c.getSymbol().isBlank())
+                .collect(Collectors.toMap(
+                        c -> c.getSymbol().trim().toUpperCase(),
+                        this::resolveAssetClass,
+                        (a, b) -> a
+                ));
 
         List<GrahamRecommendation> recommendations = filteredCompanies.stream()
                 .map(c -> {
                     String ticker = c.getSymbol().trim().toUpperCase();
-                    String assetClass = inferAssetClass(ticker);
+                    String assetClass = resolvedClassByTicker.getOrDefault(ticker, inferAssetClass(ticker));
 
                     BigDecimal targetPct = BigDecimal.ZERO;
                     if (hasGoals) {
@@ -157,7 +164,7 @@ public class GenerateGrahamRecommendationsUseCase {
                         return true;
                     }
                     boolean isCovered = finalGoalsByTicker.containsKey(r.getTicker().toUpperCase())
-                            || finalGoalsByClass.containsKey(inferAssetClass(r.getTicker()));
+                            || finalGoalsByClass.containsKey(resolvedClassByTicker.getOrDefault(r.getTicker().trim().toUpperCase(), inferAssetClass(r.getTicker())));
                     return isCovered && r.getAllocationGap().compareTo(BigDecimal.ZERO) > 0;
                 })
                 .sorted(Comparator.comparing(GrahamRecommendation::getRecommendationScore).reversed())
@@ -171,6 +178,29 @@ public class GenerateGrahamRecommendationsUseCase {
         }
 
         return new GenerationResult(recommendations, excludedTickers);
+    }
+
+    private String resolveAssetClass(RankedCompany company) {
+        if (company != null && company.getAssetClass() != null && !company.getAssetClass().isBlank()) {
+            return normalizeAssetClassKey(company.getAssetClass());
+        }
+        return inferAssetClass(company != null ? company.getSymbol() : null);
+    }
+
+    private String normalizeAssetClassKey(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "OUTROS";
+        }
+        String normalized = raw.trim().toUpperCase();
+        return switch (normalized) {
+            case "AÇÕES", "ACOES" -> "ACOES";
+            case "FIIS", "FII" -> "FIIS";
+            case "BDRS", "BDR" -> "BDRS";
+            case "ETFS", "ETF" -> "ETFS";
+            case "RENDA FIXA", "RENDA_FIXA" -> "RENDA_FIXA";
+            case "OUTROS" -> "OUTROS";
+            default -> normalized;
+        };
     }
 
     private String inferAssetClass(String ticker) {
