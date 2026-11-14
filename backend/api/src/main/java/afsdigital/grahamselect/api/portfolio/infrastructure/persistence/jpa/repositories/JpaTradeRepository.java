@@ -12,8 +12,19 @@ import java.util.UUID;
 
 @Repository
 public interface JpaTradeRepository extends JpaRepository<TradeEntity, UUID> {
-    boolean existsByUserIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+    boolean existsByUserIdAndProfileIdIsNullAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
             String userId,
+            String ticker,
+            LocalDate tradeDate,
+            BigDecimal quantity,
+            BigDecimal price,
+            String broker,
+            String side
+    );
+
+    boolean existsByUserIdAndProfileIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+            String userId,
+            String profileId,
             String ticker,
             LocalDate tradeDate,
             BigDecimal quantity,

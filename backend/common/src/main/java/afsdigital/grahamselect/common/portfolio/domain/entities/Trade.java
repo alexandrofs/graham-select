@@ -13,6 +13,7 @@ import java.util.UUID;
 public class Trade {
     private UUID id;
     private String userId;
+    private String profileId;
     private String ticker;
     private String side; // COMPRA, VENDA
     private LocalDate tradeDate;

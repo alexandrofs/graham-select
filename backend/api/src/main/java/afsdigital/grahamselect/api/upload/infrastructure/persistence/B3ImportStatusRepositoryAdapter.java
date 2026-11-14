@@ -21,11 +21,12 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
     private final B3ImportStatusJpaRepository repository;
 
     @Override
-    public B3ImportStatus createPending(String correlationId, String userId, String fileName) {
+    public B3ImportStatus createPending(String correlationId, String userId, String fileName, String profileId) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         B3ImportStatusEntity entity = B3ImportStatusEntity.builder()
                 .correlationId(correlationId)
                 .userId(userId)
+                .profileId(profileId)
                 .fileName(fileName)
                 .status(B3ImportStatusState.RECEIVED)
                 .processedRows(0)
@@ -144,6 +145,7 @@ public class B3ImportStatusRepositoryAdapter implements B3ImportStatusPort {
         return new B3ImportStatus(
                 entity.getCorrelationId(),
                 entity.getUserId(),
+                entity.getProfileId(),
                 entity.getFileName(),
                 entity.getStatus(),
                 entity.getProcessedRows(),

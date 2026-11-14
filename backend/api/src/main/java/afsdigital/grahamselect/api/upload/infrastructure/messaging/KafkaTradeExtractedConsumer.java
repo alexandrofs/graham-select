@@ -36,6 +36,7 @@ public class KafkaTradeExtractedConsumer {
         Trade trade = Trade.builder()
                 .id(UUID.fromString(event.eventId()))
                 .userId(event.userId())
+                .profileId(event.profileId())
                 .ticker(event.ticker())
                 .tradeDate(event.tradeDate())
                 .side(event.side() != null ? event.side() : "COMPRA")
@@ -49,18 +50,18 @@ public class KafkaTradeExtractedConsumer {
             Trade savedTrade = saveTradeUseCase.execute(trade);
 
             if (savedTrade == null) {
-                log.info("Duplicated trade ignored (logical check): {} for user {} at {}", event.ticker(), event.userId(), event.tradeDate());
+                log.info("Duplicated trade ignored (logical check): {} for user {} profileId {} at {}", event.ticker(), event.userId(), event.profileId(), event.tradeDate());
                 importStatusPort.addDuplicate(event.correlationId(), event.userId(), 1);
             } else {
-                log.info("New trade saved: {} for user {} at {}", event.ticker(), event.userId(), event.tradeDate());
+                log.info("New trade saved: {} for user {} profileId {} at {}", event.ticker(), event.userId(), event.profileId(), event.tradeDate());
                 sendPortfolioUpdateNotificationUseCase.execute(event.userId());
             }
         } catch (DataIntegrityViolationException e) {
-            log.warn("Duplicated trade ignored (DB constraint): {} for user {} at {}. Race condition detected but handled.", 
-                    event.ticker(), event.userId(), event.tradeDate());
+            log.warn("Duplicated trade ignored (DB constraint): {} for user {} profileId {} at {}. Race condition detected but handled.", 
+                    event.ticker(), event.userId(), event.profileId(), event.tradeDate());
             importStatusPort.addDuplicate(event.correlationId(), event.userId(), 1);
         } catch (Exception e) {
-            log.error("Error processing trade extracted event: {}", e.getMessage(), e);
+            log.error("Error processing trade extracted event for user {} profileId {}: {}", event.userId(), event.profileId(), e.getMessage(), e);
             importStatusPort.addProgress(event.correlationId(), event.userId(), 0, 1, e.getMessage());
         }
     }

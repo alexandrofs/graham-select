@@ -4,6 +4,6 @@ import '../entities/upload_result.dart';
 
 abstract class UploadRepository {
   Future<UploadResult> uploadFile(AppFile file);
-  Future<UploadResult> uploadB3File(AppFile file);
+  Future<UploadResult> uploadB3File(AppFile file, {String? profileId});
   Future<UploadProcessingStatus> fetchB3UploadStatus(String correlationId);
 }

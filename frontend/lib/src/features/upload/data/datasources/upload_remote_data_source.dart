@@ -47,13 +47,21 @@ class UploadRemoteDataSource {
     }
   }
 
-  Future<UploadResponseModel> uploadB3File(AppFile file, {String? token}) async {
+  Future<UploadResponseModel> uploadB3File(
+    AppFile file, {
+    String? token,
+    String? profileId,
+  }) async {
     try {
       final uri = Uri.parse('$baseUrl/upload/b3');
       final request = http.MultipartRequest('POST', uri);
 
       if (token != null) {
         request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      if (profileId != null && profileId.trim().isNotEmpty) {
+        request.fields['profileId'] = profileId.trim();
       }
 
       request.files.add(

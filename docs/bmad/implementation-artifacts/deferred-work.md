@@ -29,3 +29,6 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 - Validação de `sub` e `email` nulos na conversão OAuth2 [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:34] — Comportamento pré-existente da Story 1.1 na extração de claims do JWT.
 - Recuperação de concorrência dentro da mesma transação em `OAuth2UserProvisioningConverter.convert()` [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:72] — Bloco catch pré-existente da Story 1.1 dentro de método anotado com `@Transactional`.
+
+## Deferred from: code review of 7-1-vinculo-de-novo-cpf-a-conta-matriz (2026-11-13)
+- Implementar `Persistable<UUID>` em `FamilyProfileEntity` (`backend/api/src/main/java/afsdigital/grahamselect/api/family/infrastructure/persistence/jpa/entities/FamilyProfileEntity.java`) para evitar `SELECT` prévio antes de `INSERT` em `FamilyProfileJpaAdapter.save()`.

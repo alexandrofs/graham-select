@@ -10,8 +10,21 @@ import java.util.Optional;
 public interface TradePort {
     Trade save(Trade trade);
     
+    default boolean exists(
+            String userId,
+            String ticker,
+            LocalDate tradeDate,
+            BigDecimal quantity,
+            BigDecimal price,
+            String broker,
+            String side
+    ) {
+        return exists(userId, null, ticker, tradeDate, quantity, price, broker, side);
+    }
+
     boolean exists(
             String userId,
+            String profileId,
             String ticker,
             LocalDate tradeDate,
             BigDecimal quantity,

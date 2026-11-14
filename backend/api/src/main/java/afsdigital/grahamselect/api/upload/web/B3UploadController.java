@@ -1,5 +1,8 @@
 package afsdigital.grahamselect.api.upload.web;
 
+import afsdigital.grahamselect.api.auth.infrastructure.security.PremiumFeatureAccessGuard;
+import afsdigital.grahamselect.common.family.application.repository.FamilyProfilePort;
+import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
 import afsdigital.grahamselect.common.upload.application.repository.B3ImportStatusPort;
 import afsdigital.grahamselect.common.upload.application.usecase.UploadB3FileUseCase;
 import afsdigital.grahamselect.common.upload.domain.events.FileUploadedEvent;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -34,9 +38,20 @@ public class B3UploadController {
 
     private final UploadB3FileUseCase uploadB3FileUseCase;
     private final B3ImportStatusPort importStatusPort;
+    private final PremiumFeatureAccessGuard premiumFeatureAccessGuard;
+    private final FamilyProfilePort familyProfilePort;
 
     @PostMapping
-    public ResponseEntity<B3UploadAcceptedResponse> upload(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal Jwt jwt) throws IOException {
+    public ResponseEntity<B3UploadAcceptedResponse> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "profileId", required = false) String profileId,
+            @AuthenticationPrincipal Jwt jwt
+    ) throws IOException {
+        String userId = jwt.getSubject();
+        log.info("Recebido upload B3: userId={}, profileId={}, fileName={}", userId, profileId, file.getOriginalFilename());
+
+        String normalizedProfileId = resolveAndValidateProfileId(profileId, userId);
+
         if (file.isEmpty() || file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".xlsx")) {
             log.error("Erro na validação do arquivo B3: Formato não suportado ou vazio. Nome do arquivo: {}", file.getOriginalFilename());
             throw new B3UploadValidationException("Apenas arquivos .xlsx (Excel) da B3 são suportados no momento.");
@@ -47,7 +62,7 @@ public class B3UploadController {
 
         FileUploadedEvent event;
         try (InputStream is = new java.io.ByteArrayInputStream(fileBytes)) {
-            event = uploadB3FileUseCase.execute(is, file.getOriginalFilename(), jwt.getSubject());
+            event = uploadB3FileUseCase.execute(is, file.getOriginalFilename(), userId, normalizedProfileId);
         }
 
         return ResponseEntity.accepted().body(new B3UploadAcceptedResponse(
@@ -55,6 +70,26 @@ public class B3UploadController {
                 event.correlationId(),
                 "RECEIVED"
         ));
+    }
+
+    private String resolveAndValidateProfileId(String profileId, String userId) {
+        if (profileId == null || profileId.isBlank()) {
+            return null;
+        }
+        premiumFeatureAccessGuard.canAccessPremiumFeatures();
+        UUID parsedId;
+        try {
+            parsedId = UUID.fromString(profileId.trim());
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid profileId UUID format in B3 upload: userId={}, profileId={}", userId, profileId, e);
+            throw new FamilyProfileNotFoundException("Perfil familiar não encontrado.");
+        }
+        familyProfilePort.findActiveByIdAndMasterUserId(parsedId, userId)
+                .orElseThrow(() -> {
+                    log.error("Family profile not found or does not belong to user: userId={}, profileId={}", userId, parsedId);
+                    return new FamilyProfileNotFoundException("Perfil familiar não encontrado.");
+                });
+        return parsedId.toString();
     }
 
     @GetMapping("/status/{correlationId}")
@@ -66,6 +101,7 @@ public class B3UploadController {
                 .map(status -> ResponseEntity.ok(new B3ImportStatusEnvelope(new B3ImportStatusView(
                         status.correlationId(),
                         status.fileName(),
+                        status.profileId(),
                         status.status().name(),
                         status.processedRows(),
                         status.successfulRows(),

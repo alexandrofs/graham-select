@@ -6,7 +6,11 @@ import java.util.Optional;
 
 public interface B3ImportStatusPort {
 
-    B3ImportStatus createPending(String correlationId, String userId, String fileName);
+    default B3ImportStatus createPending(String correlationId, String userId, String fileName) {
+        return createPending(correlationId, userId, fileName, null);
+    }
+
+    B3ImportStatus createPending(String correlationId, String userId, String fileName, String profileId);
 
     B3ImportStatus markProcessing(String correlationId, String userId);
 

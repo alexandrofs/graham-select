@@ -34,6 +34,9 @@ public class B3ImportStatusEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
+    @Column(name = "profile_id", length = 36)
+    private String profileId;
+
     @Column(name = "file_name", nullable = false)
     private String fileName;
 

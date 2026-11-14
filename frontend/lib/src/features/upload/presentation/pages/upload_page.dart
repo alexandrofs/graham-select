@@ -1,19 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../family_holding/presentation/providers/family_profile_provider.dart';
 import '../providers/upload_provider.dart';
 import '../widgets/b3_upload_zone.dart';
 import '../widgets/upload_progress_widget.dart';
 
-class UploadPage extends StatelessWidget {
+class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
 
   @override
+  State<UploadPage> createState() => _UploadPageState();
+}
+
+class _UploadPageState extends State<UploadPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      try {
+        final familyProvider = context.read<FamilyProfileProvider>();
+        if (familyProvider.state == FamilyProfileState.initial) {
+          familyProvider.fetchProfiles(silent: true);
+        }
+      } catch (_) {
+        // Ignora caso FamilyProfileProvider não esteja registrado em testes isolados
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    FamilyProfileProvider? familyProvider;
+    try {
+      familyProvider = context.watch<FamilyProfileProvider>();
+    } catch (_) {
+      familyProvider = null;
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Consumer<UploadProvider>(
         builder: (context, provider, child) {
+          final profiles = familyProvider?.profiles ?? const [];
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -34,7 +64,64 @@ class UploadPage extends StatelessWidget {
                         color: AppTheme.textColor.withValues(alpha: 0.7),
                       ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+
+                if (profiles.isNotEmpty) ...[
+                  Builder(
+                    builder: (context) {
+                      final hasSelected = provider.selectedProfileId != null &&
+                          profiles.any((p) => p.id == provider.selectedProfileId);
+                      if (provider.selectedProfileId != null && !hasSelected) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            provider.setSelectedProfileId(null);
+                          }
+                        });
+                      }
+                      final effectiveProfileId =
+                          hasSelected ? provider.selectedProfileId : null;
+                      return DropdownButtonFormField<String?>(
+                        key: const Key('upload_profile_selector'),
+                        initialValue: effectiveProfileId,
+                        decoration: const InputDecoration(
+                          labelText: 'Perfil / CPF de Destino',
+                          border: OutlineInputBorder(),
+                        ),
+                        dropdownColor: AppTheme.surfaceColor,
+                        items: [
+                          const DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text('Conta Titular (Minha Carteira)'),
+                          ),
+                          ...profiles.map(
+                            (profile) => DropdownMenuItem<String?>(
+                              value: profile.id,
+                              child: Text('${profile.name} (${profile.cpfMasked})'),
+                            ),
+                          ),
+                        ],
+                        onChanged: provider.state == UploadState.uploading
+                            ? null
+                            : (value) => provider.setSelectedProfileId(value),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                ] else ...[
+                  if (provider.selectedProfileId != null)
+                    Builder(
+                      builder: (context) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            provider.setSelectedProfileId(null);
+                          }
+                        });
+                        return const SizedBox(height: 8);
+                      },
+                    )
+                  else
+                    const SizedBox(height: 8),
+                ],
 
                 // B3 Upload Zone (supports Drag and Drop and File Picker)
                 const B3UploadZone(),

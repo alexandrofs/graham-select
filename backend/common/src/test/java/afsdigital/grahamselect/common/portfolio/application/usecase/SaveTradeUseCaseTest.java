@@ -43,7 +43,7 @@ class SaveTradeUseCaseTest {
     @Test
     void shouldSaveTradeWhenNotDuplicate() {
         // Given
-        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any())).thenReturn(false);
+        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(false);
         when(tradePort.save(any())).thenReturn(trade);
 
         // When
@@ -59,6 +59,7 @@ class SaveTradeUseCaseTest {
         // Given
         when(tradePort.exists(
                 trade.getUserId(),
+                trade.getProfileId(),
                 trade.getTicker(),
                 trade.getTradeDate(),
                 trade.getQuantity(),
@@ -73,5 +74,26 @@ class SaveTradeUseCaseTest {
         // Then
         assertNull(result);
         verify(tradePort, never()).save(any());
+    }
+
+    @Test
+    void shouldCheckDuplicateUsingProfileIdWhenPresent() {
+        trade.setProfileId("profile-1");
+        when(tradePort.exists(
+                "user-123",
+                "profile-1",
+                trade.getTicker(),
+                trade.getTradeDate(),
+                trade.getQuantity(),
+                trade.getPrice(),
+                trade.getBroker(),
+                trade.getSide()
+        )).thenReturn(false);
+        when(tradePort.save(trade)).thenReturn(trade);
+
+        Trade result = saveTradeUseCase.execute(trade);
+
+        assertNotNull(result);
+        verify(tradePort).exists("user-123", "profile-1", trade.getTicker(), trade.getTradeDate(), trade.getQuantity(), trade.getPrice(), trade.getBroker(), trade.getSide());
     }
 }

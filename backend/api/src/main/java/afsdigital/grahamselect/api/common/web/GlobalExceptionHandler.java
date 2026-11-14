@@ -1,5 +1,8 @@
 package afsdigital.grahamselect.api.common.web;
 
+import afsdigital.grahamselect.common.family.application.service.exceptions.DuplicateFamilyProfileException;
+import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
+import afsdigital.grahamselect.common.family.application.service.exceptions.InvalidCpfException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionAlreadyPendingException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionNotFoundException;
 import afsdigital.grahamselect.api.upload.web.B3UploadValidationException;
@@ -82,6 +85,30 @@ public class GlobalExceptionHandler {
         log.error("Resource not found error: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Resource Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(InvalidCpfException.class)
+    public ProblemDetail handleInvalidCpf(InvalidCpfException ex) {
+        log.error("Invalid CPF provided: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Invalid CPF");
+        return problem;
+    }
+
+    @ExceptionHandler(DuplicateFamilyProfileException.class)
+    public ProblemDetail handleDuplicateFamilyProfile(DuplicateFamilyProfileException ex) {
+        log.error("Duplicate family profile: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("Duplicate Family Profile");
+        return problem;
+    }
+
+    @ExceptionHandler(FamilyProfileNotFoundException.class)
+    public ProblemDetail handleFamilyProfileNotFound(FamilyProfileNotFoundException ex) {
+        log.error("Family profile not found: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Family Profile Not Found");
         return problem;
     }
 

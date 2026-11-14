@@ -27,10 +27,14 @@ class UploadRepositoryImpl implements UploadRepository {
   }
 
   @override
-  Future<UploadResult> uploadB3File(AppFile file) async {
+  Future<UploadResult> uploadB3File(AppFile file, {String? profileId}) async {
     try {
       final token = await authRepository.getPersistedToken();
-      final responseModel = await remoteDataSource.uploadB3File(file, token: token);
+      final responseModel = await remoteDataSource.uploadB3File(
+        file,
+        token: token,
+        profileId: profileId,
+      );
       return responseModel.toEntity();
     } catch (e) {
       return UploadResult(
