@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../auth/data/auth_repository.dart';
+import '../../../tags/presentation/providers/tag_provider.dart';
+import '../../../tags/presentation/widgets/analytical_lens_tabs.dart';
 import '../providers/graham_recommendation_provider.dart';
 import '../../domain/entities/graham_recommendation.dart';
 import '../widgets/reasoning_box.dart';
@@ -13,7 +15,7 @@ class GrahamRecommendationsPage extends StatefulWidget {
 }
 
 class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, TagLensSyncMixin<GrahamRecommendationsPage> {
   late final AnimationController _shimmerController;
   late final Animation<double> _shimmerAnimation;
 
@@ -27,10 +29,11 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
     _shimmerAnimation = Tween<double>(begin: -1.5, end: 2.5).animate(
       CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
     );
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GrahamRecommendationProvider>().fetchRecommendations();
-    });
+  @override
+  Future<void> onLensChanged(String? tagId) {
+    return context.read<GrahamRecommendationProvider>().fetchRecommendations(tagId: tagId);
   }
 
   @override
@@ -173,9 +176,10 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
 
   Widget _buildErrorState(String message) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
@@ -188,7 +192,10 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.read<GrahamRecommendationProvider>().fetchRecommendations(),
+              onPressed: () {
+                final tagId = Provider.of<TagProvider?>(context, listen: false)?.selectedFilterTagId;
+                context.read<GrahamRecommendationProvider>().fetchRecommendations(tagId: tagId);
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('Recarregar'),
               style: ElevatedButton.styleFrom(
@@ -370,11 +377,17 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(TagProvider? tagProvider) {
+    final selectedTag = tagProvider?.selectedFilterTag;
+    final emptySubtitle = selectedTag != null
+        ? 'Nenhuma recomendação disponível para "${selectedTag.name}". Defina metas de alocação desta tag ou solicite o cálculo abaixo.'
+        : 'Certifique-se de ter cotações sincronizadas e metas de alocação definidas na página de alocação.';
+
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.list_alt_outlined, size: 64, color: Colors.grey),
@@ -384,14 +397,16 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Certifique-se de ter cotações sincronizadas e metas de alocação definidas na página de alocação.',
+            Text(
+              emptySubtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.read<GrahamRecommendationProvider>().fetchRecommendations(),
+              onPressed: () => context
+                  .read<GrahamRecommendationProvider>()
+                  .fetchRecommendations(tagId: tagProvider?.selectedFilterTagId),
               icon: const Icon(Icons.refresh),
               label: const Text('Recarregar'),
             ),
@@ -475,9 +490,12 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
     );
   }
 
-  Widget _buildContent(GrahamRecommendationProvider provider) {
+  Widget _buildContent(
+    GrahamRecommendationProvider provider,
+    TagProvider? tagProvider,
+  ) {
     if (provider.recommendations.isEmpty && provider.excludedTickers.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(tagProvider);
     }
 
     return Column(
@@ -498,6 +516,8 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
 
   @override
   Widget build(BuildContext context) {
+    final tagProvider = Provider.of<TagProvider?>(context);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -518,7 +538,9 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
 
               return IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: () => provider.fetchRecommendations(),
+                onPressed: () => provider.fetchRecommendations(
+                  tagId: tagProvider?.selectedFilterTagId,
+                ),
               );
             },
           ),
@@ -526,19 +548,50 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
       ),
       body: Consumer<GrahamRecommendationProvider>(
         builder: (context, provider, _) {
+          final err = provider.errorMessage ?? '';
+          final isPaywall = provider.state == RecommendationState.error &&
+              (err.contains('403') || err.contains('Premium') || err.contains('Upgrade'));
+          if (isPaywall) {
+            return _buildPremiumPaywall();
+          }
+
+          late final Widget bodyArea;
           if (provider.state == RecommendationState.loading) {
-            return _buildSkeletonLoader();
+            bodyArea = _buildSkeletonLoader();
+          } else if (provider.state == RecommendationState.error) {
+            bodyArea = _buildErrorState(err);
+          } else {
+            final contentKey =
+                'content_${provider.activeTagId}_${provider.recommendations.length}_${provider.excludedTickers.length}';
+            bodyArea = AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: SizedBox.expand(
+                key: ValueKey(contentKey),
+                child: _buildContent(provider, tagProvider),
+              ),
+            );
           }
 
-          if (provider.state == RecommendationState.error) {
-            final err = provider.errorMessage ?? '';
-            if (err.contains('403') || err.contains('Premium') || err.contains('Upgrade')) {
-              return _buildPremiumPaywall();
-            }
-            return _buildErrorState(err);
-          }
-
-          return _buildContent(provider);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (tagProvider != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const AnalyticalLensTabs(),
+                      if (tagProvider.selectedFilterTag != null) ...[
+                        const SizedBox(height: 10),
+                        const ActiveTagLensBadge(),
+                      ],
+                    ],
+                  ),
+                ),
+              Expanded(child: bodyArea),
+            ],
+          );
         },
       ),
       bottomNavigationBar: Consumer<GrahamRecommendationProvider>(
@@ -566,7 +619,10 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
                   ? null
                   : () {
                       final userId = context.read<AuthRepository>().currentUser?.uid ?? '';
-                      provider.triggerCalculation(userId);
+                      provider.triggerCalculation(
+                        userId,
+                        tagId: tagProvider?.selectedFilterTagId,
+                      );
                     },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

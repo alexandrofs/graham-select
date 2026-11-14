@@ -3,6 +3,7 @@ package afsdigital.grahamselect.valuation.infrastructure.persistence;
 import afsdigital.grahamselect.valuation.application.repository.PortfolioSnapshotPort;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class PortfolioSnapshotJpaAdapter implements PortfolioSnapshotPort {
@@ -19,19 +21,37 @@ public class PortfolioSnapshotJpaAdapter implements PortfolioSnapshotPort {
     private EntityManager entityManager;
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, BigDecimal> getCurrentAllocationByUserId(String userId) {
-        log.info("Calculating portfolio snapshot for user {}", userId);
+        return calculateCurrentAllocation(userId, null);
+    }
+
+    @Override
+    public Map<String, BigDecimal> getCurrentAllocationByUserIdAndTagId(String userId, UUID tagId) {
+        return calculateCurrentAllocation(userId, tagId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, BigDecimal> calculateCurrentAllocation(String userId, UUID tagId) {
+        log.info("Calculating portfolio snapshot for user {}, tagId={}", userId, tagId);
 
         String tradeQuery = "SELECT t.ticker, " +
                 "SUM(CASE WHEN t.side = 'COMPRA' THEN t.quantity WHEN t.side = 'VENDA' THEN -t.quantity ELSE 0 END) " +
                 "FROM trades t " +
                 "WHERE t.user_id = :userId " +
+                (tagId != null
+                        ? "AND EXISTS (SELECT 1 FROM asset_tags ag WHERE ag.user_id = t.user_id AND ag.tag_id = :tagId " +
+                          "AND (UPPER(TRIM(ag.ticker)) = UPPER(TRIM(t.ticker)) " +
+                          "OR UPPER(TRIM(t.ticker)) = CONCAT(UPPER(TRIM(ag.ticker)), 'F') " +
+                          "OR UPPER(TRIM(ag.ticker)) = CONCAT(UPPER(TRIM(t.ticker)), 'F'))) "
+                        : "") +
                 "GROUP BY t.ticker";
 
-        List<Object[]> tradeResults = entityManager.createNativeQuery(tradeQuery)
-                .setParameter("userId", userId)
-                .getResultList();
+        Query nativeTradeQuery = entityManager.createNativeQuery(tradeQuery)
+                .setParameter("userId", userId);
+        if (tagId != null) {
+            nativeTradeQuery.setParameter("tagId", tagId.toString());
+        }
+        List<Object[]> tradeResults = nativeTradeQuery.getResultList();
 
         Map<String, BigDecimal> activeQuantities = new HashMap<>();
         for (Object[] row : tradeResults) {

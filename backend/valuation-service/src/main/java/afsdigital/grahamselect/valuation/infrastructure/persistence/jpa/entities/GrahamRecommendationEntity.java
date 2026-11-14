@@ -1,5 +1,6 @@
 package afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities;
 
+import afsdigital.grahamselect.valuation.domain.AllocationScope;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -26,6 +27,13 @@ public class GrahamRecommendationEntity {
 
     @Column(name = "user_id", nullable = false)
     private String userId;
+
+    @Column(name = "tag_id", length = 36, columnDefinition = "CHAR(36)")
+    private String tagId;
+
+    @Builder.Default
+    @Column(name = "scope_key", nullable = false, length = 36)
+    private String scopeKey = AllocationScope.GLOBAL;
 
     @Column(name = "ticker", nullable = false, length = 20)
     private String ticker;

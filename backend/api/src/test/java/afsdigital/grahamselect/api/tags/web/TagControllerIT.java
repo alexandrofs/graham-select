@@ -5,9 +5,14 @@ import afsdigital.grahamselect.api.portfolio.infrastructure.persistence.jpa.repo
 import afsdigital.grahamselect.api.tags.infrastructure.persistence.jpa.repositories.JpaAssetTagRepository;
 import afsdigital.grahamselect.api.tags.infrastructure.persistence.jpa.repositories.JpaPortfolioTagRepository;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
+import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities.AllocationGoalEntity;
+import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities.GrahamRecommendationEntity;
+import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repositories.AllocationGoalJpaRepository;
+import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.GrahamRecommendationJpaRepository;
 import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
+import afsdigital.grahamselect.valuation.domain.AllocationScope;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,6 +68,12 @@ class TagControllerIT extends BaseRepositoryIT {
     private JpaTradeRepository tradeRepository;
 
     @Autowired
+    private AllocationGoalJpaRepository allocationGoalJpaRepository;
+
+    @Autowired
+    private GrahamRecommendationJpaRepository recommendationJpaRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
@@ -70,6 +81,8 @@ class TagControllerIT extends BaseRepositoryIT {
 
     @BeforeEach
     void setUp() {
+        allocationGoalJpaRepository.deleteAll();
+        recommendationJpaRepository.deleteAll();
         assetTagRepository.deleteAll();
         portfolioTagRepository.deleteAll();
         tradeRepository.deleteAll();
@@ -440,6 +453,87 @@ class TagControllerIT extends BaseRepositoryIT {
                         .header("Authorization", "Bearer idem-token"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+    }
+
+    @Test
+    void shouldCascadeDeleteScopedAllocationGoalsAndRecommendationsWhilePreservingGlobalRows() throws Exception {
+        User user = saveUser("cascade-tag-sub", SubscriptionTier.PREMIUM);
+        mockJwtDecoder("cascade-token", user);
+
+        MvcResult created = mockMvc.perform(post(ENDPOINT)
+                        .header("Authorization", "Bearer cascade-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Aposentadoria\"}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID tagId = UUID.fromString(extractId(created));
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+        allocationGoalJpaRepository.save(AllocationGoalEntity.builder()
+                .id(UUID.randomUUID())
+                .userId(user.getGoogleSub())
+                .tagId(null)
+                .scopeKey(AllocationScope.GLOBAL)
+                .goalType("ASSET_CLASS")
+                .targetKey("ACOES")
+                .targetPercentage(new BigDecimal("100.0000"))
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+        allocationGoalJpaRepository.save(AllocationGoalEntity.builder()
+                .id(UUID.randomUUID())
+                .userId(user.getGoogleSub())
+                .tagId(tagId)
+                .scopeKey(tagId.toString())
+                .goalType("ASSET_CLASS")
+                .targetKey("FIIS")
+                .targetPercentage(new BigDecimal("100.0000"))
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        recommendationJpaRepository.save(GrahamRecommendationEntity.builder()
+                .id(UUID.randomUUID())
+                .userId(user.getGoogleSub())
+                .tagId(null)
+                .scopeKey(AllocationScope.GLOBAL)
+                .ticker("PETR4")
+                .currentPrice(new BigDecimal("30.0000"))
+                .intrinsicValue(new BigDecimal("40.0000"))
+                .marginOfSafety(new BigDecimal("0.3300"))
+                .currentAllocationPct(new BigDecimal("5.0000"))
+                .targetAllocationPct(new BigDecimal("20.0000"))
+                .allocationGap(new BigDecimal("15.0000"))
+                .recommendationScore(new BigDecimal("6.1980"))
+                .generatedAt(LocalDate.now(ZoneOffset.UTC))
+                .build());
+        recommendationJpaRepository.save(GrahamRecommendationEntity.builder()
+                .id(UUID.randomUUID())
+                .userId(user.getGoogleSub())
+                .tagId(tagId)
+                .scopeKey(tagId.toString())
+                .ticker("VALE3")
+                .currentPrice(new BigDecimal("70.0000"))
+                .intrinsicValue(new BigDecimal("80.0000"))
+                .marginOfSafety(new BigDecimal("0.1400"))
+                .currentAllocationPct(new BigDecimal("5.0000"))
+                .targetAllocationPct(new BigDecimal("20.0000"))
+                .allocationGap(new BigDecimal("15.0000"))
+                .recommendationScore(new BigDecimal("3.1000"))
+                .generatedAt(LocalDate.now(ZoneOffset.UTC))
+                .build());
+
+        mockMvc.perform(delete(ENDPOINT + "/" + tagId)
+                        .header("Authorization", "Bearer cascade-token"))
+                .andExpect(status().isNoContent());
+
+        List<AllocationGoalEntity> remainingGoals = allocationGoalJpaRepository.findAll();
+        assertThat(remainingGoals).hasSize(1);
+        assertThat(remainingGoals.get(0).getScopeKey()).isEqualTo(AllocationScope.GLOBAL);
+
+        List<GrahamRecommendationEntity> remainingRecs = recommendationJpaRepository.findAll();
+        assertThat(remainingRecs).hasSize(1);
+        assertThat(remainingRecs.get(0).getScopeKey()).isEqualTo(AllocationScope.GLOBAL);
     }
 
     private String extractId(MvcResult result) throws Exception {

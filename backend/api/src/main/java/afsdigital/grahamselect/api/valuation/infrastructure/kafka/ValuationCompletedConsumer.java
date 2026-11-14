@@ -33,8 +33,8 @@ public class ValuationCompletedConsumer {
             return;
         }
 
-        log.info("Consumed valuation-completed event for userId: {}, recommendations: {}, excluded: {}", 
-                userId, event.recommendationCount(), event.excludedTickers() != null ? event.excludedTickers().size() : 0);
+        log.info("Consumed valuation-completed event for userId: {}, tagId: {}, recommendations: {}, excluded: {}",
+                userId, event.tagId(), event.recommendationCount(), event.excludedTickers() != null ? event.excludedTickers().size() : 0);
 
         notificationPort.sendNotification(userId, "VALUATION_COMPLETED", event);
     }
@@ -55,7 +55,7 @@ public class ValuationCompletedConsumer {
             return;
         }
 
-        log.error("Consumed valuation-failed event for userId: {}, error: {}", userId, event.message());
+        log.error("Consumed valuation-failed event for userId: {}, tagId: {}, error: {}", userId, event.tagId(), event.message());
 
         notificationPort.sendNotification(userId, "VALUATION_FAILED", event);
     }

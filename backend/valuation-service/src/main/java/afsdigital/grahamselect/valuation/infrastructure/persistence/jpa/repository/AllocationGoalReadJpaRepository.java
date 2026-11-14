@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface AllocationGoalReadJpaRepository extends JpaRepository<AllocationGoalReadEntity, String> {
     List<AllocationGoalReadEntity> findByUserId(String userId);
+    List<AllocationGoalReadEntity> findByUserIdAndScopeKey(String userId, String scopeKey);
 }

@@ -11,10 +11,14 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,9 +30,13 @@ public class GrahamRecommendationRepositoryImplIT extends BaseRepositoryIT {
     @Autowired
     private GrahamRecommendationRepositoryImpl grahamRecommendationRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @AfterEach
     void tearDown() {
         grahamRecommendationJpaRepository.deleteAll();
+        jdbcTemplate.update("DELETE FROM portfolio_tags");
     }
 
     @Test
@@ -86,6 +94,59 @@ public class GrahamRecommendationRepositoryImplIT extends BaseRepositoryIT {
         // Test delete on save recommendations with empty list
         grahamRecommendationRepository.saveRecommendations(userId, List.of());
         assertThat(grahamRecommendationJpaRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldIsolateRecommendationsByTagScopeAndSkipMissingTagWithoutFkFailure() {
+        String userId = "user-scoped-it";
+        UUID tagId = UUID.randomUUID();
+        jdbcTemplate.update(
+                "INSERT INTO portfolio_tags (id, user_id, name, normalized_name, created_at) VALUES (?, ?, ?, ?, ?)",
+                tagId.toString(), userId, "Aposentadoria", "aposentadoria", LocalDateTime.now(ZoneOffset.UTC)
+        );
+
+        GrahamRecommendation globalRec = GrahamRecommendation.builder()
+                .ticker("PETR4")
+                .currentPrice(new BigDecimal("30.00"))
+                .intrinsicValue(new BigDecimal("40.00"))
+                .marginOfSafety(new BigDecimal("0.33"))
+                .currentAllocationPct(new BigDecimal("5.00"))
+                .targetAllocationPct(new BigDecimal("20.00"))
+                .allocationGap(new BigDecimal("15.00"))
+                .recommendationScore(new BigDecimal("0.2580"))
+                .generatedAt(LocalDate.now(ZoneOffset.UTC))
+                .build();
+
+        GrahamRecommendation tagRec = GrahamRecommendation.builder()
+                .ticker("VALE3")
+                .currentPrice(new BigDecimal("70.00"))
+                .intrinsicValue(new BigDecimal("80.00"))
+                .marginOfSafety(new BigDecimal("0.14"))
+                .currentAllocationPct(new BigDecimal("8.00"))
+                .targetAllocationPct(new BigDecimal("10.00"))
+                .allocationGap(new BigDecimal("2.00"))
+                .recommendationScore(new BigDecimal("0.1920"))
+                .generatedAt(LocalDate.now(ZoneOffset.UTC))
+                .build();
+
+        grahamRecommendationRepository.saveRecommendations(userId, null, List.of(globalRec));
+        grahamRecommendationRepository.saveRecommendations(userId, tagId, List.of(tagRec));
+
+        assertThat(grahamRecommendationRepository.findByUserId(userId))
+                .extracting(GrahamRecommendation::getTicker)
+                .containsExactly("PETR4");
+        assertThat(grahamRecommendationRepository.findByUserId(userId, tagId))
+                .extracting(GrahamRecommendation::getTicker)
+                .containsExactly("VALE3");
+
+        // Deleting tag-scoped recommendations must preserve global scope
+        grahamRecommendationRepository.saveRecommendations(userId, tagId, List.of());
+        assertThat(grahamRecommendationRepository.findByUserId(userId, tagId)).isEmpty();
+        assertThat(grahamRecommendationRepository.findByUserId(userId)).hasSize(1);
+
+        // Deleted/missing tagId should skip cleanly without DataIntegrityViolationException
+        grahamRecommendationRepository.saveRecommendations(userId, UUID.randomUUID(), List.of(tagRec));
+        assertThat(grahamRecommendationRepository.findByUserId(userId)).hasSize(1);
     }
 
     @Configuration

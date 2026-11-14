@@ -29,7 +29,7 @@ class FlowMockGrahamRecommendationRepository implements GrahamRecommendationRepo
   bool triggerCalled = false;
 
   @override
-  Future<List<GrahamRecommendation>> getRecommendations() async {
+  Future<List<GrahamRecommendation>> getRecommendations({String? tagId}) async {
     getRecommendationsCallCount++;
     if (shouldThrowPremiumError) {
       throw Exception('Funcionalidade exclusiva para usuários Premium. Faça upgrade.');
@@ -44,7 +44,7 @@ class FlowMockGrahamRecommendationRepository implements GrahamRecommendationRepo
   }
 
   @override
-  Future<void> triggerCalculation() async {
+  Future<void> triggerCalculation({String? tagId}) async {
     triggerCalled = true;
     return;
   }
@@ -77,12 +77,12 @@ class FlowMockGrahamRecommendationProvider extends GrahamRecommendationProvider 
   set manualErrorMessage(String? v) { _manualErrorMessage = v; notifyListeners(); }
 
   @override
-  Future<void> fetchRecommendations() async {
+  Future<void> fetchRecommendations({String? tagId}) async {
     return;
   }
 
   @override
-  Future<void> triggerCalculation(String userId) async {
+  Future<void> triggerCalculation(String userId, {String? tagId}) async {
     manualIsTriggering = true;
     // Simulate the async update
     Future.delayed(const Duration(milliseconds: 500), () {

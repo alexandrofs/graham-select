@@ -8,7 +8,8 @@ import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
 import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import afsdigital.grahamselect.common.domain.repository.StockPricePort;
 import afsdigital.grahamselect.common.domain.entities.StockPrice;
-import lombok.RequiredArgsConstructor;
+import afsdigital.grahamselect.common.tags.application.repository.AssetTagPort;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -17,18 +18,52 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 public class GetPortfolioSummaryUseCase {
 
     private final TradePort tradePort;
     private final CompanyRepository companyRepository;
     private final StockPricePort stockPricePort;
+    private final PortfolioTagPort portfolioTagPort;
+    private final AssetTagPort assetTagPort;
+
+    public GetPortfolioSummaryUseCase(
+            TradePort tradePort,
+            CompanyRepository companyRepository,
+            StockPricePort stockPricePort
+    ) {
+        this(tradePort, companyRepository, stockPricePort, null, null);
+    }
+
+    public GetPortfolioSummaryUseCase(
+            TradePort tradePort,
+            CompanyRepository companyRepository,
+            StockPricePort stockPricePort,
+            PortfolioTagPort portfolioTagPort,
+            AssetTagPort assetTagPort
+    ) {
+        this.tradePort = tradePort;
+        this.companyRepository = companyRepository;
+        this.stockPricePort = stockPricePort;
+        this.portfolioTagPort = portfolioTagPort;
+        this.assetTagPort = assetTagPort;
+    }
 
     public PortfolioSummaryDTO execute(String userId) {
-        List<Trade> trades = tradePort.findAllByUserId(userId);
+        return execute(userId, null);
+    }
+
+    public PortfolioSummaryDTO execute(String userId, UUID tagId) {
+        Set<String> allowedTickers = PortfolioTagFilterSupport.resolveAllowedTickers(
+                userId, tagId, portfolioTagPort, assetTagPort
+        );
+        List<Trade> trades = PortfolioTagFilterSupport.filterTrades(
+                tradePort.findAllByUserId(userId), allowedTickers
+        );
 
         Map<String, BigDecimal> positions = new HashMap<>();
         BigDecimal totalInvested = BigDecimal.ZERO;

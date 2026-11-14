@@ -50,4 +50,28 @@ public class ValuationCompletedConsumerTest {
 
         verify(notificationPort).sendNotification(eq(userId), eq("VALUATION_FAILED"), eq(event));
     }
+
+    @Test
+    public void shouldPropagateTagIdOnValuationCompletedAndFailedNotifications() {
+        String userId = "user-123";
+        UUID tagId = UUID.randomUUID();
+        ValuationCompletedEvent completedEvent = new ValuationCompletedEvent(
+                userId, 5, List.of(), "2026-06-13T16:00:00Z", UUID.randomUUID(), tagId
+        );
+        ValuationFailedEvent failedEvent = new ValuationFailedEvent(
+                userId, "ERROR", "Message", "2026-06-13T16:00:00Z", UUID.randomUUID(), tagId
+        );
+
+        valuationCompletedConsumer.consumeValuationCompleted(
+                new ConsumerRecord<>(TopicConstants.VALUATION_COMPLETED_TOPIC, 0, 0, userId, completedEvent)
+        );
+        valuationCompletedConsumer.consumeValuationFailed(
+                new ConsumerRecord<>(TopicConstants.VALUATION_FAILED_TOPIC, 0, 0, userId, failedEvent)
+        );
+
+        verify(notificationPort).sendNotification(eq(userId), eq("VALUATION_COMPLETED"),
+                argThat(payload -> payload instanceof ValuationCompletedEvent e && tagId.equals(e.tagId())));
+        verify(notificationPort).sendNotification(eq(userId), eq("VALUATION_FAILED"),
+                argThat(payload -> payload instanceof ValuationFailedEvent e && tagId.equals(e.tagId())));
+    }
 }

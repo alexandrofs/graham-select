@@ -14,7 +14,13 @@ import java.util.UUID;
 public interface AllocationGoalJpaRepository extends JpaRepository<AllocationGoalEntity, UUID> {
     List<AllocationGoalEntity> findByUserId(String userId);
 
+    List<AllocationGoalEntity> findByUserIdAndScopeKeyOrderByGoalTypeAscTargetKeyAsc(String userId, String scopeKey);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM AllocationGoalEntity a WHERE a.userId = :userId")
     void deleteByUserId(@Param("userId") String userId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM AllocationGoalEntity a WHERE a.userId = :userId AND a.scopeKey = :scopeKey")
+    void deleteByUserIdAndScopeKey(@Param("userId") String userId, @Param("scopeKey") String scopeKey);
 }

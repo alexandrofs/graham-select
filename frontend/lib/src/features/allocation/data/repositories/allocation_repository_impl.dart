@@ -11,17 +11,17 @@ class AllocationRepositoryImpl implements AllocationRepository {
   AllocationRepositoryImpl(this.remoteDataSource, this.authRepository);
 
   @override
-  Future<List<AllocationGoal>> getGoals() async {
-    return remoteDataSource.getGoals();
+  Future<List<AllocationGoal>> getGoals({String? tagId}) async {
+    return remoteDataSource.getGoals(tagId: tagId);
   }
 
   @override
-  Future<void> saveGoals(List<AllocationGoal> goals) async {
+  Future<void> saveGoals(List<AllocationGoal> goals, {String? tagId}) async {
     final models = goals.map((g) => AllocationGoalModel(
       goalType: g.goalType,
       targetKey: g.targetKey,
       targetPercentage: g.targetPercentage,
     )).toList();
-    return remoteDataSource.saveGoals(models);
+    return remoteDataSource.saveGoals(models, tagId: tagId);
   }
 }

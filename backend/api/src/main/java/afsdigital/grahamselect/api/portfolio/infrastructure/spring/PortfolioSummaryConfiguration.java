@@ -8,6 +8,8 @@ import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import afsdigital.grahamselect.common.domain.repository.StockPricePort;
 import afsdigital.grahamselect.common.portfolio.application.repository.NotificationPort;
 import afsdigital.grahamselect.common.portfolio.application.usecase.SendPortfolioUpdateNotificationUseCase;
+import afsdigital.grahamselect.common.tags.application.repository.AssetTagPort;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,24 +27,42 @@ public class PortfolioSummaryConfiguration {
     public GetPortfolioSummaryUseCase getPortfolioSummaryUseCase(
             TradePort tradePort,
             CompanyRepository companyRepository,
-            StockPricePort stockPricePort
+            StockPricePort stockPricePort,
+            PortfolioTagPort portfolioTagPort,
+            AssetTagPort assetTagPort
     ) {
-        return new GetPortfolioSummaryUseCase(tradePort, companyRepository, stockPricePort);
+        return new GetPortfolioSummaryUseCase(
+                tradePort,
+                companyRepository,
+                stockPricePort,
+                portfolioTagPort,
+                assetTagPort
+        );
     }
 
     @Bean
     public GetCustodyPositionsUseCase getCustodyPositionsUseCase(
             TradePort tradePort,
             CompanyRepository companyRepository,
-            StockPricePort stockPricePort
+            StockPricePort stockPricePort,
+            PortfolioTagPort portfolioTagPort,
+            AssetTagPort assetTagPort
     ) {
-        return new GetCustodyPositionsUseCase(tradePort, companyRepository, stockPricePort);
+        return new GetCustodyPositionsUseCase(
+                tradePort,
+                companyRepository,
+                stockPricePort,
+                portfolioTagPort,
+                assetTagPort
+        );
     }
 
     @Bean
     public GetPortfolioEvolutionUseCase getPortfolioEvolutionUseCase(
-            TradePort tradePort
+            TradePort tradePort,
+            PortfolioTagPort portfolioTagPort,
+            AssetTagPort assetTagPort
     ) {
-        return new GetPortfolioEvolutionUseCase(tradePort);
+        return new GetPortfolioEvolutionUseCase(tradePort, portfolioTagPort, assetTagPort);
     }
 }

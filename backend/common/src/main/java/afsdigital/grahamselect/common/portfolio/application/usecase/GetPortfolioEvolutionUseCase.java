@@ -5,26 +5,54 @@ import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioEvoluti
 import afsdigital.grahamselect.common.portfolio.application.repository.TradePort;
 import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
 import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
-import lombok.RequiredArgsConstructor;
+import afsdigital.grahamselect.common.tags.application.repository.AssetTagPort;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-@RequiredArgsConstructor
 public class GetPortfolioEvolutionUseCase {
 
     private final TradePort tradePort;
+    private final PortfolioTagPort portfolioTagPort;
+    private final AssetTagPort assetTagPort;
+
+    public GetPortfolioEvolutionUseCase(TradePort tradePort) {
+        this(tradePort, null, null);
+    }
+
+    public GetPortfolioEvolutionUseCase(
+            TradePort tradePort,
+            PortfolioTagPort portfolioTagPort,
+            AssetTagPort assetTagPort
+    ) {
+        this.tradePort = tradePort;
+        this.portfolioTagPort = portfolioTagPort;
+        this.assetTagPort = assetTagPort;
+    }
 
     public PortfolioEvolutionDTO execute(String userId) {
-        List<Trade> trades = tradePort.findAllByUserId(userId);
+        return execute(userId, null);
+    }
 
-        // Define o intervalo dos últimos 12 meses consecutivos
-        LocalDate endDate = LocalDate.now();
+    public PortfolioEvolutionDTO execute(String userId, UUID tagId) {
+        Set<String> allowedTickers = PortfolioTagFilterSupport.resolveAllowedTickers(
+                userId, tagId, portfolioTagPort, assetTagPort
+        );
+        List<Trade> trades = PortfolioTagFilterSupport.filterTrades(
+                tradePort.findAllByUserId(userId), allowedTickers
+        );
+
+        // Define o intervalo dos últimos 12 meses consecutivos em UTC
+        LocalDate endDate = LocalDate.now(ZoneOffset.UTC);
         LocalDate startDate = endDate.minusMonths(11).withDayOfMonth(1);
 
         // Preenche o mapa com todos os 12 meses zerados (garante a ordem e continuidade)

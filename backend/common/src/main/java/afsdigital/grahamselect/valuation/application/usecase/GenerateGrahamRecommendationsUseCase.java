@@ -35,17 +35,25 @@ public class GenerateGrahamRecommendationsUseCase {
     private final GrahamRecommendationPort grahamRecommendationPort;
 
     public GenerationResult execute(String userId) {
-        log.info("Generating Graham recommendations for user {}", userId);
+        return execute(userId, null);
+    }
+
+    public GenerationResult execute(String userId, UUID tagId) {
+        log.info("Generating Graham recommendations for user {}, tagId={}", userId != null ? userId.replaceAll("[\\r\\n\\t]", "_") : "null", tagId);
 
         List<RankedCompany> rankedCompanies = rankingRepository.findTop20BestRanked();
         if (rankedCompanies == null || rankedCompanies.isEmpty()) {
-            log.warn("No ranked companies found. Returning empty recommendations for user {}", userId);
+            log.warn("No ranked companies found. Returning empty recommendations for user {}, tagId={}", userId, tagId);
             return new GenerationResult(List.of(), List.of());
         }
 
-        List<AllocationGoalDto> userGoals = allocationGoalPort.findByUserId(userId);
+        List<AllocationGoalDto> userGoals = tagId == null
+                ? allocationGoalPort.findByUserId(userId)
+                : allocationGoalPort.findByUserId(userId, tagId);
         boolean hasGoals = userGoals != null && !userGoals.isEmpty();
-        Map<String, BigDecimal> currentAllocation = portfolioSnapshotPort.getCurrentAllocationByUserId(userId);
+        Map<String, BigDecimal> currentAllocation = tagId == null
+                ? portfolioSnapshotPort.getCurrentAllocationByUserId(userId)
+                : portfolioSnapshotPort.getCurrentAllocationByUserIdAndTagId(userId, tagId);
 
         Map<String, BigDecimal> goalsByTicker = Map.of();
         Map<String, BigDecimal> goalsByClass = Map.of();
@@ -170,8 +178,12 @@ public class GenerateGrahamRecommendationsUseCase {
                 .sorted(Comparator.comparing(GrahamRecommendation::getRecommendationScore).reversed())
                 .toList();
 
-        grahamRecommendationPort.saveRecommendations(userId, recommendations);
-        log.info("Generated {} recommendations for user {}. Excluded {} tickers.", recommendations.size(), userId, excludedTickers.size());
+        if (tagId == null) {
+            grahamRecommendationPort.saveRecommendations(userId, recommendations);
+        } else {
+            grahamRecommendationPort.saveRecommendations(userId, tagId, recommendations);
+        }
+        log.info("Generated {} recommendations for user {}, tagId={}. Excluded {} tickers.", recommendations.size(), userId, tagId, excludedTickers.size());
         
         if (recommendations.isEmpty() && !rankedCompanies.isEmpty() && !excludedTickers.isEmpty()) {
             log.warn("All ranked companies excluded from recommendations for user {}", userId);

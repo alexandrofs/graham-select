@@ -26,19 +26,24 @@ class MockPortfolioRepository implements PortfolioRepository {
   }) async => throw UnimplementedError();
 
   @override
-  Future<PortfolioSummary> getSummary() async => throw UnimplementedError();
+  Future<PortfolioSummary> getSummary({String? tagId}) async => throw UnimplementedError();
 
   @override
-  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})>
-      getCustodyPositions() async {
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})>
+      getCustodyPositions({String? tagId}) async {
     if (shouldThrow) {
       throw Exception('Erro ao buscar custódia');
     }
-    return (positions: positionsToReturn, metaPriceUpdatedAt: metaPriceUpdatedAtToReturn);
+    return (
+      positions: positionsToReturn,
+      metaPriceUpdatedAt: metaPriceUpdatedAtToReturn,
+      untaggedAssetsCount: 0,
+      untaggedTickers: const <String>[],
+    );
   }
 
   @override
-  Future<PortfolioEvolution> getPortfolioEvolution() async => throw UnimplementedError();
+  Future<PortfolioEvolution> getPortfolioEvolution({String? tagId}) async => throw UnimplementedError();
 }
 
 void main() {

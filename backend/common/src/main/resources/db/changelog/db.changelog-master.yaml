@@ -57,5 +57,7 @@ databaseChangeLog:
       file: db/changelog/29-create-family-profiles-and-link-trades.yaml
   - include:
       file: db/changelog/30-create-portfolio-tags-and-asset-tags.yaml
+  - include:
+      file: db/changelog/31-add-tag-scope-to-allocation-goals-and-graham-recommendations.yaml
 
 

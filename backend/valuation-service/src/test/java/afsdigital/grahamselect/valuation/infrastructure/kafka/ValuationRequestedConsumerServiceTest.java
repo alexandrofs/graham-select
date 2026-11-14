@@ -71,4 +71,35 @@ public class ValuationRequestedConsumerServiceTest {
                    failedEvent.message().contains("erro ao calcular o valuation");
         }));
     }
+
+    @Test
+    public void shouldPassTagIdToUseCaseAndPropagateToCompletedAndFailedEvents() {
+        String userId = "user-123";
+        UUID tagId = UUID.randomUUID();
+        ValuationRequestedEvent event = new ValuationRequestedEvent(
+                userId, "2026-06-13T16:00:00Z", UUID.randomUUID(), tagId
+        );
+        ConsumerRecord<String, ValuationRequestedEvent> record = new ConsumerRecord<>("topic", 0, 0, userId, event);
+
+        GenerationResult result = new GenerationResult(List.of(), List.of());
+        when(generateGrahamRecommendationsUseCase.execute(userId, tagId)).thenReturn(result);
+
+        valuationRequestedConsumerService.consume(record);
+
+        verify(generateGrahamRecommendationsUseCase).execute(userId, tagId);
+        verify(generateGrahamRecommendationsUseCase, never()).execute(userId);
+        verify(kafkaTemplate).send(eq(TopicConstants.VALUATION_COMPLETED_TOPIC), eq(userId), argThat(payload ->
+                payload instanceof ValuationCompletedEvent completedEvent
+                        && tagId.equals(completedEvent.tagId())
+        ));
+
+        when(generateGrahamRecommendationsUseCase.execute(userId, tagId)).thenThrow(new RuntimeException("Boom"));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () ->
+                valuationRequestedConsumerService.consume(record)
+        );
+        verify(kafkaTemplate).send(eq(TopicConstants.VALUATION_FAILED_TOPIC), eq(userId), argThat(payload ->
+                payload instanceof ValuationFailedEvent failedEvent
+                        && tagId.equals(failedEvent.tagId())
+        ));
+    }
 }

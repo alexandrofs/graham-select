@@ -13,7 +13,12 @@ abstract class PortfolioRepository {
     required String broker,
   });
 
-  Future<PortfolioSummary> getSummary();
-  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})> getCustodyPositions();
-  Future<PortfolioEvolution> getPortfolioEvolution();
+  Future<PortfolioSummary> getSummary({String? tagId});
+  Future<({
+    List<CustodyPosition> positions,
+    DateTime? metaPriceUpdatedAt,
+    int untaggedAssetsCount,
+    List<String> untaggedTickers,
+  })> getCustodyPositions({String? tagId});
+  Future<PortfolioEvolution> getPortfolioEvolution({String? tagId});
 }

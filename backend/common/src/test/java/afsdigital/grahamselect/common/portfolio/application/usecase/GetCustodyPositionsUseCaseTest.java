@@ -8,6 +8,11 @@ import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
 import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import afsdigital.grahamselect.common.domain.repository.StockPricePort;
 import afsdigital.grahamselect.common.domain.entities.StockPrice;
+import afsdigital.grahamselect.common.tags.application.repository.AssetTagPort;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
+import afsdigital.grahamselect.common.tags.application.service.exceptions.TagNotFoundException;
+import afsdigital.grahamselect.common.tags.domain.entities.AssetTag;
+import afsdigital.grahamselect.common.tags.domain.entities.PortfolioTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +25,8 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,6 +44,12 @@ class GetCustodyPositionsUseCaseTest {
 
     @Mock
     private StockPricePort stockPricePort;
+
+    @Mock
+    private PortfolioTagPort portfolioTagPort;
+
+    @Mock
+    private AssetTagPort assetTagPort;
 
     private GetCustodyPositionsUseCase useCase;
 
@@ -445,5 +458,83 @@ class GetCustodyPositionsUseCaseTest {
         assertEquals("BOVA11F", result.get(0).ticker());
         assertEquals("ETFs", result.get(0).assetClass());
         assertEquals(new BigDecimal("110.00"), result.get(0).currentPrice());
+    }
+
+    @Test
+    void shouldFilterCustodyPositionsByTagAndReportGlobalUntaggedTickers() {
+        String userId = "user-tag-custody";
+        UUID tagId = UUID.randomUUID();
+        GetCustodyPositionsUseCase tagAware = new GetCustodyPositionsUseCase(
+                tradePort, companyRepository, stockPricePort, portfolioTagPort, assetTagPort
+        );
+
+        when(portfolioTagPort.findByIdAndUserId(tagId, userId))
+                .thenReturn(Optional.of(PortfolioTag.builder().id(tagId).userId(userId).name("Longo Prazo").build()));
+        when(assetTagPort.findAllByUserIdAndTagId(userId, tagId))
+                .thenReturn(List.of(AssetTag.builder().tagId(tagId).userId(userId).ticker("PETR4").build()));
+        when(assetTagPort.findAllByUserId(userId))
+                .thenReturn(List.of(AssetTag.builder().tagId(tagId).userId(userId).ticker("PETR4").build()));
+
+        Trade petrBuy = Trade.builder().userId(userId).ticker("PETR4").side(TradeSide.COMPRA.name())
+                .quantity(BigDecimal.TEN).price(new BigDecimal("30.00")).tradeDate(LocalDate.now(ZoneOffset.UTC)).build();
+        Trade petrFracBuy = Trade.builder().userId(userId).ticker("PETR4F").side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("2")).price(new BigDecimal("31.00")).tradeDate(LocalDate.now(ZoneOffset.UTC)).build();
+        Trade valeBuy = Trade.builder().userId(userId).ticker("VALE3").side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("5")).price(new BigDecimal("60.00")).tradeDate(LocalDate.now(ZoneOffset.UTC)).build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(petrBuy, petrFracBuy, valeBuy));
+        when(companyRepository.findByTicker("PETR4")).thenReturn(new Company("id-petr", "PETR4"));
+        when(companyRepository.findByTicker("PETR4F")).thenReturn(null);
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Map.of(
+                "id-petr", StockPrice.builder().companyId("id-petr").price(new BigDecimal("36.00"))
+                        .date(LocalDate.now(ZoneOffset.UTC)).build()
+        ));
+
+        GetCustodyPositionsUseCase.CustodyPositionsResult result = tagAware.executeWithMetadata(userId, tagId);
+
+        assertEquals(2, result.positions().size());
+        assertTrue(result.positions().stream().allMatch(p -> p.ticker().startsWith("PETR4")));
+        assertEquals(List.of("VALE3"), result.untaggedTickers());
+    }
+
+    @Test
+    void shouldReturnEmptyPositionsWhenTagHasNoAssetsWhilePreservingGlobalUntaggedTickers() {
+        String userId = "user-empty-tag";
+        UUID emptyTagId = UUID.randomUUID();
+        UUID otherTagId = UUID.randomUUID();
+        GetCustodyPositionsUseCase tagAware = new GetCustodyPositionsUseCase(
+                tradePort, companyRepository, stockPricePort, portfolioTagPort, assetTagPort
+        );
+
+        when(portfolioTagPort.findByIdAndUserId(emptyTagId, userId))
+                .thenReturn(Optional.of(PortfolioTag.builder().id(emptyTagId).userId(userId).name("Reserva").build()));
+        when(assetTagPort.findAllByUserIdAndTagId(userId, emptyTagId)).thenReturn(List.of());
+        when(assetTagPort.findAllByUserId(userId))
+                .thenReturn(List.of(AssetTag.builder().tagId(otherTagId).userId(userId).ticker("PETR4").build()));
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(
+                Trade.builder().userId(userId).ticker("PETR4").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("30.00")).build(),
+                Trade.builder().userId(userId).ticker("WEGE3").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("40.00")).build()
+        ));
+
+        GetCustodyPositionsUseCase.CustodyPositionsResult result = tagAware.executeWithMetadata(userId, emptyTagId);
+
+        assertTrue(result.positions().isEmpty());
+        assertEquals(List.of("WEGE3"), result.untaggedTickers());
+    }
+
+    @Test
+    void shouldThrowTagNotFoundWhenCustodyRequestedForForeignTag() {
+        String userId = "user-1";
+        UUID foreignTagId = UUID.randomUUID();
+        GetCustodyPositionsUseCase tagAware = new GetCustodyPositionsUseCase(
+                tradePort, companyRepository, stockPricePort, portfolioTagPort, assetTagPort
+        );
+
+        when(portfolioTagPort.findByIdAndUserId(foreignTagId, userId)).thenReturn(Optional.empty());
+
+        assertThrows(TagNotFoundException.class, () -> tagAware.executeWithMetadata(userId, foreignTagId));
     }
 }

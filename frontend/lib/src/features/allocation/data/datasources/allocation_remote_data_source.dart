@@ -7,9 +7,17 @@ class AllocationRemoteDataSource {
 
   AllocationRemoteDataSource({required this.apiClient});
 
-  Future<List<AllocationGoalModel>> getGoals() async {
+  String _scopedPath(String? tagId) {
+    final normalized = tagId?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return '/api/v1/allocation-strategy';
+    }
+    return '/api/v1/allocation-strategy?tagId=${Uri.encodeQueryComponent(normalized)}';
+  }
+
+  Future<List<AllocationGoalModel>> getGoals({String? tagId}) async {
     try {
-      final response = await apiClient.get('/api/v1/allocation-strategy');
+      final response = await apiClient.get(_scopedPath(tagId));
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
         return data.map((json) => AllocationGoalModel.fromJson(json as Map<String, dynamic>)).toList();
@@ -28,11 +36,11 @@ class AllocationRemoteDataSource {
       throw Exception(detail ?? 'Erro de conexão com o servidor.');
     }
   }
- 
-  Future<void> saveGoals(List<AllocationGoalModel> goals) async {
+
+  Future<void> saveGoals(List<AllocationGoalModel> goals, {String? tagId}) async {
     try {
       final data = goals.map((g) => g.toJson()).toList();
-      final response = await apiClient.post('/api/v1/allocation-strategy', data: data);
+      final response = await apiClient.post(_scopedPath(tagId), data: data);
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Erro ao salvar metas de alocação: ${response.statusCode}');
       }

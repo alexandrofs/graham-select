@@ -7,15 +7,66 @@ import 'package:frontend/src/features/allocation/domain/entities/allocation_goal
 import 'package:frontend/src/features/allocation/domain/repositories/allocation_repository.dart';
 import 'package:frontend/src/features/allocation/presentation/pages/allocation_strategy_page.dart';
 import 'package:frontend/src/features/allocation/presentation/providers/allocation_provider.dart';
+import 'package:frontend/src/features/tags/domain/entities/portfolio_tag.dart';
+import 'package:frontend/src/features/tags/domain/repositories/tag_repository.dart';
+import 'package:frontend/src/features/tags/presentation/providers/tag_provider.dart';
+
+class _AllocationTagRepository implements TagRepository {
+  @override
+  Future<void> assignAssetToTag({required String tagId, required String ticker}) async {}
+
+  @override
+  Future<PortfolioTag> createTag({required String name, String? color}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> deleteTag(String tagId) async {}
+
+  @override
+  Future<List<PortfolioTag>> fetchAssetTags(String ticker) async => const [];
+
+  @override
+  Future<List<PortfolioTag>> fetchTags() async => const [
+        PortfolioTag(
+          id: 'tag-1',
+          name: 'Dividendos',
+          color: '#10B981',
+          tickers: ['PETR4'],
+          assetCount: 1,
+        ),
+      ];
+
+  @override
+  Future<List<PortfolioTag>> setAssetTags({
+    required String ticker,
+    required List<String> tagIds,
+  }) async =>
+      const [];
+
+  @override
+  Future<void> unassignAssetFromTag({required String tagId, required String ticker}) async {}
+
+  @override
+  Future<PortfolioTag> updateTag({
+    required String tagId,
+    required String name,
+    String? color,
+  }) =>
+      throw UnimplementedError();
+}
 
 class ManualMockAllocationRepository implements AllocationRepository {
   List<AllocationGoal> goals = [];
+  final Map<String?, List<AllocationGoal>> goalsByScope = {};
+  final List<String?> loadedTags = [];
+  final List<String?> savedTags = [];
   bool shouldThrowPremiumError = false;
   bool shouldThrowNetworkError = false;
   Completer<List<AllocationGoal>>? getGoalsCompleter;
 
   @override
-  Future<List<AllocationGoal>> getGoals() async {
+  Future<List<AllocationGoal>> getGoals({String? tagId}) async {
+    loadedTags.add(tagId);
     if (getGoalsCompleter != null) {
       return getGoalsCompleter!.future;
     }
@@ -25,12 +76,16 @@ class ManualMockAllocationRepository implements AllocationRepository {
     if (shouldThrowNetworkError) {
       throw Exception('Network error');
     }
-    return goals;
+    return goalsByScope[tagId] ?? goals;
   }
 
   @override
-  Future<void> saveGoals(List<AllocationGoal> goals) async {
-    this.goals = goals;
+  Future<void> saveGoals(List<AllocationGoal> goals, {String? tagId}) async {
+    savedTags.add(tagId);
+    goalsByScope[tagId] = List<AllocationGoal>.from(goals);
+    if (tagId == null) {
+      this.goals = goals;
+    }
   }
 }
 
@@ -43,7 +98,7 @@ void main() {
     allocationProvider = AllocationProvider(mockRepository);
   });
 
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest({TagProvider? tagProvider}) {
     final router = GoRouter(
       routes: [
         GoRoute(
@@ -55,8 +110,12 @@ void main() {
 
     return MaterialApp.router(
       routerConfig: router,
-      builder: (context, child) => ChangeNotifierProvider<AllocationProvider>.value(
-        value: allocationProvider,
+      builder: (context, child) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AllocationProvider>.value(value: allocationProvider),
+          if (tagProvider != null)
+            ChangeNotifierProvider<TagProvider>.value(value: tagProvider),
+        ],
         child: child,
       ),
     );
@@ -129,6 +188,50 @@ void main() {
       
       btn = tester.widget<ElevatedButton>(buttonFinder);
       expect(btn.onPressed, isNotNull); // Enabled
+    });
+
+    testWidgets('should resync controllers cleanly when switching between Visão Geral and Tag without keeping _initialized stale', (tester) async {
+      mockRepository.goalsByScope[null] = const [
+        AllocationGoal(goalType: 'ASSET_CLASS', targetKey: 'ACOES', targetPercentage: 60.0),
+        AllocationGoal(goalType: 'ASSET_CLASS', targetKey: 'FIIS', targetPercentage: 40.0),
+      ];
+      mockRepository.goalsByScope['tag-1'] = const [];
+
+      final tagProvider = TagProvider(repository: _AllocationTagRepository());
+      await tagProvider.loadTags();
+
+      await tester.pumpWidget(createWidgetUnderTest(tagProvider: tagProvider));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byKey(const Key('analytical_lens_tabs')), findsOneWidget);
+      expect(find.textContaining('Estratégia de classes equilibrada!'), findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('tag_filter_tag-1')));
+      await tester.tap(find.byKey(const Key('tag_filter_tag-1')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Visualizando: Dividendos'), findsOneWidget);
+      expect(find.textContaining('0% alocados em classes'), findsOneWidget);
+      expect(mockRepository.loadedTags, [null, 'tag-1']);
+
+      final acoesField = find.byWidgetPredicate(
+        (w) => w is TextField && w.decoration?.labelText == 'Ações (ex: ACOES)',
+      );
+      await tester.enterText(acoesField, '100');
+      await tester.pump();
+      expect(find.textContaining('Estratégia de classes equilibrada!'), findsOneWidget);
+
+      final saveBtn = find.byType(ElevatedButton);
+      await tester.ensureVisible(saveBtn);
+      await tester.tap(saveBtn);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(mockRepository.savedTags, ['tag-1']);
+      expect(mockRepository.goalsByScope[null]!.length, 2);
+      expect(mockRepository.goalsByScope['tag-1']!.single.targetPercentage, 100.0);
     });
   });
 }

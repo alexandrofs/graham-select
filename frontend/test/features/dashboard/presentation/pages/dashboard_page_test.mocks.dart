@@ -103,6 +103,24 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i3.PortfolioStatus);
 
   @override
+  int get untaggedAssetsCount =>
+      (super.noSuchMethod(
+            Invocation.getter(#untaggedAssetsCount),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
+
+  @override
+  List<String> get untaggedTickers =>
+      (super.noSuchMethod(
+            Invocation.getter(#untaggedTickers),
+            returnValue: <String>[],
+            returnValueForMissingStub: <String>[],
+          )
+          as List<String>);
+
+  @override
   String get sortColumn =>
       (super.noSuchMethod(
             Invocation.getter(#sortColumn),
@@ -154,9 +172,18 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as bool);
 
   @override
-  _i6.Future<void> loadSummary() =>
+  _i6.Future<void> loadSummary({String? tagId}) =>
       (super.noSuchMethod(
-            Invocation.method(#loadSummary, []),
+            Invocation.method(#loadSummary, [], {#tagId: tagId}),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> refreshGlobalSummary() =>
+      (super.noSuchMethod(
+            Invocation.method(#refreshGlobalSummary, []),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )
@@ -204,9 +231,9 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   );
 
   @override
-  _i6.Future<void> loadCustodyPositions() =>
+  _i6.Future<void> loadCustodyPositions({String? tagId}) =>
       (super.noSuchMethod(
-            Invocation.method(#loadCustodyPositions, []),
+            Invocation.method(#loadCustodyPositions, [], {#tagId: tagId}),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )
@@ -219,9 +246,9 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   );
 
   @override
-  _i6.Future<void> loadEvolutionData() =>
+  _i6.Future<void> loadEvolutionData({String? tagId}) =>
       (super.noSuchMethod(
-            Invocation.method(#loadEvolutionData, []),
+            Invocation.method(#loadEvolutionData, [], {#tagId: tagId}),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )

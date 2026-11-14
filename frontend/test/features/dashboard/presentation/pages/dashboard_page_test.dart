@@ -11,11 +11,53 @@ import 'package:frontend/src/features/goals/presentation/widgets/motivational_cl
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/data/models/portfolio_summary_model.dart';
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart';
+import 'package:frontend/src/features/tags/domain/entities/portfolio_tag.dart';
+import 'package:frontend/src/features/tags/domain/repositories/tag_repository.dart';
+import 'package:frontend/src/features/tags/presentation/providers/tag_provider.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
 import 'dashboard_page_test.mocks.dart';
+
+class _StubTagRepository implements TagRepository {
+  _StubTagRepository(this.tags);
+  final List<PortfolioTag> tags;
+
+  @override
+  Future<void> assignAssetToTag({required String tagId, required String ticker}) async {}
+
+  @override
+  Future<PortfolioTag> createTag({required String name, String? color}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> deleteTag(String tagId) async {}
+
+  @override
+  Future<List<PortfolioTag>> fetchAssetTags(String ticker) async => const [];
+
+  @override
+  Future<List<PortfolioTag>> fetchTags() async => tags;
+
+  @override
+  Future<List<PortfolioTag>> setAssetTags({
+    required String ticker,
+    required List<String> tagIds,
+  }) async =>
+      const [];
+
+  @override
+  Future<void> unassignAssetFromTag({required String tagId, required String ticker}) async {}
+
+  @override
+  Future<PortfolioTag> updateTag({
+    required String tagId,
+    required String name,
+    String? color,
+  }) =>
+      throw UnimplementedError();
+}
 
 class _FakeGoalsRepository implements GoalsRepository {
   FinancialGoal? goal;
@@ -169,5 +211,75 @@ void main() {
     expect(find.byType(MotivationalClockCard), findsOneWidget);
     expect(find.byType(GoalHealthChecklistCard), findsOneWidget);
     expect(find.text('Checklist de Saúde da Meta'), findsOneWidget);
+  });
+
+  testWidgets('should keep GoalHealthChecklistCard on globalSummary and show ActiveTagLensBadge plus untagged banner', (tester) async {
+    final fakeRepo = _FakeGoalsRepository()
+      ..goal = const FinancialGoal(
+        id: 'goal-1',
+        goalType: 'PATRIMONY_TARGET',
+        targetValue: 500000.0,
+        monthlyContribution: 2000.0,
+        estimatedYears: 10,
+      );
+    final goalsProvider = GoalsProvider(repository: fakeRepo);
+
+    final tagSummary = PortfolioSummaryModel(
+      totalEquity: 25000.0,
+      grossYieldPercentage: 8.0,
+      accumulatedDividends: 300.0,
+      monthlyProjection: 120.0,
+    );
+    final globalSummary = PortfolioSummaryModel(
+      totalEquity: 100000.0,
+      grossYieldPercentage: 10.0,
+      accumulatedDividends: 1200.0,
+      monthlyProjection: 450.0,
+    );
+    final tagProvider = TagProvider(
+      repository: _StubTagRepository(const [
+        PortfolioTag(
+          id: 'tag-1',
+          name: 'Dividendos',
+          color: '#10B981',
+          tickers: ['PETR4'],
+          assetCount: 1,
+        ),
+      ]),
+    );
+    await tagProvider.loadTags();
+    tagProvider.selectFilterTag('tag-1');
+
+    when(mockPortfolioProvider.status).thenReturn(PortfolioStatus.success);
+    when(mockPortfolioProvider.summary).thenReturn(tagSummary);
+    when(mockPortfolioProvider.globalSummary).thenReturn(globalSummary);
+    when(mockPortfolioProvider.activeTagId).thenReturn('tag-1');
+    when(mockPortfolioProvider.untaggedAssetsCount).thenReturn(2);
+    when(mockPortfolioProvider.untaggedTickers).thenReturn(const ['VALE3', 'WEGE3']);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PortfolioProvider>.value(value: mockPortfolioProvider),
+          ChangeNotifierProvider<ProfileProvider>.value(value: mockProfileProvider),
+          ChangeNotifierProvider<GoalsProvider>.value(value: goalsProvider),
+          ChangeNotifierProvider<TagProvider>.value(value: tagProvider),
+        ],
+        child: const MaterialApp(home: DashboardPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Visualizando: Dividendos'), findsOneWidget);
+    expect(find.text('2 ativos sem tag não estão sendo exibidos'), findsOneWidget);
+    expect(find.textContaining('25.000,00'), findsOneWidget);
+
+    final checklist = tester.widget<GoalHealthChecklistCard>(
+      find.byType(GoalHealthChecklistCard),
+    );
+    expect(checklist.currentEquity, 100000.0);
+    expect(checklist.annualYieldPercentage, 10.0);
+    verify(mockPortfolioProvider.loadSummary(tagId: 'tag-1')).called(1);
+    verify(mockPortfolioProvider.loadCustodyPositions(tagId: 'tag-1')).called(1);
   });
 }

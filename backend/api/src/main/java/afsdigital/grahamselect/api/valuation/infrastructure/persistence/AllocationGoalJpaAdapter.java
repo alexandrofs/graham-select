@@ -5,7 +5,9 @@ import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repo
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import afsdigital.grahamselect.valuation.application.dto.AllocationGoalDto;
 import afsdigital.grahamselect.valuation.application.repository.AllocationGoalPort;
+import afsdigital.grahamselect.valuation.domain.AllocationScope;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AllocationGoalJpaAdapter implements AllocationGoalPort {
@@ -24,9 +27,20 @@ public class AllocationGoalJpaAdapter implements AllocationGoalPort {
     @Override
     @Transactional
     public void saveAllocationGoals(String userId, List<AllocationGoalDto> goals) {
+        saveAllocationGoals(userId, null, goals);
+    }
+
+    @Override
+    @Transactional
+    public void saveAllocationGoals(String userId, UUID tagId, List<AllocationGoalDto> goals) {
         userRepository.findByGoogleSubForWrite(userId)
-            .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        repository.deleteByUserId(userId);
+            .orElseThrow(() -> {
+                IllegalArgumentException ex = new IllegalArgumentException("User not found: " + userId);
+                log.error("User not found while saving allocation goals. userId={}, tagId={}", userId, tagId, ex);
+                return ex;
+            });
+        String scopeKey = AllocationScope.fromTagId(tagId);
+        repository.deleteByUserIdAndScopeKey(userId, scopeKey);
 
         if (goals == null || goals.isEmpty()) {
             return;
@@ -48,6 +62,8 @@ public class AllocationGoalJpaAdapter implements AllocationGoalPort {
             .map(dto -> AllocationGoalEntity.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
+                .tagId(tagId)
+                .scopeKey(scopeKey)
                 .goalType(dto.goalType())
                 .targetKey(dto.targetKey())
                 .targetPercentage(dto.targetPercentage())
@@ -62,7 +78,14 @@ public class AllocationGoalJpaAdapter implements AllocationGoalPort {
     @Override
     @Transactional(readOnly = true)
     public List<AllocationGoalDto> findByUserId(String userId) {
-        return repository.findByUserId(userId).stream()
+        return findByUserId(userId, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AllocationGoalDto> findByUserId(String userId, UUID tagId) {
+        String scopeKey = AllocationScope.fromTagId(tagId);
+        return repository.findByUserIdAndScopeKeyOrderByGoalTypeAscTargetKeyAsc(userId, scopeKey).stream()
             .map(entity -> new AllocationGoalDto(
                 entity.getGoalType(),
                 entity.getTargetKey(),

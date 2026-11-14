@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -306,5 +307,76 @@ public class GenerateGrahamRecommendationsUseCaseTest {
         assertEquals("BOVA11", result.get(0).getTicker());
         assertTrue(new BigDecimal("25.00").compareTo(result.get(0).getTargetAllocationPct()) == 0);
         assertTrue(new BigDecimal("20.00").compareTo(result.get(0).getAllocationGap()) == 0);
+    }
+
+    @Test
+    public void shouldGenerateScopedRecommendationsUsingOnlyTagGoalsAndTagSnapshotWithoutGlobalFallback() {
+        String userId = "user-123";
+        UUID tagId = UUID.randomUUID();
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+
+        RankedCompany petr4 = RankedCompany.builder()
+                .symbol("PETR4")
+                .name("Petrobras")
+                .assetClass("ACOES")
+                .intrinsicValue(new BigDecimal("45.00"))
+                .currentPrice(new BigDecimal("30.00"))
+                .marginOfSafety(new BigDecimal("0.33"))
+                .intrinsicValueUpdatedAt(now)
+                .build();
+        RankedCompany hglg11 = RankedCompany.builder()
+                .symbol("HGLG11")
+                .name("CSHG Logística")
+                .assetClass("FIIS")
+                .intrinsicValue(new BigDecimal("180.00"))
+                .currentPrice(new BigDecimal("150.00"))
+                .marginOfSafety(new BigDecimal("0.17"))
+                .intrinsicValueUpdatedAt(now)
+                .build();
+
+        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(petr4, hglg11));
+        when(allocationGoalPort.findByUserId(userId, tagId)).thenReturn(List.of(
+                new AllocationGoalDto("ASSET_CLASS", "ACOES", new BigDecimal("100.00"))
+        ));
+        when(portfolioSnapshotPort.getCurrentAllocationByUserIdAndTagId(userId, tagId))
+                .thenReturn(Map.of("PETR4", new BigDecimal("40.00")));
+
+        GenerationResult generationResult = generateGrahamRecommendationsUseCase.execute(userId, tagId);
+        List<GrahamRecommendation> result = generationResult.recommendations();
+
+        assertEquals(1, result.size());
+        assertEquals("PETR4", result.get(0).getTicker());
+        assertEquals(0, new BigDecimal("40.00").compareTo(result.get(0).getCurrentAllocationPct()));
+        assertEquals(0, new BigDecimal("100.00").compareTo(result.get(0).getTargetAllocationPct()));
+        assertEquals(0, new BigDecimal("60.00").compareTo(result.get(0).getAllocationGap()));
+        verify(grahamRecommendationPort).saveRecommendations(userId, tagId, result);
+        verify(allocationGoalPort, never()).findByUserId(userId);
+        verify(portfolioSnapshotPort, never()).getCurrentAllocationByUserId(userId);
+    }
+
+    @Test
+    public void shouldReturnRecommendationsWithoutTargetGapWhenTagHasNoGoals() {
+        String userId = "user-no-tag-goals";
+        UUID tagId = UUID.randomUUID();
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+
+        RankedCompany petr4 = RankedCompany.builder()
+                .symbol("PETR4")
+                .name("Petrobras")
+                .assetClass("ACOES")
+                .intrinsicValue(new BigDecimal("45.00"))
+                .currentPrice(new BigDecimal("30.00"))
+                .marginOfSafety(new BigDecimal("0.33"))
+                .intrinsicValueUpdatedAt(now)
+                .build();
+
+        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(petr4));
+        when(allocationGoalPort.findByUserId(userId, tagId)).thenReturn(List.of());
+        when(portfolioSnapshotPort.getCurrentAllocationByUserIdAndTagId(userId, tagId)).thenReturn(Map.of());
+
+        GenerationResult generationResult = generateGrahamRecommendationsUseCase.execute(userId, tagId);
+        assertEquals(1, generationResult.recommendations().size());
+        assertEquals(BigDecimal.ZERO, generationResult.recommendations().get(0).getTargetAllocationPct());
+        verify(grahamRecommendationPort).saveRecommendations(eq(userId), eq(tagId), anyList());
     }
 }

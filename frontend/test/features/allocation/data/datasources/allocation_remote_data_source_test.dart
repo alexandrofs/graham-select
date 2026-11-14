@@ -154,5 +154,29 @@ void main() {
             e.toString().contains('Erro ao salvar metas de alocação.'))),
       );
     });
+
+    test('getGoals and saveGoals should include tagId query parameter when provided', () async {
+      when(mockApiClient.get('/api/v1/allocation-strategy?tagId=tag-123')).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: ''),
+          data: [
+            {'goalType': 'ASSET_CLASS', 'targetKey': 'FIIS', 'targetPercentage': 100.0},
+          ],
+          statusCode: 200,
+        ),
+      );
+      when(mockApiClient.post('/api/v1/allocation-strategy?tagId=tag-123', data: anyNamed('data')))
+          .thenAnswer((_) async => Response(
+                requestOptions: RequestOptions(path: ''),
+                statusCode: 204,
+              ));
+
+      final fetched = await dataSource.getGoals(tagId: 'tag-123');
+      expect(fetched.first.targetKey, 'FIIS');
+
+      await dataSource.saveGoals(goals, tagId: 'tag-123');
+      verify(mockApiClient.get('/api/v1/allocation-strategy?tagId=tag-123')).called(1);
+      verify(mockApiClient.post('/api/v1/allocation-strategy?tagId=tag-123', data: anyNamed('data'))).called(1);
+    });
   });
 }

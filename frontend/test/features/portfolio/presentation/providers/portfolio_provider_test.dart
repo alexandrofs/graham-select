@@ -1,17 +1,48 @@
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/features/portfolio/data/datasources/notification_service.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/portfolio_notification_event.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/monthly_evolution.dart';
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/trade.dart';
 
+class FakeNotificationService implements NotificationService {
+  final StreamController<PortfolioNotificationEvent> _controller =
+      StreamController<PortfolioNotificationEvent>.broadcast();
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Stream<PortfolioNotificationEvent> get notificationStream => _controller.stream;
+
+  @override
+  Future<void> connect() async {}
+
+  @override
+  void dispose() {
+    _controller.close();
+  }
+
+  void emit(PortfolioNotificationEvent event) => _controller.add(event);
+}
+
 class MockPortfolioRepository implements PortfolioRepository {
   bool shouldThrow = false;
   List<CustodyPosition> positionsToReturn = [];
   DateTime? metaPriceUpdatedAtToReturn;
+  int untaggedAssetsCountToReturn = 0;
+  List<String> untaggedTickersToReturn = const [];
   PortfolioSummary? summaryToReturn;
   PortfolioEvolution? evolutionToReturn;
+  final List<String?> summaryTagCalls = [];
+  final List<String?> custodyTagCalls = [];
+  final List<String?> evolutionTagCalls = [];
+  Future<PortfolioSummary> Function(String? tagId)? summaryHandler;
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})> Function(String? tagId)? custodyHandler;
 
   @override
   Future<Trade> createManualTrade({
@@ -39,7 +70,9 @@ class MockPortfolioRepository implements PortfolioRepository {
   }
 
   @override
-  Future<PortfolioSummary> getSummary() async {
+  Future<PortfolioSummary> getSummary({String? tagId}) async {
+    summaryTagCalls.add(tagId);
+    if (summaryHandler != null) return summaryHandler!(tagId);
     if (shouldThrow) {
       throw Exception('Erro ao buscar resumo');
     }
@@ -55,16 +88,24 @@ class MockPortfolioRepository implements PortfolioRepository {
   }
 
   @override
-  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})>
-      getCustodyPositions() async {
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})>
+      getCustodyPositions({String? tagId}) async {
+    custodyTagCalls.add(tagId);
+    if (custodyHandler != null) return custodyHandler!(tagId);
     if (shouldThrow) {
       throw Exception('Erro ao buscar custódia');
     }
-    return (positions: positionsToReturn, metaPriceUpdatedAt: metaPriceUpdatedAtToReturn);
+    return (
+      positions: positionsToReturn,
+      metaPriceUpdatedAt: metaPriceUpdatedAtToReturn,
+      untaggedAssetsCount: untaggedAssetsCountToReturn,
+      untaggedTickers: untaggedTickersToReturn,
+    );
   }
 
   @override
-  Future<PortfolioEvolution> getPortfolioEvolution() async {
+  Future<PortfolioEvolution> getPortfolioEvolution({String? tagId}) async {
+    evolutionTagCalls.add(tagId);
     if (shouldThrow) {
       throw Exception('Erro ao buscar evolução');
     }
@@ -382,6 +423,92 @@ void main() {
 
         expect(provider.selectedAssetClassFilter, isNull);
         expect(provider.custodyPositions.length, equals(2));
+      });
+    });
+
+    group('Filtro por tag e guarda de concorrência', () {
+      test('deve preservar globalSummary separado ao carregar resumo de uma tag', () async {
+        mockRepository.summaryHandler = (tagId) async {
+          if (tagId == null) {
+            return PortfolioSummary(
+              totalEquity: 20000.0,
+              grossYieldPercentage: 12.0,
+              accumulatedDividends: 1000.0,
+              monthlyProjection: 150.0,
+            );
+          }
+          return PortfolioSummary(
+            totalEquity: 4000.0,
+            grossYieldPercentage: 20.0,
+            accumulatedDividends: 200.0,
+            monthlyProjection: 30.0,
+          );
+        };
+
+        await provider.loadSummary();
+        expect(provider.summary!.totalEquity, equals(20000.0));
+        expect(provider.globalSummary!.totalEquity, equals(20000.0));
+
+        await provider.loadSummary(tagId: 'tag-1');
+        expect(provider.activeTagId, equals('tag-1'));
+        expect(provider.summary!.totalEquity, equals(4000.0));
+        expect(provider.globalSummary!.totalEquity, equals(20000.0));
+      });
+
+      test('deve armazenar untaggedAssetsCount e untaggedTickers da custódia e ignorar respostas obsoletas', () async {
+        final slowCompleter = Completer<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})>();
+        mockRepository.custodyHandler = (tagId) {
+          if (tagId == 'tag-slow') return slowCompleter.future;
+          return Future.value((
+            positions: const <CustodyPosition>[],
+            metaPriceUpdatedAt: null,
+            untaggedAssetsCount: 3,
+            untaggedTickers: const ['BBAS3', 'ITSA4', 'WEGE3'],
+          ));
+        };
+
+        final slowFuture = provider.loadCustodyPositions(tagId: 'tag-slow');
+        final fastFuture = provider.loadCustodyPositions(tagId: 'tag-fast');
+
+        await fastFuture;
+        expect(provider.activeTagId, equals('tag-fast'));
+        expect(provider.untaggedAssetsCount, equals(3));
+
+        slowCompleter.complete((
+          positions: const <CustodyPosition>[],
+          metaPriceUpdatedAt: null,
+          untaggedAssetsCount: 99,
+          untaggedTickers: const ['OBSOLETO'],
+        ));
+        await slowFuture;
+
+        expect(provider.activeTagId, equals('tag-fast'));
+        expect(provider.untaggedAssetsCount, equals(3));
+        expect(provider.untaggedTickers, equals(['BBAS3', 'ITSA4', 'WEGE3']));
+      });
+
+      test('SSE PORTFOLIO_UPDATED deve recarregar usando o activeTagId atual', () async {
+        final sseService = FakeNotificationService();
+        final sseProvider = PortfolioProvider(mockRepository, sseService);
+        addTearDown(sseProvider.dispose);
+
+        await sseProvider.loadSummary(tagId: 'tag-sse');
+        await sseProvider.loadCustodyPositions(tagId: 'tag-sse');
+        mockRepository.summaryTagCalls.clear();
+        mockRepository.custodyTagCalls.clear();
+        mockRepository.evolutionTagCalls.clear();
+
+        sseProvider.startListeningForUpdates();
+        sseService.emit(PortfolioNotificationEvent(
+          userId: 'u1',
+          event: 'PORTFOLIO_UPDATED',
+          timestamp: DateTime.utc(2026, 11, 14),
+        ));
+        await Future.delayed(Duration.zero);
+
+        expect(mockRepository.summaryTagCalls, contains('tag-sse'));
+        expect(mockRepository.custodyTagCalls, equals(['tag-sse']));
+        expect(mockRepository.evolutionTagCalls, equals(['tag-sse']));
       });
     });
   });

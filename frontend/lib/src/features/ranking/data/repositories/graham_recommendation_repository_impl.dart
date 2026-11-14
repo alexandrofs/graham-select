@@ -13,14 +13,20 @@ class GrahamRecommendationRepositoryImpl implements GrahamRecommendationReposito
   });
 
   @override
-  Future<List<GrahamRecommendation>> getRecommendations() async {
+  Future<List<GrahamRecommendation>> getRecommendations({String? tagId}) async {
     final token = await authRepository.getPersistedToken();
-    return await remoteDataSource.getRecommendations(token: token);
+    return await remoteDataSource.getRecommendations(
+      token: token,
+      tagId: tagId,
+    );
   }
 
   @override
-  Future<void> triggerCalculation() async {
+  Future<void> triggerCalculation({String? tagId}) async {
     final token = await authRepository.getPersistedToken();
-    await remoteDataSource.triggerCalculation(token: token);
+    await remoteDataSource.triggerCalculation(
+      token: token,
+      tagId: tagId,
+    );
   }
 }

@@ -3,10 +3,12 @@ package afsdigital.grahamselect.api.valuation.infrastructure.persistence;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities.GrahamRecommendationEntity;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.GrahamRecommendationJpaRepository;
 import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationPort;
+import afsdigital.grahamselect.valuation.domain.AllocationScope;
 import afsdigital.grahamselect.valuation.domain.entities.GrahamRecommendation;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class GrahamRecommendationReadAdapter implements GrahamRecommendationPort {
@@ -20,7 +22,13 @@ public class GrahamRecommendationReadAdapter implements GrahamRecommendationPort
 
     @Override
     public List<GrahamRecommendation> findByUserId(String userId) {
-        List<GrahamRecommendationEntity> entities = repository.findByUserIdOrderByRecommendationScoreDesc(userId);
+        return findByUserId(userId, null);
+    }
+
+    @Override
+    public List<GrahamRecommendation> findByUserId(String userId, UUID tagId) {
+        String scopeKey = AllocationScope.fromTagId(tagId);
+        List<GrahamRecommendationEntity> entities = repository.findByUserIdAndScopeKeyOrderByRecommendationScoreDesc(userId, scopeKey);
         return entities.stream()
                 .map(this::toDomain)
                 .toList();

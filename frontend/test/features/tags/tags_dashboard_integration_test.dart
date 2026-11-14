@@ -13,6 +13,7 @@ import 'package:frontend/src/features/portfolio/domain/entities/trade.dart';
 import 'package:frontend/src/features/portfolio/domain/repositories/portfolio_repository.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/presentation/widgets/financial_data_table.dart';
+import 'package:frontend/src/features/portfolio/presentation/widgets/portfolio_kpi_card.dart';
 import 'package:frontend/src/features/profile/data/models/user_profile_model.dart';
 import 'package:frontend/src/features/profile/data/repositories/profile_repository.dart';
 import 'package:frontend/src/features/profile/presentation/pages/profile_page.dart';
@@ -24,10 +25,15 @@ import 'package:frontend/src/features/tags/presentation/providers/tag_provider.d
 import 'package:frontend/src/features/tags/presentation/widgets/dashboard_tag_filter_bar.dart';
 
 class _FakePortfolioRepository implements PortfolioRepository {
-  _FakePortfolioRepository(this.positions, this.summary);
+  _FakePortfolioRepository(
+    this.positions,
+    this.summary, {
+    _StatefulTagRepository? tagRepository,
+  }) : _tagRepository = tagRepository;
 
   final List<CustodyPosition> positions;
   final PortfolioSummary summary;
+  final _StatefulTagRepository? _tagRepository;
 
   @override
   Future<Trade> createManualTrade({
@@ -40,18 +46,63 @@ class _FakePortfolioRepository implements PortfolioRepository {
   }) =>
       throw UnimplementedError();
 
-  @override
-  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})>
-      getCustodyPositions() async {
-    return (positions: positions, metaPriceUpdatedAt: DateTime.utc(2026, 11, 14, 15));
+  List<String> _untaggedTickers() {
+    if (_tagRepository == null) return const [];
+    final tagged = _tagRepository._tags
+        .expand((t) => t.tickers)
+        .map((t) => t.trim().toUpperCase())
+        .toSet();
+    return positions
+        .map((p) => p.ticker.trim().toUpperCase())
+        .where((t) => !tagged.contains(t))
+        .toList();
+  }
+
+  List<CustodyPosition> _filterPositions(String? tagId) {
+    final normalized = tagId?.trim();
+    if (normalized == null || normalized.isEmpty || _tagRepository == null) {
+      return positions;
+    }
+    final matching = _tagRepository._tags.where((t) => t.id == normalized);
+    if (matching.isEmpty) return const [];
+    final allowed =
+        matching.first.tickers.map((t) => t.trim().toUpperCase()).toSet();
+    return positions
+        .where((p) => allowed.contains(p.ticker.trim().toUpperCase()))
+        .toList();
   }
 
   @override
-  Future<PortfolioEvolution> getPortfolioEvolution() =>
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})>
+      getCustodyPositions({String? tagId}) async {
+    final untagged = _untaggedTickers();
+    return (
+      positions: _filterPositions(tagId),
+      metaPriceUpdatedAt: DateTime.utc(2026, 11, 14, 15),
+      untaggedAssetsCount: untagged.length,
+      untaggedTickers: untagged,
+    );
+  }
+
+  @override
+  Future<PortfolioEvolution> getPortfolioEvolution({String? tagId}) =>
       throw UnimplementedError();
 
   @override
-  Future<PortfolioSummary> getSummary() async => summary;
+  Future<PortfolioSummary> getSummary({String? tagId}) async {
+    final normalized = tagId?.trim();
+    if (normalized == null || normalized.isEmpty || _tagRepository == null) {
+      return summary;
+    }
+    final filtered = _filterPositions(normalized);
+    final equity = filtered.fold<double>(0.0, (sum, p) => sum + p.marketValue);
+    return PortfolioSummary(
+      totalEquity: equity,
+      grossYieldPercentage: filtered.isEmpty ? 0.0 : 16.67,
+      accumulatedDividends: filtered.isEmpty ? 0.0 : 220.0,
+      monthlyProjection: filtered.isEmpty ? 0.0 : 18.0,
+    );
+  }
 }
 
 class _FakeProfileRepository implements ProfileRepository {
@@ -265,42 +316,44 @@ void main() {
 
   group('Tags Dashboard, Sheet & Profile Integration Tests', () {
     testWidgets(
-      'associa múltiplas tags, cria tag inline no bottom sheet e filtra a custódia em memória preservando KPIs globais',
+      'associa múltiplas tags, cria tag inline no bottom sheet e filtra custódia/KPIs por tag via backend preservando aviso de ativos sem tag',
       (tester) async {
         tester.view.physicalSize = const Size(1440, 1400);
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
-        final portfolioRepo =
-            _FakePortfolioRepository(_samplePositions(), _sampleSummary());
+        final tagRepo = _StatefulTagRepository(const [
+          PortfolioTag(
+            id: 'tag-div',
+            name: 'Dividendos',
+            color: '#6366F1',
+            tickers: ['PETR4'],
+            assetCount: 1,
+          ),
+          PortfolioTag(
+            id: 'tag-com',
+            name: 'Commodities',
+            color: '#10B981',
+            tickers: ['VALE3'],
+            assetCount: 1,
+          ),
+          PortfolioTag(
+            id: 'tag-vazia',
+            name: 'Vazia',
+            color: '#F59E0B',
+            tickers: [],
+            assetCount: 0,
+          ),
+        ]);
+        final portfolioRepo = _FakePortfolioRepository(
+          _samplePositions(),
+          _sampleSummary(),
+          tagRepository: tagRepo,
+        );
         final portfolioProvider = PortfolioProvider(portfolioRepo);
         final profileProvider = ProfileProvider(_FakeProfileRepository());
-        final tagProvider = TagProvider(
-          repository: _StatefulTagRepository(const [
-            PortfolioTag(
-              id: 'tag-div',
-              name: 'Dividendos',
-              color: '#6366F1',
-              tickers: ['PETR4'],
-              assetCount: 1,
-            ),
-            PortfolioTag(
-              id: 'tag-com',
-              name: 'Commodities',
-              color: '#10B981',
-              tickers: ['VALE3'],
-              assetCount: 1,
-            ),
-            PortfolioTag(
-              id: 'tag-vazia',
-              name: 'Vazia',
-              color: '#F59E0B',
-              tickers: [],
-              assetCount: 0,
-            ),
-          ]),
-        );
+        final tagProvider = TagProvider(repository: tagRepo);
 
         await tester.pumpWidget(
           _buildRouterApp(
@@ -312,8 +365,17 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Barra de filtro + todas as posições visíveis inicialmente
+        // Barra de lente analítica + todas as posições e KPI global visíveis inicialmente
         expect(find.byKey(const Key('dashboard_tag_filter_bar')), findsOneWidget);
+        expect(find.byKey(const Key('active_tag_lens_badge')), findsNothing);
+        expect(find.byKey(const Key('untagged_assets_banner')), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(PortfolioKpiCard),
+            matching: find.textContaining('7.850,00'),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('PETR4'), findsOneWidget);
         expect(find.text('VALE3'), findsOneWidget);
         expect(find.text('CDB BANCO X'), findsOneWidget);
@@ -356,14 +418,38 @@ void main() {
         );
         expect(find.text('Tags de PETR4 atualizadas com sucesso.'), findsOneWidget);
 
-        // Filtra pela tag "Dividendos": apenas PETR4 fica na tabela, KPIs globais permanecem
+        // Filtra pela tag "Dividendos": backend recalcula KPIs (3.500,00) + exibe badge e aviso de ativo sem tag
         await tester.tap(find.byKey(const Key('tag_filter_tag-div')));
         await tester.pumpAndSettle();
 
+        expect(find.text('Visualizando: Dividendos'), findsOneWidget);
         expect(find.text('PETR4'), findsOneWidget);
         expect(find.text('VALE3'), findsNothing);
         expect(find.text('CDB BANCO X'), findsNothing);
         expect(find.text('Patrimônio Total'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(PortfolioKpiCard),
+            matching: find.textContaining('3.500,00'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(PortfolioKpiCard),
+            matching: find.textContaining('7.850,00'),
+          ),
+          findsNothing,
+        );
+        expect(find.text('1 ativo sem tag não está sendo exibido'), findsOneWidget);
+
+        // Abre seletor rápido de ativos sem tag a partir do aviso discreto
+        await tester.tap(find.byKey(const Key('associate_untagged_assets_button')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('untagged_assets_quick_sheet')), findsOneWidget);
+        expect(find.byKey(const Key('untagged_asset_item_CDB BANCO X')), findsOneWidget);
+        await tester.tap(find.byTooltip('Fechar'));
+        await tester.pumpAndSettle();
 
         // Filtra por tag sem ativos ("Vazia"): mostra empty state contextual + Limpar filtro
         await tester.tap(find.byKey(const Key('tag_filter_tag-vazia')));
@@ -378,6 +464,14 @@ void main() {
         await tester.tap(find.byKey(const Key('clear_tag_filter_button')));
         await tester.pumpAndSettle();
 
+        expect(find.byKey(const Key('active_tag_lens_badge')), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(PortfolioKpiCard),
+            matching: find.textContaining('7.850,00'),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('PETR4'), findsOneWidget);
         expect(find.text('VALE3'), findsOneWidget);
         expect(find.text('CDB BANCO X'), findsOneWidget);

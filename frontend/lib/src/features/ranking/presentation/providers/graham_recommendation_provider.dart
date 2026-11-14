@@ -15,6 +15,8 @@ class GrahamRecommendationProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isTriggering = false;
   StreamSubscription? _notificationSubscription;
+  String? _activeTagId;
+  int _fetchGeneration = 0;
 
   GrahamRecommendationProvider({
     required this.repository,
@@ -25,15 +27,32 @@ class GrahamRecommendationProvider extends ChangeNotifier {
   List<GrahamRecommendation> get recommendations => _recommendations;
   String? get errorMessage => _errorMessage;
   bool get isTriggering => _isTriggering;
+  String? get activeTagId => _activeTagId;
 
-  Future<void> fetchRecommendations() async {
+  String? _normalizeTagId(String? tagId) {
+    final trimmed = tagId?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
+  Future<void> fetchRecommendations({String? tagId}) async {
+    final normalizedTagId = _normalizeTagId(tagId);
+    final generation = ++_fetchGeneration;
+    if (_activeTagId != normalizedTagId) {
+      _recommendations = [];
+      _excludedTickers = [];
+    }
+    _activeTagId = normalizedTagId;
     _setState(RecommendationState.loading);
     _errorMessage = null;
 
     try {
-      _recommendations = await repository.getRecommendations();
+      final result = await repository.getRecommendations(tagId: normalizedTagId);
+      if (generation != _fetchGeneration) return;
+      _recommendations = result;
       _setState(RecommendationState.success);
     } catch (e) {
+      if (generation != _fetchGeneration) return;
       _errorMessage = e.toString();
       _setState(RecommendationState.error);
     }
@@ -41,9 +60,11 @@ class GrahamRecommendationProvider extends ChangeNotifier {
 List<dynamic> _excludedTickers = [];
 List<dynamic> get excludedTickers => _excludedTickers;
 
-Future<void> triggerCalculation(String currentUserId) async {
+Future<void> triggerCalculation(String currentUserId, {String? tagId}) async {
   if (_isTriggering) return;
 
+  final targetTagId = _normalizeTagId(tagId);
+  _activeTagId = targetTagId;
   _isTriggering = true;
   _errorMessage = null;
   _excludedTickers = [];
@@ -54,10 +75,14 @@ Future<void> triggerCalculation(String currentUserId) async {
 
     // 1. Subscreve ANTES de disparar o trigger (Decision 3)
     if (notificationService != null && notificationService!.isConnected) {
-      _notificationSubscription?.cancel();
+      await _notificationSubscription?.cancel();
       _notificationSubscription = notificationService!.notificationStream.listen((event) {
         // 2. Filtra por userId (Achado #5) - Comparação insensível a maiúsculas/minúsculas
         if (event.userId.trim().toLowerCase() != currentUserId.trim().toLowerCase()) return;
+
+        // Correlaciona pelo escopo da tag (GLOBAL omite tagId; visão por tag traz tagId exato)
+        final eventTagId = _normalizeTagId(event.payload?['tagId']?.toString());
+        if (eventTagId != targetTagId) return;
 
         if (event.event == 'VALUATION_COMPLETED') {
           _excludedTickers = event.payload?['excludedTickers'] ?? [];
@@ -71,7 +96,7 @@ Future<void> triggerCalculation(String currentUserId) async {
     }
 
     // 2. Dispara o cálculo
-    await repository.triggerCalculation();
+    await repository.triggerCalculation(tagId: targetTagId);
 
     if (notificationService != null && notificationService!.isConnected) {
       // 3. Aguarda evento via SSE com timeout de 30s
@@ -82,17 +107,19 @@ Future<void> triggerCalculation(String currentUserId) async {
           throw TimeoutException('O processamento está demorando mais que o esperado. As recomendações serão atualizadas automaticamente em breve.');
         },
       );
-      await fetchRecommendations();
     } else {
       // 4. Fallback caso SSE não esteja disponível (Achado #6)
       await Future.delayed(const Duration(seconds: 3)); // Fix to 3s
-      await fetchRecommendations();
     }
 
-    _setState(RecommendationState.success);
+    if (_activeTagId == targetTagId) {
+      await fetchRecommendations(tagId: targetTagId);
+    }
   } catch (e) {
-    _errorMessage = e.toString().replaceFirst('Exception: ', '');
-    _setState(RecommendationState.error);
+    if (_activeTagId == targetTagId) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _setState(RecommendationState.error);
+    }
   } finally {
     _isTriggering = false;
     _notificationSubscription?.cancel();
@@ -106,6 +133,8 @@ Future<void> triggerCalculation(String currentUserId) async {
     _recommendations = [];
     _errorMessage = null;
     _isTriggering = false;
+    _activeTagId = null;
+    _excludedTickers = [];
     _notificationSubscription?.cancel();
     _notificationSubscription = null;
     notifyListeners();

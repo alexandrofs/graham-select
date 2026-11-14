@@ -13,6 +13,7 @@ import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
 import '../../../portfolio/presentation/widgets/financial_data_table.dart';
 import '../../../portfolio/presentation/widgets/asset_allocation_donut_chart.dart';
 import '../../../tags/presentation/providers/tag_provider.dart';
+import '../../../tags/presentation/widgets/analytical_lens_tabs.dart';
 import '../../../tags/presentation/widgets/dashboard_tag_filter_bar.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -22,31 +23,39 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage>
+    with TagLensSyncMixin<DashboardPage> {
+  bool _initialAccountLoaded = false;
+
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      final portfolioProvider = context.read<PortfolioProvider>();
-      final goalsProvider = Provider.of<GoalsProvider?>(context, listen: false);
-      final tagProvider = Provider.of<TagProvider?>(context, listen: false);
+  Future<void> onLensChanged(String? tagId) async {
+    if (!mounted) return;
+    final portfolioProvider = context.read<PortfolioProvider>();
+    final goalsProvider = Provider.of<GoalsProvider?>(context, listen: false);
+    final isInitialLoad = !_initialAccountLoaded;
+    _initialAccountLoaded = true;
+
+    if (isInitialLoad) {
       context.read<ProfileProvider>().fetchProfile();
-      portfolioProvider.loadCustodyPositions();
-      await Future.wait([
-        portfolioProvider.loadSummary(),
-        if (goalsProvider != null) goalsProvider.loadGoal(),
-        if (tagProvider != null)
-          tagProvider.loadTags(silent: tagProvider.tags.isNotEmpty),
-      ]);
-      if (!mounted) return;
-      if (goalsProvider != null && goalsProvider.currentGoal != null && portfolioProvider.summary != null) {
-        goalsProvider.recalculateLocalProjection(
-          currentEquity: portfolioProvider.summary!.totalEquity,
-          grossYieldPercentage: portfolioProvider.summary!.grossYieldPercentage,
-        );
-      }
-    });
+    }
+    portfolioProvider.loadCustodyPositions(tagId: tagId);
+    await Future.wait([
+      portfolioProvider.loadSummary(tagId: tagId),
+      if (tagId != null && portfolioProvider.globalSummary == null)
+        portfolioProvider.refreshGlobalSummary(),
+      if (isInitialLoad && goalsProvider != null) goalsProvider.loadGoal(),
+    ]);
+    if (!mounted) return;
+    final goalSummary = portfolioProvider.globalSummary ?? portfolioProvider.summary;
+    if (isInitialLoad &&
+        goalsProvider != null &&
+        goalsProvider.currentGoal != null &&
+        goalSummary != null) {
+      goalsProvider.recalculateLocalProjection(
+        currentEquity: goalSummary.totalEquity,
+        grossYieldPercentage: goalSummary.grossYieldPercentage,
+      );
+    }
   }
 
   @override
@@ -73,16 +82,27 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Consumer<PortfolioProvider>(
           builder: (context, provider, child) {
             final currentGoal = goalsProvider?.currentGoal;
+            final goalSummary = provider.globalSummary ?? provider.summary;
             GoalProjection? effectiveProjection = goalsProvider?.projection;
             if (currentGoal != null && effectiveProjection == null) {
               effectiveProjection = TimeToGoalCalculator.calculate(
                 goalType: currentGoal.goalType,
                 targetValue: currentGoal.targetValue,
-                currentEquity: provider.summary?.totalEquity ?? 0.0,
+                currentEquity: goalSummary?.totalEquity ?? 0.0,
                 monthlyContribution: currentGoal.monthlyContribution,
-                annualYieldPercentage: provider.summary?.grossYieldPercentage ?? 0.0,
+                annualYieldPercentage: goalSummary?.grossYieldPercentage ?? 0.0,
               );
             }
+
+            final activeTag = tagProvider?.selectedFilterTag;
+            final effectiveUntaggedTickers = tagProvider == null
+                ? provider.untaggedTickers
+                : provider.untaggedTickers
+                    .where((t) => tagProvider.tagsForTicker(t).isEmpty)
+                    .toList();
+            final untaggedCount = provider.untaggedTickers.isNotEmpty
+                ? effectiveUntaggedTickers.length
+                : provider.untaggedAssetsCount;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,10 +137,40 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                if (tagProvider != null) ...[
+                  const SizedBox(height: 20),
+                  const DashboardTagFilterBar(),
+                  if (activeTag != null) ...[
+                    const SizedBox(height: 12),
+                    const ActiveTagLensBadge(),
+                  ],
+                  if (activeTag != null && untaggedCount > 0) ...[
+                    const SizedBox(height: 12),
+                    _UntaggedAssetsBanner(
+                      count: untaggedCount,
+                      onAssociatePressed: () {
+                        if (effectiveUntaggedTickers.isEmpty) return;
+                        UntaggedAssetsQuickSheet.show(
+                          context,
+                          untaggedTickers: effectiveUntaggedTickers,
+                          tagProvider: tagProvider,
+                          onTagsUpdated: () async {
+                            final activeTagId = tagProvider.selectedFilterTagId;
+                            await provider.refreshGlobalSummary();
+                            await Future.wait([
+                              provider.loadSummary(tagId: activeTagId),
+                              provider.loadCustodyPositions(tagId: activeTagId),
+                            ]);
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ],
+                const SizedBox(height: 24),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
-                  child: _buildKpiSection(context, provider),
+                  child: _buildKpiSection(context, provider, tagProvider),
                 ),
                 if (goalsProvider != null) ...[
                   const SizedBox(height: 32),
@@ -132,8 +182,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     const SizedBox(height: 24),
                     GoalHealthChecklistCard(
                       goal: currentGoal,
-                      currentEquity: provider.summary?.totalEquity ?? 0.0,
-                      annualYieldPercentage: provider.summary?.grossYieldPercentage ?? 0.0,
+                      currentEquity: goalSummary?.totalEquity ?? 0.0,
+                      annualYieldPercentage: goalSummary?.grossYieldPercentage ?? 0.0,
                     ),
                   ],
                 ],
@@ -141,18 +191,18 @@ class _DashboardPageState extends State<DashboardPage> {
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: AssetAllocationDonutChart(
-                    key: ValueKey(provider.rawCustodyPositions.hashCode),
+                    key: ValueKey(
+                      'donut_${provider.activeTagId}_${provider.custodyStatus}_${provider.rawCustodyPositions.length}_${provider.rawCustodyPositions.fold<double>(0, (sum, p) => sum + p.marketValue)}',
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
-                if (tagProvider != null) ...[
-                  const DashboardTagFilterBar(),
-                  const SizedBox(height: 16),
-                ],
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: FinancialDataTable(
-                    key: ValueKey(provider.rawCustodyPositions.hashCode),
+                    key: ValueKey(
+                      'table_${provider.activeTagId}_${provider.custodyStatus}_${provider.rawCustodyPositions.length}',
+                    ),
                   ),
                 ),
               ],
@@ -163,7 +213,11 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildKpiSection(BuildContext context, PortfolioProvider provider) {
+  Widget _buildKpiSection(
+    BuildContext context,
+    PortfolioProvider provider,
+    TagProvider? tagProvider,
+  ) {
     if (provider.status == PortfolioStatus.error) {
       return Container(
         key: const ValueKey('error'),
@@ -184,7 +238,9 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
             TextButton(
-              onPressed: () => provider.loadSummary(),
+              onPressed: () => provider.loadSummary(
+                tagId: tagProvider?.selectedFilterTagId,
+              ),
               child: const Text('Tentar novamente'),
             ),
           ],
@@ -196,7 +252,11 @@ class _DashboardPageState extends State<DashboardPage> {
     final isLoading = provider.status == PortfolioStatus.loading;
 
     return GridView.count(
-      key: ValueKey(summary != null ? '${summary.totalEquity}_${summary.grossYieldPercentage}' : 'loading'),
+      key: ValueKey(
+        summary != null
+            ? 'kpi_${provider.activeTagId}_${summary.totalEquity}_${summary.grossYieldPercentage}_${summary.accumulatedDividends}'
+            : 'loading_${provider.activeTagId}',
+      ),
       crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : (MediaQuery.of(context).size.width > 800 ? 2 : 1),
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
@@ -229,6 +289,67 @@ class _DashboardPageState extends State<DashboardPage> {
           isLoading: isLoading,
         ),
       ],
+    );
+  }
+}
+
+class _UntaggedAssetsBanner extends StatelessWidget {
+  const _UntaggedAssetsBanner({
+    required this.count,
+    required this.onAssociatePressed,
+  });
+
+  final int count;
+  final VoidCallback onAssociatePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = count == 1
+        ? '1 ativo sem tag não está sendo exibido'
+        : '$count ativos sem tag não estão sendo exibidos';
+
+    return Container(
+      key: const Key('untagged_assets_banner'),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            size: 18,
+            color: Color(0xFFF59E0B),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          TextButton(
+            key: const Key('associate_untagged_assets_button'),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 40),
+              foregroundColor: const Color(0xFFFBBF24),
+            ),
+            onPressed: onAssociatePressed,
+            child: const Text(
+              'Associar agora',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

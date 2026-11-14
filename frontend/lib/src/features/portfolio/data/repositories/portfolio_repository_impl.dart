@@ -13,9 +13,9 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   PortfolioRepositoryImpl(this.remoteDataSource, this.authRepository);
 
   @override
-  Future<PortfolioSummary> getSummary() async {
+  Future<PortfolioSummary> getSummary({String? tagId}) async {
     final token = await authRepository.getPersistedToken();
-    return remoteDataSource.getSummary(token: token);
+    return remoteDataSource.getSummary(token: token, tagId: tagId);
   }
 
   @override
@@ -40,15 +40,19 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   }
 
   @override
-  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})>
-      getCustodyPositions() async {
+  Future<({
+    List<CustodyPosition> positions,
+    DateTime? metaPriceUpdatedAt,
+    int untaggedAssetsCount,
+    List<String> untaggedTickers,
+  })> getCustodyPositions({String? tagId}) async {
     final token = await authRepository.getPersistedToken();
-    return remoteDataSource.getCustodyPositions(token: token);
+    return remoteDataSource.getCustodyPositions(token: token, tagId: tagId);
   }
 
   @override
-  Future<PortfolioEvolution> getPortfolioEvolution() async {
+  Future<PortfolioEvolution> getPortfolioEvolution({String? tagId}) async {
     final token = await authRepository.getPersistedToken();
-    return remoteDataSource.getPortfolioEvolution(token: token);
+    return remoteDataSource.getPortfolioEvolution(token: token, tagId: tagId);
   }
 }
