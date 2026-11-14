@@ -76,11 +76,11 @@ development_status:
   5-3-what-if-sensitivity-simulator: done
   5-4-goal-health-alert-checklist: done
   epic-5-retrospective: optional
-  epic-6: in-progress
+  epic-6: done
   6-1-admin-observability-dashboard: done
   6-2-failed-ingestion-dlq-management: done
   6-3-master-data-ticker-management: done
-  epic-6-retrospective: optional
+  epic-6-retrospective: done
   epic-7: backlog
   epic-7-retrospective: optional
   epic-8: backlog
