@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/allocation_goal.dart';
 import '../providers/allocation_provider.dart';
+import '../../../tags/presentation/providers/tag_provider.dart';
+import '../../../tags/presentation/widgets/analytical_lens_tabs.dart';
 
 class AllocationStrategyPage extends StatefulWidget {
   const AllocationStrategyPage({super.key});
@@ -12,8 +14,8 @@ class AllocationStrategyPage extends StatefulWidget {
 }
 
 class _AllocationStrategyPageState extends State<AllocationStrategyPage>
-    with SingleTickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
+    with SingleTickerProviderStateMixin, TagLensSyncMixin<AllocationStrategyPage> {
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // Class controllers
   final _acoesController = TextEditingController();
@@ -25,7 +27,8 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
   final List<_TickerField> _tickerFields = [];
 
   double _classSum = 0;
-  bool _initialized = false;
+  bool _needsControllerSync = true;
+  List<AllocationGoal>? _lastSyncedGoals;
 
   // Shimmer animation
   late final AnimationController _shimmerController;
@@ -47,10 +50,13 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
     _fiisController.addListener(_updateSums);
     _rendaFixaController.addListener(_updateSums);
     _outrosController.addListener(_updateSums);
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AllocationProvider>().loadGoals();
-    });
+  @override
+  Future<void> onLensChanged(String? tagId) {
+    _needsControllerSync = true;
+    _formKey = GlobalKey<FormState>();
+    return context.read<AllocationProvider>().loadGoals(tagId: tagId);
   }
 
   @override
@@ -146,7 +152,7 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      if (_classSum != 100) {
+      if ((_classSum - 100.0).abs() >= 0.01) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('A soma das metas de classe deve fechar em exatamente 100%.'),
@@ -211,10 +217,13 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
         }
       }
 
-      context.read<AllocationProvider>().saveGoals(goalsToSave).then((_) {
+      final activeTagId = Provider.of<TagProvider?>(context, listen: false)?.selectedFilterTagId;
+      context.read<AllocationProvider>().saveGoals(goalsToSave, tagId: activeTagId).then((_) {
         if (!mounted) return;
         final provider = context.read<AllocationProvider>();
         if (provider.status == AllocationStatus.success) {
+          _lastSyncedGoals = provider.goals;
+          _needsControllerSync = false;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Estratégia de alocação salva com sucesso!'),
@@ -381,7 +390,12 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.read<AllocationProvider>().loadGoals(),
+              onPressed: () {
+                _needsControllerSync = true;
+                final tagId =
+                    Provider.of<TagProvider?>(context, listen: false)?.selectedFilterTagId;
+                context.read<AllocationProvider>().loadGoals(tagId: tagId);
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('Recarregar'),
               style: ElevatedButton.styleFrom(
@@ -394,55 +408,76 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
     );
   }
 
+  String? _syncedSuccessTagId;
+
   @override
   Widget build(BuildContext context) {
+    final tagProvider = Provider.of<TagProvider?>(context);
+    final selectedTag = tagProvider?.selectedFilterTag;
+    final selectedTagId = tagProvider?.selectedFilterTagId;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Consumer<AllocationProvider>(
         builder: (context, provider, child) {
-          if (provider.status == AllocationStatus.loading && !_initialized) {
-            return _buildSkeletonLoader();
-          }
-
           if (provider.status == AllocationStatus.error) {
             final errMsg = provider.errorMessage ?? '';
             if (errMsg.contains('Premium') || errMsg.contains('exclusiva')) {
               return _buildPremiumPaywall();
             }
-            return _buildErrorState(errMsg);
           }
 
-          if (provider.status == AllocationStatus.success && !_initialized) {
-            _initialized = true;
+          if (provider.status == AllocationStatus.success &&
+              (_needsControllerSync ||
+                  provider.activeTagId != _syncedSuccessTagId ||
+                  !identical(provider.goals, _lastSyncedGoals))) {
+            _needsControllerSync = false;
+            _syncedSuccessTagId = provider.activeTagId;
+            _lastSyncedGoals = provider.goals;
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _initializeControllers(provider.goals);
+              if (mounted) {
+                _initializeControllers(provider.goals);
+              }
             });
           }
 
           final remainingPct = 100.0 - _classSum;
-          final isPerfect = _classSum == 100.0;
+          final isPerfect = (_classSum - 100.0).abs() < 0.01;
 
-          return Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Configuração de Estratégia',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Defina suas metas de alocação para subsidiar o cálculo de recomendações inteligentes do Motor de Graham.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                  ),
-                  const SizedBox(height: 24),
+          late final Widget content;
+          late final String contentKey;
+          if (provider.status == AllocationStatus.loading &&
+              (_needsControllerSync || provider.activeTagId != selectedTagId)) {
+            contentKey = 'loading_$selectedTagId';
+            content = _buildSkeletonLoader();
+          } else if (provider.status == AllocationStatus.error) {
+            contentKey = 'error_$selectedTagId';
+            content = _buildErrorState(provider.errorMessage ?? '');
+          } else {
+            contentKey = 'form_${provider.activeTagId}';
+            content = Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Configuração de Estratégia',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      selectedTag != null
+                          ? 'Defina metas exclusivas para a tag "${selectedTag.name}". Sem metas próprias, esta tag operará sem alocação alvo.'
+                          : 'Defina suas metas de alocação para subsidiar o cálculo de recomendações inteligentes do Motor de Graham.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                    ),
+                    const SizedBox(height: 24),
 
                   // Real-time Sum Indicator Banner
                   Container(
@@ -649,6 +684,36 @@ class _AllocationStrategyPageState extends State<AllocationStrategyPage>
                 ],
               ),
             ),
+          );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (tagProvider != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const AnalyticalLensTabs(),
+                      if (selectedTag != null) ...[
+                        const SizedBox(height: 10),
+                        const ActiveTagLensBadge(),
+                      ],
+                    ],
+                  ),
+                ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: SizedBox.expand(
+                    key: ValueKey(contentKey),
+                    child: content,
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),

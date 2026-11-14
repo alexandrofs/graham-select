@@ -1,8 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/monthly_evolution.dart';
 import '../providers/portfolio_provider.dart';
+import '../../../tags/presentation/providers/tag_provider.dart';
+import '../../../tags/presentation/widgets/analytical_lens_tabs.dart';
 
 class EvolutionPage extends StatefulWidget {
   const EvolutionPage({super.key});
@@ -11,17 +15,15 @@ class EvolutionPage extends StatefulWidget {
   State<EvolutionPage> createState() => _EvolutionPageState();
 }
 
-class _EvolutionPageState extends State<EvolutionPage> {
+class _EvolutionPageState extends State<EvolutionPage>
+    with TagLensSyncMixin<EvolutionPage> {
   bool _isGraphView = true;
   DateTime? _startDate;
   DateTime? _endDate;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PortfolioProvider>().loadEvolutionData();
-    });
+  Future<void> onLensChanged(String? tagId) {
+    return context.read<PortfolioProvider>().loadEvolutionData(tagId: tagId);
   }
 
   // Função para formatar o mês "yyyy-MM" para algo amigável "MM/yy"
@@ -129,6 +131,10 @@ class _EvolutionPageState extends State<EvolutionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final tagProvider = Provider.of<TagProvider?>(context);
+    final selectedTag = tagProvider?.selectedFilterTag;
+    final selectedTagId = tagProvider?.selectedFilterTagId;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -189,20 +195,31 @@ class _EvolutionPageState extends State<EvolutionPage> {
                   ),
                 ],
               ),
+              if (tagProvider != null) ...[
+                const SizedBox(height: 16),
+                const AnalyticalLensTabs(),
+                if (selectedTag != null) ...[
+                  const SizedBox(height: 10),
+                  const ActiveTagLensBadge(),
+                ],
+              ],
               const SizedBox(height: 24),
 
               // Conteúdo Dinâmico com base no Provider
               Expanded(
                 child: Consumer<PortfolioProvider>(
                   builder: (context, provider, child) {
+                    late final Widget content;
+                    late final String stateKey;
+
                     if (provider.evolutionStatus == PortfolioStatus.loading) {
-                      return const Center(
+                      stateKey = 'loading_$selectedTagId';
+                      content = const Center(
                         child: CircularProgressIndicator(color: AppTheme.primaryColor),
                       );
-                    }
-
-                    if (provider.evolutionStatus == PortfolioStatus.error) {
-                      return Center(
+                    } else if (provider.evolutionStatus == PortfolioStatus.error) {
+                      stateKey = 'error_$selectedTagId';
+                      content = Center(
                         child: Card(
                           color: AppTheme.surfaceColor,
                           child: Padding(
@@ -224,7 +241,9 @@ class _EvolutionPageState extends State<EvolutionPage> {
                                 ),
                                 const SizedBox(height: 16),
                                 ElevatedButton(
-                                  onPressed: () => provider.loadEvolutionData(),
+                                  onPressed: () => provider.loadEvolutionData(
+                                    tagId: tagProvider?.selectedFilterTagId,
+                                  ),
                                   style: ElevatedButton.styleFrom(
                                     minimumSize: const Size(150, 44),
                                     backgroundColor: AppTheme.primaryColor,
@@ -236,26 +255,37 @@ class _EvolutionPageState extends State<EvolutionPage> {
                           ),
                         ),
                       );
-                    }
-
-                    final evolution = provider.evolutionData;
-                    if (evolution == null || evolution.monthlyData.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'Nenhum histórico disponível ainda.',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white60),
-                        ),
-                      );
-                    }
-
-                    final data = evolution.monthlyData;
-                    final filteredData = _getFilteredData(data);
-
-                    if (_isGraphView) {
-                      return _buildGraphView(data);
                     } else {
-                      return _buildTableView(filteredData);
+                      final evolution = provider.evolutionData;
+                      if (evolution == null || evolution.monthlyData.isEmpty) {
+                        stateKey = 'empty_$selectedTagId';
+                        content = Center(
+                          child: Text(
+                            selectedTag != null
+                                ? 'Nenhum histórico disponível para a tag "${selectedTag.name}".'
+                                : 'Nenhum histórico disponível ainda.',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white60),
+                          ),
+                        );
+                      } else {
+                        final data = evolution.monthlyData;
+                        final filteredData = _getFilteredData(data);
+                        stateKey =
+                            'data_${provider.activeTagId}_${_isGraphView}_${data.length}_${filteredData.length}_${filteredData.fold<double>(0, (s, e) => s + e.totalContributions + e.totalDividends)}';
+                        content = _isGraphView
+                            ? _buildGraphView(data)
+                            : _buildTableView(filteredData);
+                      }
                     }
+
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: SizedBox.expand(
+                        key: ValueKey(stateKey),
+                        child: content,
+                      ),
+                    );
                   },
                 ),
               ),
@@ -288,114 +318,132 @@ class _EvolutionPageState extends State<EvolutionPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Legenda moderna no topo do gráfico
-            Row(
+            const Wrap(
+              spacing: 24,
+              runSpacing: 8,
               children: [
                 _LegendItem(color: AppTheme.primaryColor, label: 'Aportes (Compras)'),
-                const SizedBox(width: 24),
                 _LegendItem(color: AppTheme.accentColor, label: 'Dividendos (Proventos)'),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
 
             // Área Principal das Barras
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final barWidth = (constraints.maxWidth / displayData.length) * 0.35;
+                  final barWidth = ((constraints.maxWidth / displayData.length) * 0.35).clamp(4.0, 48.0);
+                  const labelReserve = 22.0;
+                  final labelGap = constraints.maxHeight < 100 ? 4.0 : 12.0;
+                  final maxBarHeight = math.max(
+                    0.0,
+                    math.min(
+                      constraints.maxHeight * 0.75,
+                      constraints.maxHeight - labelGap - labelReserve,
+                    ),
+                  );
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: displayData.map((item) {
-                      double contributionHeight = constraints.maxHeight * 0.75 * (item.totalContributions / graphMaxHeight);
+                      double contributionHeight = maxBarHeight * (item.totalContributions / graphMaxHeight);
                       if (item.totalContributions > 0 && contributionHeight < 4.0) {
-                        contributionHeight = 4.0;
+                        contributionHeight = math.min(maxBarHeight, 4.0);
                       }
 
-                      double dividendsHeight = constraints.maxHeight * 0.75 * (item.totalDividends / graphMaxHeight);
+                      double dividendsHeight = maxBarHeight * (item.totalDividends / graphMaxHeight);
                       if (item.totalDividends > 0 && dividendsHeight < 4.0) {
-                        dividendsHeight = 4.0;
+                        dividendsHeight = math.min(maxBarHeight, 4.0);
                       }
 
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          // As duas barras emparelhadas
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              // Barra de Aporte
-                              Tooltip(
-                                message: 'Aportado: ${_formatCurrency(item.totalContributions)}',
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeOutCubic,
-                                  width: barWidth,
-                                  height: contributionHeight,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppTheme.primaryColor,
-                                        AppTheme.primaryColor.withValues(alpha: 0.7),
+                          // As duas barras emparelhadas (contidas à altura útil durante transições/resize)
+                          ConstrainedBox(
+                            constraints: BoxConstraints(maxHeight: maxBarHeight),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                // Barra de Aporte
+                                Tooltip(
+                                  message: 'Aportado: ${_formatCurrency(item.totalContributions)}',
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeOutCubic,
+                                    width: barWidth,
+                                    height: contributionHeight,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppTheme.primaryColor,
+                                          AppTheme.primaryColor.withValues(alpha: 0.7),
+                                        ],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                      ),
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(6),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        )
                                       ],
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
                                     ),
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(6),
-                                      topRight: Radius.circular(6),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppTheme.primaryColor.withValues(alpha: 0.2),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      )
-                                    ],
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 4),
-                              // Barra de Dividendo
-                              Tooltip(
-                                message: 'Dividendos: ${_formatCurrency(item.totalDividends)}',
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeOutCubic,
-                                  width: barWidth,
-                                  height: dividendsHeight,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppTheme.accentColor,
-                                        AppTheme.accentColor.withValues(alpha: 0.7),
+                                const SizedBox(width: 4),
+                                // Barra de Dividendo
+                                Tooltip(
+                                  message: 'Dividendos: ${_formatCurrency(item.totalDividends)}',
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeOutCubic,
+                                    width: barWidth,
+                                    height: dividendsHeight,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppTheme.accentColor,
+                                          AppTheme.accentColor.withValues(alpha: 0.7),
+                                        ],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                      ),
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(6),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppTheme.accentColor.withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        )
                                       ],
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
                                     ),
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(6),
-                                      topRight: Radius.circular(6),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppTheme.accentColor.withValues(alpha: 0.2),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      )
-                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: labelGap),
                           // Rótulo do Mês abaixo das barras
-                          Text(
-                            _formatMonth(item.month),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white54,
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _formatMonth(item.month),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white54,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
                           ),
                         ],

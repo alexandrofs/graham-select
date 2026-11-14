@@ -41,6 +41,8 @@ public class PortfolioSnapshotJpaAdapterIT extends BaseRepositoryIT {
 
     @BeforeEach
     void setUp() {
+        entityManager.createNativeQuery("DELETE FROM asset_tags").executeUpdate();
+        entityManager.createNativeQuery("DELETE FROM portfolio_tags").executeUpdate();
         entityManager.createNativeQuery("DELETE FROM trades").executeUpdate();
         stockPriceJpaRepository.deleteAll();
         companyJpaRepository.deleteAll();
@@ -48,6 +50,8 @@ public class PortfolioSnapshotJpaAdapterIT extends BaseRepositoryIT {
 
     @AfterEach
     void tearDown() {
+        entityManager.createNativeQuery("DELETE FROM asset_tags").executeUpdate();
+        entityManager.createNativeQuery("DELETE FROM portfolio_tags").executeUpdate();
         entityManager.createNativeQuery("DELETE FROM trades").executeUpdate();
         stockPriceJpaRepository.deleteAll();
         companyJpaRepository.deleteAll();
@@ -142,6 +146,86 @@ public class PortfolioSnapshotJpaAdapterIT extends BaseRepositoryIT {
         assertThat(allocation).hasSize(2);
         assertThat(allocation.get("PETR4")).isEqualByComparingTo("37.5000");
         assertThat(allocation.get("VALE3")).isEqualByComparingTo("62.5000");
+    }
+
+    @Test
+    void shouldCalculateRealPortfolioSnapshotFilteredByTagIdIncludingFractionalMatch() {
+        String userId = "user-tag-snapshot";
+        UUID tagId = UUID.randomUUID();
+
+        CompanyEntity petr = companyJpaRepository.save(CompanyEntity.builder()
+                .id(UUID.randomUUID().toString())
+                .ticker("PETR4")
+                .name("Petrobras")
+                .build());
+        CompanyEntity vale = companyJpaRepository.save(CompanyEntity.builder()
+                .id(UUID.randomUUID().toString())
+                .ticker("VALE3")
+                .name("Vale")
+                .build());
+
+        stockPriceJpaRepository.save(StockPriceEntity.builder()
+                .id(UUID.randomUUID().toString())
+                .companyId(petr.getId())
+                .price(new BigDecimal("30.00"))
+                .priceDate(LocalDate.now())
+                .build());
+        stockPriceJpaRepository.save(StockPriceEntity.builder()
+                .id(UUID.randomUUID().toString())
+                .companyId(vale.getId())
+                .price(new BigDecimal("80.00"))
+                .priceDate(LocalDate.now())
+                .build());
+
+        entityManager.createNativeQuery("INSERT INTO portfolio_tags (id, user_id, name, normalized_name, created_at) " +
+                "VALUES (:id, :userId, :name, :normalizedName, :createdAt)")
+                .setParameter("id", tagId.toString())
+                .setParameter("userId", userId)
+                .setParameter("name", "Aposentadoria")
+                .setParameter("normalizedName", "aposentadoria")
+                .setParameter("createdAt", LocalDateTime.now())
+                .executeUpdate();
+
+        // Store fractional ticker tag PETR4F to verify bidirectional matching against trade PETR4
+        entityManager.createNativeQuery("INSERT INTO asset_tags (id, user_id, tag_id, ticker, created_at) " +
+                "VALUES (:id, :userId, :tagId, :ticker, :createdAt)")
+                .setParameter("id", UUID.randomUUID().toString())
+                .setParameter("userId", userId)
+                .setParameter("tagId", tagId.toString())
+                .setParameter("ticker", "PETR4F")
+                .setParameter("createdAt", LocalDateTime.now())
+                .executeUpdate();
+
+        entityManager.createNativeQuery("INSERT INTO trades (id, user_id, ticker, trade_date, quantity, price, broker, created_at, side) " +
+                "VALUES (:id, :userId, :ticker, :tradeDate, :quantity, :price, :broker, :createdAt, :side)")
+                .setParameter("id", UUID.randomUUID().toString())
+                .setParameter("userId", userId)
+                .setParameter("ticker", "PETR4")
+                .setParameter("tradeDate", java.sql.Date.valueOf(LocalDate.now()))
+                .setParameter("quantity", new BigDecimal("100"))
+                .setParameter("price", new BigDecimal("25.00"))
+                .setParameter("broker", "XP")
+                .setParameter("createdAt", LocalDateTime.now())
+                .setParameter("side", "COMPRA")
+                .executeUpdate();
+
+        entityManager.createNativeQuery("INSERT INTO trades (id, user_id, ticker, trade_date, quantity, price, broker, created_at, side) " +
+                "VALUES (:id, :userId, :ticker, :tradeDate, :quantity, :price, :broker, :createdAt, :side)")
+                .setParameter("id", UUID.randomUUID().toString())
+                .setParameter("userId", userId)
+                .setParameter("ticker", "VALE3")
+                .setParameter("tradeDate", java.sql.Date.valueOf(LocalDate.now()))
+                .setParameter("quantity", new BigDecimal("50"))
+                .setParameter("price", new BigDecimal("75.00"))
+                .setParameter("broker", "XP")
+                .setParameter("createdAt", LocalDateTime.now())
+                .setParameter("side", "COMPRA")
+                .executeUpdate();
+
+        Map<String, BigDecimal> allocation = portfolioSnapshotJpaAdapter.getCurrentAllocationByUserIdAndTagId(userId, tagId);
+
+        assertThat(allocation).containsOnlyKeys("PETR4");
+        assertThat(allocation.get("PETR4")).isEqualByComparingTo("100.0000");
     }
 
     @Configuration

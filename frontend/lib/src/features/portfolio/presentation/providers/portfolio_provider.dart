@@ -31,19 +31,53 @@ class PortfolioProvider extends ChangeNotifier {
   PortfolioSummary? _summary;
   PortfolioSummary? get summary => _summary;
 
-  Future<void> loadSummary() async {
+  PortfolioSummary? _globalSummary;
+  PortfolioSummary? get globalSummary => _globalSummary;
+
+  String? _activeTagId;
+  String? get activeTagId => _activeTagId;
+
+  int _summaryGeneration = 0;
+  int _custodyGeneration = 0;
+  int _evolutionGeneration = 0;
+
+  String? _normalizeTagId(String? tagId) {
+    final trimmed = tagId?.trim();
+    return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+  }
+
+  Future<void> loadSummary({String? tagId}) async {
+    final normalizedTagId = _normalizeTagId(tagId);
+    _activeTagId = normalizedTagId;
+    final gen = ++_summaryGeneration;
+
     _status = PortfolioStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _summary = await repository.getSummary();
+      final result = await repository.getSummary(tagId: normalizedTagId);
+      if (gen != _summaryGeneration) return;
+      _summary = result;
+      if (normalizedTagId == null) {
+        _globalSummary = result;
+      }
       _status = PortfolioStatus.success;
     } catch (e) {
+      if (gen != _summaryGeneration) return;
       _status = PortfolioStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
     }
     notifyListeners();
+  }
+
+  Future<void> refreshGlobalSummary() async {
+    try {
+      _globalSummary = await repository.getSummary();
+      notifyListeners();
+    } catch (_) {
+      // Silencioso para não sobrescrever feedback visual do escopo ativo
+    }
   }
 
   Future<void> createManualTrade({
@@ -140,23 +174,41 @@ class PortfolioProvider extends ChangeNotifier {
   DateTime? _custodyMetaPriceUpdatedAt;
   DateTime? get custodyMetaPriceUpdatedAt => _custodyMetaPriceUpdatedAt;
 
+  int _untaggedAssetsCount = 0;
+  int get untaggedAssetsCount => _untaggedAssetsCount;
+
+  List<String> _untaggedTickers = const [];
+  List<String> get untaggedTickers => List.unmodifiable(_untaggedTickers);
+
   String _sortColumn = 'ticker';
   String get sortColumn => _sortColumn;
 
   bool _sortAscending = true;
   bool get sortAscending => _sortAscending;
 
-  Future<void> loadCustodyPositions() async {
+  Future<void> loadCustodyPositions({String? tagId}) async {
+    final normalizedTagId = _normalizeTagId(tagId);
+    _activeTagId = normalizedTagId;
+    final gen = ++_custodyGeneration;
+
     _custodyStatus = PortfolioStatus.loading;
     _custodyError = null;
     notifyListeners();
 
     try {
-      final result = await repository.getCustodyPositions();
+      final result = await repository.getCustodyPositions(tagId: normalizedTagId);
+      if (gen != _custodyGeneration) return;
       _custodyPositions = result.positions;
       _custodyMetaPriceUpdatedAt = result.metaPriceUpdatedAt;
+      _untaggedAssetsCount = result.untaggedAssetsCount;
+      _untaggedTickers = result.untaggedTickers;
+      if (_selectedAssetClassFilter != null &&
+          !_custodyPositions.any((p) => p.assetClass == _selectedAssetClassFilter)) {
+        _selectedAssetClassFilter = null;
+      }
       _custodyStatus = PortfolioStatus.success;
     } catch (e) {
+      if (gen != _custodyGeneration) return;
       _custodyStatus = PortfolioStatus.error;
       _custodyError = e.toString().replaceFirst('Exception: ', '');
     }
@@ -204,15 +256,22 @@ class PortfolioProvider extends ChangeNotifier {
   PortfolioEvolution? _evolutionData;
   PortfolioEvolution? get evolutionData => _evolutionData;
 
-  Future<void> loadEvolutionData() async {
+  Future<void> loadEvolutionData({String? tagId}) async {
+    final normalizedTagId = _normalizeTagId(tagId);
+    _activeTagId = normalizedTagId;
+    final gen = ++_evolutionGeneration;
+
     _evolutionStatus = PortfolioStatus.loading;
     _evolutionError = null;
     notifyListeners();
 
     try {
-      _evolutionData = await repository.getPortfolioEvolution();
+      final result = await repository.getPortfolioEvolution(tagId: normalizedTagId);
+      if (gen != _evolutionGeneration) return;
+      _evolutionData = result;
       _evolutionStatus = PortfolioStatus.success;
     } catch (e) {
+      if (gen != _evolutionGeneration) return;
       _evolutionStatus = PortfolioStatus.error;
       _evolutionError = e.toString().replaceFirst('Exception: ', '');
     }
@@ -235,9 +294,10 @@ class PortfolioProvider extends ChangeNotifier {
     _notificationSubscription = notificationService!.notificationStream.listen((event) {
       if (event.event == 'PORTFOLIO_UPDATED') {
         Future.wait([
-          loadSummary(),
-          loadCustodyPositions(),
-          loadEvolutionData(),
+          loadSummary(tagId: _activeTagId),
+          if (_activeTagId != null) refreshGlobalSummary(),
+          loadCustodyPositions(tagId: _activeTagId),
+          loadEvolutionData(tagId: _activeTagId),
         ]);
       }
     });

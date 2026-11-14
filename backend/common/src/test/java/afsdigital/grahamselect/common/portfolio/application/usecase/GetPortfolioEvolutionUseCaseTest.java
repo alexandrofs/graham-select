@@ -5,6 +5,11 @@ import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioEvoluti
 import afsdigital.grahamselect.common.portfolio.application.repository.TradePort;
 import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
 import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
+import afsdigital.grahamselect.common.tags.application.repository.AssetTagPort;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
+import afsdigital.grahamselect.common.tags.application.service.exceptions.TagNotFoundException;
+import afsdigital.grahamselect.common.tags.domain.entities.AssetTag;
+import afsdigital.grahamselect.common.tags.domain.entities.PortfolioTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +18,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +34,12 @@ class GetPortfolioEvolutionUseCaseTest {
 
     @Mock
     private TradePort tradePort;
+
+    @Mock
+    private PortfolioTagPort portfolioTagPort;
+
+    @Mock
+    private AssetTagPort assetTagPort;
 
     private GetPortfolioEvolutionUseCase useCase;
 
@@ -114,5 +129,90 @@ class GetPortfolioEvolutionUseCaseTest {
                 assertEquals(BigDecimal.ZERO, dto.totalDividends());
             }
         }
+    }
+
+    @Test
+    void shouldFilterEvolutionTradesByTagInUtcTwelveMonthWindow() {
+        String userId = "user-1";
+        UUID tagId = UUID.randomUUID();
+        GetPortfolioEvolutionUseCase tagAware = new GetPortfolioEvolutionUseCase(
+                tradePort, portfolioTagPort, assetTagPort
+        );
+
+        when(portfolioTagPort.findByIdAndUserId(tagId, userId))
+                .thenReturn(Optional.of(PortfolioTag.builder().id(tagId).userId(userId).name("FIIs").build()));
+        when(assetTagPort.findAllByUserIdAndTagId(userId, tagId))
+                .thenReturn(List.of(AssetTag.builder().tagId(tagId).userId(userId).ticker("HGLG11").build()));
+
+        LocalDate utcNow = LocalDate.now(ZoneOffset.UTC);
+        LocalDate twoMonthsAgo = utcNow.minusMonths(2);
+
+        Trade taggedBuy = Trade.builder()
+                .userId(userId).ticker("HGLG11").side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("10")).price(new BigDecimal("160.00"))
+                .tradeDate(twoMonthsAgo).build();
+        Trade taggedDiv = Trade.builder()
+                .userId(userId).ticker("HGLG11").side(TradeSide.DIVIDENDO.name())
+                .quantity(new BigDecimal("10")).price(new BigDecimal("1.10"))
+                .tradeDate(twoMonthsAgo).build();
+        Trade untaggedBuy = Trade.builder()
+                .userId(userId).ticker("PETR4").side(TradeSide.COMPRA.name())
+                .quantity(new BigDecimal("50")).price(new BigDecimal("35.00"))
+                .tradeDate(twoMonthsAgo).build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(taggedBuy, taggedDiv, untaggedBuy));
+
+        PortfolioEvolutionDTO evolution = tagAware.execute(userId, tagId);
+
+        assertEquals(12, evolution.monthlyData().size());
+        String targetMonth = twoMonthsAgo.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        for (MonthlyEvolutionDTO dto : evolution.monthlyData()) {
+            if (dto.month().equals(targetMonth)) {
+                assertEquals(new BigDecimal("1600.00"), dto.totalContributions());
+                assertEquals(new BigDecimal("11.00"), dto.totalDividends());
+            } else {
+                assertEquals(BigDecimal.ZERO, dto.totalContributions());
+                assertEquals(BigDecimal.ZERO, dto.totalDividends());
+            }
+        }
+    }
+
+    @Test
+    void shouldReturnZeroEvolutionWhenTagHasNoAssets() {
+        String userId = "user-1";
+        UUID tagId = UUID.randomUUID();
+        GetPortfolioEvolutionUseCase tagAware = new GetPortfolioEvolutionUseCase(
+                tradePort, portfolioTagPort, assetTagPort
+        );
+
+        when(portfolioTagPort.findByIdAndUserId(tagId, userId))
+                .thenReturn(Optional.of(PortfolioTag.builder().id(tagId).userId(userId).name("Vazia").build()));
+        when(assetTagPort.findAllByUserIdAndTagId(userId, tagId)).thenReturn(List.of());
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(
+                Trade.builder().userId(userId).ticker("PETR4").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(BigDecimal.TEN)
+                        .tradeDate(LocalDate.now(ZoneOffset.UTC)).build()
+        ));
+
+        PortfolioEvolutionDTO evolution = tagAware.execute(userId, tagId);
+
+        assertEquals(12, evolution.monthlyData().size());
+        for (MonthlyEvolutionDTO dto : evolution.monthlyData()) {
+            assertEquals(BigDecimal.ZERO, dto.totalContributions());
+            assertEquals(BigDecimal.ZERO, dto.totalDividends());
+        }
+    }
+
+    @Test
+    void shouldThrowTagNotFoundWhenEvolutionRequestedForUnknownTag() {
+        String userId = "user-1";
+        UUID tagId = UUID.randomUUID();
+        GetPortfolioEvolutionUseCase tagAware = new GetPortfolioEvolutionUseCase(
+                tradePort, portfolioTagPort, assetTagPort
+        );
+
+        when(portfolioTagPort.findByIdAndUserId(tagId, userId)).thenReturn(Optional.empty());
+
+        assertThrows(TagNotFoundException.class, () -> tagAware.execute(userId, tagId));
     }
 }

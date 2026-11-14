@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository("apiGrahamRecommendationJpaRepository")
 public interface GrahamRecommendationJpaRepository extends JpaRepository<GrahamRecommendationEntity, UUID> {
     List<GrahamRecommendationEntity> findByUserIdOrderByRecommendationScoreDesc(String userId);
+    List<GrahamRecommendationEntity> findByUserIdAndScopeKeyOrderByRecommendationScoreDesc(String userId, String scopeKey);
 }

@@ -1,5 +1,6 @@
 package afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities;
 
+import afsdigital.grahamselect.valuation.domain.AllocationScope;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -29,6 +30,14 @@ public class AllocationGoalEntity {
 
     @Column(name = "user_id", nullable = false)
     private String userId;
+
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "tag_id", length = 36)
+    private UUID tagId;
+
+    @Builder.Default
+    @Column(name = "scope_key", nullable = false, length = 36)
+    private String scopeKey = AllocationScope.GLOBAL;
 
     @Column(name = "goal_type", nullable = false, length = 20)
     private String goalType; // "ASSET_CLASS" | "TICKER"

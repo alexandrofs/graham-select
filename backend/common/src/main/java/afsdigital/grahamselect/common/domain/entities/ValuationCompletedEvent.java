@@ -11,8 +11,19 @@ public record ValuationCompletedEvent(
     int recommendationCount,
     List<ExcludedTicker> excludedTickers,
     String completedAt,
-    UUID eventId
+    UUID eventId,
+    UUID tagId
 ) {
     public static final int STALE_DATA_THRESHOLD_DAYS = 7;
     public static final BigDecimal OUTLIER_MARGIN_THRESHOLD = new BigDecimal("0.80");
+
+    public ValuationCompletedEvent(
+        String userId,
+        int recommendationCount,
+        List<ExcludedTicker> excludedTickers,
+        String completedAt,
+        UUID eventId
+    ) {
+        this(userId, recommendationCount, excludedTickers, completedAt, eventId, null);
+    }
 }

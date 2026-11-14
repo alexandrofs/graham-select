@@ -14,8 +14,20 @@ class PortfolioRemoteDataSource {
     this.baseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8080/api/v1'),
   });
 
-  Future<PortfolioSummaryModel> getSummary({String? token}) async {
-    final uri = Uri.parse('$baseUrl/portfolios/summary');
+  Uri _buildScopedUri(String path, {String? tagId}) {
+    final normalizedTagId = tagId?.trim();
+    final base = Uri.parse('$baseUrl$path');
+    if (normalizedTagId == null || normalizedTagId.isEmpty) {
+      return base;
+    }
+    return base.replace(queryParameters: {
+      ...base.queryParameters,
+      'tagId': normalizedTagId,
+    });
+  }
+
+  Future<PortfolioSummaryModel> getSummary({String? token, String? tagId}) async {
+    final uri = _buildScopedUri('/portfolios/summary', tagId: tagId);
     final response = await client.get(
       uri,
       headers: {
@@ -66,11 +78,15 @@ class PortfolioRemoteDataSource {
     }
   }
 
-  /// Retorna as posições de custódia e o priceUpdatedAt autoritativo do backend.
+  /// Retorna as posições de custódia, o priceUpdatedAt autoritativo do backend e metadados de ativos sem tag.
   /// O campo [metaPriceUpdatedAt] pode ser null quando todas as posições são CACHE sem data real.
-  Future<({List<CustodyPositionModel> positions, DateTime? metaPriceUpdatedAt})>
-      getCustodyPositions({String? token}) async {
-    final uri = Uri.parse('$baseUrl/portfolios/custody');
+  Future<({
+    List<CustodyPositionModel> positions,
+    DateTime? metaPriceUpdatedAt,
+    int untaggedAssetsCount,
+    List<String> untaggedTickers,
+  })> getCustodyPositions({String? token, String? tagId}) async {
+    final uri = _buildScopedUri('/portfolios/custody', tagId: tagId);
     final response = await client.get(
       uri,
       headers: {
@@ -82,21 +98,33 @@ class PortfolioRemoteDataSource {
     if (response.statusCode == 200) {
       final Map<String, dynamic> body = jsonDecode(response.body);
       final List<dynamic> data = body['data'];
-      final Map<String, dynamic> meta = body['meta'] as Map<String, dynamic>;
+      final Map<String, dynamic> meta = (body['meta'] as Map<String, dynamic>?) ?? const {};
 
       final positions = data.map((json) => CustodyPositionModel.fromJson(json)).toList();
       final metaUpdatedAt = meta['priceUpdatedAt'] != null
           ? DateTime.parse(meta['priceUpdatedAt'] as String)
           : null;
+      final untaggedAssetsCount = (meta['untaggedAssetsCount'] as num?)?.toInt() ?? 0;
+      final untaggedRaw = meta['untaggedTickers'] as List<dynamic>?;
+      final untaggedTickers = untaggedRaw
+              ?.map((e) => e.toString().trim().toUpperCase())
+              .where((e) => e.isNotEmpty)
+              .toList() ??
+          const <String>[];
 
-      return (positions: positions, metaPriceUpdatedAt: metaUpdatedAt);
+      return (
+        positions: positions,
+        metaPriceUpdatedAt: metaUpdatedAt,
+        untaggedAssetsCount: untaggedAssetsCount,
+        untaggedTickers: untaggedTickers,
+      );
     } else {
       throw Exception('Erro ao buscar posições de custódia: ${response.statusCode}');
     }
   }
 
-  Future<PortfolioEvolutionModel> getPortfolioEvolution({String? token}) async {
-    final uri = Uri.parse('$baseUrl/portfolios/evolution');
+  Future<PortfolioEvolutionModel> getPortfolioEvolution({String? token, String? tagId}) async {
+    final uri = _buildScopedUri('/portfolios/evolution', tagId: tagId);
     final response = await client.get(
       uri,
       headers: {

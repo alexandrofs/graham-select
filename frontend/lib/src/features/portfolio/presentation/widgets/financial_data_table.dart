@@ -26,17 +26,18 @@ class FinancialDataTable extends StatelessWidget {
       case PortfolioStatus.error:
         return _AnomalyAlert(
           message: provider.custodyError ?? 'Erro desconhecido ao carregar custódia',
-          onRetry: () => provider.loadCustodyPositions(),
+          onRetry: () => provider.loadCustodyPositions(
+            tagId: tagProvider?.selectedFilterTagId,
+          ),
         );
       case PortfolioStatus.success:
-        if (provider.custodyPositions.isEmpty) {
-          return const _EmptyStateWidget();
-        }
         final selectedFilterTag = tagProvider?.selectedFilterTag;
         final allowedTickers = selectedFilterTag == null
             ? null
             : tagProvider!.filteredTickersForSelectedTag;
-        final filteredPositions = allowedTickers == null
+        final useAuthoritativeBackendSlice =
+            selectedFilterTag != null && provider.activeTagId == selectedFilterTag.id;
+        final filteredPositions = allowedTickers == null || useAuthoritativeBackendSlice
             ? provider.custodyPositions
             : provider.custodyPositions
                 .where(
@@ -44,11 +45,14 @@ class FinancialDataTable extends StatelessWidget {
                       allowedTickers.contains(pos.ticker.trim().toUpperCase()),
                 )
                 .toList();
-        if (filteredPositions.isEmpty && selectedFilterTag != null) {
+        if (selectedFilterTag != null && filteredPositions.isEmpty) {
           return _FilteredEmptyStateWidget(
             tagName: selectedFilterTag.name,
             onClearFilter: () => tagProvider!.selectFilterTag(null),
           );
+        }
+        if (provider.custodyPositions.isEmpty) {
+          return const _EmptyStateWidget();
         }
         return _buildTableContent(
           context,
@@ -440,8 +444,9 @@ class FinancialDataTable extends StatelessWidget {
                   size: 18,
                   color: Colors.white70,
                 ),
-                onPressed: () {
-                  showModalBottomSheet<bool>(
+                onPressed: () async {
+                  final portfolioProvider = context.read<PortfolioProvider>();
+                  final saved = await showModalBottomSheet<bool>(
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
@@ -450,6 +455,14 @@ class FinancialDataTable extends StatelessWidget {
                       child: AssetTagSelectorSheet(ticker: ticker),
                     ),
                   );
+                  if (saved == true && context.mounted) {
+                    final activeTagId = tagProvider.selectedFilterTagId;
+                    await portfolioProvider.refreshGlobalSummary();
+                    await Future.wait([
+                      portfolioProvider.loadSummary(tagId: activeTagId),
+                      portfolioProvider.loadCustodyPositions(tagId: activeTagId),
+                    ]);
+                  }
                 },
               ),
             ),

@@ -8,7 +8,8 @@ import afsdigital.grahamselect.common.portfolio.domain.entities.TradeSide;
 import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import afsdigital.grahamselect.common.domain.repository.StockPricePort;
 import afsdigital.grahamselect.common.domain.entities.StockPrice;
-import lombok.RequiredArgsConstructor;
+import afsdigital.grahamselect.common.tags.application.repository.AssetTagPort;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -20,19 +21,67 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 public class GetCustodyPositionsUseCase {
+
+    public record CustodyPositionsResult(
+            List<CustodyPositionDTO> positions,
+            List<String> untaggedTickers
+    ) {
+    }
 
     private final TradePort tradePort;
     private final CompanyRepository companyRepository;
     private final StockPricePort stockPricePort;
+    private final PortfolioTagPort portfolioTagPort;
+    private final AssetTagPort assetTagPort;
+
+    public GetCustodyPositionsUseCase(
+            TradePort tradePort,
+            CompanyRepository companyRepository,
+            StockPricePort stockPricePort
+    ) {
+        this(tradePort, companyRepository, stockPricePort, null, null);
+    }
+
+    public GetCustodyPositionsUseCase(
+            TradePort tradePort,
+            CompanyRepository companyRepository,
+            StockPricePort stockPricePort,
+            PortfolioTagPort portfolioTagPort,
+            AssetTagPort assetTagPort
+    ) {
+        this.tradePort = tradePort;
+        this.companyRepository = companyRepository;
+        this.stockPricePort = stockPricePort;
+        this.portfolioTagPort = portfolioTagPort;
+        this.assetTagPort = assetTagPort;
+    }
 
     public List<CustodyPositionDTO> execute(String userId) {
-        // Ordenar trades por data cronologicamente de forma robusta
-        List<Trade> trades = tradePort.findAllByUserId(userId).stream()
+        return execute(userId, null);
+    }
+
+    public List<CustodyPositionDTO> execute(String userId, UUID tagId) {
+        return executeWithMetadata(userId, tagId).positions();
+    }
+
+    public CustodyPositionsResult executeWithMetadata(String userId, UUID tagId) {
+        Set<String> allowedTickers = PortfolioTagFilterSupport.resolveAllowedTickers(
+                userId, tagId, portfolioTagPort, assetTagPort
+        );
+
+        // Ordenar trades globais por data cronologicamente de forma robusta
+        List<Trade> allTrades = tradePort.findAllByUserId(userId).stream()
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(Trade::getTradeDate, Comparator.nullsLast(Comparator.naturalOrder())))
                 .toList();
+
+        List<String> globalActiveTickers = computeActiveTickers(allTrades);
+        List<String> untaggedTickers = PortfolioTagFilterSupport.findUntaggedTickers(
+                globalActiveTickers, userId, assetTagPort
+        );
+
+        List<Trade> trades = PortfolioTagFilterSupport.filterTrades(allTrades, allowedTickers);
 
         // 1. Agrupar trades por Ticker (somar COMPRA, subtrair VENDA, excluir DIVIDENDO)
         // Também calcular Preço Médio Ponderado das Compras
@@ -71,7 +120,7 @@ public class GetCustodyPositionsUseCase {
                 .toList();
 
         if (activeTickers.isEmpty()) {
-            return Collections.emptyList();
+            return new CustodyPositionsResult(Collections.emptyList(), untaggedTickers);
         }
 
         // 2. Map Tickers to Companies (with fractional suffix fallback, e.g. BOVA11F -> BOVA11)
@@ -163,18 +212,32 @@ public class GetCustodyPositionsUseCase {
             ));
         }
 
-        return result;
+        return new CustodyPositionsResult(result, untaggedTickers);
+    }
+
+    private List<String> computeActiveTickers(List<Trade> orderedTrades) {
+        if (orderedTrades.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<String, BigDecimal> quantities = new HashMap<>();
+        for (Trade trade : orderedTrades) {
+            String ticker = trade.getTicker();
+            BigDecimal quantity = trade.getQuantity();
+            if (TradeSide.COMPRA.name().equals(trade.getSide())) {
+                quantities.merge(ticker, quantity, BigDecimal::add);
+            } else if (TradeSide.VENDA.name().equals(trade.getSide())) {
+                BigDecimal newQty = quantities.getOrDefault(ticker, BigDecimal.ZERO).subtract(quantity);
+                quantities.put(ticker, newQty.compareTo(BigDecimal.ZERO) <= 0 ? BigDecimal.ZERO : newQty);
+            }
+        }
+        return quantities.entrySet().stream()
+                .filter(entry -> entry.getValue().compareTo(BigDecimal.ZERO) > 0)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     private String stripFractionalSuffix(String ticker) {
-        if (ticker == null || ticker.isBlank()) {
-            return "";
-        }
-        String t = ticker.trim().toUpperCase();
-        if (t.endsWith("F") && t.length() > 4 && Character.isDigit(t.charAt(t.length() - 2))) {
-            return t.substring(0, t.length() - 1);
-        }
-        return t;
+        return PortfolioTagFilterSupport.stripFractionalSuffix(ticker);
     }
 
     private String inferAssetClass(String ticker) {

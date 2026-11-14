@@ -1,12 +1,14 @@
 package afsdigital.grahamselect.api.portfolio.web;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
+import afsdigital.grahamselect.common.portfolio.application.dto.CustodyPositionDTO;
 import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioSummaryDTO;
 import afsdigital.grahamselect.common.portfolio.application.dto.MonthlyEvolutionDTO;
 import afsdigital.grahamselect.common.portfolio.application.dto.PortfolioEvolutionDTO;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioSummaryUseCase;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetCustodyPositionsUseCase;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetPortfolioEvolutionUseCase;
+import afsdigital.grahamselect.common.tags.application.service.exceptions.TagNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +17,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -77,5 +82,80 @@ class PortfolioControllerTest extends BaseRepositoryIT {
                 .andExpect(jsonPath("$.monthlyData[1].month").value("2026-05"))
                 .andExpect(jsonPath("$.monthlyData[1].totalContributions").value(2000.00))
                 .andExpect(jsonPath("$.monthlyData[1].totalDividends").value(100.00));
+    }
+
+    @Test
+    void shouldForwardTagIdToPortfolioEndpointsAndReturnUntaggedMeta() throws Exception {
+        UUID tagId = UUID.randomUUID();
+        PortfolioSummaryDTO summary = new PortfolioSummaryDTO(
+                new BigDecimal("500.00"),
+                new BigDecimal("10.0"),
+                new BigDecimal("25.00"),
+                new BigDecimal("25.00")
+        );
+        when(getPortfolioSummaryUseCase.execute("user-1", tagId)).thenReturn(summary);
+
+        CustodyPositionDTO pos = new CustodyPositionDTO(
+                "PETR4", new BigDecimal("10.00"), new BigDecimal("30.00"), new BigDecimal("50.00"),
+                new BigDecimal("500.00"), new BigDecimal("66.67"), "LIVE", Instant.parse("2026-11-14T10:00:00Z"), "Ações"
+        );
+        when(getCustodyPositionsUseCase.executeWithMetadata("user-1", tagId))
+                .thenReturn(new GetCustodyPositionsUseCase.CustodyPositionsResult(List.of(pos), List.of("VALE3", "WEGE3")));
+
+        PortfolioEvolutionDTO evolution = new PortfolioEvolutionDTO(List.of(
+                new MonthlyEvolutionDTO("2026-11", new BigDecimal("300.00"), new BigDecimal("25.00"))
+        ));
+        when(getPortfolioEvolutionUseCase.execute("user-1", tagId)).thenReturn(evolution);
+
+        mockMvc.perform(get("/api/v1/portfolios/summary")
+                        .param("tagId", tagId.toString())
+                        .with(jwt().jwt(builder -> builder.subject("user-1")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalEquity").value(500.00));
+
+        mockMvc.perform(get("/api/v1/portfolios/custody")
+                        .param("tagId", tagId.toString())
+                        .with(jwt().jwt(builder -> builder.subject("user-1")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].ticker").value("PETR4"))
+                .andExpect(jsonPath("$.meta.total").value(1))
+                .andExpect(jsonPath("$.meta.untaggedAssetsCount").value(2))
+                .andExpect(jsonPath("$.meta.untaggedTickers[0]").value("VALE3"))
+                .andExpect(jsonPath("$.meta.untaggedTickers[1]").value("WEGE3"));
+
+        mockMvc.perform(get("/api/v1/portfolios/evolution")
+                        .param("tagId", tagId.toString())
+                        .with(jwt().jwt(builder -> builder.subject("user-1")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monthlyData[0].totalContributions").value(300.00));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenPortfolioUseCasesThrowTagNotFound() throws Exception {
+        UUID foreignTagId = UUID.randomUUID();
+        when(getPortfolioSummaryUseCase.execute("user-1", foreignTagId))
+                .thenThrow(new TagNotFoundException("Tag não encontrada"));
+        when(getCustodyPositionsUseCase.executeWithMetadata("user-1", foreignTagId))
+                .thenThrow(new TagNotFoundException("Tag não encontrada"));
+        when(getPortfolioEvolutionUseCase.execute("user-1", foreignTagId))
+                .thenThrow(new TagNotFoundException("Tag não encontrada"));
+
+        mockMvc.perform(get("/api/v1/portfolios/summary")
+                        .param("tagId", foreignTagId.toString())
+                        .with(jwt().jwt(builder -> builder.subject("user-1"))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/v1/portfolios/custody")
+                        .param("tagId", foreignTagId.toString())
+                        .with(jwt().jwt(builder -> builder.subject("user-1"))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/v1/portfolios/evolution")
+                        .param("tagId", foreignTagId.toString())
+                        .with(jwt().jwt(builder -> builder.subject("user-1"))))
+                .andExpect(status().isNotFound());
     }
 }

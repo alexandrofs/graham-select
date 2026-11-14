@@ -72,7 +72,7 @@ class ManualMockPortfolioRepository implements PortfolioRepository {
   );
 
   @override
-  Future<PortfolioSummary> getSummary() async {
+  Future<PortfolioSummary> getSummary({String? tagId}) async {
     return summary;
   }
 
@@ -89,12 +89,18 @@ class ManualMockPortfolioRepository implements PortfolioRepository {
   }
 
   @override
-  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt})> getCustodyPositions() async {
-    return (positions: <CustodyPosition>[], metaPriceUpdatedAt: null);
+  Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})>
+      getCustodyPositions({String? tagId}) async {
+    return (
+      positions: <CustodyPosition>[],
+      metaPriceUpdatedAt: null,
+      untaggedAssetsCount: 0,
+      untaggedTickers: const <String>[],
+    );
   }
 
   @override
-  Future<PortfolioEvolution> getPortfolioEvolution() async {
+  Future<PortfolioEvolution> getPortfolioEvolution({String? tagId}) async {
     throw UnimplementedError();
   }
 }

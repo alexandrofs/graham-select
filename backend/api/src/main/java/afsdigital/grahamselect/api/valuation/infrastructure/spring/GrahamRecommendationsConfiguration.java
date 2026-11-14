@@ -2,6 +2,7 @@ package afsdigital.grahamselect.api.valuation.infrastructure.spring;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.GrahamRecommendationReadAdapter;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.GrahamRecommendationJpaRepository;
+import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
 import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationPort;
 import afsdigital.grahamselect.valuation.application.usecase.GetGrahamRecommendationsUseCase;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +20,8 @@ public class GrahamRecommendationsConfiguration {
 
     @Bean
     public GetGrahamRecommendationsUseCase getGrahamRecommendationsUseCase(
-            @Qualifier("apiGrahamRecommendationPort") GrahamRecommendationPort port) {
-        return new GetGrahamRecommendationsUseCase(port);
+            @Qualifier("apiGrahamRecommendationPort") GrahamRecommendationPort port,
+            PortfolioTagPort portfolioTagPort) {
+        return new GetGrahamRecommendationsUseCase(port, portfolioTagPort);
     }
 }

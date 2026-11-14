@@ -4,6 +4,7 @@ import 'package:frontend/src/features/auth/data/auth_repository.dart';
 import 'package:frontend/src/features/portfolio/data/datasources/portfolio_remote_data_source.dart';
 import 'package:frontend/src/features/portfolio/data/models/custody_position_model.dart';
 import 'package:frontend/src/features/portfolio/data/models/monthly_evolution_model.dart';
+import 'package:frontend/src/features/portfolio/data/models/portfolio_summary_model.dart';
 import 'package:frontend/src/features/portfolio/data/repositories/portfolio_repository_impl.dart';
 import 'package:http/http.dart' as http;
 
@@ -40,16 +41,38 @@ class FakeHttpClient extends http.BaseClient {
 }
 
 class MockPortfolioRemoteDataSource extends PortfolioRemoteDataSource {
-  ({List<CustodyPositionModel> positions, DateTime? metaPriceUpdatedAt})? responseToReturn;
+  ({
+    List<CustodyPositionModel> positions,
+    DateTime? metaPriceUpdatedAt,
+    int untaggedAssetsCount,
+    List<String> untaggedTickers,
+  })? responseToReturn;
   PortfolioEvolutionModel? evolutionResponseToReturn;
+  PortfolioSummaryModel? summaryResponseToReturn;
   String? capturedToken;
+  String? capturedTagId;
 
   MockPortfolioRemoteDataSource() : super(client: FakeHttpClient());
 
   @override
-  Future<({List<CustodyPositionModel> positions, DateTime? metaPriceUpdatedAt})>
-      getCustodyPositions({String? token}) async {
+  Future<PortfolioSummaryModel> getSummary({String? token, String? tagId}) async {
     capturedToken = token;
+    capturedTagId = tagId;
+    if (summaryResponseToReturn != null) {
+      return summaryResponseToReturn!;
+    }
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<({
+    List<CustodyPositionModel> positions,
+    DateTime? metaPriceUpdatedAt,
+    int untaggedAssetsCount,
+    List<String> untaggedTickers,
+  })> getCustodyPositions({String? token, String? tagId}) async {
+    capturedToken = token;
+    capturedTagId = tagId;
     if (responseToReturn != null) {
       return responseToReturn!;
     }
@@ -57,8 +80,9 @@ class MockPortfolioRemoteDataSource extends PortfolioRemoteDataSource {
   }
 
   @override
-  Future<PortfolioEvolutionModel> getPortfolioEvolution({String? token}) async {
+  Future<PortfolioEvolutionModel> getPortfolioEvolution({String? token, String? tagId}) async {
     capturedToken = token;
+    capturedTagId = tagId;
     if (evolutionResponseToReturn != null) {
       return evolutionResponseToReturn!;
     }
@@ -94,17 +118,39 @@ void main() {
           )
         ],
         metaPriceUpdatedAt: tDate,
+        untaggedAssetsCount: 1,
+        untaggedTickers: const ['VALE3'],
       );
 
       mockRemoteDataSource.responseToReturn = tResponse;
       mockAuthRepository.persistedToken = 'token-123';
 
-      final result = await repository.getCustodyPositions();
+      final result = await repository.getCustodyPositions(tagId: 'tag-abc');
 
       expect(mockRemoteDataSource.capturedToken, equals('token-123'));
+      expect(mockRemoteDataSource.capturedTagId, equals('tag-abc'));
       expect(result.positions.length, equals(1));
       expect(result.positions[0].ticker, equals('PETR4'));
       expect(result.metaPriceUpdatedAt, equals(tDate));
+      expect(result.untaggedAssetsCount, equals(1));
+      expect(result.untaggedTickers, equals(['VALE3']));
+    });
+
+    test('deve repassar tagId em getSummary e getPortfolioEvolution', () async {
+      mockRemoteDataSource.summaryResponseToReturn = PortfolioSummaryModel(
+        totalEquity: 2000.0,
+        grossYieldPercentage: 5.0,
+        accumulatedDividends: 100.0,
+        monthlyProjection: 10.0,
+      );
+      mockRemoteDataSource.evolutionResponseToReturn = const PortfolioEvolutionModel(monthlyData: []);
+
+      final summary = await repository.getSummary(tagId: 'tag-1');
+      expect(summary.totalEquity, equals(2000.0));
+      expect(mockRemoteDataSource.capturedTagId, equals('tag-1'));
+
+      await repository.getPortfolioEvolution(tagId: 'tag-2');
+      expect(mockRemoteDataSource.capturedTagId, equals('tag-2'));
     });
   });
 }

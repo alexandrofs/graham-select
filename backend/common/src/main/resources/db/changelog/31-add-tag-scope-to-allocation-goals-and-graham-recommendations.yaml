@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: 31-add-tag-scope-to-allocation-goals
+      author: bmad-dev
+      changes:
+        - addColumn:
+            tableName: allocation_goals
+            columns:
+              - column:
+                  name: tag_id
+                  type: CHAR(36)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: scope_key
+                  type: VARCHAR(36)
+                  defaultValue: "GLOBAL"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: allocation_goals
+            indexName: idx_allocation_goals_user_scope
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: scope_key
+        - dropUniqueConstraint:
+            tableName: allocation_goals
+            constraintName: uq_allocation_goals_user_type_key
+        - addUniqueConstraint:
+            tableName: allocation_goals
+            columnNames: user_id, scope_key, goal_type, target_key
+            constraintName: uq_allocation_goals_user_scope_type_key
+        - addForeignKeyConstraint:
+            baseTableName: allocation_goals
+            baseColumnNames: tag_id
+            referencedTableName: portfolio_tags
+            referencedColumnNames: id
+            constraintName: fk_allocation_goals_tag_id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: 31-add-tag-scope-to-graham-recommendations
+      author: bmad-dev
+      changes:
+        - addColumn:
+            tableName: graham_recommendations
+            columns:
+              - column:
+                  name: tag_id
+                  type: CHAR(36)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: scope_key
+                  type: VARCHAR(36)
+                  defaultValue: "GLOBAL"
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: graham_recommendations
+            indexName: idx_graham_rec_user_scope
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: scope_key
+        - addForeignKeyConstraint:
+            baseTableName: graham_recommendations
+            baseColumnNames: tag_id
+            referencedTableName: portfolio_tags
+            referencedColumnNames: id
+            constraintName: fk_graham_rec_tag_id
+            onDelete: CASCADE
+            onUpdate: RESTRICT

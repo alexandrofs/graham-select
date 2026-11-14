@@ -39,31 +39,37 @@ public class ValuationRequestedConsumerService {
             return;
         }
 
-        log.info("Consumed valuation-requested event for userId: {}", userId);
+        UUID tagId = event.tagId();
+        log.info("Consumed valuation-requested event for userId: {}, tagId: {}", userId, tagId);
 
         try {
-            GenerationResult result = generateGrahamRecommendationsUseCase.execute(userId);
+            GenerationResult result = tagId == null
+                    ? generateGrahamRecommendationsUseCase.execute(userId)
+                    : generateGrahamRecommendationsUseCase.execute(userId, tagId);
 
             ValuationCompletedEvent completedEvent = new ValuationCompletedEvent(
                     userId,
                     result.recommendations().size(),
                     result.excludedTickers(),
                     OffsetDateTime.now(ZoneOffset.UTC).toString(),
-                    UUID.randomUUID()
+                    UUID.randomUUID(),
+                    tagId
             );
 
             kafkaTemplate.send(TopicConstants.VALUATION_COMPLETED_TOPIC, userId, completedEvent);
-            log.info("Successfully processed valuation request and published completion for userId: {}", userId);
+            log.info("Successfully processed valuation request and published completion for userId: {}, tagId: {}", userId, tagId);
 
         } catch (Exception e) {
-            log.error("[VALUATION] Fatal error processing valuation-requested for userId: {}. Error: {}", userId, e.getMessage(), e);
+            log.error("[VALUATION] Fatal error processing valuation-requested for userId: {}, tagId: {}. Error: {}",
+                    userId, tagId, e.getMessage(), e);
 
             ValuationFailedEvent failedEvent = new ValuationFailedEvent(
                     userId,
                     "VALUATION_CALCULATION_ERROR",
                     "Ocorreu um erro ao calcular o valuation. Por favor, tente novamente mais tarde.",
                     OffsetDateTime.now(ZoneOffset.UTC).toString(),
-                    UUID.randomUUID()
+                    UUID.randomUUID(),
+                    tagId
             );
 
             kafkaTemplate.send(TopicConstants.VALUATION_FAILED_TOPIC, userId, failedEvent);
