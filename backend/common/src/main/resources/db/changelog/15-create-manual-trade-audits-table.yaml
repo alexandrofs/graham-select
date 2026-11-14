@@ -2,6 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: 15-create-manual-trade-audits-table
       author: gemini-cli
+      validCheckSum: 9:9bf85a2d48a98906e2fa648f8f81aec1
       changes:
         - createTable:
             tableName: manual_trade_audits

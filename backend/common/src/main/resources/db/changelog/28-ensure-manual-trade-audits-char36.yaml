@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: 28-ensure-manual-trade-audits-char36-mysql
+      author: amelia
+      dbms: mysql
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: >
+              SELECT COUNT(*) FROM information_schema.columns
+              WHERE table_schema = DATABASE()
+                AND table_name = 'manual_trade_audits'
+                AND column_name = 'id'
+                AND data_type = 'binary'
+      changes:
+        - addColumn:
+            tableName: manual_trade_audits
+            columns:
+              - column:
+                  name: id_temp
+                  type: CHAR(36)
+              - column:
+                  name: trade_id_temp
+                  type: CHAR(36)
+        - sql:
+            dbms: mysql
+            sql: UPDATE manual_trade_audits SET id_temp = BIN_TO_UUID(id), trade_id_temp = BIN_TO_UUID(trade_id)
+        - dropPrimaryKey:
+            tableName: manual_trade_audits
+            constraintName: PRIMARY
+        - dropColumn:
+            tableName: manual_trade_audits
+            columnName: id
+        - dropColumn:
+            tableName: manual_trade_audits
+            columnName: trade_id
+        - renameColumn:
+            tableName: manual_trade_audits
+            oldColumnName: id_temp
+            newColumnName: id
+            columnDataType: CHAR(36)
+        - renameColumn:
+            tableName: manual_trade_audits
+            oldColumnName: trade_id_temp
+            newColumnName: trade_id
+            columnDataType: CHAR(36)
+        - addNotNullConstraint:
+            tableName: manual_trade_audits
+            columnName: id
+            columnDataType: CHAR(36)
+        - addNotNullConstraint:
+            tableName: manual_trade_audits
+            columnName: trade_id
+            columnDataType: CHAR(36)
+        - addPrimaryKey:
+            tableName: manual_trade_audits
+            columnNames: id
+            constraintName: pk_manual_trade_audits
