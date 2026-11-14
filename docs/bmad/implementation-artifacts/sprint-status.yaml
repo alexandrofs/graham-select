@@ -1,4 +1,5 @@
 # generated: 2026-03-12
+# last_updated: 2026-11-13
 # project: graham-select
 # project_key: NOKEY
 # tracking_system: file-system
@@ -34,6 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-13
+last_updated: 2026-11-13
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -82,10 +84,18 @@ development_status:
   6-3-master-data-ticker-management: done
   epic-6-retrospective: done
   epic-7: backlog
+  7-1-vinculo-de-novo-cpf-a-conta-matriz: backlog
   epic-7-retrospective: optional
   epic-8: backlog
+  8-1-criacao-e-associacao-de-tags: backlog
+  8-2-filtros-de-dashboard-e-recomendacoes-por-tag: backlog
   epic-8-retrospective: optional
   epic-9: backlog
+  9-1-importacao-de-nota-de-corretagem-pdf: backlog
+  9-2-web-crawler-de-proventos-e-fatos-relevantes: backlog
+  9-3-conector-open-finance: backlog
   epic-9-retrospective: optional
   epic-10: backlog
+  10-1-relatorio-de-bens-e-direitos-informe-anual: backlog
+  10-2-calculo-de-lucro-realizado-e-isencao: backlog
   epic-10-retrospective: optional
