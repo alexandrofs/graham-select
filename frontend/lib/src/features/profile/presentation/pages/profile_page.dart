@@ -238,6 +238,34 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
 
+          const SizedBox(height: 16),
+
+          Card(
+            color: AppTheme.surfaceColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: ListTile(
+              key: const Key('profile_tags_management_button'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              leading: CircleAvatar(
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                child: const Icon(Icons.label_outline, color: AppTheme.primaryColor),
+              ),
+              title: const Text(
+                'Tags da Carteira',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text(
+                'Crie e organize tags personalizadas para agrupar e filtrar seus ativos.',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/tags'),
+            ),
+          ),
+
           const SizedBox(height: 40),
           // Botão de Sair (Opcional, mas útil no perfil)
           SizedBox(

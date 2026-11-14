@@ -79,6 +79,12 @@ import 'src/features/family_holding/data/repositories/family_profile_repository_
 import 'src/features/family_holding/presentation/providers/family_profile_provider.dart';
 import 'src/features/family_holding/presentation/pages/family_profiles_page.dart';
 
+// Tags Feature Imports
+import 'src/features/tags/data/datasources/tag_remote_datasource.dart';
+import 'src/features/tags/data/repositories/tag_repository_impl.dart';
+import 'src/features/tags/presentation/providers/tag_provider.dart';
+import 'src/features/tags/presentation/pages/tag_management_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -157,6 +163,12 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final FamilyProfileRemoteDataSource familyProfileRemoteDataSource;
   late final FamilyProfileRepositoryImpl familyProfileRepository;
 
+  late final TagRemoteDataSource tagRemoteDataSource;
+  late final TagRepositoryImpl tagRepository;
+  late final TagProvider tagProvider;
+  StreamSubscription<dynamic>? _tagAuthSubscription;
+  String? _activeTagUserId;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -222,6 +234,20 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     familyProfileRemoteDataSource = FamilyProfileRemoteDataSource(apiClient: effectiveApiClient);
     familyProfileRepository = FamilyProfileRepositoryImpl(remoteDataSource: familyProfileRemoteDataSource);
 
+    // Tags Feature DI
+    tagRemoteDataSource = TagRemoteDataSource(apiClient: effectiveApiClient);
+    tagRepository = TagRepositoryImpl(remoteDataSource: tagRemoteDataSource);
+    tagProvider = TagProvider(repository: tagRepository);
+    _activeTagUserId = effectiveAuthRepository.currentUser?.uid;
+    _tagAuthSubscription = effectiveAuthRepository.authStateChanges.listen((user) {
+      final nextUserId = user?.uid;
+      if (nextUserId == null ||
+          (_activeTagUserId != null && _activeTagUserId != nextUserId)) {
+        tagProvider.reset();
+      }
+      _activeTagUserId = nextUserId;
+    });
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -261,6 +287,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
             GoRoute(path: '/family-profiles', builder: (context, state) => const FamilyProfilesPage()),
+            GoRoute(path: '/tags', builder: (context, state) => const TagManagementPage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
             GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
             GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
@@ -274,6 +301,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
   @override
   void dispose() {
+    _tagAuthSubscription?.cancel();
+    tagProvider.dispose();
     authListenable.dispose();
     router.dispose();
     super.dispose();
@@ -305,6 +334,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
         ChangeNotifierProvider(create: (_) => FamilyProfileProvider(repository: familyProfileRepository)),
+        ChangeNotifierProvider<TagProvider>.value(value: tagProvider),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),

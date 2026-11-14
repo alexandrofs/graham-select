@@ -1,0 +1,114 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30-create-portfolio-tags-table
+      author: bmad-dev
+      changes:
+        - createTable:
+            tableName: portfolio_tags
+            columns:
+              - column:
+                  name: id
+                  type: CHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: normalized_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color
+                  type: VARCHAR(7)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: portfolio_tags
+            columnNames: user_id, normalized_name
+            constraintName: uq_portfolio_tags_user_normalized_name
+        - createIndex:
+            tableName: portfolio_tags
+            indexName: idx_portfolio_tags_user_id
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: 30-create-asset-tags-table
+      author: bmad-dev
+      changes:
+        - createTable:
+            tableName: asset_tags
+            columns:
+              - column:
+                  name: id
+                  type: CHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tag_id
+                  type: CHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ticker
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: asset_tags
+            baseColumnNames: tag_id
+            referencedTableName: portfolio_tags
+            referencedColumnNames: id
+            constraintName: fk_asset_tags_tag_id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+        - addUniqueConstraint:
+            tableName: asset_tags
+            columnNames: user_id, tag_id, ticker
+            constraintName: uq_asset_tags_user_tag_ticker
+        - createIndex:
+            tableName: asset_tags
+            indexName: idx_asset_tags_user_ticker
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: ticker
+        - createIndex:
+            tableName: asset_tags
+            indexName: idx_asset_tags_tag_id
+            columns:
+              - column:
+                  name: tag_id

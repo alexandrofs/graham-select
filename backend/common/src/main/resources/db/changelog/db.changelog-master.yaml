@@ -55,5 +55,7 @@ databaseChangeLog:
       file: db/changelog/28-ensure-manual-trade-audits-char36.yaml
   - include:
       file: db/changelog/29-create-family-profiles-and-link-trades.yaml
+  - include:
+      file: db/changelog/30-create-portfolio-tags-and-asset-tags.yaml
 
 
