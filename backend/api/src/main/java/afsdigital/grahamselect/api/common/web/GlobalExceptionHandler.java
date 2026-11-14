@@ -3,6 +3,8 @@ package afsdigital.grahamselect.api.common.web;
 import afsdigital.grahamselect.common.family.application.service.exceptions.DuplicateFamilyProfileException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.InvalidCpfException;
+import afsdigital.grahamselect.common.tags.application.service.exceptions.DuplicateTagException;
+import afsdigital.grahamselect.common.tags.application.service.exceptions.TagNotFoundException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionAlreadyPendingException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionNotFoundException;
 import afsdigital.grahamselect.api.upload.web.B3UploadValidationException;
@@ -12,10 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.stream.Collectors;
 
@@ -109,6 +113,44 @@ public class GlobalExceptionHandler {
         log.error("Family profile not found: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Family Profile Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(DuplicateTagException.class)
+    public ProblemDetail handleDuplicateTag(DuplicateTagException ex) {
+        log.error("Duplicate tag: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("Duplicate Tag");
+        return problem;
+    }
+
+    @ExceptionHandler(TagNotFoundException.class)
+    public ProblemDetail handleTagNotFound(TagNotFoundException ex) {
+        log.error("Tag not found: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Tag Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.error("Invalid parameter '{}': {}", ex.getName(), ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro inválido: " + ex.getName()
+        );
+        problem.setTitle("Invalid Parameter");
+        return problem;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        log.error("Malformed JSON request: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Corpo da requisição JSON inválido ou malformado."
+        );
+        problem.setTitle("Malformed JSON Request");
         return problem;
     }
 

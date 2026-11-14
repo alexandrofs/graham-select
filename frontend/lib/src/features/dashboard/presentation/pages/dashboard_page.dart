@@ -12,6 +12,8 @@ import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
 import '../../../portfolio/presentation/widgets/financial_data_table.dart';
 import '../../../portfolio/presentation/widgets/asset_allocation_donut_chart.dart';
+import '../../../tags/presentation/providers/tag_provider.dart';
+import '../../../tags/presentation/widgets/dashboard_tag_filter_bar.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -28,11 +30,14 @@ class _DashboardPageState extends State<DashboardPage> {
       if (!mounted) return;
       final portfolioProvider = context.read<PortfolioProvider>();
       final goalsProvider = Provider.of<GoalsProvider?>(context, listen: false);
+      final tagProvider = Provider.of<TagProvider?>(context, listen: false);
       context.read<ProfileProvider>().fetchProfile();
       portfolioProvider.loadCustodyPositions();
       await Future.wait([
         portfolioProvider.loadSummary(),
         if (goalsProvider != null) goalsProvider.loadGoal(),
+        if (tagProvider != null)
+          tagProvider.loadTags(silent: tagProvider.tags.isNotEmpty),
       ]);
       if (!mounted) return;
       if (goalsProvider != null && goalsProvider.currentGoal != null && portfolioProvider.summary != null) {
@@ -47,6 +52,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final goalsProvider = Provider.of<GoalsProvider?>(context);
+    final tagProvider = Provider.of<TagProvider?>(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
@@ -139,6 +145,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 const SizedBox(height: 32),
+                if (tagProvider != null) ...[
+                  const DashboardTagFilterBar(),
+                  const SizedBox(height: 16),
+                ],
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: FinancialDataTable(

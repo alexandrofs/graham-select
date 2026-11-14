@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/portfolio_provider.dart';
+import '../../domain/entities/custody_position.dart';
+import '../../../tags/presentation/providers/tag_provider.dart';
+import '../../../tags/presentation/widgets/asset_tag_selector_sheet.dart';
 
 /// Rota de upload centralizada — evita string mágica espalhada no código
 const _kUploadRoute = '/upload';
@@ -13,6 +16,7 @@ class FinancialDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PortfolioProvider>();
+    final tagProvider = Provider.of<TagProvider?>(context);
 
     switch (provider.custodyStatus) {
       case PortfolioStatus.initial:
@@ -28,17 +32,45 @@ class FinancialDataTable extends StatelessWidget {
         if (provider.custodyPositions.isEmpty) {
           return const _EmptyStateWidget();
         }
-        return _buildTableContent(context, provider);
+        final selectedFilterTag = tagProvider?.selectedFilterTag;
+        final allowedTickers = selectedFilterTag == null
+            ? null
+            : tagProvider!.filteredTickersForSelectedTag;
+        final filteredPositions = allowedTickers == null
+            ? provider.custodyPositions
+            : provider.custodyPositions
+                .where(
+                  (pos) =>
+                      allowedTickers.contains(pos.ticker.trim().toUpperCase()),
+                )
+                .toList();
+        if (filteredPositions.isEmpty && selectedFilterTag != null) {
+          return _FilteredEmptyStateWidget(
+            tagName: selectedFilterTag.name,
+            onClearFilter: () => tagProvider!.selectFilterTag(null),
+          );
+        }
+        return _buildTableContent(
+          context,
+          provider,
+          filteredPositions,
+          tagProvider,
+        );
     }
   }
 
-  Widget _buildTableContent(BuildContext context, PortfolioProvider provider) {
+  Widget _buildTableContent(
+    BuildContext context,
+    PortfolioProvider provider,
+    List<CustodyPosition> filteredPositions,
+    TagProvider? tagProvider,
+  ) {
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final percentFormatter = NumberFormat('+##0.00%;-##0.00%', 'pt_BR');
     final quantityFormatter = NumberFormat('#,##0', 'pt_BR');
     final timeFormatter = DateFormat('HH:mm', 'pt_BR');
 
-    final positions = provider.custodyPositions;
+    final positions = filteredPositions;
     final isAscending = provider.sortAscending;
     final sortColumn = provider.sortColumn;
 
@@ -116,7 +148,7 @@ class FinancialDataTable extends StatelessWidget {
                   horizontalMargin: 8,
                   headingRowHeight: 44,
                   dataRowMinHeight: 48,
-                  dataRowMaxHeight: 52,
+                  dataRowMaxHeight: tagProvider != null ? double.infinity : 52,
                   sortColumnIndex: _getColumnIndex(sortColumn),
                   sortAscending: isAscending,
                   columns: [
@@ -126,6 +158,21 @@ class FinancialDataTable extends StatelessWidget {
                     _buildHeader(context, provider, 'currentPrice', 'Cotação Atual', isNumeric: true),
                     _buildHeader(context, provider, 'marketValue', 'Valor de Mercado', isNumeric: true),
                     _buildHeader(context, provider, 'gainLossPercentage', 'Ganho/Perda %', isNumeric: true),
+                    if (tagProvider != null)
+                      DataColumn(
+                        label: Semantics(
+                          header: true,
+                          label: 'Tags do ativo',
+                          child: const Text(
+                            'Tags',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'DM Sans',
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                   rows: positions.map((pos) {
                     final isPositive = pos.gainLossPercentage > 0;
@@ -216,6 +263,8 @@ class FinancialDataTable extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (tagProvider != null)
+                          _buildTagsCell(context, tagProvider, pos.ticker),
                       ],
                     );
                   }).toList(),
@@ -276,6 +325,138 @@ class FinancialDataTable extends StatelessWidget {
       default:
         return 0;
     }
+  }
+
+  DataCell _buildTagsCell(
+    BuildContext context,
+    TagProvider tagProvider,
+    String ticker,
+  ) {
+    final assetTags = tagProvider.tagsForTicker(ticker);
+    final visibleTags = assetTags.take(3).toList();
+    final overflowCount = assetTags.length - visibleTags.length;
+
+    return DataCell(
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (visibleTags.isNotEmpty)
+              Flexible(
+                fit: FlexFit.loose,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 220),
+                  child: Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      ...visibleTags.map((tag) {
+                        final color = TagProvider.parseColor(tag.color);
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Text(
+                                  tag.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      if (overflowCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Text(
+                            '+$overflowCount',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              const Text(
+                'Sem tag',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white38,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            const SizedBox(width: 4),
+            Semantics(
+              label: 'Gerenciar tags de $ticker',
+              child: IconButton(
+                key: Key('manage_asset_tags_$ticker'),
+                tooltip: 'Gerenciar tags',
+                icon: Icon(
+                  visibleTags.isEmpty
+                      ? Icons.add_circle_outline
+                      : Icons.edit_outlined,
+                  size: 18,
+                  color: Colors.white70,
+                ),
+                onPressed: () {
+                  showModalBottomSheet<bool>(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => ChangeNotifierProvider<TagProvider>.value(
+                      value: tagProvider,
+                      child: AssetTagSelectorSheet(ticker: ticker),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -512,6 +693,71 @@ class _AnomalyAlert extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FilteredEmptyStateWidget extends StatelessWidget {
+  const _FilteredEmptyStateWidget({
+    required this.tagName,
+    required this.onClearFilter,
+  });
+
+  final String tagName;
+  final VoidCallback onClearFilter;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      key: const Key('filtered_tags_empty_state'),
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.filter_list_off_rounded,
+              size: 40,
+              color: Color(0xFF6366F1),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Nenhum ativo associado à tag selecionada',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'A tag "$tagName" ainda não possui ativos da sua custódia vinculados.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              key: const Key('clear_tag_filter_button'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onPressed: onClearFilter,
+              icon: const Icon(Icons.clear_all, size: 18),
+              label: const Text('Limpar filtro'),
+            ),
+          ],
+        ),
       ),
     );
   }
