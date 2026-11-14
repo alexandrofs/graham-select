@@ -99,13 +99,22 @@ class MockUploadRemoteDataSource extends _i1.Mock
   _i7.Future<_i3.UploadResponseModel> uploadB3File(
     _i8.AppFile? file, {
     String? token,
+    String? profileId,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#uploadB3File, [file], {#token: token}),
+            Invocation.method(
+              #uploadB3File,
+              [file],
+              {#token: token, #profileId: profileId},
+            ),
             returnValue: _i7.Future<_i3.UploadResponseModel>.value(
               _FakeUploadResponseModel_1(
                 this,
-                Invocation.method(#uploadB3File, [file], {#token: token}),
+                Invocation.method(
+                  #uploadB3File,
+                  [file],
+                  {#token: token, #profileId: profileId},
+                ),
               ),
             ),
           )

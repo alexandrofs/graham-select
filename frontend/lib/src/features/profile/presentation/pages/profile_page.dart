@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/src/core/theme/app_theme.dart';
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart';
@@ -208,7 +209,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
           // Comparação de Tiers
           const TierComparisonCard(),
-          
+
+          const SizedBox(height: 24),
+
+          Card(
+            color: AppTheme.surfaceColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: ListTile(
+              key: const Key('profile_family_holding_button'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              leading: CircleAvatar(
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                child: const Icon(Icons.family_restroom, color: AppTheme.primaryColor),
+              ),
+              title: const Text(
+                'Holding Familiar (Multi-CPF)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text(
+                'Vincule CPFs de dependentes para importar extratos e consolidar a carteira da família.',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/family-profiles'),
+            ),
+          ),
+
           const SizedBox(height: 40),
           // Botão de Sair (Opcional, mas útil no perfil)
           SizedBox(

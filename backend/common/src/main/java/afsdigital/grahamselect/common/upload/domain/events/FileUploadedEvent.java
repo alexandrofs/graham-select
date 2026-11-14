@@ -12,6 +12,19 @@ public record FileUploadedEvent(
     String fileName,
     String storagePath,
     String correlationId,
+    String profileId,
     String version,
     OffsetDateTime timestamp
-) {}
+) {
+    public FileUploadedEvent(
+            String eventId,
+            String userId,
+            String fileName,
+            String storagePath,
+            String correlationId,
+            String version,
+            OffsetDateTime timestamp
+    ) {
+        this(eventId, userId, fileName, storagePath, correlationId, null, version, timestamp);
+    }
+}

@@ -16,6 +16,7 @@ class UploadProvider extends ChangeNotifier {
 
   UploadState _state = UploadState.idle;
   AppFile? _selectedFile;
+  String? _selectedProfileId;
   String? _errorMessage;
   String? _successMessage;
   UploadProcessingStatus? _processingStatus;
@@ -29,6 +30,7 @@ class UploadProvider extends ChangeNotifier {
 
   UploadState get state => _state;
   AppFile? get selectedFile => _selectedFile;
+  String? get selectedProfileId => _selectedProfileId;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
   UploadProcessingStatus? get processingStatus => _processingStatus;
@@ -104,7 +106,10 @@ class UploadProvider extends ChangeNotifier {
     _processingStatus = null;
 
     try {
-      final result = await uploadB3FileUseCase(_selectedFile!);
+      final result = await uploadB3FileUseCase(
+        _selectedFile!,
+        profileId: _selectedProfileId,
+      );
 
       if (result.success && result.correlationId != null) {
         await _pollUploadStatus(result.correlationId!);
@@ -137,6 +142,11 @@ class UploadProvider extends ChangeNotifier {
     _selectedFile = file;
     _clearMessages();
     _setState(UploadState.idle);
+  }
+
+  void setSelectedProfileId(String? profileId) {
+    _selectedProfileId = profileId;
+    notifyListeners();
   }
 
   Future<void> _pollUploadStatus(String correlationId) async {

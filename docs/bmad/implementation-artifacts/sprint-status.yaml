@@ -83,8 +83,8 @@ development_status:
   6-2-failed-ingestion-dlq-management: done
   6-3-master-data-ticker-management: done
   epic-6-retrospective: done
-  epic-7: backlog
-  7-1-vinculo-de-novo-cpf-a-conta-matriz: backlog
+  epic-7: in-progress
+  7-1-vinculo-de-novo-cpf-a-conta-matriz: done
   epic-7-retrospective: optional
   epic-8: backlog
   8-1-criacao-e-associacao-de-tags: backlog

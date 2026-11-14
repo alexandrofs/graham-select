@@ -11,6 +11,7 @@ public record TradeExtractionFailedEvent(
         String version,
         OffsetDateTime timestamp,
         String userId,
+        String profileId,
         String correlationId,
         String fileName,
         long lineNumber,

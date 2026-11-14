@@ -32,6 +32,9 @@ public class TradeEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
+    @Column(name = "profile_id", length = 36)
+    private String profileId;
+
     @Column(nullable = false, length = 20)
     private String ticker;
 

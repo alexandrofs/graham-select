@@ -7,7 +7,7 @@ class UploadB3FileUseCase {
 
   UploadB3FileUseCase(this.repository);
 
-  Future<UploadResult> call(AppFile file) {
-    return repository.uploadB3File(file);
+  Future<UploadResult> call(AppFile file, {String? profileId}) {
+    return repository.uploadB3File(file, profileId: profileId);
   }
 }

@@ -11,6 +11,7 @@ public class SaveTradeUseCase {
     public Trade execute(Trade trade) {
         boolean alreadyExists = tradePort.exists(
                 trade.getUserId(),
+                trade.getProfileId(),
                 trade.getTicker(),
                 trade.getTradeDate(),
                 trade.getQuantity(),

@@ -20,12 +20,17 @@ public class UploadB3FileUseCase {
     private final B3ImportStatusPort importStatusPort;
 
     public FileUploadedEvent execute(InputStream inputStream, String fileName, String userId) {
+        return execute(inputStream, fileName, userId, null);
+    }
+
+    public FileUploadedEvent execute(InputStream inputStream, String fileName, String userId, String profileId) {
         String storagePath = storagePort.save(inputStream, fileName, userId);
         String correlationId = UUID.randomUUID().toString();
 
         FileUploadedEvent event = FileUploadedEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .userId(userId)
+                .profileId(profileId)
                 .fileName(fileName)
                 .storagePath(storagePath)
                 .correlationId(correlationId)
@@ -33,7 +38,7 @@ public class UploadB3FileUseCase {
                 .timestamp(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
 
-        importStatusPort.createPending(correlationId, userId, fileName);
+        importStatusPort.createPending(correlationId, userId, fileName, profileId);
         eventPort.publish(event);
         return event;
     }

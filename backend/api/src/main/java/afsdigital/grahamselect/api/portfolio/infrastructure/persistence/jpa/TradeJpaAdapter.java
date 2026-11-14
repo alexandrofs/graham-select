@@ -19,9 +19,13 @@ public class TradeJpaAdapter implements TradePort {
 
     @Override
     public Trade save(Trade trade) {
+        String normalizedProfileId = (trade.getProfileId() == null || trade.getProfileId().isBlank())
+                ? null
+                : trade.getProfileId().trim();
         TradeEntity entity = TradeEntity.builder()
                 .id(trade.getId())
                 .userId(trade.getUserId())
+                .profileId(normalizedProfileId)
                 .ticker(trade.getTicker())
                 .side(trade.getSide())
                 .tradeDate(trade.getTradeDate())
@@ -36,6 +40,7 @@ public class TradeJpaAdapter implements TradePort {
         return Trade.builder()
                 .id(saved.getId())
                 .userId(saved.getUserId())
+                .profileId(saved.getProfileId())
                 .ticker(saved.getTicker())
                 .side(saved.getSide())
                 .tradeDate(saved.getTradeDate())
@@ -49,6 +54,7 @@ public class TradeJpaAdapter implements TradePort {
     @Override
     public boolean exists(
             String userId,
+            String profileId,
             String ticker,
             LocalDate tradeDate,
             BigDecimal quantity,
@@ -56,8 +62,13 @@ public class TradeJpaAdapter implements TradePort {
             String broker,
             String side
     ) {
-        return repository.existsByUserIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
-                userId, ticker, tradeDate, quantity, price, broker, side
+        if (profileId == null || profileId.isBlank()) {
+            return repository.existsByUserIdAndProfileIdIsNullAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+                    userId, ticker, tradeDate, quantity, price, broker, side
+            );
+        }
+        return repository.existsByUserIdAndProfileIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+                userId, profileId, ticker, tradeDate, quantity, price, broker, side
         );
     }
 
@@ -67,6 +78,7 @@ public class TradeJpaAdapter implements TradePort {
                 .map(saved -> Trade.builder()
                         .id(saved.getId())
                         .userId(saved.getUserId())
+                        .profileId(saved.getProfileId())
                         .ticker(saved.getTicker())
                         .side(saved.getSide())
                         .tradeDate(saved.getTradeDate())

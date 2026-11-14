@@ -73,6 +73,12 @@ import 'src/features/admin/presentation/pages/admin_dashboard_page.dart';
 import 'src/features/admin/presentation/pages/admin_dlq_page.dart';
 import 'src/features/admin/presentation/pages/admin_tickers_page.dart';
 
+// Family Holding Feature Imports
+import 'src/features/family_holding/data/datasources/family_profile_remote_datasource.dart';
+import 'src/features/family_holding/data/repositories/family_profile_repository_impl.dart';
+import 'src/features/family_holding/presentation/providers/family_profile_provider.dart';
+import 'src/features/family_holding/presentation/pages/family_profiles_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -148,6 +154,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final AdminRemoteDatasource adminRemoteDatasource;
   late final AdminRepositoryImpl adminRepository;
 
+  late final FamilyProfileRemoteDataSource familyProfileRemoteDataSource;
+  late final FamilyProfileRepositoryImpl familyProfileRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -209,6 +218,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     adminRemoteDatasource = AdminRemoteDatasource(apiClient: effectiveApiClient);
     adminRepository = AdminRepositoryImpl(remoteDatasource: adminRemoteDatasource);
 
+    // Family Holding Feature DI
+    familyProfileRemoteDataSource = FamilyProfileRemoteDataSource(apiClient: effectiveApiClient);
+    familyProfileRepository = FamilyProfileRepositoryImpl(remoteDataSource: familyProfileRemoteDataSource);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -247,6 +260,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/graham-recommendations', builder: (context, state) => const GrahamRecommendationsPage()),
             GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
+            GoRoute(path: '/family-profiles', builder: (context, state) => const FamilyProfilesPage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
             GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
             GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
@@ -290,6 +304,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
           ),
         ),
         ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
+        ChangeNotifierProvider(create: (_) => FamilyProfileProvider(repository: familyProfileRepository)),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),

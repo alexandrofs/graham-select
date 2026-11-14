@@ -1,0 +1,108 @@
+databaseChangeLog:
+  - changeSet:
+      id: 29-create-family-profiles-table
+      author: bmad-dev
+      changes:
+        - createTable:
+            tableName: family_profiles
+            columns:
+              - column:
+                  name: id
+                  type: CHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: master_user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cpf_digits
+                  type: VARCHAR(11)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: relationship
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: family_profiles
+            columnNames: master_user_id, cpf_digits
+            constraintName: uq_family_profiles_master_cpf
+        - createIndex:
+            tableName: family_profiles
+            indexName: idx_family_profiles_master_user
+            columns:
+              - column:
+                  name: master_user_id
+
+  - changeSet:
+      id: 29-add-profile-id-to-b3-import-status
+      author: bmad-dev
+      changes:
+        - addColumn:
+            tableName: b3_import_status
+            columns:
+              - column:
+                  name: profile_id
+                  type: CHAR(36)
+                  constraints:
+                    nullable: true
+        - createIndex:
+            tableName: b3_import_status
+            indexName: idx_b3_import_status_profile
+            columns:
+              - column:
+                  name: profile_id
+
+  - changeSet:
+      id: 29-add-profile-id-to-trades
+      author: bmad-dev
+      changes:
+        - addColumn:
+            tableName: trades
+            columns:
+              - column:
+                  name: profile_id
+                  type: CHAR(36)
+                  constraints:
+                    nullable: true
+        - createIndex:
+            tableName: trades
+            indexName: idx_trades_user_profile
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: profile_id
+        - dropUniqueConstraint:
+            constraintName: uq_trade_deduplication
+            tableName: trades
+        - addUniqueConstraint:
+            columnNames: user_id, profile_id, ticker, trade_date, quantity, price, broker, side
+            constraintName: uq_trade_deduplication
+            tableName: trades
+

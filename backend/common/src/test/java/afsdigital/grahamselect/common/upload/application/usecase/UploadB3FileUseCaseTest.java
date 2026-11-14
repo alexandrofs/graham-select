@@ -43,14 +43,31 @@ public class UploadB3FileUseCaseTest {
         FileUploadedEvent result = useCase.execute(fileStream, filename, userId);
 
         verify(storagePort).save(fileStream, filename, userId);
-        verify(importStatusPort).createPending(result.correlationId(), userId, filename);
+        verify(importStatusPort).createPending(result.correlationId(), userId, filename, null);
         verify(eventPort).publish(argThat(event -> 
             event.userId().equals(userId) && 
+            event.profileId() == null &&
             event.fileName().equals(filename) && 
             event.storagePath().equals(savedPath) &&
             event.correlationId() != null &&
             event.eventId() != null &&
             "v1".equals(event.version())
         ));
+    }
+
+    @Test
+    public void shouldPropagateProfileIdWhenProvided() {
+        InputStream fileStream = mock(InputStream.class);
+        String userId = "user-123";
+        String profileId = "profile-uuid-1";
+        String filename = "negociacao.xlsx";
+        String savedPath = "/tmp/uploads/negociacao.xlsx";
+
+        when(storagePort.save(any(), eq(filename), eq(userId))).thenReturn(savedPath);
+
+        FileUploadedEvent result = useCase.execute(fileStream, filename, userId, profileId);
+
+        verify(importStatusPort).createPending(result.correlationId(), userId, filename, profileId);
+        verify(eventPort).publish(argThat(event -> profileId.equals(event.profileId())));
     }
 }
