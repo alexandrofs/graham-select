@@ -51,5 +51,7 @@ databaseChangeLog:
       file: db/changelog/26-create-dlq-messages-table.yaml
   - include:
       file: db/changelog/27-add-asset-class-to-company.yaml
+  - include:
+      file: db/changelog/28-ensure-manual-trade-audits-char36.yaml
 
 
