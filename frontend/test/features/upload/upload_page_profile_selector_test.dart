@@ -29,6 +29,12 @@ class FakeUploadRepository implements UploadRepository {
   }
 
   @override
+  Future<UploadResult> uploadBrokerageNoteFile(AppFile file, {String? profileId}) async {
+    lastProfileId = profileId;
+    return const UploadResult(success: true, message: 'enviado');
+  }
+
+  @override
   Future<UploadProcessingStatus> fetchB3UploadStatus(String correlationId) async {
     return UploadProcessingStatus(
       correlationId: correlationId,

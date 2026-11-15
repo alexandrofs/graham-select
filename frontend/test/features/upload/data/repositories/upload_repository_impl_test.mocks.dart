@@ -121,6 +121,31 @@ class MockUploadRemoteDataSource extends _i1.Mock
           as _i7.Future<_i3.UploadResponseModel>);
 
   @override
+  _i7.Future<_i3.UploadResponseModel> uploadBrokerageNoteFile(
+    _i8.AppFile? file, {
+    String? token,
+    String? profileId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #uploadBrokerageNoteFile,
+              [file],
+              {#token: token, #profileId: profileId},
+            ),
+            returnValue: _i7.Future<_i3.UploadResponseModel>.value(
+              _FakeUploadResponseModel_1(
+                this,
+                Invocation.method(
+                  #uploadBrokerageNoteFile,
+                  [file],
+                  {#token: token, #profileId: profileId},
+                ),
+              ),
+            ),
+          )
+          as _i7.Future<_i3.UploadResponseModel>);
+
+  @override
   _i7.Future<_i4.UploadStatusResponseModel> fetchB3UploadStatus(
     String? correlationId, {
     String? token,

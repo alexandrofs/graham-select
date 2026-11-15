@@ -22,12 +22,22 @@ class _B3UploadZoneState extends State<B3UploadZone> {
       onDragDone: (detail) async {
         if (detail.files.isNotEmpty) {
           final file = detail.files.first;
-          final bytes = await file.readAsBytes();
-          provider.setFile(AppFile(
-            name: file.name,
-            bytes: bytes,
-            size: bytes.length,
-          ));
+          final extension = file.name.split('.').last.toLowerCase();
+          if (extension == 'xlsx' || extension == 'pdf') {
+            final bytes = await file.readAsBytes();
+            provider.setFile(AppFile(
+              name: file.name,
+              bytes: bytes,
+              size: bytes.length,
+            ));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Formato não suportado. Utilize arquivos .xlsx (B3) ou .pdf (SINACOR).'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
         }
       },
       onDragEntered: (detail) => setState(() => _dragging = true),
@@ -66,7 +76,7 @@ class _B3UploadZoneState extends State<B3UploadZone> {
                 Text(
                   provider.hasFile
                       ? provider.selectedFile!.name
-                      : 'Arraste sua planilha da B3 aqui',
+                      : 'Arraste sua planilha da B3 (.xlsx) ou Nota de Corretagem SINACOR (.pdf) aqui',
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -74,7 +84,7 @@ class _B3UploadZoneState extends State<B3UploadZone> {
                 Text(
                   provider.hasFile
                       ? '${(provider.selectedFile!.size / 1024).toStringAsFixed(1)} KB'
-                      : 'ou clique para selecionar (.xlsx)',
+                      : 'ou clique para selecionar (.xlsx, .pdf)',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (provider.state == UploadState.uploading) ...[

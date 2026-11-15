@@ -46,6 +46,25 @@ class UploadRepositoryImpl implements UploadRepository {
   }
 
   @override
+  Future<UploadResult> uploadBrokerageNoteFile(AppFile file, {String? profileId}) async {
+    try {
+      final token = await authRepository.getPersistedToken();
+      final responseModel = await remoteDataSource.uploadBrokerageNoteFile(
+        file,
+        token: token,
+        profileId: profileId,
+      );
+      return responseModel.toEntity();
+    } catch (e) {
+      return UploadResult(
+        success: false,
+        message: 'Erro ao conectar com o servidor: ${e.toString()}',
+        statusCode: null,
+      );
+    }
+  }
+
+  @override
   Future<UploadProcessingStatus> fetchB3UploadStatus(String correlationId) async {
     final token = await authRepository.getPersistedToken();
     final responseModel = await remoteDataSource.fetchB3UploadStatus(correlationId, token: token);

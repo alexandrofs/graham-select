@@ -80,6 +80,30 @@ class MockUploadRepository extends _i1.Mock implements _i4.UploadRepository {
           as _i5.Future<_i2.UploadResult>);
 
   @override
+  _i5.Future<_i2.UploadResult> uploadBrokerageNoteFile(
+    _i6.AppFile? file, {
+    String? profileId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #uploadBrokerageNoteFile,
+              [file],
+              {#profileId: profileId},
+            ),
+            returnValue: _i5.Future<_i2.UploadResult>.value(
+              _FakeUploadResult_0(
+                this,
+                Invocation.method(
+                  #uploadBrokerageNoteFile,
+                  [file],
+                  {#profileId: profileId},
+                ),
+              ),
+            ),
+          )
+          as _i5.Future<_i2.UploadResult>);
+
+  @override
   _i5.Future<_i3.UploadProcessingStatus> fetchB3UploadStatus(
     String? correlationId,
   ) =>

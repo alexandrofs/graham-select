@@ -48,21 +48,24 @@ public class B3UploadController {
             @AuthenticationPrincipal Jwt jwt
     ) throws IOException {
         String userId = jwt.getSubject();
-        log.info("Recebido upload B3: userId={}, profileId={}, fileName={}", userId, profileId, file.getOriginalFilename());
+        String originalFilename = file != null ? file.getOriginalFilename() : null;
+        log.info("Recebido upload B3: userId={}, profileId={}, fileName={}", userId, profileId, originalFilename);
 
         String normalizedProfileId = resolveAndValidateProfileId(profileId, userId);
 
-        if (file.isEmpty() || file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".xlsx")) {
-            log.error("Erro na validação do arquivo B3: Formato não suportado ou vazio. Nome do arquivo: {}", file.getOriginalFilename());
+        if (file == null || file.isEmpty() || originalFilename == null || !originalFilename.toLowerCase(java.util.Locale.ROOT).endsWith(".xlsx")) {
+            log.error("Erro na validação do arquivo B3: Formato não suportado ou vazio. Nome do arquivo: {}", originalFilename);
             throw new B3UploadValidationException("Apenas arquivos .xlsx (Excel) da B3 são suportados no momento.");
         }
 
         byte[] fileBytes = file.getBytes();
         validateHeaders(fileBytes);
 
+        String safeFileName = java.nio.file.Paths.get(originalFilename).getFileName().toString();
+
         FileUploadedEvent event;
         try (InputStream is = new java.io.ByteArrayInputStream(fileBytes)) {
-            event = uploadB3FileUseCase.execute(is, file.getOriginalFilename(), userId, normalizedProfileId);
+            event = uploadB3FileUseCase.execute(is, safeFileName, userId, normalizedProfileId);
         }
 
         return ResponseEntity.accepted().body(new B3UploadAcceptedResponse(
