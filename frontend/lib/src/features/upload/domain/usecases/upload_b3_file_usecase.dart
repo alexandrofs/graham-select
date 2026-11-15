@@ -8,6 +8,9 @@ class UploadB3FileUseCase {
   UploadB3FileUseCase(this.repository);
 
   Future<UploadResult> call(AppFile file, {String? profileId}) {
+    if (file.name.trim().toLowerCase().endsWith('.pdf')) {
+      return repository.uploadBrokerageNoteFile(file, profileId: profileId);
+    }
     return repository.uploadB3File(file, profileId: profileId);
   }
 }

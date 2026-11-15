@@ -166,5 +166,29 @@ void main() {
       expect(result.success, false);
       expect(result.message, 'Server error');
     });
+
+    test('should handle PDF brokerage note upload through uploadB3File', () async {
+      // Arrange
+      final file = AppFile(
+        name: 'nota.pdf',
+        bytes: testBytes,
+        size: testBytes.length,
+      );
+      provider.setFile(file);
+
+      when(mockUploadB3FileUseCase(file, profileId: anyNamed('profileId'))).thenAnswer(
+        (_) async => const UploadResult(
+          success: true,
+          message: 'Nota enviada para processamento',
+          correlationId: 'corr-pdf-999',
+        ),
+      );
+
+      // Act
+      await provider.uploadB3File();
+
+      // Assert
+      verify(mockUploadB3FileUseCase(file, profileId: anyNamed('profileId'))).called(1);
+    });
   });
 }

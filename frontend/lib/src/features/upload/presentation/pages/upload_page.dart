@@ -51,7 +51,7 @@ class _UploadPageState extends State<UploadPage> {
               children: [
                 // Header
                 Text(
-                  'Importar Planilha da B3',
+                  'Importar Planilha da B3 e Notas de Corretagem',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -59,10 +59,26 @@ class _UploadPageState extends State<UploadPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Faça o upload do seu relatório de negociação extraído do portal do investidor B3 (.xlsx).',
+                  'Faça o upload do seu relatório de negociação B3 (.xlsx) ou da sua Nota de Corretagem SINACOR (.pdf).',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppTheme.textColor.withValues(alpha: 0.7),
                       ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    Chip(
+                      avatar: const Icon(Icons.table_chart_outlined, size: 16),
+                      label: const Text('.xlsx (Planilha B3)'),
+                      backgroundColor: AppTheme.surfaceColor,
+                    ),
+                    Chip(
+                      avatar: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                      label: const Text('.pdf (Nota SINACOR)'),
+                      backgroundColor: AppTheme.surfaceColor,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
 

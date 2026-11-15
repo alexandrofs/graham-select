@@ -105,5 +105,31 @@ void main() {
       expect(result.message, contains('Network error'));
       expect(result.statusCode, null);
     });
+
+    test('should return success result when uploadBrokerageNoteFile succeeds', () async {
+      // Arrange
+      final pdfFile = AppFile(
+        name: 'nota.pdf',
+        bytes: Uint8List.fromList([1, 2, 3]),
+        size: 3,
+      );
+      const responseModel = UploadResponseModel(
+        message: 'Nota enviada com sucesso',
+        statusCode: 202,
+        correlationId: 'corr-123',
+      );
+      when(
+        mockDataSource.uploadBrokerageNoteFile(pdfFile, token: anyNamed('token'), profileId: anyNamed('profileId')),
+      ).thenAnswer((_) async => responseModel);
+
+      // Act
+      final result = await repository.uploadBrokerageNoteFile(pdfFile, profileId: 'prof-1');
+
+      // Assert
+      expect(result.success, true);
+      expect(result.message, 'Nota enviada com sucesso');
+      expect(result.correlationId, 'corr-123');
+      verify(mockDataSource.uploadBrokerageNoteFile(pdfFile, token: 'test-token', profileId: 'prof-1')).called(1);
+    });
   });
 }

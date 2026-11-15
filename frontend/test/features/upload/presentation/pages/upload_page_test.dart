@@ -39,11 +39,12 @@ void main() {
     );
   }
 
-  testWidgets('deve exibir o título e a zona de upload da B3', (WidgetTester tester) async {
+  testWidgets('deve exibir o título e a zona de upload da B3 e Notas de Corretagem', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
     
-    expect(find.text('Importar Planilha da B3'), findsOneWidget);
-    expect(find.text('Arraste sua planilha da B3 aqui'), findsOneWidget);
+    expect(find.text('Importar Planilha da B3 e Notas de Corretagem'), findsOneWidget);
+    expect(find.text('Arraste sua planilha da B3 (.xlsx) ou Nota de Corretagem SINACOR (.pdf) aqui'), findsOneWidget);
+    expect(find.text('.pdf (Nota SINACOR)'), findsOneWidget);
   });
 }

@@ -47,7 +47,7 @@ class UploadProvider extends ChangeNotifier {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['xlsx'],
+        allowedExtensions: ['xlsx', 'pdf'],
         allowMultiple: false,
         withData: true, // Importante para Web!
       );

@@ -91,8 +91,8 @@ development_status:
   8-2-filtros-de-dashboard-e-recomendacoes-por-tag: done
   8-3-templates-e-onboarding-de-tags: ready-for-dev
   epic-8-retrospective: done
-  epic-9: backlog
-  9-1-importacao-de-nota-de-corretagem-pdf: backlog
+  epic-9: in-progress
+  9-1-importacao-de-nota-de-corretagem-pdf: done
   9-2-web-crawler-de-proventos-e-fatos-relevantes: backlog
   9-3-conector-open-finance: backlog
   epic-9-retrospective: optional

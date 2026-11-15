@@ -85,6 +85,44 @@ class UploadRemoteDataSource {
     }
   }
 
+  Future<UploadResponseModel> uploadBrokerageNoteFile(
+    AppFile file, {
+    String? token,
+    String? profileId,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/upload/brokerage-note');
+      final request = http.MultipartRequest('POST', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      if (profileId != null && profileId.trim().isNotEmpty) {
+        request.fields['profileId'] = profileId.trim();
+      }
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          file.bytes,
+          filename: file.name,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final Map<String, dynamic> jsonResponse = response.body.isNotEmpty
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : {};
+
+      return UploadResponseModel.fromJson(jsonResponse, response.statusCode);
+    } catch (e) {
+      throw Exception('Erro ao fazer upload da nota de corretagem: ${e.toString()}');
+    }
+  }
+
   Future<UploadStatusResponseModel> fetchB3UploadStatus(
     String correlationId, {
     String? token,
