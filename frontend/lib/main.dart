@@ -85,6 +85,12 @@ import 'src/features/tags/data/repositories/tag_repository_impl.dart';
 import 'src/features/tags/presentation/providers/tag_provider.dart';
 import 'src/features/tags/presentation/pages/tag_management_page.dart';
 
+// Dividends Feature Imports
+import 'src/features/dividends/data/datasources/dividend_remote_data_source.dart';
+import 'src/features/dividends/data/repositories/dividend_repository_impl.dart';
+import 'src/features/dividends/presentation/providers/dividend_provider.dart';
+import 'src/features/dividends/presentation/pages/dividends_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -169,6 +175,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   StreamSubscription<dynamic>? _tagAuthSubscription;
   String? _activeTagUserId;
 
+  late final DividendRemoteDataSource dividendRemoteDataSource;
+  late final DividendRepositoryImpl dividendRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -248,6 +257,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       _activeTagUserId = nextUserId;
     });
 
+    // Dividends Feature DI
+    dividendRemoteDataSource = DividendRemoteDataSource(apiClient: effectiveApiClient);
+    dividendRepository = DividendRepositoryImpl(remoteDataSource: dividendRemoteDataSource);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -290,6 +303,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/tags', builder: (context, state) => const TagManagementPage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
             GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
+            GoRoute(path: '/dividends', builder: (context, state) => const DividendsPage()),
             GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
             GoRoute(path: '/admin/dlq', builder: (context, state) => const AdminDlqPage()),
             GoRoute(path: '/admin/tickers', builder: (context, state) => const AdminTickersPage()),
@@ -337,6 +351,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider<TagProvider>.value(value: tagProvider),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
+        ChangeNotifierProvider(create: (_) => DividendProvider(repository: dividendRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminDlqProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminTickerProvider(repository: adminRepository)),
