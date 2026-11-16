@@ -53,6 +53,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Branching:** Novas funcionalidades devem ser desenvolvidas em branches nomeadas como `feature/nome-da-feature`.
 - **Commits:** Seguir Conventional Commits rigorosamente (ex: `feat: minha nova feature`, `fix: correcao de bug`).
 - **Deploy:** Nenhuma imagem Docker deve ser gerada via Dockerfile manual para o backend; utilizar sempre os comandos de Buildpacks nativos (`./mvnw spring-boot:build-image -pl api`).
+- **Pull Requests (PR):** Ao receber comando para abrir/criar PR, crie-o diretamente e de forma autônoma via API do GitHub (`POST /repos/{owner}/{repo}/pulls`) usando credenciais obtidas de `git credential fill`, sem transferir a ação para o usuário via link manual.
 
 ### Critical Don't-Miss Rules
 
