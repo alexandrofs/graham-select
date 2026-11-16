@@ -544,6 +544,90 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
+  /dividends/schedule:
+    get:
+      summary: Consulta agenda de proventos
+      description: Retorna a agenda consolidada de dividendos, JCP e rendimentos.
+      tags:
+        - Dividends
+      parameters:
+        - name: ticker
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: onlyMyTickers
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de proventos programados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DividendScheduleItem'
+  /dividends/facts:
+    get:
+      summary: Consulta fatos relevantes
+      description: Retorna comunicados e fatos relevantes corporativos.
+      tags:
+        - Dividends
+      parameters:
+        - name: ticker
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: onlyMyTickers
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de fatos relevantes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RelevantFactItem'
+  /admin/crawler/dividends/sync:
+    post:
+      summary: Disparo manual de sincronização de proventos e fatos relevantes
+      description: Endpoint restrito a administradores para forçar varredura de eventos corporativos.
+      tags:
+        - Admin
+      responses:
+        '200':
+          description: Resultado da sincronização de eventos corporativos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateEventSyncSummary'
+        '403':
+          description: Acesso restrito a administradores
 
 components:
   schemas:
@@ -762,4 +846,76 @@ components:
         timestamp:
           type: string
           format: date-time
+    DividendScheduleItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticker:
+          type: string
+        type:
+          type: string
+          enum: [DIVIDENDO, JCP, RENDIMENTO, BONIFICACAO, DESDOBRAMENTO]
+        rate:
+          type: number
+        netValue:
+          type: number
+        approvedDate:
+          type: string
+          format: date
+        comDate:
+          type: string
+          format: date
+        exDate:
+          type: string
+          format: date
+        paymentDate:
+          type: string
+          format: date
+        source:
+          type: string
+        status:
+          type: string
+        userShares:
+          type: number
+        estimatedTotal:
+          type: number
+        estimatedNetTotal:
+          type: number
+    RelevantFactItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticker:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        sourceUrl:
+          type: string
+        category:
+          type: string
+        publicationDate:
+          type: string
+          format: date-time
+    CorporateEventSyncSummary:
+      type: object
+      properties:
+        tickersProcessed:
+          type: integer
+        newDividends:
+          type: integer
+        updatedDividends:
+          type: integer
+        newFacts:
+          type: integer
+        executionTime:
+          type: string
+          format: date-time
+        status:
+          type: string
 

@@ -64,6 +64,9 @@
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/AdminApi.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/AdminApiController.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/AdminApiDelegate.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/DividendsApi.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/DividendsApiController.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/DividendsApiDelegate.java" />
                             </target>
                         </configuration>
                     </execution>
@@ -195,6 +198,11 @@
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.18.3</version>
         </dependency>
         <dependency>
             <groupId>afsdigital.grahamselect</groupId>

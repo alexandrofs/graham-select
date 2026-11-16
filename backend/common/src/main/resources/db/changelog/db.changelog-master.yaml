@@ -59,5 +59,7 @@ databaseChangeLog:
       file: db/changelog/30-create-portfolio-tags-and-asset-tags.yaml
   - include:
       file: db/changelog/31-add-tag-scope-to-allocation-goals-and-graham-recommendations.yaml
+  - include:
+      file: db/changelog/32-create-dividend-announcements-and-relevant-facts.yaml
 
 

@@ -48,7 +48,8 @@ class _Sidebar extends StatelessWidget {
       if (location.startsWith('/graham-recommendations')) return 4;
       if (location.startsWith('/upload')) return 5;
       if (location.startsWith('/metas')) return 6;
-      if (location.startsWith('/profile')) return 7;
+      if (location.startsWith('/dividends')) return 7;
+      if (location.startsWith('/profile')) return 8;
       return 0;
     }
 
@@ -74,6 +75,8 @@ class _Sidebar extends StatelessWidget {
           case 6:
             context.go('/metas');
           case 7:
+            context.go('/dividends');
+          case 8:
             context.go('/profile');
         }
       },
@@ -132,6 +135,11 @@ class _Sidebar extends StatelessWidget {
           label: Text('Metas'),
         ),
         NavigationRailDestination(
+          icon: Icon(Icons.calendar_month_outlined, key: Key('nav_dividends_button')),
+          selectedIcon: Icon(Icons.calendar_month),
+          label: Text('Proventos'),
+        ),
+        NavigationRailDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person),
           label: Text('Meu Perfil'),
@@ -156,7 +164,8 @@ class _BottomNavBar extends StatelessWidget {
       if (location.startsWith('/graham-recommendations')) return 4;
       if (location.startsWith('/upload')) return 5;
       if (location.startsWith('/metas')) return 6;
-      if (location.startsWith('/profile')) return 7;
+      if (location.startsWith('/dividends')) return 7;
+      if (location.startsWith('/profile')) return 8;
       return 0;
     }
 
@@ -179,6 +188,8 @@ class _BottomNavBar extends StatelessWidget {
           case 6:
             context.go('/metas');
           case 7:
+            context.go('/dividends');
+          case 8:
             context.go('/profile');
         }
       },
@@ -210,6 +221,10 @@ class _BottomNavBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.flag_outlined),
           label: 'Metas',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.calendar_month_outlined),
+          label: 'Proventos',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outline),

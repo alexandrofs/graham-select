@@ -45,3 +45,12 @@ brapi:
 market-data:
   sync:
     cron: ${MARKET_DATA_SYNC_CRON:0 0 20 * * MON-FRI}
+
+corporate-events:
+  sync:
+    cron: ${CORPORATE_EVENTS_SYNC_CRON:0 0 21 * * MON-FRI}
+
+crawler:
+  user-agent: ${CRAWLER_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 GrahamSelectCrawler/1.0}
+  timeout-ms: ${CRAWLER_TIMEOUT_MS:10000}
+
