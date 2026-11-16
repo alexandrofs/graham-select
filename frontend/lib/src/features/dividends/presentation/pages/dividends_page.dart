@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../domain/entities/relevant_fact.dart';
 import '../providers/dividend_provider.dart';
 import '../widgets/dividend_schedule_card.dart';
 import '../widgets/dividend_summary_header.dart';
@@ -114,6 +115,36 @@ class _DividendsPageState extends State<DividendsPage> with SingleTickerProvider
               ),
             ),
             const SizedBox(width: 8),
+            ActionChip(
+              key: const Key('dividends_date_range_button'),
+              avatar: Icon(
+                Icons.calendar_today_rounded,
+                size: 14,
+                color: provider.startDate != null ? AppTheme.primaryColor : Colors.white70,
+              ),
+              label: Text(
+                provider.startDate != null && provider.endDate != null
+                    ? '${provider.startDate!.day}/${provider.startDate!.month} - ${provider.endDate!.day}/${provider.endDate!.month}'
+                    : 'Período',
+                style: TextStyle(
+                  color: provider.startDate != null ? AppTheme.primaryColor : Colors.white70,
+                  fontSize: 12,
+                ),
+              ),
+              backgroundColor: provider.startDate != null
+                  ? AppTheme.primaryColor.withValues(alpha: 0.15)
+                  : AppTheme.surfaceColor,
+              onPressed: () => _pickDateRange(context, provider),
+            ),
+            if (provider.startDate != null) ...[
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 16, color: Colors.white60),
+                tooltip: 'Limpar período',
+                onPressed: () => provider.clearDateRange(),
+              ),
+            ],
+            const SizedBox(width: 8),
             IconButton(
               key: const Key('dividends_refresh_button'),
               icon: const Icon(Icons.refresh_rounded, color: Colors.white70),
@@ -178,7 +209,10 @@ class _DividendsPageState extends State<DividendsPage> with SingleTickerProvider
         itemCount: provider.facts.length,
         itemBuilder: (context, index) {
           final fact = provider.facts[index];
-          return RelevantFactCard(fact: fact);
+          return RelevantFactCard(
+            fact: fact,
+            onOpenUrl: () => _openFactUrl(context, fact),
+          );
         },
       );
     }
@@ -275,6 +309,66 @@ class _DividendsPageState extends State<DividendsPage> with SingleTickerProvider
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _pickDateRange(BuildContext context, DividendProvider provider) async {
+    final initialDateRange = provider.startDate != null && provider.endDate != null
+        ? DateTimeRange(start: provider.startDate!, end: provider.endDate!)
+        : null;
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      initialDateRange: initialDateRange,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppTheme.primaryColor,
+              onPrimary: Colors.black,
+              surface: AppTheme.surfaceColor,
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      provider.setDateRange(picked.start, picked.end);
+    }
+  }
+
+  void _openFactUrl(BuildContext context, RelevantFact fact) {
+    if (fact.sourceUrl == null || fact.sourceUrl!.isEmpty) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('${fact.ticker} - Documento Oficial'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(fact.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            const Text('Link do comunicado oficial na fonte:'),
+            const SizedBox(height: 6),
+            SelectableText(
+              fact.sourceUrl!,
+              style: const TextStyle(color: AppTheme.primaryColor),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
       ),
     );
   }

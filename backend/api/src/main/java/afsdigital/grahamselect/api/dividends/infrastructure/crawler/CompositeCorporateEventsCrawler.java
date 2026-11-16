@@ -50,7 +50,7 @@ public class CompositeCorporateEventsCrawler implements DividendCrawlerPort, Rel
                 List<DividendAnnouncement> brapiList = brapiDividendCrawler.crawlDividends(tickers);
                 mergeDividends(consolidated, brapiList);
             } catch (Exception e) {
-                log.warn("Erro ao coletar proventos na Brapi: {}", e.getMessage(), e);
+                log.error("Erro ao coletar proventos na Brapi para tickers {}: {}", tickers, e.getMessage(), e);
             }
         }
 
@@ -60,7 +60,7 @@ public class CompositeCorporateEventsCrawler implements DividendCrawlerPort, Rel
                 List<DividendAnnouncement> cvmList = cvmDividendCrawler.crawlDividends(tickers);
                 mergeDividends(consolidated, cvmList);
             } catch (Exception e) {
-                log.warn("Erro ao coletar proventos nos canais oficiais CVM: {}", e.getMessage(), e);
+                log.error("Erro ao coletar proventos nos canais oficiais CVM para tickers {}: {}", tickers, e.getMessage(), e);
             }
         }
 
@@ -104,7 +104,7 @@ public class CompositeCorporateEventsCrawler implements DividendCrawlerPort, Rel
         try {
             return cvmRelevantFactCrawler.crawlRelevantFacts(tickers);
         } catch (Exception e) {
-            log.warn("Erro ao coletar fatos relevantes na CVM: {}", e.getMessage(), e);
+            log.error("Erro ao coletar fatos relevantes na CVM para tickers {}: {}", tickers, e.getMessage(), e);
             return Collections.emptyList();
         }
     }

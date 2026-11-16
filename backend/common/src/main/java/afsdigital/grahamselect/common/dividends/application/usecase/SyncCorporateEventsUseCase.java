@@ -49,39 +49,45 @@ public class SyncCorporateEventsUseCase {
         try {
             // 1. Proventos
             List<DividendAnnouncement> announcements = dividendCrawlerPort.crawlDividends(tickers);
-            for (DividendAnnouncement announcement : announcements) {
-                try {
-                    boolean exists = dividendAnnouncementPort.existsByTickerAndComDateAndTypeAndRate(
-                            announcement.getTicker(),
-                            announcement.getComDate(),
-                            announcement.getType(),
-                            announcement.getRate()
-                    );
-                    dividendAnnouncementPort.save(announcement);
-                    if (exists) {
-                        updatedDividends++;
-                    } else {
-                        newDividends++;
+            if (announcements != null) {
+                for (DividendAnnouncement announcement : announcements) {
+                    if (announcement == null || announcement.getTicker() == null) continue;
+                    try {
+                        boolean exists = dividendAnnouncementPort.existsByTickerAndComDateAndTypeAndRate(
+                                announcement.getTicker(),
+                                announcement.getComDate(),
+                                announcement.getType(),
+                                announcement.getRate()
+                        );
+                        dividendAnnouncementPort.save(announcement);
+                        if (exists) {
+                            updatedDividends++;
+                        } else {
+                            newDividends++;
+                        }
+                    } catch (Exception e) {
+                        log.error("Erro ao persistir anúncio de provento para ticker={}: {}", announcement.getTicker(), e.getMessage(), e);
                     }
-                } catch (Exception e) {
-                    log.error("Erro ao persistir anúncio de provento para ticker={}: {}", announcement.getTicker(), e.getMessage(), e);
                 }
             }
 
             // 2. Fatos Relevantes
             List<RelevantFact> facts = relevantFactCrawlerPort.crawlRelevantFacts(tickers);
-            for (RelevantFact fact : facts) {
-                try {
-                    boolean exists = relevantFactPort.existsByTickerAndPublicationDate(
-                            fact.getTicker(),
-                            fact.getPublicationDate()
-                    );
-                    if (!exists) {
-                        relevantFactPort.save(fact);
-                        newFacts++;
+            if (facts != null) {
+                for (RelevantFact fact : facts) {
+                    if (fact == null || fact.getTicker() == null) continue;
+                    try {
+                        boolean exists = relevantFactPort.existsByTickerAndPublicationDate(
+                                fact.getTicker(),
+                                fact.getPublicationDate()
+                        );
+                        if (!exists) {
+                            relevantFactPort.save(fact);
+                            newFacts++;
+                        }
+                    } catch (Exception e) {
+                        log.error("Erro ao persistir fato relevante para ticker={}: {}", fact.getTicker(), e.getMessage(), e);
                     }
-                } catch (Exception e) {
-                    log.error("Erro ao persistir fato relevante para ticker={}: {}", fact.getTicker(), e.getMessage(), e);
                 }
             }
 

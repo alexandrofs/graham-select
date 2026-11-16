@@ -82,4 +82,21 @@ class BrapiCorporateEventsAdapterTest {
         assertThat(jcp.getNetValue()).isEqualByComparingTo(new BigDecimal("0.680000")); // 0.80 * 0.85
         assertThat(jcp.getComDate()).isEqualTo(LocalDate.of(2026, 5, 2));
     }
+
+    @Test
+    @DisplayName("Deve consultar lote com múltiplos tickers mantendo vírgula não escapada")
+    void shouldQueryBatchWithUnescapedComma() {
+        RestClient.Builder builder = RestClient.builder().baseUrl("https://brapi.dev/api");
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        RestClient restClient = builder.build();
+
+        BrapiCorporateEventsAdapter adapter = new BrapiCorporateEventsAdapter(restClient, "test-token");
+
+        server.expect(requestTo("https://brapi.dev/api/quote/PETR4,VALE3?dividends=true&token=test-token"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("{\"results\":[]}", MediaType.APPLICATION_JSON));
+
+        adapter.crawlDividends(List.of("PETR4", "VALE3"));
+        server.verify();
+    }
 }

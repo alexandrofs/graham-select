@@ -39,8 +39,9 @@ public class GetRelevantFactsUseCase {
                 List<CustodyPositionDTO> positions = getCustodyPositionsUseCase.execute(userId);
                 if (positions != null) {
                     myTickers = positions.stream()
-                            .filter(p -> p.quantity() != null && p.quantity().compareTo(BigDecimal.ZERO) > 0)
-                            .map(p -> p.ticker().toUpperCase())
+                            .filter(p -> p != null && p.ticker() != null && !p.ticker().isBlank()
+                                    && p.quantity() != null && p.quantity().compareTo(BigDecimal.ZERO) > 0)
+                            .map(p -> p.ticker().trim().toUpperCase())
                             .collect(Collectors.toSet());
                 }
             } catch (Exception e) {

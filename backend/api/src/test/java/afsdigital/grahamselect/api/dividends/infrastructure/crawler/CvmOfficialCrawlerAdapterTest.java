@@ -69,6 +69,36 @@ class CvmOfficialCrawlerAdapterTest {
     }
 
     @Test
+    @DisplayName("Deve extrair proventos com taxa formatada com ponto decimal sem corromper valor")
+    void shouldExtractDividendsWithDotDecimalRate() {
+        String html = """
+                <html>
+                <body>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>BBAS3</td>
+                        <td>DIVIDENDO</td>
+                        <td>2026-03-12</td>
+                        <td>2026-03-28</td>
+                        <td>0.854000</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </body>
+                </html>
+                """;
+
+        Document document = Jsoup.parse(html);
+        CvmOfficialCrawlerAdapter adapter = new CvmOfficialCrawlerAdapter(url -> document, "TestAgent/1.0", 5000);
+
+        List<DividendAnnouncement> announcements = adapter.crawlDividends(List.of("BBAS3"));
+
+        assertThat(announcements).hasSize(1);
+        assertThat(announcements.get(0).getRate()).isEqualByComparingTo(new BigDecimal("0.854000"));
+    }
+
+    @Test
     @DisplayName("Deve extrair fatos relevantes de documento HTML da CVM/B3 hermeticamente")
     void shouldExtractRelevantFactsFromCvmHtml() {
         String html = """

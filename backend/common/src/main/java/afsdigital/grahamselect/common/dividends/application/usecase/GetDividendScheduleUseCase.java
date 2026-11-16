@@ -41,8 +41,9 @@ public class GetDividendScheduleUseCase {
                 List<CustodyPositionDTO> positions = getCustodyPositionsUseCase.execute(userId);
                 if (positions != null) {
                     for (CustodyPositionDTO pos : positions) {
-                        if (pos.quantity() != null && pos.quantity().compareTo(BigDecimal.ZERO) > 0) {
-                            userSharesMap.merge(pos.ticker().toUpperCase(), pos.quantity(), BigDecimal::add);
+                        if (pos != null && pos.ticker() != null && !pos.ticker().isBlank()
+                                && pos.quantity() != null && pos.quantity().compareTo(BigDecimal.ZERO) > 0) {
+                            userSharesMap.merge(pos.ticker().trim().toUpperCase(), pos.quantity(), BigDecimal::add);
                         }
                     }
                 }

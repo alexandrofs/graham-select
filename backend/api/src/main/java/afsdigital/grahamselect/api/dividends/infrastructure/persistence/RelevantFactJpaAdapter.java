@@ -31,7 +31,9 @@ public class RelevantFactJpaAdapter implements RelevantFactPort {
         }
         List<RelevantFact> saved = new ArrayList<>();
         for (RelevantFact fact : facts) {
-            saved.add(save(fact));
+            if (fact != null) {
+                saved.add(save(fact));
+            }
         }
         return saved;
     }
@@ -39,6 +41,12 @@ public class RelevantFactJpaAdapter implements RelevantFactPort {
     @Override
     @Transactional
     public RelevantFact save(RelevantFact fact) {
+        if (fact == null) return null;
+        if (fact.getPublicationDate() == null) {
+            log.warn("Tentativa de salvar fato relevante sem data de publicação para ticker={}", fact.getTicker());
+            return fact;
+        }
+
         LocalDateTime pubDateUtc = LocalDateTime.ofInstant(fact.getPublicationDate(), ZoneOffset.UTC);
 
         if (repository.existsByTickerAndPublicationDate(fact.getTicker(), pubDateUtc)) {
@@ -75,12 +83,13 @@ public class RelevantFactJpaAdapter implements RelevantFactPort {
             int limit
     ) {
         boolean tickersEmpty = tickers == null || tickers.isEmpty();
+        List<String> safeTickers = tickersEmpty ? List.of("") : tickers;
         LocalDateTime startUtc = startDate != null ? LocalDateTime.ofInstant(startDate, ZoneOffset.UTC) : null;
         LocalDateTime endUtc = endDate != null ? LocalDateTime.ofInstant(endDate, ZoneOffset.UTC) : null;
         int pageLimit = limit > 0 ? limit : 20;
 
         List<RelevantFactEntity> entities = repository.findRecentFacts(
-                tickers,
+                safeTickers,
                 tickersEmpty,
                 startUtc,
                 endUtc,
@@ -92,6 +101,7 @@ public class RelevantFactJpaAdapter implements RelevantFactPort {
     @Override
     @Transactional(readOnly = true)
     public boolean existsByTickerAndPublicationDate(String ticker, Instant publicationDate) {
+        if (ticker == null || publicationDate == null) return false;
         LocalDateTime pubDateUtc = LocalDateTime.ofInstant(publicationDate, ZoneOffset.UTC);
         return repository.existsByTickerAndPublicationDate(ticker, pubDateUtc);
     }

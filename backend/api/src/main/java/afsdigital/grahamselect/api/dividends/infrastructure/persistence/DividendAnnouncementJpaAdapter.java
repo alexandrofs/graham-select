@@ -34,7 +34,9 @@ public class DividendAnnouncementJpaAdapter implements DividendAnnouncementPort 
         }
         List<DividendAnnouncement> saved = new ArrayList<>();
         for (DividendAnnouncement announcement : announcements) {
-            saved.add(save(announcement));
+            if (announcement != null) {
+                saved.add(save(announcement));
+            }
         }
         return saved;
     }
@@ -101,8 +103,9 @@ public class DividendAnnouncementJpaAdapter implements DividendAnnouncementPort 
             String status
     ) {
         boolean tickersEmpty = tickers == null || tickers.isEmpty();
+        List<String> safeTickers = tickersEmpty ? List.of("") : tickers;
         List<DividendAnnouncementEntity> entities = repository.findSchedule(
-                tickers,
+                safeTickers,
                 tickersEmpty,
                 startDate,
                 endDate,
