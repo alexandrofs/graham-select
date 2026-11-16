@@ -82,10 +82,10 @@ public class BrapiCorporateEventsAdapter implements DividendCrawlerPort {
         try {
             BrapiDividendsResponse response = brapiRestClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/quote/{tickers}")
+                            .path("/quote/" + tickers)
                             .queryParam("dividends", "true")
                             .queryParam("token", token)
-                            .build(tickers))
+                            .build())
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (req, resp) -> {
                         log.warn("Brapi API retornou status de erro: {} para tickers: {}", resp.getStatusCode(), tickers);
@@ -133,7 +133,7 @@ public class BrapiCorporateEventsAdapter implements DividendCrawlerPort {
                 LocalDate paymentDate = parseDate(item.paymentDate());
                 LocalDate approvedDate = parseDate(item.approvedOn());
                 CorporateEventType type = CorporateEventType.fromString(item.label());
-                String status = (paymentDate != null && paymentDate.isBefore(today)) ? "PAID" : "APPROVED";
+                String status = (paymentDate != null && !paymentDate.isAfter(today)) ? "PAID" : "APPROVED";
 
                 DividendAnnouncement announcement = DividendAnnouncement.builder()
                         .ticker(ticker)
@@ -170,7 +170,7 @@ public class BrapiCorporateEventsAdapter implements DividendCrawlerPort {
             }
             return LocalDate.parse(rawDate.trim(), DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (Exception e) {
-            log.warn("Não foi possível parsear data: {}", rawDate);
+            log.error("Não foi possível parsear data: {}", rawDate, e);
             return null;
         }
     }

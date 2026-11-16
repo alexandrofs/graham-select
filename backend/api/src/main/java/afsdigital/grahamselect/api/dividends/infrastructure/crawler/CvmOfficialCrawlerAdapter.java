@@ -68,7 +68,7 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
                     announcements.addAll(parseDividendsFromDoc(doc, cleanTicker));
                 }
             } catch (Exception e) {
-                log.warn("Falha no crawling de proventos CVM para ticker: {}. Erro: {}", cleanTicker, e.getMessage());
+                log.error("Falha no crawling de proventos CVM para ticker: {}. Erro: {}", cleanTicker, e.getMessage(), e);
             }
         }
 
@@ -95,7 +95,7 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
                     facts.addAll(parseRelevantFactsFromDoc(doc, cleanTicker));
                 }
             } catch (Exception e) {
-                log.warn("Falha no crawling de fatos relevantes CVM para ticker: {}. Erro: {}", cleanTicker, e.getMessage());
+                log.error("Falha no crawling de fatos relevantes CVM para ticker: {}. Erro: {}", cleanTicker, e.getMessage(), e);
             }
         }
 
@@ -122,10 +122,16 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
 
                 LocalDate paymentDate = parseLocalDate(cols.get(3).text().trim());
 
-                String rateStr = cols.get(4).text().replace("R$", "").replace(".", "").replace(",", ".").trim();
+                String rateStr = cols.get(4).text().replace("R$", "").trim();
+                if (rateStr.contains(",")) {
+                    rateStr = rateStr.replace(".", "").replace(",", ".");
+                }
                 BigDecimal rate = new BigDecimal(rateStr);
+                if (rate.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
 
-                String status = (paymentDate != null && paymentDate.isBefore(LocalDate.now(ZoneOffset.UTC)))
+                String status = (paymentDate != null && !paymentDate.isAfter(LocalDate.now(ZoneOffset.UTC)))
                         ? "PAID"
                         : "APPROVED";
 
@@ -141,7 +147,7 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
 
                 list.add(announcement);
             } catch (Exception e) {
-                log.warn("Erro ao parsear linha de provento CVM: {}. Erro: {}", row.text(), e.getMessage());
+                log.error("Erro ao parsear linha de provento CVM: {}. Erro: {}", row.text(), e.getMessage(), e);
             }
         }
         return list;
@@ -178,9 +184,13 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
                         : "FATO_RELEVANTE";
 
                 Element dateEl = item.selectFirst(".data, time");
-                Instant pubDate = Instant.now();
+                Instant pubDate = null;
                 if (dateEl != null && !dateEl.text().isBlank()) {
                     pubDate = parseInstant(dateEl.text().trim());
+                }
+                if (pubDate == null) {
+                    // Descarte de fatos sem data válida para evitar duplicatas não-determinísticas
+                    continue;
                 }
 
                 RelevantFact fact = RelevantFact.builder()
@@ -194,7 +204,7 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
 
                 list.add(fact);
             } catch (Exception e) {
-                log.warn("Erro ao parsear fato relevante CVM: {}. Erro: {}", item.text(), e.getMessage());
+                log.error("Erro ao parsear fato relevante CVM: {}. Erro: {}", item.text(), e.getMessage(), e);
             }
         }
         return list;
@@ -208,13 +218,13 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
             }
             return LocalDate.parse(str, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         } catch (Exception e) {
-            log.warn("Data inválida no crawler CVM: {}", str);
+            log.error("Data inválida no crawler CVM: {}", str, e);
             return null;
         }
     }
 
     private Instant parseInstant(String str) {
-        if (str == null || str.isBlank()) return Instant.now();
+        if (str == null || str.isBlank()) return null;
         try {
             if (str.contains("T")) {
                 return Instant.parse(str);
@@ -224,8 +234,8 @@ public class CvmOfficialCrawlerAdapter implements DividendCrawlerPort, RelevantF
                 return ld.atStartOfDay(ZoneOffset.UTC).toInstant();
             }
         } catch (Exception e) {
-            log.warn("Instant inválido no crawler CVM: {}", str);
+            log.error("Instant inválido no crawler CVM: {}", str, e);
         }
-        return Instant.now();
+        return null;
     }
 }

@@ -108,6 +108,22 @@ class DividendControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/dividends/schedule com filtros de data deve delegar parâmetros ao caso de uso")
+    void shouldReturnDividendScheduleWithDateFilters() throws Exception {
+        LocalDate start = LocalDate.of(2026, 1, 1);
+        LocalDate end = LocalDate.of(2026, 12, 31);
+
+        when(getDividendScheduleUseCase.execute(eq("user-123"), isNull(), eq(start), eq(end), isNull(), eq(false)))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/dividends/schedule")
+                        .param("startDate", "2026-01-01")
+                        .param("endDate", "2026-12-31")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("GET /api/v1/dividends/facts deve retornar lista de fatos relevantes com status 200 OK")
     void shouldReturnRelevantFacts() throws Exception {
         RelevantFactDTO fact = new RelevantFactDTO(

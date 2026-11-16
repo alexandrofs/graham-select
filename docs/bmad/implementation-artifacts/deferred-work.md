@@ -32,3 +32,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 7-1-vinculo-de-novo-cpf-a-conta-matriz (2026-11-13)
 - Implementar `Persistable<UUID>` em `FamilyProfileEntity` (`backend/api/src/main/java/afsdigital/grahamselect/api/family/infrastructure/persistence/jpa/entities/FamilyProfileEntity.java`) para evitar `SELECT` prévio antes de `INSERT` em `FamilyProfileJpaAdapter.save()`.
+
+## Deferred from: code review of 9-2-web-crawler-de-proventos-e-fatos-relevantes.md (2026-11-15)
+
+- Endpoints Ideais e Protocolo Rad/ENET da CVM [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CvmOfficialCrawlerAdapter.java:467] — A extração avançada de formulários e autenticação na sessão do sistema CVM Rad/ENET requer engenharia reversa de protocolo governamental além do escopo da história 9.2, onde Brapi opera como fonte primária robusta.
+- Consulta de Agenda com Expressão COALESCE Sem Índice Funcional e Sem Paginação [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/persistence/jpa/repositories/DividendAnnouncementJpaRepository.java:1131] — Em grande escala de dados, `COALESCE(paymentDate, comDate)` impede uso de índices B-Tree padrão e ausência de `Pageable` pode onerar memória.

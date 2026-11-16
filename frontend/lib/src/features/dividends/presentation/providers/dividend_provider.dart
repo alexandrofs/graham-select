@@ -12,6 +12,8 @@ class DividendProvider extends ChangeNotifier {
   List<RelevantFact> _facts = [];
   bool _onlyMyAssets = false;
   String? _selectedTicker;
+  DateTime? _startDate;
+  DateTime? _endDate;
   int _selectedTab = 0; // 0 = Agenda de Proventos, 1 = Fatos Relevantes
 
   DividendProvider({required this.repository});
@@ -22,6 +24,8 @@ class DividendProvider extends ChangeNotifier {
   List<RelevantFact> get facts => _facts;
   bool get onlyMyAssets => _onlyMyAssets;
   String? get selectedTicker => _selectedTicker;
+  DateTime? get startDate => _startDate;
+  DateTime? get endDate => _endDate;
   int get selectedTab => _selectedTab;
 
   double get totalEstimatedNext30Days {
@@ -62,31 +66,57 @@ class DividendProvider extends ChangeNotifier {
     loadData();
   }
 
+  void setDateRange(DateTime? start, DateTime? end) {
+    _startDate = start;
+    _endDate = end;
+    notifyListeners();
+    loadData();
+  }
+
+  void clearDateRange() {
+    _startDate = null;
+    _endDate = null;
+    notifyListeners();
+    loadData();
+  }
+
   Future<void> loadData() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    try {
-      final results = await Future.wait([
-        repository.getDividendSchedule(
-          ticker: _selectedTicker,
-          onlyMyTickers: _onlyMyAssets,
-        ),
-        repository.getRelevantFacts(
-          ticker: _selectedTicker,
-          onlyMyTickers: _onlyMyAssets,
-        ),
-      ]);
+    String? scheduleError;
+    String? factsError;
 
-      _schedule = results[0] as List<DividendAnnouncement>;
-      _facts = results[1] as List<RelevantFact>;
-      _isLoading = false;
-      notifyListeners();
+    try {
+      _schedule = await repository.getDividendSchedule(
+        ticker: _selectedTicker,
+        startDate: _startDate,
+        endDate: _endDate,
+        onlyMyTickers: _onlyMyAssets,
+      );
     } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      _isLoading = false;
-      notifyListeners();
+      scheduleError = e.toString().replaceFirst('Exception: ', '');
     }
+
+    try {
+      _facts = await repository.getRelevantFacts(
+        ticker: _selectedTicker,
+        onlyMyTickers: _onlyMyAssets,
+      );
+    } catch (e) {
+      factsError = e.toString().replaceFirst('Exception: ', '');
+    }
+
+    if (scheduleError != null && factsError != null) {
+      _errorMessage = scheduleError;
+    } else if (scheduleError != null && _selectedTab == 0) {
+      _errorMessage = scheduleError;
+    } else if (factsError != null && _selectedTab == 1) {
+      _errorMessage = factsError;
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 }

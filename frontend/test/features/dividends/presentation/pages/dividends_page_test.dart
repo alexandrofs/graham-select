@@ -104,6 +104,13 @@ void main() {
     expect(find.text('VALE3'), findsOneWidget);
     expect(find.text('Programa de Recompra de Ações'), findsOneWidget);
     expect(find.text('Ver documento oficial'), findsOneWidget);
+
+    await tester.tap(find.text('Ver documento oficial'));
+    await tester.pumpAndSettle();
+    expect(find.text('VALE3 - Documento Oficial'), findsOneWidget);
+    expect(find.text('https://cvm.gov.br/doc/123'), findsOneWidget);
+    await tester.tap(find.text('Fechar'));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Deve exibir empty state quando não houver proventos', (tester) async {

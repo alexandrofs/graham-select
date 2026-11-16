@@ -6,7 +6,7 @@ story_key: "9-2-web-crawler-de-proventos-e-fatos-relevantes"
 
 # Story 9.2: Web Crawler de Proventos e Fatos Relevantes
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -211,6 +211,23 @@ Para que a agenda de proventos (Data COM, Data EX, Data de Pagamento, Valor por 
   - [x] 8.2 Executar `flutter analyze` garantindo 0 erros e 0 warnings.
   - [x] 8.3 Executar `flutter test` garantindo 100% de sucesso nos testes de frontend.
   - [x] 8.4 Validar conformidade de todos os novos logs de API, schedulers e captura de exceções com as regras de `AGENTS.md`.
+
+### Review Findings
+
+- [x] [Review][Decision] Consistência do Rótulo de Navegação — mantido 'Proventos' para evitar quebra em telas menores conforme decisão do usuário.
+- [x] [Review][Patch] Implementar Seletor de Intervalo de Datas no Frontend e DividendProvider [frontend/lib/src/features/dividends/presentation/pages/dividends_page.dart:4516]
+- [x] [Review][Patch] Ação Inoperante em RelevantFactCard [frontend/lib/src/features/dividends/presentation/pages/dividends_page.dart:4624]
+- [x] [Review][Patch] Corrupção na Conversão Numérica de Taxas em CvmOfficialCrawlerAdapter [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CvmOfficialCrawlerAdapter.java:527]
+- [x] [Review][Patch] Violação do Padrão de Logs do AGENTS.md e AC 8 em Crawlers e Adapters [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CvmOfficialCrawlerAdapter.java:472]
+- [x] [Review][Patch] Defeito de URL Encoding em Consultas Batch na Brapi [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/BrapiCorporateEventsAdapter.java:160]
+- [x] [Review][Patch] Fallback Não-Determinístico Instant.now() Gerando Registros Duplicados [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CvmOfficialCrawlerAdapter.java:583]
+- [x] [Review][Patch] Inconsistência de Borda no Cálculo de Status de Pagamento no Dia [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/BrapiCorporateEventsAdapter.java:212]
+- [x] [Review][Patch] Ponto Único de Falha no Carregamento de Dados do Frontend [frontend/lib/src/features/dividends/presentation/providers/dividend_provider.dart:4799]
+- [x] [Review][Patch] Blindagem contra Null em Use Cases e Adapters [backend/common/src/main/java/afsdigital/grahamselect/common/dividends/application/usecase/SyncCorporateEventsUseCase.java:2866]
+- [x] [Review][Patch] Contexto de Ticker Ausente nos Logs de Fallback do Composite Crawler [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CompositeCorporateEventsCrawler.java:338]
+- [x] [Review][Patch] Verificação de 403 Forbidden e Controle de Acesso Ausente nos Testes de Controller [backend/api/src/test/java/afsdigital/grahamselect/api/admin/web/AdminDividendCrawlerControllerTest.java:1648]
+- [x] [Review][Defer] Endpoints Ideais e Protocolo Rad/ENET da CVM [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CvmOfficialCrawlerAdapter.java:467] — deferred, pre-existing
+- [x] [Review][Defer] Consulta de Agenda com Expressão COALESCE Sem Índice Funcional e Sem Paginação [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/persistence/jpa/repositories/DividendAnnouncementJpaRepository.java:1131] — deferred, pre-existing
 
 ## Dev Notes
 

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-13
-last_updated: 2026-11-15
+last_updated: 2026-11-16
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -93,7 +93,7 @@ development_status:
   epic-8-retrospective: done
   epic-9: in-progress
   9-1-importacao-de-nota-de-corretagem-pdf: done
-  9-2-web-crawler-de-proventos-e-fatos-relevantes: in-progress
+  9-2-web-crawler-de-proventos-e-fatos-relevantes: done
   9-3-conector-open-finance: backlog
   epic-9-retrospective: optional
   epic-10: backlog

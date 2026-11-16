@@ -54,4 +54,14 @@ class AdminDividendCrawlerControllerTest {
                 .andExpect(jsonPath("$.newFacts").value(4))
                 .andExpect(jsonPath("$.status").value("SUCCESS"));
     }
+
+    @Test
+    @DisplayName("Endpoint triggerSync deve ser protegido com a anotação @RequireAdmin")
+    void shouldBeAnnotatedWithRequireAdmin() throws NoSuchMethodException {
+        var method = AdminDividendCrawlerController.class.getMethod("triggerSync", org.springframework.security.core.Authentication.class);
+        org.junit.jupiter.api.Assertions.assertTrue(
+                method.isAnnotationPresent(afsdigital.grahamselect.api.auth.infrastructure.security.RequireAdmin.class),
+                "O endpoint deve conter a anotação @RequireAdmin"
+        );
+    }
 }
