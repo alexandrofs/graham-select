@@ -54,3 +54,17 @@ crawler:
   user-agent: ${CRAWLER_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 GrahamSelectCrawler/1.0}
   timeout-ms: ${CRAWLER_TIMEOUT_MS:10000}
 
+openfinance:
+  encryption:
+    secret-key: ${OPENFINANCE_ENCRYPTION_KEY:0123456789abcdef0123456789abcdef}
+  sync:
+    cron: ${OPENFINANCE_SYNC_CRON:0 0 6 * * *}
+  webhook:
+    secret: ${OPENFINANCE_WEBHOOK_SECRET:sandbox-openfinance-webhook-secret-2026}
+  mock:
+    enabled: ${OPENFINANCE_MOCK_ENABLED:true}
+  client:
+    connect-timeout-ms: ${OPENFINANCE_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${OPENFINANCE_READ_TIMEOUT_MS:15000}
+
+

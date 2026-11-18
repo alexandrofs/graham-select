@@ -61,5 +61,7 @@ databaseChangeLog:
       file: db/changelog/31-add-tag-scope-to-allocation-goals-and-graham-recommendations.yaml
   - include:
       file: db/changelog/32-create-dividend-announcements-and-relevant-facts.yaml
+  - include:
+      file: db/changelog/33-create-open-finance-connections-and-sync-logs.yaml
 
 

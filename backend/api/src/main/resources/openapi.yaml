@@ -628,6 +628,119 @@ paths:
                 $ref: '#/components/schemas/CorporateEventSyncSummary'
         '403':
           description: Acesso restrito a administradores
+  /api/v1/open-finance/institutions:
+    get:
+      summary: Lista instituições parceiras disponíveis para Open Finance
+      tags:
+        - Open Finance
+      responses:
+        '200':
+          description: Lista de instituições parceiras
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenFinanceInstitutionItem'
+  /api/v1/open-finance/connections:
+    get:
+      summary: Lista conexões Open Finance ativas do investidor
+      tags:
+        - Open Finance
+      responses:
+        '200':
+          description: Lista de conexões
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenFinanceConnectionItem'
+    post:
+      summary: Inicia conexão Open Finance gerando URL de consentimento
+      tags:
+        - Open Finance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateOpenFinanceConnectionRequest'
+      responses:
+        '201':
+          description: Conexão iniciada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentUrlResponse'
+  /api/v1/open-finance/connections/callback:
+    post:
+      summary: Processa callback de autorização e ativa conexão Open Finance
+      tags:
+        - Open Finance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeConsentCallbackRequest'
+      responses:
+        '200':
+          description: Conexão ativada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenFinanceConnectionItem'
+  /api/v1/open-finance/connections/{id}/sync:
+    post:
+      summary: Dispara sincronização sob demanda de uma conexão Open Finance
+      tags:
+        - Open Finance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Resultado da sincronização
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenFinanceSyncResult'
+  /api/v1/open-finance/connections/{id}:
+    delete:
+      summary: Desconecta e revoga consentimento de conexão Open Finance
+      tags:
+        - Open Finance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Conexão revogada com sucesso
+  /api/v1/open-finance/webhook:
+    post:
+      summary: Webhook para notificações assíncronas de parceiros Open Finance
+      tags:
+        - Open Finance
+      parameters:
+        - name: X-Webhook-Secret
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evento recebido com sucesso
+        '401':
+          description: Segredo de webhook inválido ou ausente
 
 components:
   schemas:
@@ -918,4 +1031,106 @@ components:
           format: date-time
         status:
           type: string
+    OpenFinanceInstitutionItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logoUrl:
+          type: string
+        enabled:
+          type: boolean
+        description:
+          type: string
+    InitiateOpenFinanceConnectionRequest:
+      type: object
+      required:
+        - institutionId
+      properties:
+        institutionId:
+          type: string
+        profileId:
+          type: string
+          format: uuid
+    ConsentUrlResponse:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          format: uuid
+        consentUrl:
+          type: string
+        state:
+          type: string
+    ExchangeConsentCallbackRequest:
+      type: object
+      required:
+        - connectionId
+        - code
+      properties:
+        connectionId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        state:
+          type: string
+    OpenFinanceConnectionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+        profileId:
+          type: string
+          format: uuid
+        institutionId:
+          type: string
+        institutionName:
+          type: string
+        institutionLogoUrl:
+          type: string
+        status:
+          type: string
+        consentExpiresAt:
+          type: string
+          format: date-time
+        lastSyncAt:
+          type: string
+          format: date-time
+        lastSyncStatus:
+          type: string
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    OpenFinanceSyncResult:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        positionsFetched:
+          type: integer
+        transactionsFetched:
+          type: integer
+        tradesCreated:
+          type: integer
+        tradesDuplicated:
+          type: integer
+        message:
+          type: string
+        syncedAt:
+          type: string
+          format: date-time
 

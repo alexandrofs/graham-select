@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-13
-last_updated: 2026-11-16
+last_updated: 2026-11-18
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -91,10 +91,10 @@ development_status:
   8-2-filtros-de-dashboard-e-recomendacoes-por-tag: done
   8-3-templates-e-onboarding-de-tags: ready-for-dev
   epic-8-retrospective: done
-  epic-9: in-progress
+  epic-9: done
   9-1-importacao-de-nota-de-corretagem-pdf: done
   9-2-web-crawler-de-proventos-e-fatos-relevantes: done
-  9-3-conector-open-finance: backlog
+  9-3-conector-open-finance: done
   epic-9-retrospective: optional
   epic-10: backlog
   10-1-relatorio-de-bens-e-direitos-informe-anual: backlog
