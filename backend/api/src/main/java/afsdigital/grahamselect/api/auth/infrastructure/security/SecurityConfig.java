@@ -33,6 +33,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/public/**").permitAll()
+                .requestMatchers("/api/v1/open-finance/webhook").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/test/auth/**").authenticated() // For testing
                 .anyRequest().authenticated()

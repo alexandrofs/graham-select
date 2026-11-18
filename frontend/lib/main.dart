@@ -91,6 +91,11 @@ import 'src/features/dividends/data/repositories/dividend_repository_impl.dart';
 import 'src/features/dividends/presentation/providers/dividend_provider.dart';
 import 'src/features/dividends/presentation/pages/dividends_page.dart';
 
+// Open Finance Feature Imports
+import 'src/features/open_finance/data/datasources/open_finance_remote_data_source.dart';
+import 'src/features/open_finance/data/repositories/open_finance_repository_impl.dart';
+import 'src/features/open_finance/presentation/providers/open_finance_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -178,6 +183,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final DividendRemoteDataSource dividendRemoteDataSource;
   late final DividendRepositoryImpl dividendRepository;
 
+  late final OpenFinanceRemoteDataSource openFinanceRemoteDataSource;
+  late final OpenFinanceRepositoryImpl openFinanceRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -260,6 +268,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     // Dividends Feature DI
     dividendRemoteDataSource = DividendRemoteDataSource(apiClient: effectiveApiClient);
     dividendRepository = DividendRepositoryImpl(remoteDataSource: dividendRemoteDataSource);
+
+    // Open Finance Feature DI
+    openFinanceRemoteDataSource = OpenFinanceRemoteDataSourceImpl(apiClient: effectiveApiClient);
+    openFinanceRepository = OpenFinanceRepositoryImpl(remoteDataSource: openFinanceRemoteDataSource);
 
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
@@ -352,6 +364,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(create: (_) => DividendProvider(repository: dividendRepository)),
+        ChangeNotifierProvider(create: (_) => OpenFinanceProvider(repository: openFinanceRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminDlqProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminTickerProvider(repository: adminRepository)),

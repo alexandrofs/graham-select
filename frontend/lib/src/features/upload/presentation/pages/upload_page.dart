@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../family_holding/presentation/providers/family_profile_provider.dart';
+import '../../../open_finance/presentation/widgets/open_finance_tab.dart';
 import '../providers/upload_provider.dart';
 import '../widgets/b3_upload_zone.dart';
 import '../widgets/upload_progress_widget.dart';
@@ -14,6 +15,8 @@ class UploadPage extends StatefulWidget {
 }
 
 class _UploadPageState extends State<UploadPage> {
+  int _selectedTab = 0;
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +85,35 @@ class _UploadPageState extends State<UploadPage> {
                 ),
                 const SizedBox(height: 24),
 
+                // Seletor de modo de importação: Manual vs Open Finance
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment<int>(
+                        value: 0,
+                        label: Text('Upload Manual (.xlsx / .pdf)'),
+                        icon: Icon(Icons.upload_file),
+                      ),
+                      ButtonSegment<int>(
+                        value: 1,
+                        label: Text('Open Finance (Automático)'),
+                        icon: Icon(Icons.sync),
+                      ),
+                    ],
+                    selected: {_selectedTab},
+                    onSelectionChanged: (Set<int> newSelection) {
+                      setState(() {
+                        _selectedTab = newSelection.first;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                if (_selectedTab == 1)
+                  const OpenFinanceTab()
+                else ...[
                 if (profiles.isNotEmpty) ...[
                   Builder(
                     builder: (context) {
@@ -269,6 +301,7 @@ class _UploadPageState extends State<UploadPage> {
                     child: const Text('Tentar Novamente'),
                   ),
                 ],
+              ],
               ],
             ),
           );
