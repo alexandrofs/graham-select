@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -16,6 +17,7 @@ public class TaxAssetDeclarationReport {
     private final BigDecimal currentYearTotal;
     private final BigDecimal netVariation;
     private final BigDecimal percentageVariation;
+    private final Map<String, BigDecimal> subtotalsByGroup;
     private final List<TaxAssetDeclarationItem> items;
 
 }

@@ -30,6 +30,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -115,6 +116,7 @@ class TaxDeclarationControllerTest {
                 new BigDecimal("5250.00"),
                 new BigDecimal("-1750.00"),
                 new BigDecimal("-25.00"),
+                Map.of("03", new BigDecimal("5250.00")),
                 List.of(item)
         );
     }
@@ -148,18 +150,15 @@ class TaxDeclarationControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/tax/bens-e-direitos com profileId não pertencente ao usuário deve lançar FamilyProfileNotFoundException")
-    void shouldThrowWhenProfileNotFound() {
+    @DisplayName("GET /api/v1/tax/bens-e-direitos com profileId não pertencente ao usuário deve retornar 404 Not Found")
+    void shouldThrowWhenProfileNotFound() throws Exception {
         UUID profileId = UUID.randomUUID();
         when(premiumFeatureAccessGuard.canAccessPremiumFeatures()).thenReturn(true);
         when(familyProfilePort.findActiveByIdAndMasterUserId(profileId, "user-123")).thenReturn(Optional.empty());
 
-        try {
-            mockMvc.perform(get("/api/v1/tax/bens-e-direitos")
-                    .param("profileId", profileId.toString()));
-        } catch (Exception e) {
-            assertThat(e.getCause()).isInstanceOf(FamilyProfileNotFoundException.class);
-        }
+        mockMvc.perform(get("/api/v1/tax/bens-e-direitos")
+                        .param("profileId", profileId.toString()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -196,7 +195,7 @@ class TaxDeclarationControllerTest {
                         .param("year", "2025"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, org.hamcrest.Matchers.startsWith("text/csv")))
-                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "form-data; name=\"attachment\"; filename=\"informe_bens_direitos_2025.csv\""))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"informe_bens_direitos_2025.csv\""))
                 .andReturn().getResponse().getContentAsByteArray();
 
         // Verificar UTF-8 BOM (\uFEFF -> 0xEF, 0xBB, 0xBF)

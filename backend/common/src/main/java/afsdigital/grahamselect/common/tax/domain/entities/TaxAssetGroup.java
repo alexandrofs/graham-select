@@ -23,6 +23,12 @@ public enum TaxAssetGroup {
             "NASD11", "BBSD11", "ISUS11", "GENB11"
     );
 
+    private static final Set<String> KNOWN_UNITS = Set.of(
+            "TAEE11", "SANB11", "KLBN11", "ALUP11", "SAPR11", "BPAC11",
+            "CPLE11", "ENGI11", "TIET11", "SULA11", "RANI11", "MODL11",
+            "PPLA11"
+    );
+
     private final String groupCode;
     private final String itemCode;
     private final String groupDescription;
@@ -41,7 +47,7 @@ public enum TaxAssetGroup {
             if (assetClass.contains("FII") || assetClass.contains("IMOBILIAR")) {
                 return FII;
             }
-            if (assetClass.contains("FIAGRO") || assetClass.contains("AGRO")) {
+            if (assetClass.contains("FIAGRO")) {
                 return FIAGRO;
             }
             if (assetClass.contains("BDR")) {
@@ -70,6 +76,9 @@ public enum TaxAssetGroup {
         if (ticker.endsWith("11")) {
             if (KNOWN_ETFS.contains(ticker)) {
                 return ETF;
+            }
+            if (KNOWN_UNITS.contains(ticker)) {
+                return ACOES;
             }
             return FII;
         }

@@ -34,11 +34,14 @@ class TaxProvider extends ChangeNotifier {
     try {
       final years = await repository.getAvailableYears(profileId: _selectedProfileId);
       _availableYears = years;
-      if (_selectedYear == null) {
-        if (_availableYears.isNotEmpty) {
+      final defaultYear = DateTime.now().year - 1;
+      if (_selectedYear == null || !_availableYears.contains(_selectedYear)) {
+        if (_availableYears.contains(defaultYear)) {
+          _selectedYear = defaultYear;
+        } else if (_availableYears.isNotEmpty) {
           _selectedYear = _availableYears.first;
         } else {
-          _selectedYear = DateTime.now().year - 1;
+          _selectedYear = defaultYear;
         }
       }
       notifyListeners();
@@ -103,7 +106,6 @@ class TaxProvider extends ChangeNotifier {
       return csv;
     } catch (e) {
       _isExporting = false;
-      _errorMessage = 'Falha ao exportar CSV: ${e.toString()}';
       notifyListeners();
       return null;
     }

@@ -10,6 +10,7 @@ import afsdigital.grahamselect.common.tax.application.usecase.GetTaxAssetDeclara
 import afsdigital.grahamselect.common.tax.application.usecase.GetTaxAvailableYearsUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,7 +60,7 @@ public class TaxDeclarationController {
             return ResponseEntity.ok(report);
         } catch (FamilyProfileNotFoundException e) {
             log.error("Perfil familiar não encontrado: userId={}, profileId={}, erro={}", userId, profileId, e.getMessage(), e);
-            throw e;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil familiar não encontrado.", e);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -112,12 +113,12 @@ public class TaxDeclarationController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
-            headers.setContentDispositionFormData("attachment", filename);
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
 
             return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
         } catch (FamilyProfileNotFoundException e) {
             log.error("Perfil familiar não encontrado para exportação CSV: userId={}, profileId={}, erro={}", userId, profileId, e.getMessage(), e);
-            throw e;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil familiar não encontrado.", e);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -141,7 +142,7 @@ public class TaxDeclarationController {
             return ResponseEntity.ok(years);
         } catch (FamilyProfileNotFoundException e) {
             log.error("Perfil familiar não encontrado para available-years: userId={}, profileId={}, erro={}", userId, profileId, e.getMessage(), e);
-            throw e;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil familiar não encontrado.", e);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -180,10 +181,14 @@ public class TaxDeclarationController {
         if (value == null) {
             return "";
         }
-        if (value.contains(";") || value.contains("\"") || value.contains("\n") || value.contains("\r")) {
-            return "\"" + value.replace("\"", "\"\"") + "\"";
+        String sanitized = value;
+        if (sanitized.startsWith("=") || sanitized.startsWith("+") || sanitized.startsWith("-") || sanitized.startsWith("@")) {
+            sanitized = "'" + sanitized;
         }
-        return value;
+        if (sanitized.contains(";") || sanitized.contains("\"") || sanitized.contains("\n") || sanitized.contains("\r")) {
+            return "\"" + sanitized.replace("\"", "\"\"") + "\"";
+        }
+        return sanitized;
     }
 
     private String formatQuantityCsv(BigDecimal quantity) {

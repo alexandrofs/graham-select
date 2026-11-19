@@ -6,7 +6,7 @@ baseline_commit: "1d49faa1024eb5b8e71de50fa1a64d48c441ac79"
 
 # Story 10.1: Relatório de Bens e Direitos (Informe Anual)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -244,6 +244,21 @@ Para que eu possa preencher de forma ágil, precisa e em conformidade com as reg
   - [x] Executar `mvn clean test` no backend garantindo 100% de sucesso.
   - [x] Executar `flutter analyze` e `flutter test` no frontend garantindo 0 erros e 0 warnings.
   - [x] Validar conformidade total com as regras de `AGENTS.md`.
+
+### Review Findings
+
+- [x] [Review][Patch] Implementar subtotais por grupo de bens e direitos no DTO e na interface [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/dto/TaxAssetDeclarationReportDTO.java e frontend/lib/src/features/tax/presentation/pages/tax_declaration_page.dart]
+- [x] [Review][Patch] Classificação incorreta de Units da B3 (finais 11 como TAEE11, SANB11) e Fiagro [backend/common/src/main/java/afsdigital/grahamselect/common/tax/domain/entities/TaxAssetGroup.java:44-46, 70-75]
+- [x] [Review][Patch] Header Content-Disposition divergente na exportação CSV (form-data vs attachment) [backend/api/src/main/java/afsdigital/grahamselect/api/tax/web/TaxDeclarationController.java:115]
+- [x] [Review][Patch] Tratamento de FamilyProfileNotFoundException deve retornar HTTP 404 em vez de 500 [backend/api/src/main/java/afsdigital/grahamselect/api/tax/web/TaxDeclarationController.java:118, 142]
+- [x] [Review][Patch] Preservação de caixa alta de nomes próprios de corretoras na discriminação de ativos liquidados [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java:201]
+- [x] [Review][Patch] Ordenação determinística de trades do mesmo dia (COMPRA antes de VENDA) [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java:56-58]
+- [x] [Review][Patch] Sanitização contra Injeção de Fórmulas no CSV (prevenir execução de operadores '=', '+', '-', '@') [backend/api/src/main/java/afsdigital/grahamselect/api/tax/web/TaxDeclarationController.java:183]
+- [x] [Review][Patch] Disponibilização de anos fiscais para investidores buy-and-hold sem trades no ano corrente [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAvailableYearsUseCase.java:26-42]
+- [x] [Review][Patch] Seleção do ano anterior como default no frontend e prevenção de AssertionError no Dropdown ao trocar de perfil [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart:37-43]
+- [x] [Review][Patch] Falha na exportação de CSV não deve substituir a tela inteira por card de erro [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart:104-108]
+- [x] [Review][Defer] Redesenho de navegação inferior móvel com mais de 5 destinos [frontend/lib/src/core/widgets/main_layout.dart:237] — deferred, pre-existing
+- [x] [Review][Defer] Otimização de consulta em lote para dados de empresa/CNPJ (N+1) [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java:72-85] — deferred, pre-existing
 
 ## Dev Notes
 

@@ -54,6 +54,7 @@ public class GetTaxAssetDeclarationReportUseCase {
                 .filter(trade -> trade.getTradeDate() != null && !trade.getTradeDate().isAfter(cutoffCurrentYear))
                 .filter(trade -> trade.getQuantity() != null && trade.getQuantity().compareTo(BigDecimal.ZERO) > 0)
                 .sorted(Comparator.comparing(Trade::getTradeDate)
+                        .thenComparing(trade -> "COMPRA".equalsIgnoreCase(trade.getSide()) ? 0 : 1)
                         .thenComparing(trade -> trade.getCreatedAt() != null ? trade.getCreatedAt() : LocalDateTime.MIN))
                 .toList();
 
@@ -163,6 +164,11 @@ public class GetTaxAssetDeclarationReportUseCase {
                     .divide(previousYearTotal, 2, RoundingMode.HALF_UP);
         }
 
+        Map<String, BigDecimal> subtotalsByGroup = new LinkedHashMap<>();
+        for (TaxAssetDeclarationItemDTO item : items) {
+            subtotalsByGroup.merge(item.groupCode(), item.currentYearValue(), BigDecimal::add);
+        }
+
         return new TaxAssetDeclarationReportDTO(
                 reportYear,
                 previousYear,
@@ -170,6 +176,7 @@ public class GetTaxAssetDeclarationReportUseCase {
                 currentYearTotal,
                 netVariation,
                 percentageVariation,
+                subtotalsByGroup,
                 items
         );
     }
@@ -191,6 +198,9 @@ public class GetTaxAssetDeclarationReportUseCase {
         String assetType = resolveAssetTypeName(group, liquidated ? previousQuantity : currentQuantity);
 
         if (liquidated) {
+            String brokerPart = brokerText.startsWith("Custodiado ")
+                    ? "custodiado " + brokerText.substring(11)
+                    : brokerText;
             return String.format(
                     "Posição de %s %s de %s (%s), CNPJ: %s, %s, totalmente alienada durante o ano-calendário de %d. Custo total de aquisição em 31/12/%d: R$ 0,00.",
                     formatQuantity(previousQuantity),
@@ -198,7 +208,7 @@ public class GetTaxAssetDeclarationReportUseCase {
                     companyName,
                     ticker,
                     cnpj,
-                    brokerText.toLowerCase(Locale.ROOT),
+                    brokerPart,
                     year,
                     year
             );

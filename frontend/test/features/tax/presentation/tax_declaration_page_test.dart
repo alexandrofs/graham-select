@@ -93,12 +93,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Posição Patrimonial Consolidada'), findsOneWidget);
+    expect(find.byKey(const Key('tax_group_header_03')), findsOneWidget);
     expect(find.text('PETR4'), findsOneWidget);
     expect(find.text('PETROLEO BRASILEIRO S.A. PETROBRAS'), findsOneWidget);
     expect(find.text('CNPJ: 33.000.167/0001-01'), findsOneWidget);
     expect(find.byKey(const Key('copy_discrimination_PETR4')), findsOneWidget);
 
     // Clica no botão de copiar discriminação
+    await tester.ensureVisible(find.byKey(const Key('copy_discrimination_PETR4')));
     await tester.tap(find.byKey(const Key('copy_discrimination_PETR4')));
     await tester.pumpAndSettle();
 

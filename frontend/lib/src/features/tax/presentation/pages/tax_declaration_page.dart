@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../family_holding/presentation/providers/family_profile_provider.dart';
@@ -80,13 +81,22 @@ class _TaxDeclarationPageState extends State<TaxDeclarationPage> {
                           ? null
                           : () async {
                               final csv = await provider.exportCsv();
-                              if (context.mounted && csv != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Arquivo CSV exportado com sucesso!'),
-                                    backgroundColor: AppTheme.accentColor,
-                                  ),
-                                );
+                              if (context.mounted) {
+                                if (csv != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Arquivo CSV exportado com sucesso!'),
+                                      backgroundColor: AppTheme.accentColor,
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Falha ao exportar CSV. Tente novamente.'),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                }
                               }
                             },
                       icon: provider.isExporting
@@ -124,7 +134,11 @@ class _TaxDeclarationPageState extends State<TaxDeclarationPage> {
                           width: 180,
                           child: DropdownButtonFormField<int>(
                             key: const Key('tax_year_selector'),
-                            initialValue: provider.selectedYear,
+                            value: (provider.availableYears.contains(provider.selectedYear))
+                                ? provider.selectedYear
+                                : (provider.availableYears.isNotEmpty
+                                    ? provider.availableYears.first
+                                    : DateTime.now().year - 1),
                             decoration: const InputDecoration(
                               labelText: 'Ano-Calendário',
                               border: OutlineInputBorder(),
@@ -274,18 +288,62 @@ class _TaxDeclarationPageState extends State<TaxDeclarationPage> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Listagem dos Ativos
+                  // Listagem dos Ativos com Subtotais por Grupo
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: report.items.length,
                     itemBuilder: (context, index) {
                       final item = report.items[index];
-                      return TaxItemCard(
-                        key: Key('tax_item_${item.ticker}'),
-                        item: item,
-                        previousYear: report.previousYear,
-                        reportYear: report.year,
+                      final isFirstOfGroup = index == 0 || report.items[index - 1].groupCode != item.groupCode;
+                      final groupSubtotal = report.subtotalsByGroup[item.groupCode] ?? item.currentYearValue;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isFirstOfGroup) ...[
+                            if (index > 0) const SizedBox(height: 16),
+                            Container(
+                              key: Key('tax_group_header_${item.groupCode}'),
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceColor,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.white12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Grupo ${item.groupCode} • ${item.groupDescription}',
+                                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.primaryColor,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Subtotal: ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$ ').format(groupSubtotal)}',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          TaxItemCard(
+                            key: Key('tax_item_${item.ticker}'),
+                            item: item,
+                            previousYear: report.previousYear,
+                            reportYear: report.year,
+                          ),
+                        ],
                       );
                     },
                   ),

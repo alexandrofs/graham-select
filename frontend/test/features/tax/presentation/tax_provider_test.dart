@@ -130,5 +130,13 @@ void main() {
       expect(provider.errorMessage, isNotNull);
       expect(provider.errorMessage, contains('Falha ao carregar o informe de Bens e Direitos'));
     });
+
+    test('Falha no exportCsv não deve sobrescrever errorMessage do relatório', () async {
+      repository.shouldThrow = true;
+      final result = await provider.exportCsv();
+      expect(result, isNull);
+      expect(provider.isExporting, false);
+      expect(provider.errorMessage, isNull);
+    });
   });
 }

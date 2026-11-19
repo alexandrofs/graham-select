@@ -23,7 +23,7 @@ public class GetTaxAvailableYearsUseCase {
             return new TaxAvailableYearsDTO(List.of());
         }
 
-        List<Integer> years = trades.stream()
+        List<Integer> tradeYears = trades.stream()
                 .filter(Objects::nonNull)
                 .filter(trade -> {
                     if (profileId != null && !profileId.isBlank()) {
@@ -36,6 +36,19 @@ public class GetTaxAvailableYearsUseCase {
                 .filter(Objects::nonNull)
                 .map(java.time.LocalDate::getYear)
                 .distinct()
+                .sorted()
+                .toList();
+
+        if (tradeYears.isEmpty()) {
+            return new TaxAvailableYearsDTO(List.of());
+        }
+
+        int minYear = tradeYears.get(0);
+        int currentYear = java.time.LocalDate.now().getYear();
+        int maxYear = Math.max(tradeYears.get(tradeYears.size() - 1), currentYear);
+
+        List<Integer> years = java.util.stream.IntStream.rangeClosed(minYear, maxYear)
+                .boxed()
                 .sorted(Comparator.reverseOrder())
                 .toList();
 

@@ -240,7 +240,7 @@ class TaxUseCasesTest {
     }
 
     @Test
-    @DisplayName("Deve retornar lista ordenada decrescente dos anos disponíveis")
+    @DisplayName("Deve retornar lista ordenada decrescente dos anos disponíveis incluindo anos em custódia até o ano corrente")
     void shouldReturnAvailableYearsInDescendingOrder() {
         Trade t1 = createTrade("PETR4", "COMPRA", LocalDate.of(2023, 5, 10), new BigDecimal("100"), new BigDecimal("30.00"), "XP", null);
         Trade t2 = createTrade("PETR4", "COMPRA", LocalDate.of(2025, 1, 10), new BigDecimal("100"), new BigDecimal("30.00"), "XP", null);
@@ -250,7 +250,86 @@ class TaxUseCasesTest {
 
         TaxAvailableYearsDTO availableYears = availableYearsUseCase.execute(userId, null);
 
-        assertThat(availableYears.years()).containsExactly(2025, 2024, 2023);
+        assertThat(availableYears.years()).contains(2025, 2024, 2023);
+        assertThat(availableYears.years()).isSortedAccordingTo(java.util.Comparator.reverseOrder());
+    }
+
+    @Test
+    @DisplayName("Deve classificar Units da B3 como Ações e ETFs conhecidos como ETF")
+    void shouldClassifyUnitsAndKnownEtfsCorrectly() {
+        assertThat(TaxAssetGroup.classify(null, "TAEE11")).isEqualTo(TaxAssetGroup.ACOES);
+        assertThat(TaxAssetGroup.classify(null, "SANB11")).isEqualTo(TaxAssetGroup.ACOES);
+        assertThat(TaxAssetGroup.classify(null, "BOVA11")).isEqualTo(TaxAssetGroup.ETF);
+        assertThat(TaxAssetGroup.classify(null, "HGLG11")).isEqualTo(TaxAssetGroup.FII);
+
+        Company agroCompany = Company.builder()
+                .ticker("AGRO3")
+                .name("SLC AGRICOLA")
+                .assetClass("AGRONEGÓCIO")
+                .build();
+        assertThat(TaxAssetGroup.classify(agroCompany, "AGRO3")).isEqualTo(TaxAssetGroup.ACOES);
+    }
+
+    @Test
+    @DisplayName("Deve calcular subtotais por grupo e manter caixa alta de corretora em alienação")
+    void shouldCalculateSubtotalsAndPreserveBrokerCasing() {
+        Trade t1 = createTrade("PETR4", "COMPRA", LocalDate.of(2024, 5, 10), new BigDecimal("100"), new BigDecimal("30.00"), "XP Investimentos", null);
+        Trade t2 = createTrade("PETR4", "VENDA", LocalDate.of(2025, 3, 20), new BigDecimal("100"), new BigDecimal("45.00"), "XP Investimentos", null);
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(t1, t2));
+        when(companyRepository.findByTicker("PETR4")).thenReturn(Company.builder()
+                .ticker("PETR4")
+                .name("PETROLEO BRASILEIRO S.A. PETROBRAS")
+                .cnpj("33.000.167/0001-01")
+                .assetClass("AÇÕES")
+                .build());
+
+        TaxAssetDeclarationReportDTO report = reportUseCase.execute(userId, 2025, null);
+        assertThat(report.subtotalsByGroup()).isNotNull();
+        assertThat(report.items().get(0).discrimination()).contains("custodiado na corretora XP Investimentos");
+    }
+
+    @Test
+    @DisplayName("Deve ordenar COMPRA antes de VENDA em trades do mesmo dia com timestamps idênticos")
+    void shouldOrderBuyBeforeSellOnSameDay() {
+        LocalDate sameDay = LocalDate.of(2025, 6, 1);
+        LocalDateTime sameTime = LocalDateTime.of(2025, 6, 1, 10, 0);
+
+        Trade tSell = Trade.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .ticker("VALE3")
+                .side("VENDA")
+                .tradeDate(sameDay)
+                .quantity(new BigDecimal("50"))
+                .price(new BigDecimal("60.00"))
+                .createdAt(sameTime)
+                .build();
+
+        Trade tBuy = Trade.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .ticker("VALE3")
+                .side("COMPRA")
+                .tradeDate(sameDay)
+                .quantity(new BigDecimal("100"))
+                .price(new BigDecimal("50.00"))
+                .createdAt(sameTime)
+                .build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(tSell, tBuy));
+        when(companyRepository.findByTicker("VALE3")).thenReturn(Company.builder()
+                .ticker("VALE3")
+                .name("VALE S.A.")
+                .cnpj("33.592.510/0001-54")
+                .assetClass("AÇÕES")
+                .build());
+
+        TaxAssetDeclarationReportDTO report = reportUseCase.execute(userId, 2025, null);
+        assertThat(report.items()).hasSize(1);
+        TaxAssetDeclarationItemDTO item = report.items().get(0);
+        assertThat(item.quantity()).isEqualByComparingTo(new BigDecimal("50"));
+        assertThat(item.averagePrice()).isEqualByComparingTo(new BigDecimal("50.00"));
     }
 
 }
