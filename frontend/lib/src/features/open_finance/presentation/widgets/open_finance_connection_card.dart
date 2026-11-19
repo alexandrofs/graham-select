@@ -79,7 +79,7 @@ class OpenFinanceConnectionCard extends StatelessWidget {
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(
+                            errorBuilder: (context, error, stackTrace) => const Icon(
                               Icons.account_balance,
                               color: AppTheme.accentColor,
                               size: 20,
