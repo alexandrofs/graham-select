@@ -96,6 +96,12 @@ import 'src/features/open_finance/data/datasources/open_finance_remote_data_sour
 import 'src/features/open_finance/data/repositories/open_finance_repository_impl.dart';
 import 'src/features/open_finance/presentation/providers/open_finance_provider.dart';
 
+// Tax Feature Imports
+import 'src/features/tax/data/datasources/tax_remote_data_source.dart';
+import 'src/features/tax/data/repositories/tax_repository_impl.dart';
+import 'src/features/tax/presentation/providers/tax_provider.dart';
+import 'src/features/tax/presentation/pages/tax_declaration_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -186,6 +192,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final OpenFinanceRemoteDataSource openFinanceRemoteDataSource;
   late final OpenFinanceRepositoryImpl openFinanceRepository;
 
+  late final TaxRemoteDataSource taxRemoteDataSource;
+  late final TaxRepositoryImpl taxRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -273,6 +282,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     openFinanceRemoteDataSource = OpenFinanceRemoteDataSourceImpl(apiClient: effectiveApiClient);
     openFinanceRepository = OpenFinanceRepositoryImpl(remoteDataSource: openFinanceRemoteDataSource);
 
+    // Tax Feature DI
+    taxRemoteDataSource = TaxRemoteDataSource(apiClient: effectiveApiClient);
+    taxRepository = TaxRepositoryImpl(remoteDataSource: taxRemoteDataSource);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -316,6 +329,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
             GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
             GoRoute(path: '/dividends', builder: (context, state) => const DividendsPage()),
+            GoRoute(path: '/tax', builder: (context, state) => const TaxDeclarationPage()),
             GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
             GoRoute(path: '/admin/dlq', builder: (context, state) => const AdminDlqPage()),
             GoRoute(path: '/admin/tickers', builder: (context, state) => const AdminTickersPage()),
@@ -365,6 +379,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(create: (_) => DividendProvider(repository: dividendRepository)),
         ChangeNotifierProvider(create: (_) => OpenFinanceProvider(repository: openFinanceRepository)),
+        ChangeNotifierProvider(create: (_) => TaxProvider(repository: taxRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminDlqProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminTickerProvider(repository: adminRepository)),

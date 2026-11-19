@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: 34-add-cnpj-to-company
+      author: graham-select-dev
+      changes:
+        - addColumn:
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: true
+        - createIndex:
+            indexName: idx_company_cnpj
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+        - update:
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+                  value: "33.000.167/0001-01"
+            where: "ticker = 'PETR4'"
+        - update:
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+                  value: "33.592.510/0001-54"
+            where: "ticker = 'VALE3'"
+        - update:
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+                  value: "60.872.504/0001-23"
+            where: "ticker = 'ITUB4'"
+        - update:
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+                  value: "60.746.948/0001-12"
+            where: "ticker = 'BBDC4'"
+        - update:
+            tableName: company
+            columns:
+              - column:
+                  name: cnpj
+                  value: "00.000.000/0001-91"
+            where: "ticker = 'BBAS3'"
+      rollback:
+        - dropIndex:
+            indexName: idx_company_cnpj
+            tableName: company
+        - dropColumn:
+            tableName: company
+            columnName: cnpj

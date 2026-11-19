@@ -39,6 +39,7 @@ public class CompanyJpaAdapter implements CompanyRepository {
                 .id(id)
                 .ticker(company.getTicker())
                 .name(company.getName())
+                .cnpj(company.getCnpj())
                 .assetClass(company.getAssetClass())
                 .sector(company.getSector())
                 .createdAt(company.getCreatedAt())
@@ -83,6 +84,7 @@ public class CompanyJpaAdapter implements CompanyRepository {
                 entity.getId(),
                 entity.getTicker(),
                 entity.getName(),
+                entity.getCnpj(),
                 entity.getAssetClass(),
                 entity.getSector(),
                 entity.getCreatedAt(),

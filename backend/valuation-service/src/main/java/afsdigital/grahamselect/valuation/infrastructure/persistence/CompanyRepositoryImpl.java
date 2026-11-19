@@ -38,6 +38,7 @@ public class CompanyRepositoryImpl implements CompanyRepository {
                 .id(id)
                 .ticker(company.getTicker())
                 .name(company.getName() != null ? company.getName() : (existing != null ? existing.getName() : null))
+                .cnpj(company.getCnpj() != null ? company.getCnpj() : (existing != null ? existing.getCnpj() : null))
                 .assetClass(company.getAssetClass() != null ? company.getAssetClass() : (existing != null ? existing.getAssetClass() : null))
                 .sector(company.getSector() != null ? company.getSector() : (existing != null ? existing.getSector() : null))
                 .createdAt(company.getCreatedAt() != null ? company.getCreatedAt() : (existing != null ? existing.getCreatedAt() : null))
@@ -82,6 +83,7 @@ public class CompanyRepositoryImpl implements CompanyRepository {
                 entity.getId(),
                 entity.getTicker(),
                 entity.getName(),
+                entity.getCnpj(),
                 entity.getAssetClass(),
                 entity.getSector(),
                 entity.getCreatedAt(),

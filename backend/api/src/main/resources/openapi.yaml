@@ -14,6 +14,8 @@ info:
 servers:
   - url: https://domain/api/v1
 tags:
+  - name: Tax
+    description: Relatórios fiscais e informes de Bens e Direitos para IRPF
   - name: Financial Data
     description: Dados financeiros das empresas
   - name: Admin - DLQ
@@ -741,6 +743,77 @@ paths:
           description: Evento recebido com sucesso
         '401':
           description: Segredo de webhook inválido ou ausente
+  /api/v1/tax/bens-e-direitos:
+    get:
+      summary: Relatório de Bens e Direitos (Informe Anual IRPF)
+      description: Retorna a posição patrimonial consolidada em 31/12 para declaração de IRPF.
+      tags:
+        - Tax
+      parameters:
+        - name: year
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 2025
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Relatório de Bens e Direitos
+        '403':
+          description: Acesso negado - Requer assinatura Premium
+        '404':
+          description: Perfil familiar não encontrado
+  /api/v1/tax/bens-e-direitos/export:
+    get:
+      summary: Exportação do Relatório de Bens e Direitos em CSV
+      description: Exporta o relatório consolidado em formato CSV compatível com Excel no Brasil.
+      tags:
+        - Tax
+      parameters:
+        - name: year
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 2025
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Arquivo CSV exportado com sucesso
+          content:
+            text/csv:
+              schema:
+                type: string
+        '403':
+          description: Acesso negado - Requer assinatura Premium
+        '404':
+          description: Perfil familiar não encontrado
+  /api/v1/tax/available-years:
+    get:
+      summary: Anos disponíveis para emissão de relatório fiscal
+      tags:
+        - Tax
+      parameters:
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de anos disponíveis
 
 components:
   schemas:
