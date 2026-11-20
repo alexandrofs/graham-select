@@ -53,3 +53,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 - Mecanismo de download de arquivos CSV no Flutter Web via launchUrl(dataURI) [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart:140] — O disparo de download via dataURI no Flutter Web/Desktop pode apresentar comportamentos variados entre browsers ou desconsiderar Content-Disposition; padronização com package dedicado de file saver adiada por seguir padrão já existente na Story 10.1.
 - Calendário dinâmico de feriados bancários móveis para vencimento de DARF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/domain/utils/DarfDueDateCalculator.java:11] — Feriados móveis (Sexta-feira Santa, Carnaval, Corpus Christi) diferidos para implementação em serviço compartilhado de calendário fiscal/bancário; 31/12 incluído como feriado bancário fixo (Resolução CMN/Bacen 4.880/2020).
+
+## Deferred from: retrospective of Epic 5 (2026-11-20)
+
+- Debounce do formulário de metas financeiras [frontend/lib/src/features/goals/presentation/] — Defer da Story 5.1 sem dono; **Dono: Elena (Junior Dev)**. Prioridade baixa; registrado no backlog para tratamento em refator de UX.
