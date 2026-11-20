@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: apache/kafka
+  tag: "3.7.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 9092
+  controllerPort: 9093
+
+clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+persistence:
+  enabled: false # Usando volume emptyDir ou PVC configurável

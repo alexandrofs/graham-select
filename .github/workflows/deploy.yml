@@ -1,0 +1,247 @@
+name: Build & Deploy Graham Select (Kubernetes OKE)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ============================================================================
+  # 1. Validação Completa (Testes Backend, Frontend e Linting Helm)
+  # ============================================================================
+  validate:
+    name: Validate Suite & Helm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        run: |
+          mvn clean test
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Run Frontend Tests & Analysis
+        working-directory: ./frontend
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+
+      - name: Lint Helm Charts
+        run: |
+          helm lint helm/kafka
+          helm lint helm/graham-select
+          helm template test-kafka helm/kafka > /dev/null
+          helm template test-graham helm/graham-select --debug > /dev/null
+
+  # ============================================================================
+  # 2. Build & Push das Imagens Docker (Spring Boot ARM64 + Flutter NGINX)
+  # ============================================================================
+  build-and-push:
+    name: Build & Push Images to GHCR (ARM64)
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (ARM64 Support)
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: 'arm64'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Backend API Build & Publish ---
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build & Publish Backend API Image (ARM64)
+        working-directory: ./backend
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/graham-select-api"
+          echo "Building backend API ARM64 image: ${IMAGE_NAME}:${{ github.sha }}"
+          mvn -B spring-boot:build-image -pl api -am \
+            -Dspring-boot.build-image.imageName="${IMAGE_NAME}:${{ github.sha }}" \
+            -Dspring-boot.build-image.imagePlatform=linux/arm64
+
+          echo "Tagging API latest tag..."
+          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_NAME}:latest"
+
+          echo "Pushing API images to GHCR..."
+          docker push "${IMAGE_NAME}:${{ github.sha }}"
+          docker push "${IMAGE_NAME}:latest"
+
+      # --- Backend Valuation Service Build & Publish ---
+      - name: Build & Publish Valuation Service Image (ARM64)
+        working-directory: ./backend
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/graham-select-valuation"
+          echo "Building backend Valuation ARM64 image: ${IMAGE_NAME}:${{ github.sha }}"
+          mvn -B spring-boot:build-image -pl valuation-service -am \
+            -Dspring-boot.build-image.imageName="${IMAGE_NAME}:${{ github.sha }}" \
+            -Dspring-boot.build-image.imagePlatform=linux/arm64
+
+          echo "Tagging Valuation latest tag..."
+          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_NAME}:latest"
+
+          echo "Pushing Valuation images to GHCR..."
+          docker push "${IMAGE_NAME}:${{ github.sha }}"
+          docker push "${IMAGE_NAME}:latest"
+
+      # --- Frontend Build & Publish ---
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Build Flutter Web Release
+        working-directory: ./frontend
+        run: |
+          flutter pub get
+          flutter build web --release \
+            --dart-define=API_BASE_URL="https://graham.afsdigital.com.br" \
+            --dart-define=GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
+            --dart-define=FIREBASE_API_KEY="${{ vars.FIREBASE_API_KEY }}" \
+            --dart-define=FIREBASE_AUTH_DOMAIN="${{ vars.FIREBASE_AUTH_DOMAIN }}" \
+            --dart-define=FIREBASE_PROJECT_ID="${{ vars.FIREBASE_PROJECT_ID }}" \
+            --dart-define=FIREBASE_STORAGE_BUCKET="${{ vars.FIREBASE_STORAGE_BUCKET }}" \
+            --dart-define=FIREBASE_MESSAGING_SENDER_ID="${{ vars.FIREBASE_MESSAGING_SENDER_ID }}" \
+            --dart-define=FIREBASE_APP_ID="${{ vars.FIREBASE_APP_ID }}" \
+            --dart-define=FIREBASE_MEASUREMENT_ID="${{ vars.FIREBASE_MEASUREMENT_ID }}"
+
+      - name: Build & Publish Frontend Image (Multi-Arch ARM64 NGINX)
+        working-directory: ./frontend
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/graham-select-frontend"
+          echo "Building frontend ARM64 image: ${IMAGE_NAME}:${{ github.sha }}"
+          docker buildx build \
+            --platform linux/arm64 \
+            -t "${IMAGE_NAME}:${{ github.sha }}" \
+            -t "${IMAGE_NAME}:latest" \
+            --push .
+
+  # ============================================================================
+  # 3. Deploy no Kubernetes OKE via Helm
+  # ============================================================================
+  deploy:
+    name: Deploy to Kubernetes OKE
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      # --- Deploy Kafka in dedicated namespace 'kafka' ---
+      - name: Provision Dedicated Kafka Namespace & Broker
+        run: |
+          kubectl create namespace kafka --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install kafka ./helm/kafka \
+            --namespace kafka \
+            --create-namespace \
+            --wait \
+            --timeout 5m
+
+      # --- Configure Graham-Select Namespace & Registry Secret ---
+      - name: Configure Image Pull Secret for GHCR
+        run: |
+          kubectl create namespace graham-select --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret docker-registry ghcr-secret \
+            --namespace graham-select \
+            --docker-server=ghcr.io \
+            --docker-username="${{ github.actor }}" \
+            --docker-password="${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Unlock Helm if stuck in pending state
+        run: |
+          kubectl get secret -n graham-select -l owner=helm -o jsonpath='{range .items[?(@.metadata.labels.status=="pending-upgrade")]}{.metadata.name}{"\n"}{end}' | xargs -r kubectl delete secret -n graham-select || true
+          kubectl get secret -n graham-select -l owner=helm -o jsonpath='{range .items[?(@.metadata.labels.status=="pending-install")]}{.metadata.name}{"\n"}{end}' | xargs -r kubectl delete secret -n graham-select || true
+
+      # --- Deploy Graham Select via Helm Chart ---
+      - name: Deploy Graham Select via Helm Chart
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+
+          helm upgrade --install graham-select ./helm/graham-select \
+            --namespace graham-select \
+            --create-namespace \
+            --force-conflicts \
+            --set api.image.tag="${IMAGE_TAG}" \
+            --set valuation.image.tag="${IMAGE_TAG}" \
+            --set frontend.image.tag="${IMAGE_TAG}" \
+            --set-string database.password="${{ secrets.DB_PASSWORD }}" \
+            --set-string secrets.jwtSecretKey="${{ secrets.JWT_SECRET_KEY }}" \
+            --set-string secrets.googleClientSecret="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            --set-string secrets.brapiToken="${{ secrets.BRAPI_TOKEN }}" \
+            --set-string secrets.openfinanceEncryptionKey="${{ secrets.OPENFINANCE_ENCRYPTION_KEY }}" \
+            --set-string secrets.openfinanceWebhookSecret="${{ secrets.OPENFINANCE_WEBHOOK_SECRET }}" \
+            --wait \
+            --timeout 10m
+
+      # --- Verify Rollout Status ---
+      - name: Verify Kubernetes Rollout Status
+        run: |
+          echo "Verifying API rollout..."
+          kubectl rollout status deployment/graham-select-api -n graham-select --timeout=180s
+
+          echo "Verifying Valuation rollout..."
+          kubectl rollout status deployment/graham-select-valuation -n graham-select --timeout=180s
+
+          echo "Verifying Frontend rollout..."
+          kubectl rollout status deployment/graham-select-frontend -n graham-select --timeout=180s
+
+          echo "Listing Kubernetes resources in namespace graham-select..."
+          kubectl get all,ingress -n graham-select -o wide

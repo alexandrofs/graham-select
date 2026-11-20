@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "graham-select.fullname" . }}-config
+  labels:
+    {{- include "graham-select.labels" . | nindent 4 }}
+data:
+  # Database Parameters
+  MYSQL_HOST: {{ .Values.database.host | quote }}
+  MYSQL_PORT: {{ .Values.database.port | quote }}
+  MYSQL_DATABASE: {{ .Values.database.name | quote }}
+  MYSQL_USER: {{ .Values.database.user | quote }}
+  SPRING_DATASOURCE_URL: "jdbc:mysql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?{{ .Values.database.extraParams }}"
+  SPRING_DATASOURCE_USERNAME: {{ .Values.database.user | quote }}
+
+  # Kafka Parameters (Dedicated namespace 'kafka')
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.kafka.bootstrapServers | quote }}
+  KAFKA_CONSUMER_GROUP_ID: {{ .Values.kafka.consumerGroupId | quote }}
+
+  # Application Parameters
+  SPRING_PROFILES_ACTIVE: "prod"
+  FRONTEND_URL: {{ .Values.api.env.FRONTEND_URL | quote }}
+  CORS_ALLOWED_ORIGINS: {{ .Values.api.env.CORS_ALLOWED_ORIGINS | quote }}
+  BPL_JVM_THREAD_COUNT: {{ .Values.api.env.BPL_JVM_THREAD_COUNT | default "50" | quote }}
+  JAVA_TOOL_OPTIONS: {{ .Values.api.env.JAVA_TOOL_OPTIONS | default "-Xss512k -XX:ReservedCodeCacheSize=64M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8" | quote }}
+  STORAGE_PATH: {{ .Values.api.env.STORAGE_PATH | default "/data/uploads" | quote }}
+  MARKET_DATA_SYNC_CRON: {{ .Values.api.env.MARKET_DATA_SYNC_CRON | quote }}
+  CORPORATE_EVENTS_SYNC_CRON: {{ .Values.api.env.CORPORATE_EVENTS_SYNC_CRON | quote }}
+  OPENFINANCE_SYNC_CRON: {{ .Values.api.env.OPENFINANCE_SYNC_CRON | quote }}
+  OPENFINANCE_MOCK_ENABLED: {{ .Values.api.env.OPENFINANCE_MOCK_ENABLED | quote }}
