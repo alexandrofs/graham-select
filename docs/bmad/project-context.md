@@ -1,10 +1,10 @@
 ---
 project_name: 'graham-select'
 user_name: 'Alex'
-date: '2026-03-08T15:24:29-03:00'
+date: '2026-11-20T19:08:55-03:00'
 sections_completed: ['technology_stack', 'language_rules', 'framework_rules', 'testing_rules', 'quality_rules', 'workflow_rules', 'anti_patterns']
 status: 'complete'
-rule_count: 14
+rule_count: 18
 optimized_for_llm: true
 ---
 
@@ -16,49 +16,77 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 ## Technology Stack & Versions
 
-- **Frontend:** Flutter SDK `^3.11.0`, Dart
-- **Backend:** Java `21`, Spring Boot `3.4.13` (Multi-módulo: `common`, `api`, `valuation-service`)
+- **Frontend:** Flutter SDK `^3.11.0`, Dart 3
+  - Dependências principais: `provider` (`^6.1.2`), `go_router` (`^14.3.0`), `http` (`^1.2.2`), `firebase_core` (`^3.11.0`), `file_picker` (`^8.1.4`)
+- **Backend:** Java `21` (compatibilidade com JDK 21/22 configurada em `start-app.sh`), Spring Boot `3.4.13`
+  - Arquitetura multi-módulo: `common`, `api`, `valuation-service`
+- **Banco de Dados & Migrations:** MySQL `8.0.33` (TiDB Serverless) gerenciado exclusivamente via **Liquibase**
 - **Mensageria:** Apache Kafka (Aiven)
-- **Banco de Dados:** MySQL `8.0.33` (TiDB Serverless)
-- **Infra/Deploy:** Docker Compose (Local), Spring Native Cloud Native Buildpacks (Produção no Render.com)
-- **Arquitetura (C4):** Structurizr
+- **Infraestrutura & Deploy:**
+  - Local: Docker Compose (Kafka, MySQL)
+  - Produção: Spring Boot Cloud Native Buildpacks (hospedado no Render.com)
+- **Documentação de Arquitetura (C4):** Structurizr DSL (`docs/workspace.dsl`)
+
+---
 
 ## Critical Implementation Rules
 
 ### Language-Specific Rules
 
-- **Java 21:** 
-  - Priorizar recursos modernos da linguagem (Records, Pattern Matching) onde aplicável.
-  - **Obrigatório:** Todas as operações temporais (datas e horas) DEVEM utilizar `ZoneOffset.UTC`. Use `OffsetDateTime.now(ZoneOffset.UTC)` ou `LocalDateTime.now(ZoneOffset.UTC)` de forma consistente para evitar bugs de fuso horário.
-- **Dart:** Tipagem estrita é obrigatória. Null safety garantido em todas as implementações.
+- **Java 21:**
+  - **Recursos Modernos:** Priorizar Records, Pattern Matching e estruturas imutáveis sempre que aplicável.
+  - **Manipulação Temporal Mandatória:** Todas as operações temporais (datas e horas) DEVEM utilizar explicitamente `ZoneOffset.UTC`. Utilize `OffsetDateTime.now(ZoneOffset.UTC)` ou `LocalDateTime.now(ZoneOffset.UTC)` de forma consistente em todas as entidades, DTOs e cálculos para evitar divergências de fuso horário.
+  - **Tratamento de Exceções & Logs:** Toda exceção capturada ou lançada DEVE registrar log em nível `ERROR` acompanhada do stack trace correspondente (`logger.error("Context message...", e)`). Nunca silencie exceções com blocos `catch` vazios.
+- **Dart:**
+  - **Tipagem Estrita & Null Safety:** Tipagem explícita em assinaturas de métodos e propriedades públicas; null safety estrito sem uso indiscriminado de force-unwrap (`!`).
+  - **Tratamento Assíncrono:** Tratar chamadas assíncronas (`async`/`await`) com blocos `try/catch`, propagando erros de forma controlada na interface.
 
 ### Framework-Specific Rules
 
-- **Spring Boot Multi-Módulo:** 
-  - Regras de negócio compartilhadas e DTOs devem residir no módulo `common`.
-  - O módulo `api` deve focar apenas na recepção de arquivos/dados e endpoints REST.
-  - O módulo `valuation-service` não deve ter endpoints HTTP de entrada de usuário, consumindo apenas dados do Kafka.
-- **Flutter:** Utilizar `provider` (`^6.1.2`) para gerência de estado e `go_router` (`^14.3.0`) para rotas.
+- **Spring Boot Multi-Módulo:**
+  - **Divisão de Responsabilidades:**
+    - `common`: DTOs compartilhados, modelos de domínio e utilitários de negócio reutilizáveis.
+    - `api`: Endpoints REST públicos e autenticados, extração de token JWT, CORS, validação de payload e publicação de eventos para processamento assíncrono.
+    - `valuation-service`: Processamento intensivo de dados consumidos exclusivamente via Apache Kafka; **não** deve expor endpoints HTTP de entrada para usuários.
+  - **Observabilidade em Entradas:** Obrigatório registrar log em nível `INFO` em **todas** as entradas de métodos de endpoints de API e no recebimento de mensagens em consumers Kafka, incluindo metadados contextuais (`userId`, IDs de transação/ativo, status).
+  - **Imutabilidade do Liquibase:** É **estritamente proibido** alterar retroativamente arquivos de migration já aplicados. Qualquer alteração de esquema ou correção em banco de dados deve ser realizada via **novas migrations incrementais e idempotentes**, aplicando `preConditions` ou `validCheckSum` quando pertinente.
+- **Flutter:**
+  - **Gerência de Estado:** Utilizar `provider` (`ChangeNotifierProvider`, `context.watch()`, `context.read()`) para desacoplar lógica de visualização.
+  - **Roteamento:** Rotas centralizadas e declarativas via `go_router`.
+  - **Estrutura por Features:** Código organizado por funcionalidade dentro de `lib/src/features/<feature_name>/{data,domain,presentation}`.
 
 ### Testing Rules
 
-- Lints rigorosos devem ser sempre respeitados no frontend (definidos em `analysis_options.yaml` via `flutter_lints`).
+- **Validação Automatizada Mandatória:**
+  - Após implementar qualquer funcionalidade ou correção de review, **é obrigatório** executar toda a suíte de testes:
+    - Backend: `./mvnw test` (ou `mvn test`)
+    - Frontend: `flutter test`
+- **Análise Estática Rigorosa:**
+  - O comando `flutter analyze` deve ser executado no diretório `frontend` e deve passar com **zero** erros e alertas de linting (conforme `analysis_options.yaml`).
+- **Cobertura de Casos de Borda:**
+  - Novas regras de negócio (cálculos financeiros, tributação/IRPF, consolidação de custódia, family holding) e novos widgets de interface devem vir acompanhados de seus respectivos testes unitários e de widget (`flutter_test`).
 
 ### Code Quality & Style Rules
 
-- Todas as definições de arquitetura C4 devem ser mantidas e atualizadas em `docs/workspace.dsl` (Structurizr).
+- **Rastreabilidade Arquitetural (C4 Model):**
+  - Todas as decisões e novos componentes/containers devem ser refletidos e mantidos atualizados em `docs/workspace.dsl` (Structurizr).
+- **Tratamento de Exceções & Log Traces:**
+  - Proibido engolir exceções. Todo bloco `catch` deve registrar contexto de falha detalhado e o stack trace correspondente no log `ERROR`.
 
 ### Development Workflow Rules
 
-- **Branching:** Novas funcionalidades devem ser desenvolvidas em branches nomeadas como `feature/nome-da-feature`.
-- **Commits:** Seguir Conventional Commits rigorosamente (ex: `feat: minha nova feature`, `fix: correcao de bug`).
-- **Deploy:** Nenhuma imagem Docker deve ser gerada via Dockerfile manual para o backend; utilizar sempre os comandos de Buildpacks nativos (`./mvnw spring-boot:build-image -pl api`).
-- **Pull Requests (PR):** Ao receber comando para abrir/criar PR, crie-o diretamente e de forma autônoma via API do GitHub (`POST /repos/{owner}/{repo}/pulls`) usando credenciais obtidas de `git credential fill`, sem transferir a ação para o usuário via link manual.
+- **Branching Mandatório:** Sempre crie e trabalhe em uma branch isolada e sincronizada antes de implementar uma história (`git checkout -b feature/nome-da-historia main` ou a partir da branch base designada).
+- **Commits:** Seguir rigorosamente o padrão *Conventional Commits* (ex: `feat: ...`, `fix: ...`, `chore: ...`).
+- **Deploy Backend:** Não criar Dockerfiles manuais para os serviços Spring Boot; utilizar sempre os Buildpacks nativos (`./mvnw spring-boot:build-image -pl api`).
+- **Abertura Autônoma de Pull Requests (PR):** Quando solicitado abrir/criar PR, o agente DEVE criá-lo de forma 100% autônoma via API do GitHub (`POST /repos/{owner}/{repo}/pulls`) usando credenciais obtidas com `git credential fill` caso a CLI `gh` não esteja no PATH, sem transferir a ação para o usuário via link web.
 
-### Critical Don't-Miss Rules
+### Critical Don't-Miss Rules (Anti-Patterns & Gotchas)
 
-- **Comunicação Assíncrona:** Nunca realizar chamadas síncronas entre `api` e `valuation-service`. A comunicação **deve** fluir exclusivamente via Apache Kafka.
-- **CORS:** O backend Spring Boot (porta 8080) deve sempre possuir CORS ativo permitindo chamadas do Frontend Web (porta 3000).
+- **Comunicação Assíncrona Estrita:** Jamais realizar chamadas HTTP síncronas entre `api` e `valuation-service`. A troca de dados para processamento financeiro deve ocorrer exclusivamente via tópicos do Apache Kafka.
+- **Imutabilidade de Migrations (Liquibase):** Nunca modifique migrations existentes que já tenham sido executadas ou comitadas. Adicione novas migrations incrementais.
+- **Multitenancy & JWT:** O `userId` deve ser extraído do token JWT (`jwt.getSubject()`) de forma estrita em todos os endpoints autenticados e propagado em todas as consultas SQL/JPA e eventos de mensageria para garantir isolamento absoluto por usuário.
+- **Path Traversal em Uploads:** Qualquer endpoint de ingestão de arquivos (ex: planilhas B3) deve sanitizar o nome dos arquivos descartando caminhos relativos ou caracteres de escape (`../`).
+- **CORS Centralizado:** Configurado via `CorsConfigurationSource` no Spring Security cobrindo `localhost:3000` e o domínio oficial no Render (`https://graham-select-frontend.onrender.com`).
 
 ---
 
@@ -108,4 +136,4 @@ Quando agentes AI operam de forma autônoma (sem validação humana história a 
 - Review quarterly for outdated rules
 - Remove rules that become obvious over time
 
-Last Updated: 2026-05-31T16:46:00-03:00
+Last Updated: 2026-11-20T19:08:55-03:00

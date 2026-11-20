@@ -62,6 +62,9 @@ class _FamilyProfilesPageState extends State<FamilyProfilesPage> {
                     if (provider.state != FamilyProfileState.premiumRequired)
                       ElevatedButton.icon(
                         key: const Key('family_profile_add_button'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 44),
+                        ),
                         onPressed: provider.isSubmitting
                             ? null
                             : () => _openAddProfileDialog(context, provider),
@@ -123,6 +126,9 @@ class _FamilyProfilesPageState extends State<FamilyProfilesPage> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                ),
                 onPressed: () => context.push('/profile'),
                 child: const Text('Ver Planos Premium'),
               ),
@@ -397,6 +403,9 @@ class _AddProfileDialogState extends State<_AddProfileDialog> {
         ),
         ElevatedButton(
           key: const Key('family_profile_save_button'),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(0, 40),
+          ),
           onPressed: _submitting ? null : _submit,
           child: _submitting
               ? const SizedBox(

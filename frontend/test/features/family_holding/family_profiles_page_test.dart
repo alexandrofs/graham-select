@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/src/core/theme/app_theme.dart';
 import 'package:frontend/src/features/family_holding/data/datasources/family_profile_remote_datasource.dart';
 import 'package:frontend/src/features/family_holding/domain/entities/family_profile_entity.dart';
 import 'package:frontend/src/features/family_holding/domain/repositories/family_profile_repository.dart';
@@ -45,6 +46,7 @@ class MockFamilyRepo implements FamilyProfileRepository {
 void main() {
   Widget wrapWithProvider(FamilyProfileProvider provider) {
     return MaterialApp(
+      theme: AppTheme.darkTheme,
       home: ChangeNotifierProvider<FamilyProfileProvider>.value(
         value: provider,
         child: const FamilyProfilesPage(),
