@@ -598,8 +598,35 @@ N/A
 
 ### Completion Notes List
 
-N/A — ready-for-dev
+Implementação concluída; todas as tasks e findings de review marcados [x]. Dev Agent Record regularizado na retro do Épico 4.
 
 ### File List
 
-N/A — a ser preenchido pelo agente de desenvolvimento
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/AllocationGoalJpaAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/entities/AllocationGoalEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/persistence/jpa/repositories/AllocationGoalJpaRepository.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/infrastructure/spring/AllocationStrategyConfiguration.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/valuation/web/AllocationStrategyController.java`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/valuation/web/AllocationStrategyIT.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/dto/AllocationGoalDto.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/repository/AllocationGoalPort.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/exceptions/AllocationGoalValidationException.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GetAllocationGoalsUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/valuation/domain/AllocationScope.java`
+- `backend/common/src/test/java/afsdigital/grahamselect/valuation/application/usecase/GetAllocationGoalsUseCaseTest.java`
+- `backend/common/src/test/java/afsdigital/grahamselect/valuation/application/usecase/SaveAllocationGoalsUseCaseTest.java`
+- `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/AllocationGoalReadAdapter.java`
+- `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/entities/AllocationGoalReadEntity.java`
+- `backend/valuation-service/src/main/java/afsdigital/grahamselect/valuation/infrastructure/persistence/jpa/repository/AllocationGoalReadJpaRepository.java`
+- `frontend/lib/src/features/allocation/data/datasources/allocation_remote_data_source.dart`
+- `frontend/lib/src/features/allocation/data/models/allocation_goal_model.dart`
+- `frontend/lib/src/features/allocation/data/repositories/allocation_repository_impl.dart`
+- `frontend/lib/src/features/allocation/domain/entities/allocation_goal.dart`
+- `frontend/lib/src/features/allocation/domain/repositories/allocation_repository.dart`
+- `frontend/lib/src/features/allocation/presentation/pages/allocation_strategy_page.dart`
+- `frontend/lib/src/features/allocation/presentation/providers/allocation_provider.dart`
+- `frontend/test/features/allocation/data/datasources/allocation_remote_data_source_test.dart`
+- `frontend/test/features/allocation/data/datasources/allocation_remote_data_source_test.mocks.dart`
+- `frontend/test/features/allocation/presentation/pages/allocation_strategy_page_test.dart`
+- `frontend/test/features/allocation/presentation/providers/allocation_provider_test.dart`

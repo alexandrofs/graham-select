@@ -60,6 +60,11 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Comunicação Assíncrona:** Nunca realizar chamadas síncronas entre `api` e `valuation-service`. A comunicação **deve** fluir exclusivamente via Apache Kafka.
 - **CORS:** O backend Spring Boot (porta 8080) deve sempre possuir CORS ativo permitindo chamadas do Frontend Web (porta 3000).
 
+### Numeric Robustness & Contract Rules (Retro Epic 5)
+
+- **Robustez numérica (obrigatório em todo cálculo financeiro, Java e Dart):** validar entradas com `Double.isFinite` / `.isFinite` antes de calcular; aplicar `clamp` em percentuais (0–100) e valores negativos de patrimônio/aporte; nunca multiplicar `0 × ∞` nem dividir por zero (checar denominador antes); resultados `NaN`/`Infinity` devem virar estado explícito (ex.: `isUnreachable`) e nunca chegar à UI ou ao JSON. Citar esta regra nas tasks de toda story com cálculo.
+- **Paridade Java × Dart:** lógica duplicada nas duas linguagens (ex.: `TimeToGoalCalculator`) deve ter testes de paridade com vetores compartilhados em `backend/common/src/test/resources/goals/time-to-goal-parity-vectors.json`. Toda correção deve ser feita nas duas implementações e novo caso adicionado ao JSON.
+- **Create-story — checagens obrigatórias:** (1) cruzar todos os cenários de exceção/circuit breaker do `epics.md` com as tasks da story; (2) validar contratos de API (formato objeto vs. array, nomes de campos, `totalValue` vs. `totalEquity`) contra o código/controllers existentes antes de marcar `ready-for-dev`.
 ---
 
 ## Security Checklist
@@ -90,6 +95,8 @@ Quando agentes AI operam de forma autônoma (sem validação humana história a 
 2. **Testes Estáticos & Compilação:** É obrigatório rodar localmente `mvn clean test` no backend e `flutter analyze` + testes de widget no frontend a cada história concluída.
 3. **Gate Humano de Deploy:** Modificações que envolvam CORS, portas, banco de dados ou ambiente de produção exigem aprovação manual e Smoke Test do Project Lead antes do merge da branch na `main`.
 
+4. **Coesão de Escopo (Fatiamento Flexível):** histórias devem ter foco funcional único e claro. Use ~20-25 arquivos alterados como sinal de alerta para avaliar a divisão em fatias menores (heurística, sem rigidez excessiva).
+5. **Critérios do YOLO Mode:** o modo autônomo/YOLO é permitido apenas para histórias de documentação, setup e correções de baixo risco. Features críticas (autenticação, ingestão de dados, cálculos financeiros, CORS/produção) exigem validação humana e E2E antes de `done`.
 ---
 
 ## Usage Guidelines
