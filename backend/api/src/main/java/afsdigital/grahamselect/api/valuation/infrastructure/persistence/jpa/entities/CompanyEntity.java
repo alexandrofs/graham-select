@@ -27,6 +27,9 @@ public class CompanyEntity {
     private String ticker;
     private String name;
 
+    @Column(name = "cnpj", length = 20)
+    private String cnpj;
+
     @Column(name = "asset_class", length = 50)
     private String assetClass;
 

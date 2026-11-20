@@ -15,18 +15,22 @@ public class Company {
     private final String id;
     private final String ticker;
     private final String name;
+    private final String cnpj;
     private final String assetClass;
     private final String sector;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
     public Company(String ticker) {
-        this(UUID.randomUUID().toString(), ticker, null, null, null, null, null);
+        this(UUID.randomUUID().toString(), ticker, null, null, null, null, null, null);
     }
 
     public Company(String id, String ticker) {
-        this(id, ticker, null, null, null, null, null);
+        this(id, ticker, null, null, null, null, null, null);
+    }
+
+    public Company(String id, String ticker, String name, String assetClass, String sector, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this(id, ticker, name, null, assetClass, sector, createdAt, updatedAt);
     }
 
 }
-

@@ -63,5 +63,7 @@ databaseChangeLog:
       file: db/changelog/32-create-dividend-announcements-and-relevant-facts.yaml
   - include:
       file: db/changelog/33-create-open-finance-connections-and-sync-logs.yaml
+  - include:
+      file: db/changelog/34-add-cnpj-to-company.yaml
 
 

@@ -49,7 +49,8 @@ class _Sidebar extends StatelessWidget {
       if (location.startsWith('/upload')) return 5;
       if (location.startsWith('/metas')) return 6;
       if (location.startsWith('/dividends')) return 7;
-      if (location.startsWith('/profile')) return 8;
+      if (location.startsWith('/tax')) return 8;
+      if (location.startsWith('/profile')) return 9;
       return 0;
     }
 
@@ -77,6 +78,8 @@ class _Sidebar extends StatelessWidget {
           case 7:
             context.go('/dividends');
           case 8:
+            context.go('/tax');
+          case 9:
             context.go('/profile');
         }
       },
@@ -140,6 +143,11 @@ class _Sidebar extends StatelessWidget {
           label: Text('Proventos'),
         ),
         NavigationRailDestination(
+          icon: Icon(Icons.receipt_long_outlined, key: Key('nav_tax_button')),
+          selectedIcon: Icon(Icons.receipt_long),
+          label: Text('Bens e Direitos'),
+        ),
+        NavigationRailDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person),
           label: Text('Meu Perfil'),
@@ -165,7 +173,8 @@ class _BottomNavBar extends StatelessWidget {
       if (location.startsWith('/upload')) return 5;
       if (location.startsWith('/metas')) return 6;
       if (location.startsWith('/dividends')) return 7;
-      if (location.startsWith('/profile')) return 8;
+      if (location.startsWith('/tax')) return 8;
+      if (location.startsWith('/profile')) return 9;
       return 0;
     }
 
@@ -190,6 +199,8 @@ class _BottomNavBar extends StatelessWidget {
           case 7:
             context.go('/dividends');
           case 8:
+            context.go('/tax');
+          case 9:
             context.go('/profile');
         }
       },
@@ -225,6 +236,10 @@ class _BottomNavBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.calendar_month_outlined),
           label: 'Proventos',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.receipt_long_outlined),
+          label: 'IRPF',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outline),
