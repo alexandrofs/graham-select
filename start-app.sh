@@ -13,6 +13,15 @@ echo -e "${BLUE}=== Graham Select - Inicializador Local ===${NC}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env.local"
 
+# Configurar JAVA_HOME para JDK 22/21 compatível com o backend Spring Boot / Lombok
+if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+  COMPATIBLE_JAVA=$(/usr/libexec/java_home -v 22 2>/dev/null || /usr/libexec/java_home -v 21 2>/dev/null)
+  if [ -n "$COMPATIBLE_JAVA" ]; then
+    export JAVA_HOME="$COMPATIBLE_JAVA"
+    export PATH="$JAVA_HOME/bin:$PATH"
+  fi
+fi
+
 if [ -f "$ENV_FILE" ]; then
   echo -e "${GREEN}[0/4] Carregando variáveis de .env.local...${NC}"
   # Exporta cada linha não-comentada e não-vazia
