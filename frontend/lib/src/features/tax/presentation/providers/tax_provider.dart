@@ -1,33 +1,50 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../domain/entities/annual_tax_summary.dart';
 import '../../domain/entities/tax_declaration_report.dart';
 import '../../domain/repositories/tax_repository.dart';
+
+enum TaxTab { bensEDireitos, apuracaoMensal }
 
 class TaxProvider extends ChangeNotifier {
   final TaxRepository repository;
 
+  TaxTab _activeTab = TaxTab.bensEDireitos;
   TaxDeclarationReport? _report;
+  AnnualTaxSummary? _monthlySummary;
   List<int> _availableYears = [];
   int? _selectedYear;
   String? _selectedProfileId;
-  bool _isLoading = false;
+  bool _isLoadingReport = false;
+  bool _isLoadingMonthly = false;
   bool _isExporting = false;
   String? _errorMessage;
 
   TaxProvider({required this.repository});
 
+  TaxTab get activeTab => _activeTab;
   TaxDeclarationReport? get report => _report;
+  AnnualTaxSummary? get monthlySummary => _monthlySummary;
   List<int> get availableYears => _availableYears;
   int? get selectedYear => _selectedYear;
   String? get selectedProfileId => _selectedProfileId;
-  bool get isLoading => _isLoading;
+  bool get isLoading => _isLoadingReport || _isLoadingMonthly;
   bool get isExporting => _isExporting;
   String? get errorMessage => _errorMessage;
 
+  void setActiveTab(TaxTab tab) {
+    if (_activeTab == tab) return;
+    _activeTab = tab;
+    notifyListeners();
+  }
+
   Future<void> init() async {
     await loadAvailableYears();
-    await loadReport();
+    await Future.wait([
+      loadReport(),
+      loadMonthlyCapitalGains(),
+    ]);
   }
 
   Future<void> loadAvailableYears() async {
@@ -55,7 +72,10 @@ class TaxProvider extends ChangeNotifier {
     if (_selectedYear == year) return;
     _selectedYear = year;
     notifyListeners();
-    await loadReport();
+    await Future.wait([
+      loadReport(),
+      loadMonthlyCapitalGains(),
+    ]);
   }
 
   Future<void> setProfileId(String? profileId) async {
@@ -63,11 +83,14 @@ class TaxProvider extends ChangeNotifier {
     _selectedProfileId = profileId;
     notifyListeners();
     await loadAvailableYears();
-    await loadReport();
+    await Future.wait([
+      loadReport(),
+      loadMonthlyCapitalGains(),
+    ]);
   }
 
   Future<void> loadReport() async {
-    _isLoading = true;
+    _isLoadingReport = true;
     _errorMessage = null;
     notifyListeners();
 
@@ -77,11 +100,31 @@ class TaxProvider extends ChangeNotifier {
         profileId: _selectedProfileId,
       );
       _report = result;
-      _isLoading = false;
+      _isLoadingReport = false;
       notifyListeners();
     } catch (e) {
-      _isLoading = false;
+      _isLoadingReport = false;
       _errorMessage = 'Falha ao carregar o informe de Bens e Direitos: ${e.toString()}';
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMonthlyCapitalGains() async {
+    _isLoadingMonthly = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await repository.getMonthlyCapitalGains(
+        year: _selectedYear,
+        profileId: _selectedProfileId,
+      );
+      _monthlySummary = result;
+      _isLoadingMonthly = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoadingMonthly = false;
+      _errorMessage = 'Falha ao carregar a apuração mensal de ganhos de capital: ${e.toString()}';
       notifyListeners();
     }
   }
@@ -92,6 +135,31 @@ class TaxProvider extends ChangeNotifier {
 
     try {
       final csv = await repository.exportBensEDireitosCsv(
+        year: _selectedYear,
+        profileId: _selectedProfileId,
+      );
+      final uri = Uri.dataFromString(
+        csv,
+        mimeType: 'text/csv',
+        encoding: utf8,
+      );
+      await launchUrl(uri);
+      _isExporting = false;
+      notifyListeners();
+      return csv;
+    } catch (e) {
+      _isExporting = false;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<String?> exportMonthlyCsv() async {
+    _isExporting = true;
+    notifyListeners();
+
+    try {
+      final csv = await repository.exportMonthlyCapitalGainsCsv(
         year: _selectedYear,
         profileId: _selectedProfileId,
       );

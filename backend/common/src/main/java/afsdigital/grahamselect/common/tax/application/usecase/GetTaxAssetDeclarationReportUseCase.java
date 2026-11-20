@@ -7,6 +7,7 @@ import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
 import afsdigital.grahamselect.common.tax.application.dto.TaxAssetDeclarationItemDTO;
 import afsdigital.grahamselect.common.tax.application.dto.TaxAssetDeclarationReportDTO;
 import afsdigital.grahamselect.common.tax.domain.entities.TaxAssetGroup;
+import afsdigital.grahamselect.common.tax.domain.utils.TaxTickerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -270,15 +271,7 @@ public class GetTaxAssetDeclarationReportUseCase {
     }
 
     private String stripFractionalSuffix(String ticker) {
-        if (ticker == null) {
-            return "";
-        }
-        String normalized = ticker.trim().toUpperCase(Locale.ROOT);
-        if (normalized.endsWith("F") && normalized.length() > 4
-                && Character.isDigit(normalized.charAt(normalized.length() - 2))) {
-            return normalized.substring(0, normalized.length() - 1);
-        }
-        return normalized;
+        return TaxTickerUtils.stripFractionalSuffix(ticker);
     }
 
     private static class PositionTracker {

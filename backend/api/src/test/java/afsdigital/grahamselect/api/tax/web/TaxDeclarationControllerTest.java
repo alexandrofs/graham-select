@@ -4,11 +4,12 @@ import afsdigital.grahamselect.api.auth.infrastructure.security.PremiumFeatureAc
 import afsdigital.grahamselect.common.family.application.repository.FamilyProfilePort;
 import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
 import afsdigital.grahamselect.common.family.domain.entities.FamilyProfile;
-import afsdigital.grahamselect.common.tax.application.dto.TaxAssetDeclarationItemDTO;
-import afsdigital.grahamselect.common.tax.application.dto.TaxAssetDeclarationReportDTO;
-import afsdigital.grahamselect.common.tax.application.dto.TaxAvailableYearsDTO;
+import afsdigital.grahamselect.common.tax.application.dto.*;
 import afsdigital.grahamselect.common.tax.application.usecase.GetTaxAssetDeclarationReportUseCase;
 import afsdigital.grahamselect.common.tax.application.usecase.GetTaxAvailableYearsUseCase;
+import afsdigital.grahamselect.common.tax.application.usecase.GetTaxMonthlyCapitalGainsUseCase;
+import afsdigital.grahamselect.common.tax.domain.entities.DarfStatus;
+import afsdigital.grahamselect.common.tax.domain.entities.TaxCategory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ class TaxDeclarationControllerTest {
 
     @Mock
     private GetTaxAvailableYearsUseCase getTaxAvailableYearsUseCase;
+
+    @Mock
+    private GetTaxMonthlyCapitalGainsUseCase getTaxMonthlyCapitalGainsUseCase;
 
     @Mock
     private PremiumFeatureAccessGuard premiumFeatureAccessGuard;
@@ -220,6 +224,121 @@ class TaxDeclarationControllerTest {
                 .andExpect(jsonPath("$.years[0]").value(2025))
                 .andExpect(jsonPath("$.years[1]").value(2024))
                 .andExpect(jsonPath("$.years[2]").value(2023));
+    }
+
+    private AnnualTaxSummaryDTO createSampleMonthlySummary() {
+        MonthlyTradeOperationDTO op = new MonthlyTradeOperationDTO(
+                "PETR4",
+                java.time.LocalDate.of(2025, 3, 15),
+                "VENDA",
+                new BigDecimal("100.0000"),
+                new BigDecimal("40.00"),
+                new BigDecimal("30.0000"),
+                new BigDecimal("4000.00"),
+                new BigDecimal("1000.00"),
+                TaxCategory.SWING_TRADE_EQUITY
+        );
+
+        MonthlyTaxCalculationDTO march = new MonthlyTaxCalculationDTO(
+                3,
+                2025,
+                new BigDecimal("4000.00"),
+                true,
+                new BigDecimal("1000.00"),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                DarfStatus.EXEMPT,
+                BigDecimal.ZERO,
+                null,
+                List.of(op)
+        );
+
+        return new AnnualTaxSummaryDTO(
+                2025,
+                List.of(march),
+                BigDecimal.ZERO,
+                new BigDecimal("4000.00"),
+                new BigDecimal("1000.00"),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO
+        );
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/tax/monthly-capital-gains deve retornar 200 OK com resumo anual")
+    void shouldReturnMonthlyCapitalGainsSummary() throws Exception {
+        AnnualTaxSummaryDTO summary = createSampleMonthlySummary();
+        when(getTaxMonthlyCapitalGainsUseCase.execute("user-123", 2025, null)).thenReturn(summary);
+
+        mockMvc.perform(get("/api/v1/tax/monthly-capital-gains")
+                        .param("year", "2025"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.year").value(2025))
+                .andExpect(jsonPath("$.totalSalesYear").value(4000.00))
+                .andExpect(jsonPath("$.totalExemptProfitYear").value(1000.00))
+                .andExpect(jsonPath("$.monthlyCalculations[0].month").value(3))
+                .andExpect(jsonPath("$.monthlyCalculations[0].isEquityExempt").value(true))
+                .andExpect(jsonPath("$.monthlyCalculations[0].darfStatus").value("EXEMPT"));
+
+        verify(getTaxMonthlyCapitalGainsUseCase).execute("user-123", 2025, null);
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/tax/monthly-capital-gains com profileId sem plano Premium deve retornar 403 Forbidden")
+    void shouldReturn403WhenMonthlyGainsWithProfileIdWithoutPremium() throws Exception {
+        String profileId = UUID.randomUUID().toString();
+        when(premiumFeatureAccessGuard.canAccessPremiumFeatures()).thenReturn(false);
+
+        mockMvc.perform(get("/api/v1/tax/monthly-capital-gains")
+                        .param("profileId", profileId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/tax/monthly-capital-gains com profileId não encontrado deve retornar 404 Not Found")
+    void shouldReturn404WhenMonthlyGainsProfileNotFound() throws Exception {
+        UUID profileId = UUID.randomUUID();
+        when(premiumFeatureAccessGuard.canAccessPremiumFeatures()).thenReturn(true);
+        when(familyProfilePort.findActiveByIdAndMasterUserId(profileId, "user-123")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/tax/monthly-capital-gains")
+                        .param("profileId", profileId.toString()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/tax/monthly-capital-gains/export deve retornar CSV com UTF-8 BOM e seções corretas")
+    void shouldExportMonthlyCapitalGainsCsvSuccessfully() throws Exception {
+        AnnualTaxSummaryDTO summary = createSampleMonthlySummary();
+        when(getTaxMonthlyCapitalGainsUseCase.execute("user-123", 2025, null)).thenReturn(summary);
+
+        byte[] responseBytes = mockMvc.perform(get("/api/v1/tax/monthly-capital-gains/export")
+                        .param("year", "2025"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, org.hamcrest.Matchers.startsWith("text/csv")))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"apuracao_mensal_ganhos_capital_2025.csv\""))
+                .andReturn().getResponse().getContentAsByteArray();
+
+        // Verificar UTF-8 BOM (\uFEFF -> 0xEF, 0xBB, 0xBF)
+        assertThat(responseBytes.length).isGreaterThan(3);
+        assertThat(responseBytes[0]).isEqualTo((byte) 0xEF);
+        assertThat(responseBytes[1]).isEqualTo((byte) 0xBB);
+        assertThat(responseBytes[2]).isEqualTo((byte) 0xBF);
+
+        String csvContent = new String(responseBytes, java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(csvContent).contains("Mês;Alienações Ações (R$);Isento Ações;Lucro Isento (R$);");
+        assertThat(csvContent).contains("Data;Ticker;Tipo;Quantidade;Preço Venda (R$);Preço Médio (R$);Valor Alienação (R$);Resultado Líquido (R$);Classificação");
+        assertThat(csvContent).contains("03/2025;4000,00;Sim;1000,00;");
+        assertThat(csvContent).contains("15/03/2025;PETR4;VENDA;100;40,00;30,00;4000,00;1000,00;SWING_TRADE_EQUITY");
     }
 
 }

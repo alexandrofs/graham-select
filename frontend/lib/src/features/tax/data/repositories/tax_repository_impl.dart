@@ -1,3 +1,4 @@
+import '../../domain/entities/annual_tax_summary.dart';
 import '../../domain/entities/tax_declaration_report.dart';
 import '../../domain/repositories/tax_repository.dart';
 import '../datasources/tax_remote_data_source.dart';
@@ -21,5 +22,16 @@ class TaxRepositoryImpl implements TaxRepository {
   @override
   Future<String> exportBensEDireitosCsv({int? year, String? profileId}) {
     return remoteDataSource.exportBensEDireitosCsv(year: year, profileId: profileId);
+  }
+
+  @override
+  Future<AnnualTaxSummary> getMonthlyCapitalGains({int? year, String? profileId}) async {
+    final json = await remoteDataSource.getMonthlyCapitalGains(year: year, profileId: profileId);
+    return AnnualTaxSummary.fromJson(json);
+  }
+
+  @override
+  Future<String> exportMonthlyCapitalGainsCsv({int? year, String? profileId}) {
+    return remoteDataSource.exportMonthlyCapitalGainsCsv(year: year, profileId: profileId);
   }
 }
