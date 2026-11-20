@@ -86,16 +86,16 @@ development_status:
   epic-7: in-progress
   7-1-vinculo-de-novo-cpf-a-conta-matriz: done
   epic-7-retrospective: optional
-  epic-8: in-progress
+  epic-8: done
   8-1-criacao-e-associacao-de-tags: done
   8-2-filtros-de-dashboard-e-recomendacoes-por-tag: done
-  8-3-templates-e-onboarding-de-tags: ready-for-dev
+  8-3-templates-e-onboarding-de-tags: cancelled
   epic-8-retrospective: done
   epic-9: done
   9-1-importacao-de-nota-de-corretagem-pdf: done
   9-2-web-crawler-de-proventos-e-fatos-relevantes: done
   9-3-conector-open-finance: done
-  epic-9-retrospective: optional
+  epic-9-retrospective: done
   epic-10: in-progress
   10-1-relatorio-de-bens-e-direitos-informe-anual: done
   10-2-calculo-de-lucro-realizado-e-isencao: backlog
