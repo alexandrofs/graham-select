@@ -1,0 +1,6 @@
+apiVersion: v2
+name: graham-select
+description: Helm chart para deploy da plataforma Graham Select no Kubernetes OKE (Oracle Cloud)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

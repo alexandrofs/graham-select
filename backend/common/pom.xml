@@ -91,9 +91,6 @@
                             <version>1.18.34</version>
                         </path>
                     </annotationProcessorPaths>
-                    <compilerArgs>
-                        <arg>-proc:full</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

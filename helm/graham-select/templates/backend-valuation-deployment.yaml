@@ -1,0 +1,59 @@
+{{- if .Values.valuation.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "graham-select.valuation.fullname" . }}
+  labels:
+    {{- include "graham-select.labels" . | nindent 4 }}
+    app.kubernetes.io/component: valuation
+spec:
+  replicas: {{ .Values.valuation.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "graham-select.valuation.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "graham-select.valuation.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: valuation
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "graham-select.fullname" . }}
+      containers:
+        - name: valuation
+          image: "{{ .Values.valuation.image.repository }}:{{ .Values.valuation.image.tag }}"
+          imagePullPolicy: {{ .Values.valuation.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.valuation.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.valuation.env.SERVER_PORT | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "graham-select.fullname" . }}-config
+            - secretRef:
+                name: {{ include "graham-select.fullname" . }}-secret
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.valuation.probes.liveness.path }}
+              port: {{ .Values.valuation.probes.liveness.port }}
+            initialDelaySeconds: {{ .Values.valuation.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.valuation.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.valuation.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.valuation.probes.liveness.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.valuation.probes.readiness.path }}
+              port: {{ .Values.valuation.probes.readiness.port }}
+            initialDelaySeconds: {{ .Values.valuation.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.valuation.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.valuation.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.valuation.probes.readiness.failureThreshold }}
+          resources:
+            {{- toYaml .Values.valuation.resources | nindent 12 }}
+{{- end }}

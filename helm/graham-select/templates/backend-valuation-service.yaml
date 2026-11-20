@@ -1,0 +1,18 @@
+{{- if .Values.valuation.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "graham-select.valuation.fullname" . }}
+  labels:
+    {{- include "graham-select.labels" . | nindent 4 }}
+    app.kubernetes.io/component: valuation
+spec:
+  type: {{ .Values.valuation.service.type }}
+  ports:
+    - port: {{ .Values.valuation.service.port }}
+      targetPort: {{ .Values.valuation.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "graham-select.valuation.selectorLabels" . | nindent 4 }}
+{{- end }}
