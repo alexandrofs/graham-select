@@ -814,6 +814,67 @@ paths:
       responses:
         '200':
           description: Lista de anos disponíveis
+  /api/v1/tax/monthly-capital-gains:
+    get:
+      summary: Apuração Mensal de Ganhos de Capital e DARF (Código 6015)
+      description: Retorna o demonstrativo consolidado dos 12 meses do ano com cálculo de lucro isento, lucro tributável, compensação de prejuízos e guias DARF.
+      tags:
+        - Tax
+      parameters:
+        - name: year
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Apuração anual e mensal de ganhos de capital
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnualTaxSummary'
+        '400':
+          description: Ano inválido
+        '403':
+          description: Acesso a perfis familiares requer assinatura Premium
+        '404':
+          description: Perfil familiar não encontrado
+  /api/v1/tax/monthly-capital-gains/export:
+    get:
+      summary: Exportação da Apuração Mensal de Ganhos de Capital em CSV
+      description: Exporta o demonstrativo dos 12 meses e o detalhamento das operações em CSV sanitizado com UTF-8 BOM.
+      tags:
+        - Tax
+      parameters:
+        - name: year
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: profileId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Arquivo CSV formatado para download
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Acesso a perfis familiares requer assinatura Premium
+        '404':
+          description: Perfil familiar não encontrado
 
 components:
   schemas:
@@ -1206,4 +1267,94 @@ components:
         syncedAt:
           type: string
           format: date-time
+    AnnualTaxSummary:
+      type: object
+      properties:
+        year:
+          type: integer
+        totalEquitySalesYear:
+          type: number
+        totalExemptProfitYear:
+          type: number
+        totalCommonTaxableProfitYear:
+          type: number
+        totalFiiTaxableProfitYear:
+          type: number
+        totalTaxDueYear:
+          type: number
+        accumulatedLossCommonEndOfYear:
+          type: number
+        accumulatedLossFiiEndOfYear:
+          type: number
+        accumulatedDarfBelowMinimumEndOfYear:
+          type: number
+        monthlyCalculations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyTaxCalculation'
+    MonthlyTaxCalculation:
+      type: object
+      properties:
+        month:
+          type: integer
+        year:
+          type: integer
+        totalEquitySales:
+          type: number
+        isEquityExempt:
+          type: boolean
+        exemptProfit:
+          type: number
+        commonTaxableProfit:
+          type: number
+        commonLossCompensated:
+          type: number
+        commonLossCarryforward:
+          type: number
+        commonTaxDue:
+          type: number
+        fiiTaxableProfit:
+          type: number
+        fiiLossCompensated:
+          type: number
+        fiiLossCarryforward:
+          type: number
+        fiiTaxDue:
+          type: number
+        totalTaxDue:
+          type: number
+        darfStatus:
+          type: string
+          enum: [NO_TAX_DUE, EXEMPT, LOSS, ACCUMULATED_BELOW_MINIMUM, DUE, PAID, OVERDUE]
+        darfAmount:
+          type: number
+        darfDueDate:
+          type: string
+          format: date
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyTradeOperation'
+    MonthlyTradeOperation:
+      type: object
+      properties:
+        ticker:
+          type: string
+        tradeDate:
+          type: string
+          format: date
+        side:
+          type: string
+        quantity:
+          type: number
+        price:
+          type: number
+        averagePrice:
+          type: number
+        totalSaleValue:
+          type: number
+        netProfitOrLoss:
+          type: number
+        category:
+          type: string
 

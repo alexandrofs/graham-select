@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/features/tax/domain/entities/annual_tax_summary.dart';
 import 'package:frontend/src/features/tax/domain/entities/tax_declaration_item.dart';
 import 'package:frontend/src/features/tax/domain/entities/tax_declaration_report.dart';
 import 'package:frontend/src/features/tax/domain/repositories/tax_repository.dart';
@@ -6,8 +7,10 @@ import 'package:frontend/src/features/tax/presentation/providers/tax_provider.da
 
 class FakeTaxRepository implements TaxRepository {
   TaxDeclarationReport? reportToReturn;
+  AnnualTaxSummary? monthlySummaryToReturn;
   List<int> availableYearsToReturn = [];
   String csvToReturn = 'csv content';
+  String monthlyCsvToReturn = 'monthly csv content';
   bool shouldThrow = false;
   int? lastYear;
   String? lastProfileId;
@@ -42,6 +45,22 @@ class FakeTaxRepository implements TaxRepository {
     lastYear = year;
     lastProfileId = profileId;
     return csvToReturn;
+  }
+
+  @override
+  Future<AnnualTaxSummary> getMonthlyCapitalGains({int? year, String? profileId}) async {
+    if (shouldThrow) throw Exception('Network error');
+    lastYear = year;
+    lastProfileId = profileId;
+    return monthlySummaryToReturn ?? AnnualTaxSummary.empty(year ?? 2025);
+  }
+
+  @override
+  Future<String> exportMonthlyCapitalGainsCsv({int? year, String? profileId}) async {
+    if (shouldThrow) throw Exception('Network error');
+    lastYear = year;
+    lastProfileId = profileId;
+    return monthlyCsvToReturn;
   }
 }
 
@@ -137,6 +156,39 @@ void main() {
       expect(result, isNull);
       expect(provider.isExporting, false);
       expect(provider.errorMessage, isNull);
+    });
+
+    test('Deve alternar aba ativa', () {
+      expect(provider.activeTab, TaxTab.bensEDireitos);
+      provider.setActiveTab(TaxTab.apuracaoMensal);
+      expect(provider.activeTab, TaxTab.apuracaoMensal);
+    });
+
+    test('Deve carregar apuração mensal com sucesso', () async {
+      repository.monthlySummaryToReturn = const AnnualTaxSummary(
+        year: 2025,
+        monthlyCalculations: [],
+        totalTaxDueYear: 500.0,
+        totalSalesYear: 10000.0,
+        totalExemptProfitYear: 1000.0,
+        totalTaxableProfitYear: 2500.0,
+        finalCommonLossCarryforward: 0.0,
+        finalFiiLossCarryforward: 0.0,
+      );
+
+      await provider.loadMonthlyCapitalGains();
+
+      expect(provider.isLoading, false);
+      expect(provider.errorMessage, isNull);
+      expect(provider.monthlySummary, isNotNull);
+      expect(provider.monthlySummary!.totalTaxDueYear, 500.0);
+    });
+
+    test('Falha no exportMonthlyCsv não deve quebrar estado', () async {
+      repository.shouldThrow = true;
+      final result = await provider.exportMonthlyCsv();
+      expect(result, isNull);
+      expect(provider.isExporting, false);
     });
   });
 }

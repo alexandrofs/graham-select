@@ -48,3 +48,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 - Redesenho de navegação inferior móvel com mais de 5 destinos [frontend/lib/src/core/widgets/main_layout.dart:237] — A barra inferior de navegação (`_BottomNavBar`) possui 10 destinos, ultrapassando a recomendação de 3-5 do Material Design. Deve ser abordado em um refator dedicado de UX (ex: menu 'Mais'/Drawer).
 - Otimização de consulta em lote para CNPJs de empresas no relatório de IRPF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java:72] — A busca de dados de empresas utiliza cache em memória por ticker único; substituição por `findAllByTickerIn` pode ser implementada futuramente caso a carteira contenha centenas de ativos distintos.
+
+## Deferred from: code review of 10-2-calculo-de-lucro-realizado-e-isencao.md (2026-11-20)
+
+- Mecanismo de download de arquivos CSV no Flutter Web via launchUrl(dataURI) [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart:140] — O disparo de download via dataURI no Flutter Web/Desktop pode apresentar comportamentos variados entre browsers ou desconsiderar Content-Disposition; padronização com package dedicado de file saver adiada por seguir padrão já existente na Story 10.1.
+- Calendário dinâmico de feriados bancários móveis para vencimento de DARF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/domain/utils/DarfDueDateCalculator.java:11] — Feriados móveis (Sexta-feira Santa, Carnaval, Corpus Christi) diferidos para implementação em serviço compartilhado de calendário fiscal/bancário; 31/12 incluído como feriado bancário fixo (Resolução CMN/Bacen 4.880/2020).

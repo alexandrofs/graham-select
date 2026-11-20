@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/features/tax/domain/entities/annual_tax_summary.dart';
+import 'package:frontend/src/features/tax/domain/entities/monthly_tax_calculation.dart';
+import 'package:frontend/src/features/tax/domain/entities/monthly_trade_operation.dart';
 import 'package:frontend/src/features/tax/domain/entities/tax_declaration_item.dart';
 import 'package:frontend/src/features/tax/domain/entities/tax_declaration_report.dart';
 import 'package:frontend/src/features/tax/domain/repositories/tax_repository.dart';
@@ -9,8 +12,10 @@ import 'package:provider/provider.dart';
 
 class MockTaxRepository implements TaxRepository {
   TaxDeclarationReport? reportToReturn;
+  AnnualTaxSummary? monthlySummaryToReturn;
   List<int> availableYearsToReturn = [2025, 2024];
   String csvToReturn = 'csv content';
+  String monthlyCsvToReturn = 'monthly csv content';
 
   @override
   Future<TaxDeclarationReport> getBensEDireitos({int? year, String? profileId}) async {
@@ -34,6 +39,16 @@ class MockTaxRepository implements TaxRepository {
   @override
   Future<String> exportBensEDireitosCsv({int? year, String? profileId}) async {
     return csvToReturn;
+  }
+
+  @override
+  Future<AnnualTaxSummary> getMonthlyCapitalGains({int? year, String? profileId}) async {
+    return monthlySummaryToReturn ?? AnnualTaxSummary.empty(year ?? 2025);
+  }
+
+  @override
+  Future<String> exportMonthlyCapitalGainsCsv({int? year, String? profileId}) async {
+    return monthlyCsvToReturn;
   }
 }
 
@@ -105,5 +120,98 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Discriminação de PETR4 copiada com sucesso!'), findsOneWidget);
+  });
+
+  testWidgets('Deve alternar para aba de Apuração Mensal & DARF e renderizar cards de apuração', (tester) async {
+    final marchCalc = MonthlyTaxCalculation(
+      month: 3,
+      year: 2025,
+      totalEquitySales: 4000.0,
+      isEquityExempt: true,
+      exemptProfit: 1000.0,
+      commonTaxableProfit: 0.0,
+      commonLossCompensated: 0.0,
+      commonLossCarryforward: 0.0,
+      commonTaxDue: 0.0,
+      fiiTaxableProfit: 0.0,
+      fiiLossCompensated: 0.0,
+      fiiLossCarryforward: 0.0,
+      fiiTaxDue: 0.0,
+      totalTaxDue: 0.0,
+      accumulatedTaxUnder10: 0.0,
+      darfStatus: DarfStatus.exempt,
+      darfAmount: 0.0,
+      darfDueDate: null,
+      operations: [
+        MonthlyTradeOperation(
+          ticker: 'PETR4',
+          tradeDate: DateTime(2025, 3, 15),
+          side: 'VENDA',
+          quantity: 100,
+          price: 40.0,
+          averagePrice: 30.0,
+          totalSaleValue: 4000.0,
+          netProfitOrLoss: 1000.0,
+          category: 'SWING_TRADE_EQUITY',
+        ),
+      ],
+    );
+
+    final mayCalc = MonthlyTaxCalculation(
+      month: 5,
+      year: 2025,
+      totalEquitySales: 30000.0,
+      isEquityExempt: false,
+      exemptProfit: 0.0,
+      commonTaxableProfit: 10000.0,
+      commonLossCompensated: 0.0,
+      commonLossCarryforward: 0.0,
+      commonTaxDue: 1500.0,
+      fiiTaxableProfit: 0.0,
+      fiiLossCompensated: 0.0,
+      fiiLossCarryforward: 0.0,
+      fiiTaxDue: 0.0,
+      totalTaxDue: 1500.0,
+      accumulatedTaxUnder10: 0.0,
+      darfStatus: DarfStatus.due,
+      darfAmount: 1500.0,
+      darfDueDate: DateTime(2025, 6, 30),
+      operations: [],
+    );
+
+    repository.monthlySummaryToReturn = AnnualTaxSummary(
+      year: 2025,
+      monthlyCalculations: [marchCalc, mayCalc],
+      totalTaxDueYear: 1500.0,
+      totalSalesYear: 34000.0,
+      totalExemptProfitYear: 1000.0,
+      totalTaxableProfitYear: 10000.0,
+      finalCommonLossCarryforward: 0.0,
+      finalFiiLossCarryforward: 0.0,
+    );
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Clica na Tab 2
+    expect(find.byKey(const Key('tab_apuracao_mensal')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('tab_apuracao_mensal')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Apuração Mensal & DARF'), findsNWidgets(2));
+    expect(find.text('Resumo Anual de Apuração Fiscal (2025)'), findsOneWidget);
+    expect(find.text('Total Imposto Devido'), findsOneWidget);
+    expect(find.text('Volume Total Alienado'), findsOneWidget);
+    expect(find.text('Março/2025'), findsOneWidget);
+    expect(find.text('Maio/2025'), findsOneWidget);
+    expect(find.text('DARF a Pagar'), findsOneWidget);
+    expect(find.text('Guia DARF - Código 6015'), findsOneWidget);
+    expect(find.text('Copiar Dados do DARF'), findsOneWidget);
+
+    // Clica em Copiar Dados do DARF
+    await tester.ensureVisible(find.text('Copiar Dados do DARF'));
+    await tester.tap(find.text('Copiar Dados do DARF'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dados da Guia DARF copiados para a área de transferência!'), findsOneWidget);
   });
 }
