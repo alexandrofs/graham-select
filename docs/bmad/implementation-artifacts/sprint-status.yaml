@@ -100,3 +100,7 @@ development_status:
   10-1-relatorio-de-bens-e-direitos-informe-anual: done
   10-2-calculo-de-lucro-realizado-e-isencao: done
   epic-10-retrospective: done
+  epic-11: backlog
+  11-1-alertas-via-whatsapp-gatilhos-de-meta: backlog
+  11-2-web-push-para-zona-de-compra-graham: backlog
+  epic-11-retrospective: optional
