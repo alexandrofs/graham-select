@@ -1,20 +1,19 @@
 package afsdigital.grahamselect.common.dividends.application.usecase;
 
 import afsdigital.grahamselect.common.dividends.application.dto.CorporateEventSyncSummaryDTO;
+import afsdigital.grahamselect.common.dividends.application.repository.DividendAlertPublisherPort;
 import afsdigital.grahamselect.common.dividends.application.repository.DividendAnnouncementPort;
 import afsdigital.grahamselect.common.dividends.application.repository.DividendCrawlerPort;
 import afsdigital.grahamselect.common.dividends.application.repository.RelevantFactCrawlerPort;
 import afsdigital.grahamselect.common.dividends.application.repository.RelevantFactPort;
 import afsdigital.grahamselect.common.dividends.domain.entities.DividendAnnouncement;
 import afsdigital.grahamselect.common.dividends.domain.entities.RelevantFact;
-import afsdigital.grahamselect.common.notifications.application.usecase.NotifyDividendAlertsUseCase;
 import afsdigital.grahamselect.valuation.application.repository.CustodyTickerPort;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class SyncCorporateEventsUseCase {
@@ -24,7 +23,7 @@ public class SyncCorporateEventsUseCase {
     private final RelevantFactCrawlerPort relevantFactCrawlerPort;
     private final DividendAnnouncementPort dividendAnnouncementPort;
     private final RelevantFactPort relevantFactPort;
-    private final NotifyDividendAlertsUseCase notifyDividendAlertsUseCase;
+    private final DividendAlertPublisherPort dividendAlertPublisherPort;
 
     public SyncCorporateEventsUseCase(
             CustodyTickerPort custodyTickerPort,
@@ -43,14 +42,14 @@ public class SyncCorporateEventsUseCase {
             RelevantFactCrawlerPort relevantFactCrawlerPort,
             DividendAnnouncementPort dividendAnnouncementPort,
             RelevantFactPort relevantFactPort,
-            NotifyDividendAlertsUseCase notifyDividendAlertsUseCase
+            DividendAlertPublisherPort dividendAlertPublisherPort
     ) {
         this.custodyTickerPort = custodyTickerPort;
         this.dividendCrawlerPort = dividendCrawlerPort;
         this.relevantFactCrawlerPort = relevantFactCrawlerPort;
         this.dividendAnnouncementPort = dividendAnnouncementPort;
         this.relevantFactPort = relevantFactPort;
-        this.notifyDividendAlertsUseCase = notifyDividendAlertsUseCase;
+        this.dividendAlertPublisherPort = dividendAlertPublisherPort;
     }
 
     public CorporateEventSyncSummaryDTO execute() {
@@ -102,15 +101,12 @@ public class SyncCorporateEventsUseCase {
                 }
             }
 
-            if (notifyDividendAlertsUseCase != null && !newAnnouncements.isEmpty()) {
-                List<DividendAnnouncement> snapshot = List.copyOf(newAnnouncements);
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        notifyDividendAlertsUseCase.notifyForNewAnnouncements(snapshot);
-                    } catch (Exception e) {
-                        log.error("Erro ao disparar alertas WhatsApp para novos proventos: {}", e.getMessage(), e);
-                    }
-                });
+            if (dividendAlertPublisherPort != null && !newAnnouncements.isEmpty()) {
+                try {
+                    dividendAlertPublisherPort.publishNewDividendAnnouncements(List.copyOf(newAnnouncements));
+                } catch (Exception e) {
+                    log.error("Erro ao disparar alertas para novos proventos: {}", e.getMessage(), e);
+                }
             }
 
             // 2. Fatos Relevantes

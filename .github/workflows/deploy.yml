@@ -236,6 +236,10 @@ jobs:
             --set-string secrets.brapiToken="${{ secrets.BRAPI_TOKEN }}" \
             --set-string secrets.openfinanceEncryptionKey="${{ secrets.OPENFINANCE_ENCRYPTION_KEY }}" \
             --set-string secrets.openfinanceWebhookSecret="${{ secrets.OPENFINANCE_WEBHOOK_SECRET }}" \
+            --set-string secrets.whatsappMetaAccessToken="${{ secrets.WHATSAPP_META_ACCESS_TOKEN }}" \
+            --set-string secrets.whatsappMetaPhoneNumberId="${{ secrets.WHATSAPP_META_PHONE_NUMBER_ID }}" \
+            --set-string secrets.webpushVapidPrivateKey="${{ secrets.WEBPUSH_VAPID_PRIVATE_KEY }}" \
+            --set-string secrets.webpushVapidPublicKey="${{ secrets.WEBPUSH_VAPID_PUBLIC_KEY }}" \
             --wait \
             --timeout 10m
 

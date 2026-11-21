@@ -34,6 +34,12 @@ api:
     CORPORATE_EVENTS_SYNC_CRON: "0 0 21 * * MON-FRI"
     OPENFINANCE_SYNC_CRON: "0 0 6 * * *"
     OPENFINANCE_MOCK_ENABLED: "false"
+    WHATSAPP_PROVIDER: "mock"
+    WHATSAPP_ALERTS_CRON: "0 0 9 * * MON-FRI"
+    WHATSAPP_META_BASE_URL: "https://graph.facebook.com/v21.0"
+    WEBPUSH_PROVIDER: "mock"
+    WEBPUSH_ALERTS_CRON: "0 15 20 * * MON-FRI"
+    WEBPUSH_VAPID_SUBJECT: "mailto:contato@grahamselect.com.br"
 
   resources:
     requests:
@@ -133,6 +139,10 @@ secrets:
   brapiToken: ""
   openfinanceEncryptionKey: ""
   openfinanceWebhookSecret: ""
+  whatsappMetaAccessToken: ""
+  whatsappMetaPhoneNumberId: ""
+  webpushVapidPrivateKey: ""
+  webpushVapidPublicKey: ""
 
 # ------------------------------------------------------------------------------
 # Frontend Flutter Web Configuration
