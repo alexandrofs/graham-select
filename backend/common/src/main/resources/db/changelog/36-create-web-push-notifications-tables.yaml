@@ -1,0 +1,243 @@
+databaseChangeLog:
+  - changeSet:
+      id: 36-create-web-push-preferences-table
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: web_push_preferences
+      changes:
+        - createTable:
+            tableName: web_push_preferences
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_web_push_prefs_user_id
+              - column:
+                  name: opted_in
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: opted_in_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true
+              - column:
+                  name: min_margin_of_safety_pct
+                  type: DECIMAL(5,2)
+                  defaultValueNumeric: 20.00
+                  constraints:
+                    nullable: false
+              - column:
+                  name: only_custody_tickers
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: web_push_preferences
+
+  - changeSet:
+      id: 36-create-web-push-subscriptions-table
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: web_push_subscriptions
+      changes:
+        - createTable:
+            tableName: web_push_subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: endpoint
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: endpoint_hash
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_web_push_sub_endpoint_hash
+              - column:
+                  name: p256dh_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: auth_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_agent
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_used_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: web_push_subscriptions
+            indexName: idx_web_push_sub_user_active
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: active
+      rollback:
+        - dropIndex:
+            tableName: web_push_subscriptions
+            indexName: idx_web_push_sub_user_active
+        - dropTable:
+            tableName: web_push_subscriptions
+
+  - changeSet:
+      id: 36-create-web-push-notification-logs-table
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: web_push_notification_logs
+      changes:
+        - createTable:
+            tableName: web_push_notification_logs
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subscription_id
+                  type: VARCHAR(36)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: ticker
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: event_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dedup_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_web_push_logs_dedup_key
+              - column:
+                  name: title
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message_preview
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: provider
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: http_status
+                  type: INT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: error_message
+                  type: TEXT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: sent_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: web_push_notification_logs
+            indexName: idx_web_push_logs_user_sent
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: sent_at
+      rollback:
+        - dropIndex:
+            tableName: web_push_notification_logs
+            indexName: idx_web_push_logs_user_sent
+        - dropTable:
+            tableName: web_push_notification_logs
