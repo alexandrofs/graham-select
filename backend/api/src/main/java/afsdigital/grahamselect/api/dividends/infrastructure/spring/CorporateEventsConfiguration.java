@@ -10,6 +10,7 @@ import afsdigital.grahamselect.common.dividends.application.repository.RelevantF
 import afsdigital.grahamselect.common.dividends.application.usecase.GetDividendScheduleUseCase;
 import afsdigital.grahamselect.common.dividends.application.usecase.GetRelevantFactsUseCase;
 import afsdigital.grahamselect.common.dividends.application.usecase.SyncCorporateEventsUseCase;
+import afsdigital.grahamselect.common.notifications.application.usecase.NotifyDividendAlertsUseCase;
 import afsdigital.grahamselect.common.portfolio.application.usecase.GetCustodyPositionsUseCase;
 import afsdigital.grahamselect.valuation.application.repository.CustodyTickerPort;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,14 +55,16 @@ public class CorporateEventsConfiguration {
             CustodyTickerPort custodyTickerPort,
             CompositeCorporateEventsCrawler compositeCrawler,
             DividendAnnouncementPort dividendAnnouncementPort,
-            RelevantFactPort relevantFactPort
+            RelevantFactPort relevantFactPort,
+            NotifyDividendAlertsUseCase notifyDividendAlertsUseCase
     ) {
         return new SyncCorporateEventsUseCase(
                 custodyTickerPort,
                 compositeCrawler,
                 compositeCrawler,
                 dividendAnnouncementPort,
-                relevantFactPort
+                relevantFactPort,
+                notifyDividendAlertsUseCase
         );
     }
 

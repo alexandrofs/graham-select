@@ -1,0 +1,159 @@
+databaseChangeLog:
+  - changeSet:
+      id: 35-create-whatsapp-notifications-preferences-table
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: whatsapp_notification_preferences
+      changes:
+        - createTable:
+            tableName: whatsapp_notification_preferences
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_whatsapp_prefs_user_id
+              - column:
+                  name: phone_number
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: opted_in
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: opted_in_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true
+              - column:
+                  name: notify_dividends
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notify_rebalance_triggers
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notify_goal_milestones
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rebalance_drift_threshold_pct
+                  type: DECIMAL(5,2)
+                  defaultValueNumeric: 5.00
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: whatsapp_notification_preferences
+
+  - changeSet:
+      id: 35-create-whatsapp-notifications-logs-table
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: whatsapp_notification_logs
+      changes:
+        - createTable:
+            tableName: whatsapp_notification_logs
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dedup_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_whatsapp_logs_dedup_key
+              - column:
+                  name: message_preview
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: provider
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: provider_message_id
+                  type: VARCHAR(128)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: error_message
+                  type: TEXT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: sent_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: whatsapp_notification_logs
+            indexName: idx_whatsapp_logs_user_sent
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: sent_at
+      rollback:
+        - dropIndex:
+            tableName: whatsapp_notification_logs
+            indexName: idx_whatsapp_logs_user_sent
+        - dropTable:
+            tableName: whatsapp_notification_logs

@@ -6,6 +6,10 @@ workspace {
             description "Usuário que deseja identificar empresas de valor para investir."
         }
 
+        whatsappCloudApi = softwareSystem "Meta WhatsApp Cloud API" {
+            description "Gateway externo para entrega de alertas financeiros via WhatsApp."
+        }
+
         softwareSystem = softwareSystem "GrahamSelect" {
         
             description "Aplicativo para calcular as 10 empresas mais baratas usando a regra de Benjamin Graham."
@@ -46,8 +50,15 @@ workspace {
                     description "Serviço de cáculo de ranking das empresas"
                     rankCompaniesService -> companyFinancialDataRepository "Consulta tabela de dados de empresas"
                 }
+                whatsappNotificationsService = component "WhatsApp Notifications Service" {
+                    description "Gerencia preferências LGPD, gatilhos de rebalanceamento, marcos de metas, proventos e histórico de envios WhatsApp"
+                    technology "Java Service, ShedLock, RestClient"
+                    whatsappNotificationsService -> database "Lê e grava preferências e logs de envio WhatsApp"
+                    whatsappNotificationsService -> whatsappCloudApi "Envia alertas via WhatsApp Cloud API (ou Mock local)"
+                }
                 apiController -> geradorEventosService 
                 apiController -> rankCompaniesService
+                apiController -> whatsappNotificationsService "Expõe endpoints /api/v1/notifications/whatsapp/*"
                 geradorEventosService -> producerService
                 producerService -> kafka "Publica evento de dados de empresas"
             }

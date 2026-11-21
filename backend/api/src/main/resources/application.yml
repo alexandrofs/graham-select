@@ -67,4 +67,15 @@ openfinance:
     connect-timeout-ms: ${OPENFINANCE_CONNECT_TIMEOUT_MS:5000}
     read-timeout-ms: ${OPENFINANCE_READ_TIMEOUT_MS:15000}
 
+whatsapp:
+  provider: ${WHATSAPP_PROVIDER:mock}
+  alerts:
+    cron: ${WHATSAPP_ALERTS_CRON:0 0 9 * * MON-FRI}
+  meta:
+    base-url: ${WHATSAPP_META_BASE_URL:https://graph.facebook.com/v21.0}
+    phone-number-id: ${WHATSAPP_META_PHONE_NUMBER_ID:}
+    access-token: ${WHATSAPP_META_ACCESS_TOKEN:}
+    connect-timeout-ms: ${WHATSAPP_META_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${WHATSAPP_META_READ_TIMEOUT_MS:10000}
+
 
