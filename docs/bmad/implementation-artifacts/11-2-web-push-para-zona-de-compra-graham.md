@@ -3,7 +3,7 @@ baseline_commit: 4d6627b3d35953def9851ffdd17886eff1de4343
 ---
 # Story 11.2: Web Push para Zona de Compra (Graham)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -115,6 +115,22 @@ Para que eu possa aproveitar oportunidades de aporte com desconto sem precisar m
   - [x] 5.1 Backend: criar testes unitários para `UpdateWebPushPreferencesUseCase`, `RegisterWebPushSubscriptionUseCase`, `SendWebPushAlertUseCase`, `EvaluateGrahamBuyZoneAlertsUseCase`, `VapidWebPushGatewayAdapter` (criptografia RFC 8291, JWT ES256 P1363 e tratamento 404/410) e `WebPushNotificationsControllerTest` (seguindo o padrão de `WhatsappNotificationsControllerTest` para cobrir `200`/`400`/`401`/`404`), e executar `mvn test` em todo o reactor backend.
   - [x] 5.2 Frontend: criar testes de provider e widget (`web_push_notifications_provider_test.dart`, `web_push_notifications_page_test.dart`), executar `flutter test` e `flutter analyze` (0 erros e 0 warnings).
   - [x] 5.3 Atualizar `docs/workspace.dsl` documentando o componente/serviço de Notificações Web Push e a integração com Browser Push Services (W3C Web Push / VAPID).
+
+### Review Findings
+
+- [x] [Review][Patch] Ajustar teto de margem de segurança para 90.00% em EvaluateGrahamBuyZoneAlertsUseCase [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/EvaluateGrahamBuyZoneAlertsUseCase.java:68]
+- [x] [Review][Patch] Typo '?userAgent' no mapa de payload de registro de assinatura Web Push [frontend/lib/src/features/notifications/data/datasources/web_push_notifications_remote_data_source.dart:72]
+- [x] [Review][Patch] Validação de Host em endpoints HTTPS e extração de Origin [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/RegisterWebPushSubscriptionUseCase.java:90]
+- [x] [Review][Patch] Validação de userId não nulo/em branco e tratamento de status EXPIRED na idempotência [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/SendWebPushAlertUseCase.java:36]
+- [x] [Review][Patch] Truncamento defensivo de errorMessage em logs de notificação para prevenir overflow em push gateways [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/SendWebPushAlertUseCase.java:112]
+- [x] [Review][Patch] Sincronização do estado local do formulário após salvar preferências e no retry de erro [frontend/lib/src/features/notifications/presentation/pages/web_push_notifications_page.dart:63]
+- [x] [Review][Patch] Desabilitar botão de teste Web Push se houver alterações não salvas pendentes [frontend/lib/src/features/notifications/presentation/pages/web_push_notifications_page.dart:550]
+- [x] [Review][Patch] Alinhar log de lançamento de exceção para nível ERROR em exclusão de assinatura não pertencente ao usuário [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/DeleteWebPushSubscriptionUseCase.java:33]
+- [x] [Review][Defer] Processamento assíncrono desacoplado para disparo em massa de Web Push na avaliação diária [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/EvaluateGrahamBuyZoneAlertsUseCase.java:82] — deferred, pre-existing
+- [x] [Review][Defer] Caching de token JWT VAPID assinado por origin para redução de overhead criptográfico em lote [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java:80] — deferred, pre-existing
+- [x] [Review][Defer] Validação antecipada do par de chaves VAPID no startup do adapter [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java:45] — deferred, pre-existing
+- [x] [Review][Defer] Desativação de assinatura por endpoint físico em caso de troca de usuário no mesmo browser compartilhado [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/RegisterWebPushSubscriptionUseCase.java:40] — deferred, pre-existing
+- [x] [Review][Defer] Suporte a atributo tag para agrupamento no Service Worker push-sw.js [frontend/web/push-sw.js:20] — deferred, pre-existing
 
 ## Dev Notes
 

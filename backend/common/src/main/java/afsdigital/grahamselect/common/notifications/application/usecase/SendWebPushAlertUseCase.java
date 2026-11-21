@@ -33,6 +33,9 @@ public class SendWebPushAlertUseCase {
             String message,
             String url
     ) {
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("userId cannot be null or blank");
+        }
         if (subscription == null || !subscription.isActive()
                 || subscription.getEndpoint() == null || subscription.getEndpoint().isBlank()) {
             return false;
@@ -43,8 +46,10 @@ public class SendWebPushAlertUseCase {
 
         String boundedDedupKey = WebPushMaskingUtils.boundDedupKey(dedupKey, 255);
         var existingOpt = logPort.findByDedupKey(boundedDedupKey);
-        if (existingOpt.isPresent() && existingOpt.get().getStatus() == WebPushDeliveryStatus.SENT) {
-            log.debug("Alerta Web Push ignorado por idempotência: userId={}, dedupKey={}", userId, boundedDedupKey);
+        if (existingOpt.isPresent() && (existingOpt.get().getStatus() == WebPushDeliveryStatus.SENT
+                || existingOpt.get().getStatus() == WebPushDeliveryStatus.EXPIRED)) {
+            log.debug("Alerta Web Push ignorado por idempotência/expiração: userId={}, dedupKey={}, status={}",
+                    userId, boundedDedupKey, existingOpt.get().getStatus());
             return false;
         }
 
@@ -109,7 +114,7 @@ public class SendWebPushAlertUseCase {
                 .provider(provider)
                 .httpStatus(result.httpStatus())
                 .status(status)
-                .errorMessage(result.errorMessage())
+                .errorMessage(WebPushMaskingUtils.truncate(result.errorMessage(), 2000))
                 .sentAt(now)
                 .build();
 

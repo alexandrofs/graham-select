@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class EvaluateGrahamBuyZoneAlertsUseCase {
 
     private static final BigDecimal DEFAULT_MIN_MARGIN = new BigDecimal("20.00");
+    public static final BigDecimal MAX_NOTIFICATION_MARGIN_THRESHOLD = new BigDecimal("0.90");
     private static final ZoneId B3_ZONE = ZoneId.of("America/Sao_Paulo");
 
     private final WebPushPreferencePort preferencePort;
@@ -75,7 +76,7 @@ public class EvaluateGrahamBuyZoneAlertsUseCase {
             if (c.getMarginOfSafety() == null || c.getMarginOfSafety().compareTo(BigDecimal.ZERO) <= 0) {
                 continue;
             }
-            if (c.getMarginOfSafety().compareTo(ValuationCompletedEvent.OUTLIER_MARGIN_THRESHOLD) > 0) {
+            if (c.getMarginOfSafety().compareTo(MAX_NOTIFICATION_MARGIN_THRESHOLD) > 0) {
                 log.error("[WEBPUSH-VALUATION-CB] Outlier de margem de segurança detectado para {}: {}",
                         c.getSymbol(), c.getMarginOfSafety());
                 continue;

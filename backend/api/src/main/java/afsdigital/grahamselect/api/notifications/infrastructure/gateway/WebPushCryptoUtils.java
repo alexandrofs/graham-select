@@ -256,8 +256,13 @@ public final class WebPushCryptoUtils {
             URI uri = URI.create(endpoint.trim());
             String scheme = uri.getScheme();
             String host = uri.getHost();
+            if (scheme == null || host == null || host.isBlank()) {
+                throw new IllegalArgumentException("Endpoint must have a valid scheme and host: " + endpoint);
+            }
             int port = uri.getPort();
             return scheme + "://" + host + (port != -1 ? ":" + port : "");
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Cannot extract origin from endpoint: " + endpoint, e);
         }

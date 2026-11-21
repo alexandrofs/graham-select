@@ -69,7 +69,7 @@ class WebPushNotificationsRemoteDataSource {
           'endpoint': endpoint,
           'p256dhKey': p256dhKey,
           'authKey': authKey,
-          '?userAgent': userAgent,
+          'userAgent': userAgent,
         },
       );
       return WebPushSubscriptionModel.fromJson(_requireJsonMap(response.data));

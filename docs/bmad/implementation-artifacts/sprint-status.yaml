@@ -1,5 +1,5 @@
 # generated: 2026-03-12
-# last_updated: 2026-11-20
+# last_updated: 2026-11-21
 # project: graham-select
 # project_key: NOKEY
 # tracking_system: file-system
@@ -100,7 +100,7 @@ development_status:
   10-1-relatorio-de-bens-e-direitos-informe-anual: done
   10-2-calculo-de-lucro-realizado-e-isencao: done
   epic-10-retrospective: done
-  epic-11: in-progress
+  epic-11: done
   11-1-alertas-via-whatsapp-gatilhos-de-meta: done
-  11-2-web-push-para-zona-de-compra-graham: review
+  11-2-web-push-para-zona-de-compra-graham: done
   epic-11-retrospective: optional

@@ -104,8 +104,8 @@ class EvaluateGrahamBuyZoneAlertsUseCaseTest {
         RankedCompany c3 = buildCompany("BBAS3", new BigDecimal("0.35"), todayUtc, new BigDecimal("25.00"), new BigDecimal("38.46"));
         // Company 4: in custody, stale date (10 days old) -> should SKIP
         RankedCompany c4 = buildCompany("ITUB4", new BigDecimal("0.40"), todayUtc.minusDays(10), new BigDecimal("30.00"), new BigDecimal("50.00"));
-        // Company 5: in custody, outlier margin 0.85 (> 0.80) -> should SKIP
-        RankedCompany c5 = buildCompany("BBDC4", new BigDecimal("0.85"), todayUtc, new BigDecimal("10.00"), new BigDecimal("66.67"));
+        // Company 5: in custody, outlier margin 0.95 (> 0.90) -> should SKIP
+        RankedCompany c5 = buildCompany("BBDC4", new BigDecimal("0.95"), todayUtc, new BigDecimal("10.00"), new BigDecimal("66.67"));
 
         when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(c1, c2, c3, c4, c5));
 

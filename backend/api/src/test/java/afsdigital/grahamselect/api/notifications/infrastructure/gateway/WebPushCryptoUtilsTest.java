@@ -67,5 +67,8 @@ class WebPushCryptoUtilsTest {
                 .isEqualTo("https://fcm.googleapis.com");
         assertThat(WebPushCryptoUtils.extractOrigin("http://localhost:8080/push/v1"))
                 .isEqualTo("http://localhost:8080");
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
+                WebPushCryptoUtils.extractOrigin("https://")
+        );
     }
 }

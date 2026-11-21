@@ -163,4 +163,39 @@ class SendWebPushAlertUseCaseTest {
         assertThat(logCaptor.getValue().getStatus()).isEqualTo(WebPushDeliveryStatus.EXPIRED);
         assertThat(logCaptor.getValue().getHttpStatus()).isEqualTo(410);
     }
+
+    @Test
+    void shouldSkipSendingWhenDedupKeyAlreadyHasExpiredStatus() {
+        String userId = "user-123";
+        WebPushSubscription sub = createSubscription(userId, true);
+        String dedupKey = "test:expired-dedup";
+
+        WebPushNotificationLog existing = WebPushNotificationLog.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .dedupKey(dedupKey)
+                .status(WebPushDeliveryStatus.EXPIRED)
+                .build();
+
+        when(logPort.findByDedupKey(dedupKey)).thenReturn(Optional.of(existing));
+
+        boolean sent = useCase.sendAlert(
+                userId, sub, "PETR4", WebPushAlertType.GRAHAM_BUY_ZONE,
+                dedupKey, "Title", "Body", "/url"
+        );
+
+        assertThat(sent).isFalse();
+        verify(gatewayPort, never()).sendNotification(any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldThrowWhenUserIdIsBlank() {
+        WebPushSubscription sub = createSubscription("user-123", true);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
+                useCase.sendAlert(
+                        "   ", sub, "PETR4", WebPushAlertType.GRAHAM_BUY_ZONE,
+                        "dedup:1", "Title", "Body", "/url"
+                )
+        );
+    }
 }

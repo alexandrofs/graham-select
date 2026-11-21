@@ -141,4 +141,17 @@ class RegisterWebPushSubscriptionUseCaseTest {
         assertThat(existing.getAuthKey()).isEqualTo("new_auth");
         assertThat(existing.isActive()).isTrue();
     }
+
+    @Test
+    void shouldRejectHttpsEndpointWithEmptyHost() {
+        RegisterWebPushSubscriptionRequest request = new RegisterWebPushSubscriptionRequest(
+                "https:///path",
+                "key",
+                "auth",
+                "agent"
+        );
+        assertThatThrownBy(() -> useCase.execute("user-1", request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Endpoint URL must specify a valid host");
+    }
 }
