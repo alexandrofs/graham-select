@@ -67,5 +67,7 @@ databaseChangeLog:
       file: db/changelog/34-add-cnpj-to-company.yaml
   - include:
       file: db/changelog/35-create-whatsapp-notifications-tables.yaml
+  - include:
+      file: db/changelog/36-create-web-push-notifications-tables.yaml
 
 

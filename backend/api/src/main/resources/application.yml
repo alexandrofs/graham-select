@@ -78,4 +78,17 @@ whatsapp:
     connect-timeout-ms: ${WHATSAPP_META_CONNECT_TIMEOUT_MS:5000}
     read-timeout-ms: ${WHATSAPP_META_READ_TIMEOUT_MS:10000}
 
+webpush:
+  provider: ${WEBPUSH_PROVIDER:mock}
+  alerts:
+    cron: ${WEBPUSH_ALERTS_CRON:0 15 20 * * MON-FRI}
+  vapid:
+    subject: ${WEBPUSH_VAPID_SUBJECT:mailto:contato@grahamselect.com.br}
+    public-key: ${WEBPUSH_VAPID_PUBLIC_KEY:}
+    private-key: ${WEBPUSH_VAPID_PRIVATE_KEY:}
+  http:
+    connect-timeout-ms: ${WEBPUSH_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${WEBPUSH_READ_TIMEOUT_MS:10000}
+
+
 
