@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.common.dividends.application.usecase;
 
 import afsdigital.grahamselect.common.dividends.application.dto.CorporateEventSyncSummaryDTO;
+import afsdigital.grahamselect.common.dividends.application.repository.DividendAlertPublisherPort;
 import afsdigital.grahamselect.common.dividends.application.repository.DividendAnnouncementPort;
 import afsdigital.grahamselect.common.dividends.application.repository.DividendCrawlerPort;
 import afsdigital.grahamselect.common.dividends.application.repository.RelevantFactCrawlerPort;
@@ -43,6 +44,9 @@ class SyncCorporateEventsUseCaseTest {
 
     @Mock
     private RelevantFactPort relevantFactPort;
+
+    @Mock
+    private DividendAlertPublisherPort dividendAlertPublisherPort;
 
     @InjectMocks
     private SyncCorporateEventsUseCase useCase;
@@ -101,5 +105,6 @@ class SyncCorporateEventsUseCaseTest {
 
         verify(dividendAnnouncementPort, times(2)).save(any(DividendAnnouncement.class));
         verify(relevantFactPort, times(1)).save(any(RelevantFact.class));
+        verify(dividendAlertPublisherPort, times(1)).publishNewDividendAnnouncements(anyList());
     }
 }

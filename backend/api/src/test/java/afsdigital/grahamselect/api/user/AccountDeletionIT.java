@@ -48,11 +48,20 @@ public class AccountDeletionIT extends BaseRepositoryIT {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     @MockBean
     private JwtDecoder jwtDecoder;
 
     @BeforeEach
     void cleanUp() {
+        jdbcTemplate.update("DELETE FROM web_push_notification_logs");
+        jdbcTemplate.update("DELETE FROM web_push_subscriptions");
+        jdbcTemplate.update("DELETE FROM web_push_preferences");
+        jdbcTemplate.update("DELETE FROM whatsapp_notification_logs");
+        jdbcTemplate.update("DELETE FROM whatsapp_notification_preferences");
+        jdbcTemplate.update("DELETE FROM financial_goals");
         deletionRequestJpaRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -91,6 +100,41 @@ public class AccountDeletionIT extends BaseRepositoryIT {
         String token = "purge-token";
         mockJwt(token, user);
 
+        String sub = user.getGoogleSub();
+        jdbcTemplate.update(
+                "INSERT INTO whatsapp_notification_preferences (id, user_id, phone_number, opted_in, notify_dividends, notify_rebalance_triggers, notify_goal_milestones, rebalance_drift_threshold_pct, created_at, updated_at) " +
+                        "VALUES (?, ?, ?, true, true, true, true, 5.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), sub, "+5511999999999"
+        );
+        jdbcTemplate.update(
+                "INSERT INTO whatsapp_notification_logs (id, user_id, event_type, dedup_key, message_preview, provider, status, sent_at) " +
+                        "VALUES (?, ?, 'DIVIDEND', 'dedup-wa-test', 'msg', 'mock', 'DELIVERED', CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), sub
+        );
+        jdbcTemplate.update(
+                "INSERT INTO web_push_preferences (id, user_id, opted_in, min_margin_of_safety_pct, only_custody_tickers, created_at, updated_at) " +
+                        "VALUES (?, ?, true, 20.00, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), sub
+        );
+        jdbcTemplate.update(
+                "INSERT INTO web_push_subscriptions (id, user_id, endpoint, endpoint_hash, p256dh_key, auth_key, active, created_at, updated_at) " +
+                        "VALUES (?, ?, 'https://push.example.com/test', 'hash-test-1', 'key', 'auth', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), sub
+        );
+        jdbcTemplate.update(
+                "INSERT INTO web_push_notification_logs (id, user_id, event_type, dedup_key, title, message_preview, provider, status, sent_at) " +
+                        "VALUES (?, ?, 'GRAHAM_BUY_ZONE', 'dedup-wp-test', 'title', 'msg', 'mock', 'DELIVERED', CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), sub
+        );
+        jdbcTemplate.update(
+                "INSERT INTO financial_goals (id, user_id, goal_type, target_value, monthly_contribution, estimated_years, created_at, updated_at) " +
+                        "VALUES (?, ?, 'PATRIMONIO_TOTAL', 10000.00, 500.00, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), sub
+        );
+
+        Integer waPrefsBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM whatsapp_notification_preferences WHERE user_id = ?", Integer.class, sub);
+        assertThat(waPrefsBefore).isEqualTo(1);
+
         // 1. Request deletion
         String responseContent = mockMvc.perform(delete("/api/v1/users/me")
                         .header("Authorization", "Bearer " + token))
@@ -110,6 +154,14 @@ public class AccountDeletionIT extends BaseRepositoryIT {
         assertThat(requestOpt).isPresent();
         assertThat(requestOpt.get().getStatus()).isEqualTo(DeletionStatus.COMPLETED);
         assertThat(requestOpt.get().getUserId()).isNull(); // Should be null due to ON DELETE SET NULL
+
+        // 5. Verify LGPD purge removed all notifications and personal data
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM whatsapp_notification_preferences WHERE user_id = ?", Integer.class, sub)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM whatsapp_notification_logs WHERE user_id = ?", Integer.class, sub)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM web_push_preferences WHERE user_id = ?", Integer.class, sub)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM web_push_subscriptions WHERE user_id = ?", Integer.class, sub)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM web_push_notification_logs WHERE user_id = ?", Integer.class, sub)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM financial_goals WHERE user_id = ?", Integer.class, sub)).isZero();
     }
 
     @Test
