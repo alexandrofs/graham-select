@@ -25,12 +25,15 @@ public class DeleteWebPushSubscriptionUseCase {
         log.info("Removendo assinatura Web Push subscriptionId={} para userId={}", subscriptionId, userId);
 
         WebPushSubscription subscription = subscriptionPort.findById(subscriptionId)
-                .orElseThrow(() -> new WebPushSubscriptionNotFoundException(
-                        "Assinatura Web Push não encontrada: " + subscriptionId
-                ));
+                .orElseThrow(() -> {
+                    log.error("Assinatura Web Push não encontrada para exclusão: subscriptionId={}, userId={}", subscriptionId, userId);
+                    return new WebPushSubscriptionNotFoundException(
+                            "Assinatura Web Push não encontrada: " + subscriptionId
+                    );
+                });
 
         if (!userId.equals(subscription.getUserId())) {
-            log.warn("Tentativa de remover assinatura de outro usuário: userId={}, ownerId={}", userId, subscription.getUserId());
+            log.error("Tentativa de remover assinatura de outro usuário: userId={}, ownerId={}", userId, subscription.getUserId());
             throw new WebPushSubscriptionNotFoundException("Assinatura Web Push não encontrada: " + subscriptionId);
         }
 

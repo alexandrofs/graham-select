@@ -88,6 +88,9 @@ public class RegisterWebPushSubscriptionUseCase {
             if (scheme == null) {
                 throw new IllegalArgumentException("Endpoint URL must specify a scheme");
             }
+            if (host == null || host.isBlank()) {
+                throw new IllegalArgumentException("Endpoint URL must specify a valid host");
+            }
             if ("https".equalsIgnoreCase(scheme)) {
                 return;
             }

@@ -61,7 +61,11 @@ class _WebPushNotificationsPageState extends State<WebPushNotificationsPage> {
     if (!mounted) return;
 
     if (success) {
-      setState(() => _hasUnsavedChanges = false);
+      if (provider.preferences != null) {
+        _syncForm(provider.preferences!);
+      } else {
+        setState(() => _hasUnsavedChanges = false);
+      }
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -191,7 +195,12 @@ class _WebPushNotificationsPageState extends State<WebPushNotificationsPage> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => provider.loadAll(),
+              onPressed: () async {
+                await provider.loadAll();
+                if (mounted && provider.preferences != null) {
+                  _syncForm(provider.preferences!);
+                }
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar Novamente'),
             ),
@@ -547,7 +556,11 @@ class _WebPushNotificationsPageState extends State<WebPushNotificationsPage> {
   }
 
   Widget _buildTestAlertCard(WebPushNotificationsProvider provider) {
-    final canTest = _optedIn && provider.subscriptions.any((s) => s.active);
+    final isPersistedOptedIn = provider.preferences?.optedIn ?? false;
+    final canTest = _optedIn &&
+        isPersistedOptedIn &&
+        !_hasUnsavedChanges &&
+        provider.subscriptions.any((s) => s.active);
 
     return Card(
       color: AppTheme.surfaceColor,
@@ -593,7 +606,13 @@ class _WebPushNotificationsPageState extends State<WebPushNotificationsPage> {
                 ),
               ),
             ),
-            if (!canTest) ...[
+            if (_hasUnsavedChanges) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Nota: Salve as alterações acima antes de disparar o teste.',
+                style: TextStyle(color: Colors.amberAccent, fontSize: 12),
+              ),
+            ] else if (!canTest) ...[
               const SizedBox(height: 8),
               const Text(
                 'Nota: É necessário habilitar o consentimento e possuir pelo menos um navegador ativo para disparar o teste.',
