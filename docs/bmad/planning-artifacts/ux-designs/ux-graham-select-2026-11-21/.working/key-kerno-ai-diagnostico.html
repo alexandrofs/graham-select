@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerno — Aba 3: Kerno AI — Diagnóstico de Carteira (Key Screen Mockup)</title>
+  <style>
+    /*
+     * GOVERNING SPINE SECTIONS:
+     * - DESIGN.md: ## Colors, ## Typography (tabular-nums), ## Components (#8. kerno-ai-diagnostic-card,
+     *   #12. badge-quarantine, #14. cvm-regulatory-footer, #14. bottom-nav-bar), ## Do's and Don'ts (Isolamento R$ local vs. % no LLM)
+     * - EXPERIENCE.md: ## Information Architecture (Superfície 6), ## Voice and Tone (Guardrail léxico CVM 19/20),
+     *   ## Component Patterns (kerno-ai-diagnostic-card), ## State Patterns (Timeout LLM > 15s / Bloqueio Léxico CVM -> Fallback Determinístico Instantâneo;
+     *   Máquina de Estados Free pós-trial -> 0 chamadas LLM), ## Regulatory, Privacy & AI Guardrails (Sanitizador LGPD de IA), ## Key Flows (UJ-3 Mariana)
+     * - RULE: Offline 1:1 HTML mock. Zero JS, zero network. DESIGN.md & EXPERIENCE.md win on conflict.
+     */
+    :root {
+      --surface-base: #F8FAFC;
+      --surface-elevated: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #475569;
+      --text-on-primary: #FFFFFF;
+      --brand-primary: #4F46E5;
+      --brand-primary-deep: #3730A3;
+      --brand-accent-soft: #EEF2FF;
+      --semantic-emerald: #065F46;
+      --semantic-emerald-surface: #ECFDF5;
+      --semantic-emerald-border: #A7F3D0;
+      --semantic-amber: #92400E;
+      --semantic-amber-surface: #FFFBEB;
+      --semantic-amber-border: #FDE68A;
+      --border-subtle: #E2E8F0;
+      --border-strong: #94A3B8;
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #E2E8F0;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-variant-numeric: tabular-nums;
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+    .page-header { max-width: 960px; margin: 0 auto 24px; }
+    .page-header h1 { font-family: var(--font-display); font-size: 24px; margin-bottom: 6px; }
+    .page-header p { font-size: 14px; color: var(--text-secondary); }
+    .frames-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+      gap: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    .frame-wrapper { display: flex; flex-direction: column; gap: 12px; }
+    .frame-caption {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+    .phone-frame {
+      width: 396px;
+      background: var(--surface-base);
+      border-radius: 32px;
+      border: 6px solid #0F172A;
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.14);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .global-header {
+      background: var(--surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--brand-primary);
+    }
+    .screen-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    /* kerno-ai-diagnostic-card */
+    .ai-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .ai-card-header {
+      background: var(--brand-accent-soft);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .ai-card-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--brand-primary-deep);
+    }
+    .local-r-badge {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+    .ai-card-body {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .feedback-bar {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .thumb-btn {
+      min-width: 48px;
+      min-height: 48px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .cvm-footer {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .bottom-nav {
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px;
+    }
+    .nav-item {
+      min-height: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      gap: 2px;
+    }
+    .nav-item.active { color: var(--brand-primary); }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Kerno — Aba 3: Kerno AI — Diagnóstico de Carteira (`key-kerno-ai-diagnostico.html`)</h1>
+    <p>Coluna 1: Jornada UJ-3 de Mariana (4 cartões híbridos com cabeçalhos determinísticos locais em <code>R$</code> + narrativa Gemini 100% sanitizada em <code>%</code> sem PII). Coluna 2: Degradação Graciosa Determinística (Timeout &gt; 15s / Bloqueio Léxico CVM) + Estado Free pós-trial.</p>
+  </header>
+
+  <main class="frames-grid">
+    <!-- COLUMN 1: CANONICAL 4-CARD KERNO AI -->
+    <section class="frame-wrapper">
+      <div class="frame-caption">1. Estado Canônico — UJ-3 Mariana: 4 Cartões Estruturados (Zero PII no LLM · Sanitizador LGPD Ativo)</div>
+      <div class="phone-frame">
+        <div class="global-header">
+          <div class="brand-logo">Kerno AI · Diagnóstico</div>
+          <span style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Cota: 1/5 hoje · Cache 24h</span>
+        </div>
+
+        <div class="screen-body">
+          <!-- Card 1: Resumo Executivo -->
+          <article class="ai-card">
+            <div class="ai-card-header">
+              <span class="ai-card-title">1. Resumo Executivo</span>
+              <span class="local-r-badge">Local UI: R$ 420.000,00 · 18 ativos</span>
+            </div>
+            <div class="ai-card-body">
+              <p>Sua carteira apresenta aderência global de <strong>91,6%</strong> às metas configuradas no seu <strong>Diagrama do Cerrado</strong>. A maior defasagem relativa concentra-se na Macro Classe <strong>Ações BR (-4,2% abaixo da meta de 40,0%)</strong>, enquanto Renda Fixa encontra-se <strong>+4,0%</strong> acima do alvo.</p>
+            </div>
+          </article>
+
+          <!-- Card 2: Pontos Fortes -->
+          <article class="ai-card">
+            <div class="ai-card-header" style="background: var(--semantic-emerald-surface);">
+              <span class="ai-card-title" style="color: var(--semantic-emerald);">2. Pontos Fortes</span>
+              <span class="local-r-badge">Nota Média Pond.: 8,1/10</span>
+            </div>
+            <div class="ai-card-body">
+              <p>Nenhum ativo individual ultrapassa o <strong>Teto Máximo de Risco</strong> de <code>10,0%</code>. Dois papéis elegíveis em Ações BR (<code>BBAS3</code> e <code>WEGE3</code>, Nota 9) operam com <strong>Margem de Segurança de Graham</strong> positiva (+28,0% e +12,4%).</p>
+            </div>
+          </article>
+
+          <!-- Card 3: Alertas de Risco e Concentração (Climax UJ-3) -->
+          <article class="ai-card" style="border-color: var(--semantic-amber-border);">
+            <div class="ai-card-header" style="background: var(--semantic-amber-surface);">
+              <span class="ai-card-title" style="color: var(--semantic-amber);">3. Alertas de Risco e Concentração</span>
+              <span class="local-r-badge">Quarentena: R$ 46.200,00</span>
+            </div>
+            <div class="ai-card-body">
+              <p><strong>Concentração em Subclasse:</strong> Embora você possua 10 ações no Brasil, <strong>62,0%</strong> da classe Ações BR está concentrada na Subclasse de setores elétrico e financeiro.</p>
+              <p><strong>Quarentena de Aporte:</strong> 2 ativos com Nota &lt; 5 (<code>COGN3</code> e <code title="Token canônico recebido do Gemini e reconciliado localmente na UI">RENDA_FIXA_MANUAL_1 → CDB Banco X (Local UI)</code>) ainda representam <strong>11,0%</strong> do patrimônio total, com novos aportes bloqueados em <code>0,0%</code>.</p>
+            </div>
+          </article>
+
+          <!-- Card 4: Racional do Plano de Aporte -->
+          <article class="ai-card">
+            <div class="ai-card-header">
+              <span class="ai-card-title">4. Racional do Plano de Aporte</span>
+              <span class="local-r-badge">GPS: Zero Vendas</span>
+            </div>
+            <div class="ai-card-body">
+              <p>Pelos seus parâmetros, os próximos aportes mensais no <strong>GPS de Aporte</strong> priorizarão os ativos de Nota 8–9 fora do setor elétrico e com bônus do <strong>Multiplicador de Graham (1.30x)</strong>, diluindo organicamente o peso dos 11,0% em quarentena sem giro patrimonial.</p>
+            </div>
+          </article>
+
+          <!-- Feedback SM-5 -->
+          <div class="feedback-bar">
+            <span>Este diagnóstico foi útil?</span>
+            <div style="display: flex; gap: 8px;">
+              <div class="thumb-btn" title="Diagnóstico útil">👍</div>
+              <div class="thumb-btn" title="Diagnóstico não foi útil">👎</div>
+            </div>
+          </div>
+
+          <footer class="cvm-footer">
+            <strong>ℹ️ Snapshot 21/11/2026 16:42 (CVM 19/20 &amp; LGPD):</strong> Síntese gerada por IA (Google Gemini) após anonimização integral pelo Sanitizador LGPD de IA. Finalidade estritamente informativa e educacional baseada nos parâmetros do usuário; não constitui relatório CNPI nem consultoria CVM.
+          </footer>
+        </div>
+
+        <nav class="bottom-nav">
+          <div class="nav-item"><span>📊</span><span>Carteira</span></div>
+          <div class="nav-item"><span>🧭</span><span>GPS de Aporte</span></div>
+          <div class="nav-item active"><span>✨</span><span>Kerno AI</span></div>
+          <div class="nav-item"><span>🎯</span><span>Diagrama</span></div>
+        </nav>
+      </div>
+    </section>
+
+    <!-- COLUMN 2: GRACEFUL DEGRADATION + FREE TIER STATE -->
+    <section class="frame-wrapper">
+      <div class="frame-caption">2. Estado Alternativo — Fallback Determinístico Instantâneo (Timeout LLM &gt; 15s) + Downgrade Não-Destrutivo Free</div>
+      <div class="phone-frame">
+        <div class="global-header">
+          <div class="brand-logo">Kerno AI · Diagnóstico</div>
+          <span style="background: var(--semantic-amber-surface); color: var(--semantic-amber); border: 1px solid var(--semantic-amber-border); padding: 3px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700;">Modo Determinístico</span>
+        </div>
+
+        <div class="screen-body">
+          <!-- Graceful Degradation Banner (FR-9 / FR-10) -->
+          <article class="ai-card" style="border-color: var(--semantic-amber-border); background: var(--semantic-amber-surface);">
+            <div class="ai-card-body" style="color: var(--semantic-amber); font-weight: 600;">
+              ⚡ Diagnóstico quantitativo carregado instantaneamente. A síntese narrativa por IA está temporariamente em fila — sua cota diária não foi consumida.
+            </div>
+          </article>
+
+          <!-- Deterministic Card 1 (Also available in Free Tier with 0 LLM calls) -->
+          <article class="ai-card">
+            <div class="ai-card-header">
+              <span class="ai-card-title">1. Resumo Executivo (Motor Determinístico)</span>
+              <span class="local-r-badge">Liberado no Free · 0 Tokens LLM</span>
+            </div>
+            <div class="ai-card-body">
+              <p>• <strong>Desvio Principal:</strong> Macro Classe Ações BR em <code>35,8%</code> vs. Meta <code>40,0%</code> (Déficit relativo: <code>-4,2%</code>).</p>
+              <p>• <strong>Ativos Acima do Teto de Risco:</strong> <code>0 ativos</code> violando tetos de 6%/10%.</p>
+              <p>• <strong>Ativos em Quarentena (Nota &lt; 5):</strong> <code>2 ativos</code> somando <code>11,0%</code> da carteira (bloqueados para novos aportes).</p>
+              <p>• <strong>Descontos de Graham (VI &gt; Cotação):</strong> <code>3 ações</code> elegíveis com Multiplicador <code>1.30x</code>.</p>
+            </div>
+          </article>
+
+          <!-- Free Post-Trial Non-Destructive Paywall Card (FR-15) -->
+          <article class="ai-card" style="border: 1.5px solid var(--brand-primary);">
+            <div class="ai-card-header">
+              <span class="ai-card-title">🔒 Blocos Analíticos 2, 3 e 4 (Camada Pro / Founder)</span>
+            </div>
+            <div class="ai-card-body">
+              <p style="color: var(--text-secondary);">
+                Seu período de degustação de 90 dias encerrou. Seus dados, ativos e <strong>Notas de Qualidade (1–10)</strong> permanecem 100% salvos e visíveis.
+              </p>
+              <p style="color: var(--text-secondary);">
+                Faça upgrade para o plano <strong>Kerno Pro</strong> para desbloquear a síntese por IA de <em>Pontos Fortes</em>, <em>Alertas de Concentração por Subclasse</em>, <em>Racional do Plano de Aporte</em> e consolidação Multi-CPF.
+              </p>
+              <div style="min-height: 48px; background: var(--brand-primary); color: var(--text-on-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; margin-top: 6px;">
+                Fazer Upgrade para Kerno Pro
+              </div>
+            </div>
+          </article>
+
+          <footer class="cvm-footer">
+            <strong>ℹ️ Conformidade CVM 19/20:</strong> Indicadores quantitativos calculados em aritmética decimal estrita (BigDecimal) sobre as metas do próprio investidor.
+          </footer>
+        </div>
+
+        <nav class="bottom-nav">
+          <div class="nav-item"><span>📊</span><span>Carteira</span></div>
+          <div class="nav-item"><span>🧭</span><span>GPS de Aporte</span></div>
+          <div class="nav-item active"><span>✨</span><span>Kerno AI</span></div>
+          <div class="nav-item"><span>🎯</span><span>Diagrama</span></div>
+        </nav>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

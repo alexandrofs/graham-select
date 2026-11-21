@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerno — Aba 1: Carteira / Dashboard Patrimonial (Key Screen Mockup)</title>
+  <style>
+    /*
+     * GOVERNING SPINE SECTIONS:
+     * - DESIGN.md: ## Colors, ## Typography (tabular-nums), ## Layout & Spacing (< 600dp stacked cards, 48dp touch targets),
+     *   ## Components (#1. wealth-hero-card, #2. macro-class-distribution-card, #12. badge-founder, #12. badge-quarantine,
+     *   #13. privacy-toggle, #13. multi-cpf-selector, #14. bottom-nav-bar)
+     * - EXPERIENCE.md: ## Information Architecture (Superfícies 3 e 4), ## Component Patterns (wealth-hero-card, macro-class-distribution-card),
+     *   ## State Patterns (Modo Privacidade < 300ms, Circuit Breaker > 40% QUARENTENA_EVENTO_CORPORATIVO, D-1), ## Key Flows (UJ-1 Roberto, UJ-4 Thiago)
+     * - RULE: Offline 1:1 HTML mock. Zero JS, zero network. DESIGN.md & EXPERIENCE.md win on conflict.
+     */
+    :root {
+      --surface-base: #F8FAFC;
+      --surface-elevated: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #475569;
+      --text-on-primary: #FFFFFF;
+      --brand-primary: #4F46E5;
+      --brand-primary-hover: #4338CA;
+      --brand-primary-deep: #3730A3;
+      --brand-accent-soft: #EEF2FF;
+      --semantic-emerald: #065F46;
+      --semantic-emerald-surface: #ECFDF5;
+      --semantic-emerald-border: #A7F3D0;
+      --semantic-amber: #92400E;
+      --semantic-amber-surface: #FFFBEB;
+      --semantic-amber-border: #FDE68A;
+      --semantic-crimson: #991B1B;
+      --semantic-crimson-surface: #FEF2F2;
+      --founder-gold: #92400E;
+      --founder-gold-surface: #FEF3C7;
+      --founder-gold-border: #F59E0B;
+      --border-subtle: #E2E8F0;
+      --border-strong: #94A3B8;
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #E2E8F0;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-variant-numeric: tabular-nums;
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+    .page-header {
+      max-width: 960px;
+      margin: 0 auto 24px;
+    }
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .frames-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+      gap: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    .frame-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .frame-caption {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+    .phone-frame {
+      width: 396px;
+      background: var(--surface-base);
+      border-radius: 32px;
+      border: 6px solid #0F172A;
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.14);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Global Header */
+    .global-header {
+      background: var(--surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .brand-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--brand-primary);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: var(--brand-primary);
+      display: inline-block;
+    }
+    .multi-cpf-pill {
+      min-height: 48px;
+      padding: 0 12px;
+      border-radius: 9999px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .privacy-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 9999px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .privacy-btn.active {
+      background: var(--brand-accent-soft);
+      color: var(--brand-primary-deep);
+      border-color: var(--brand-primary);
+    }
+    /* Screen Content */
+    .screen-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    /* Wealth Hero Card */
+    .wealth-hero-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .hero-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .hero-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .badge-founder {
+      background: var(--founder-gold-surface);
+      color: var(--founder-gold);
+      border: 1px solid var(--founder-gold-border);
+      border-radius: 9999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .hero-balance {
+      font-family: var(--font-body);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+    .hero-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .badge-emerald {
+      background: var(--semantic-emerald-surface);
+      color: var(--semantic-emerald);
+      border: 1px solid var(--semantic-emerald-border);
+      border-radius: 9999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-amber {
+      background: var(--semantic-amber-surface);
+      color: var(--semantic-amber);
+      border: 1px solid var(--semantic-amber-border);
+      border-radius: 9999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    /* Macro Class Distribution Card */
+    .card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .macro-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--surface-subtle);
+    }
+    .macro-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .macro-header {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .macro-bar-track {
+      height: 10px;
+      background: var(--surface-subtle);
+      border-radius: 9999px;
+      position: relative;
+      overflow: hidden;
+    }
+    .macro-bar-fill {
+      height: 100%;
+      background: var(--brand-primary);
+      border-radius: 9999px;
+    }
+    .macro-target-marker {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--text-primary);
+      box-shadow: 0 0 0 1.5px var(--surface-elevated);
+    }
+    .subclass-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    .subclass-chip {
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    /* Stacked Asset Cards (Zero Horizontal Tables) */
+    .asset-item {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .asset-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+    }
+    .ticker-chip {
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .asset-metrics {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .btn-secondary-touch {
+      min-height: 48px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    /* Bottom Nav Bar */
+    .bottom-nav {
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px;
+    }
+    .nav-item {
+      min-height: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      gap: 2px;
+    }
+    .nav-item.active {
+      color: var(--brand-primary);
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Kerno — Aba 1: Carteira / Dashboard Patrimonial (`key-dashboard-patrimonial.html`)</h1>
+    <p>Referência visual 1:1 dos contratos <code>DESIGN.md</code> e <code>EXPERIENCE.md</code>. Coluna 1: Estado Canônico (Light-First, Multi-CPF, Membro Founder). Coluna 2: Modo Privacidade ativo (<code>R$ ••••••</code>) + Circuit Breaker de Evento Corporativo (<code>FR-17</code>).</p>
+  </header>
+
+  <main class="frames-grid">
+    <!-- COLUMN 1: CANONICAL STATE -->
+    <section class="frame-wrapper">
+      <div class="frame-caption">1. Estado Canônico — Roberto (Multi-CPF Consolidado, Membro Founder, Contraste 17.4:1 AAA)</div>
+      <div class="phone-frame">
+        <div class="global-header">
+          <div class="brand-logo"><span class="brand-dot"></span>Kerno</div>
+          <div class="multi-cpf-pill" title="Seletor Multi-CPF Holding Familiar">👥 Família (2 CPFs) ▾</div>
+          <div class="header-actions">
+            <div class="privacy-btn" title="Ativar Modo Privacidade">👁</div>
+          </div>
+        </div>
+
+        <div class="screen-body">
+          <!-- wealth-hero-card -->
+          <article class="wealth-hero-card">
+            <div class="hero-top-row">
+              <span class="hero-label">Patrimônio Líquido Consolidado</span>
+              <span class="badge-founder">👑 Membro Founder — Vitalício</span>
+            </div>
+            <div class="hero-balance">R$ 420.000,00</div>
+            <div class="hero-meta-row">
+              <span class="badge-emerald">▲ +14,2% acum. (R$ +52.230,00)</span>
+              <span style="font-size: 12px; color: var(--text-muted);">Sincronizado B3 · Hoje 16:40</span>
+            </div>
+          </article>
+
+          <!-- macro-class-distribution-card -->
+          <article class="card">
+            <div class="card-title-row">
+              <h2 class="card-title">Macro Classes vs. Meta do Diagrama</h2>
+              <span style="font-size: 12px; color: var(--brand-primary); font-weight: 600;">Soma 100,0%</span>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-header">
+                <span>Ações BR (R$ 150.360,00)</span>
+                <span>35,8% / Meta 40,0%</span>
+              </div>
+              <div class="macro-bar-track">
+                <div class="macro-bar-fill" style="width: 35.8%;"></div>
+                <div class="macro-target-marker" style="left: 40%;"></div>
+              </div>
+              <div class="subclass-chips">
+                <span class="subclass-chip">Subclasse Defensivas: 22,1%</span>
+                <span class="subclass-chip">Subclasse Crescimento: 13,7%</span>
+              </div>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-header">
+                <span>FIIs (R$ 126.840,00)</span>
+                <span>30,2% / Meta 30,0%</span>
+              </div>
+              <div class="macro-bar-track">
+                <div class="macro-bar-fill" style="width: 30.2%;"></div>
+                <div class="macro-target-marker" style="left: 30%;"></div>
+              </div>
+              <div class="subclass-chips">
+                <span class="subclass-chip">Tijolo: 18,2%</span>
+                <span class="subclass-chip">Papel: 12,0%</span>
+              </div>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-header">
+                <span>Renda Fixa / Tesouro (R$ 100.800,00)</span>
+                <span>24,0% / Meta 20,0%</span>
+              </div>
+              <div class="macro-bar-track">
+                <div class="macro-bar-fill" style="width: 24%;"></div>
+                <div class="macro-target-marker" style="left: 20%;"></div>
+              </div>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-header">
+                <span>Internacional (R$ 42.000,00)</span>
+                <span>10,0% / Meta 10,0%</span>
+              </div>
+              <div class="macro-bar-track">
+                <div class="macro-bar-fill" style="width: 10%;"></div>
+                <div class="macro-target-marker" style="left: 10%;"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Stacked Asset Cards -->
+          <article class="asset-item">
+            <div class="asset-top">
+              <div><span class="ticker-chip">BBAS3</span> <span style="font-size: 13px; color: var(--text-secondary);">Banco do Brasil ON</span></div>
+              <span class="badge-emerald">✨ Oportunidade Graham + Cerrado</span>
+            </div>
+            <div class="asset-metrics">
+              <span>Saldo: <strong>R$ 28.560,00</strong> (1.020 ações)</span>
+              <span>6,8% / Meta 8,5%</span>
+            </div>
+          </article>
+
+          <div class="btn-secondary-touch">
+            ＋ Atualizar Carteira (Planilha B3 / Ativo Manual)
+          </div>
+        </div>
+
+        <nav class="bottom-nav">
+          <div class="nav-item active"><span>📊</span><span>Carteira</span></div>
+          <div class="nav-item"><span>🧭</span><span>GPS de Aporte</span></div>
+          <div class="nav-item"><span>✨</span><span>Kerno AI</span></div>
+          <div class="nav-item"><span>🎯</span><span>Diagrama</span></div>
+        </nav>
+      </div>
+    </section>
+
+    <!-- COLUMN 2: PRIVACY MODE + CORPORATE EVENT CIRCUIT BREAKER -->
+    <section class="frame-wrapper">
+      <div class="frame-caption">2. Estado Alternativo — Thiago no Metrô (Modo Privacidade <code>R$ ••••••</code> + Circuit Breaker <code>FR-17</code>)</div>
+      <div class="phone-frame">
+        <div class="global-header">
+          <div class="brand-logo"><span class="brand-dot"></span>Kerno</div>
+          <div class="multi-cpf-pill">👤 CPF Titular ▾</div>
+          <div class="header-actions">
+            <div class="privacy-btn active" title="Modo Privacidade Ativo">🙈</div>
+          </div>
+        </div>
+
+        <div class="screen-body">
+          <!-- wealth-hero-card masked -->
+          <article class="wealth-hero-card">
+            <div class="hero-top-row">
+              <span class="hero-label">Patrimônio Líquido Consolidado</span>
+              <span class="badge-amber">🕒 Cotações de fechamento (D-1)</span>
+            </div>
+            <div class="hero-balance" aria-label="Valor monetário oculto pelo Modo Privacidade">R$ ••••••</div>
+            <div class="hero-meta-row">
+              <span class="badge-emerald" aria-label="Rentabilidade acumulada mais 14,2 por cento. Valor monetário oculto pelo Modo Privacidade">▲ +14,2% acum. (R$ ••••••)</span>
+              <span style="font-size: 12px; color: var(--brand-primary-deep); font-weight: 600;">Modo Privacidade Ativo</span>
+            </div>
+          </article>
+
+          <!-- macro-class-distribution-card masked R$, visible % -->
+          <article class="card">
+            <div class="card-title-row">
+              <h2 class="card-title">Macro Classes (Proporção Relativa %)</h2>
+              <span style="font-size: 12px; color: var(--text-muted);">Saldos R$ ocultos</span>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-header">
+                <span aria-label="Ações BR. Valor monetário oculto pelo Modo Privacidade">Ações BR (R$ ••••••)</span>
+                <span>35,8% / Meta 40,0% (-4,2%)</span>
+              </div>
+              <div class="macro-bar-track">
+                <div class="macro-bar-fill" style="width: 35.8%;"></div>
+                <div class="macro-target-marker" style="left: 40%;"></div>
+              </div>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-header">
+                <span aria-label="FIIs. Valor monetário oculto pelo Modo Privacidade">FIIs (R$ ••••••)</span>
+                <span>30,2% / Meta 30,0% (+0,2%)</span>
+              </div>
+              <div class="macro-bar-track">
+                <div class="macro-bar-fill" style="width: 30.2%;"></div>
+                <div class="macro-target-marker" style="left: 30%;"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Asset with Corporate Event Circuit Breaker (FR-17) -->
+          <article class="asset-item" style="border-color: var(--semantic-amber-border); background: var(--semantic-amber-surface);">
+            <div class="asset-top">
+              <div><span class="ticker-chip">VALE3</span> <span style="font-size: 13px; color: var(--text-primary); font-weight: 600;">Nota 8 · Teto 10%</span></div>
+              <span class="badge-amber">⚠️ Cotação em verificação de evento corporativo</span>
+            </div>
+            <p style="font-size: 12px; color: var(--semantic-amber);">
+              Variação diária anômala (&gt; 40%) detectada. Última cotação válida pré-anomalia congelada no saldo patrimonial; novos aportes suspensos temporariamente neste ticker até confirmação de grupamento/desdobramento.
+            </p>
+            <div class="asset-metrics" style="color: var(--text-primary); font-weight: 600;">
+              <span aria-label="Valor monetário oculto pelo Modo Privacidade">Saldo: R$ ••••••</span>
+              <span>Peso atual: 5,4% / Meta 7,2%</span>
+            </div>
+          </article>
+
+          <!-- Manual Fixed Income Asset Card -->
+          <article class="asset-item">
+            <div class="asset-top">
+              <div><span class="ticker-chip">TESOURO SELIC 2029</span></div>
+              <span style="font-size: 12px; color: var(--text-muted);">Isento Teto Emissor Único</span>
+            </div>
+            <div class="asset-metrics">
+              <span aria-label="Valor monetário oculto pelo Modo Privacidade">Saldo: <strong>R$ ••••••</strong></span>
+              <span>18,0% / Meta 20,0%</span>
+            </div>
+          </article>
+        </div>
+
+        <nav class="bottom-nav">
+          <div class="nav-item active"><span>📊</span><span>Carteira</span></div>
+          <div class="nav-item"><span>🧭</span><span>GPS de Aporte</span></div>
+          <div class="nav-item"><span>✨</span><span>Kerno AI</span></div>
+          <div class="nav-item"><span>🎯</span><span>Diagrama</span></div>
+        </nav>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

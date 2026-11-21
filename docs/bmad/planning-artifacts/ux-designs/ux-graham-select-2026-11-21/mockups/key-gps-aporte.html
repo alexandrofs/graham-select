@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerno — Aba 2: GPS de Aporte (Key Screen Mockup)</title>
+  <style>
+    /*
+     * GOVERNING SPINE SECTIONS:
+     * - DESIGN.md: ## Colors, ## Typography (tabular-nums), ## Components (#3. contribution-gps-card,
+     *   #4. math-transparency-accordion, #5. risk-ceiling-saturation-card, #10. button-primary,
+     *   #11. input-currency, #12. badge-graham-bonus, #14. cvm-regulatory-footer, #14. bottom-nav-bar)
+     * - EXPERIENCE.md: ## Information Architecture (Superfície 5), ## Voice and Tone (Microcopy CVM 19/20 não-imperativo),
+     *   ## Component Patterns (input-currency, contribution-gps-card, math-transparency-accordion, risk-ceiling-saturation-card),
+     *   ## State Patterns (Saturação Global de Tetos de Risco X_rem > 0, Mercado Fechado D-1), ## Key Flows (UJ-1 Roberto)
+     * - RULE: Offline 1:1 HTML mock. Zero JS, zero network. DESIGN.md & EXPERIENCE.md win on conflict.
+     */
+    :root {
+      --surface-base: #F8FAFC;
+      --surface-elevated: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #475569;
+      --text-on-primary: #FFFFFF;
+      --brand-primary: #4F46E5;
+      --brand-primary-deep: #3730A3;
+      --brand-accent-soft: #EEF2FF;
+      --semantic-emerald: #065F46;
+      --semantic-emerald-surface: #ECFDF5;
+      --semantic-emerald-border: #A7F3D0;
+      --semantic-amber: #92400E;
+      --semantic-amber-surface: #FFFBEB;
+      --semantic-amber-border: #FDE68A;
+      --border-subtle: #E2E8F0;
+      --border-strong: #94A3B8;
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #E2E8F0;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-variant-numeric: tabular-nums;
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+    .page-header { max-width: 960px; margin: 0 auto 24px; }
+    .page-header h1 { font-family: var(--font-display); font-size: 24px; margin-bottom: 6px; }
+    .page-header p { font-size: 14px; color: var(--text-secondary); }
+    .frames-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+      gap: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    .frame-wrapper { display: flex; flex-direction: column; gap: 12px; }
+    .frame-caption {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+    .phone-frame {
+      width: 396px;
+      background: var(--surface-base);
+      border-radius: 32px;
+      border: 6px solid #0F172A;
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.14);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .global-header {
+      background: var(--surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--brand-primary);
+    }
+    .screen-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    /* input-currency */
+    .input-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .input-currency-box {
+      min-height: 54px;
+      border: 2px solid var(--brand-primary);
+      border-radius: 10px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-elevated);
+    }
+    .currency-prefix { font-size: 18px; font-weight: 600; color: var(--text-muted); }
+    .currency-val { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+    .btn-primary {
+      min-height: 48px;
+      background: var(--brand-primary);
+      color: var(--text-on-primary);
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* contribution-gps-card */
+    .gps-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .gps-card.priority-1 {
+      border: 1.5px solid var(--brand-primary);
+    }
+    .gps-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .ticker-badge {
+      background: var(--surface-subtle);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .badge-graham {
+      background: var(--semantic-emerald-surface);
+      color: var(--semantic-emerald);
+      border: 1px solid var(--semantic-emerald-border);
+      border-radius: 9999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .gps-amount-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+    }
+    .gps-amount {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--semantic-emerald);
+    }
+    .gps-shares {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    /* math-transparency-accordion */
+    .accordion-trigger {
+      min-height: 48px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--brand-primary-deep);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .accordion-body {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 8px;
+    }
+    .metric-cell strong {
+      display: block;
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+    /* risk-ceiling-saturation-card */
+    .saturation-card {
+      background: var(--semantic-amber-surface);
+      border: 1.5px solid var(--semantic-amber-border);
+      border-radius: 16px;
+      padding: 16px;
+      color: var(--semantic-amber);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cvm-footer {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .bottom-nav {
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px;
+    }
+    .nav-item {
+      min-height: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      gap: 2px;
+    }
+    .nav-item.active { color: var(--brand-primary); }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Kerno — Aba 2: GPS de Aporte (`key-gps-aporte.html`)</h1>
+    <p>Coluna 1: Jornada UJ-1 de Roberto (Aporte de <code>R$ 5.000,00</code>, Multiplicador de Graham <code>1.30x</code>, cotas inteiras com Regra de Transbordamento e acordeão <em>"Por que estes ativos?"</em> expandido). Coluna 2: Mercado fechado (<code>D-1</code>) + Trava de Saturação Global de Tetos de Risco (<code>FR-6</code>).</p>
+  </header>
+
+  <main class="frames-grid">
+    <!-- COLUMN 1: CANONICAL GPS DE APORTE -->
+    <section class="frame-wrapper">
+      <div class="frame-caption">1. Estado Canônico — UJ-1 Roberto: R$ 5.000,00 distribuídos em &lt; 1.0s com Transparência Matemática</div>
+      <div class="phone-frame">
+        <div class="global-header">
+          <div class="brand-logo">Kerno · GPS de Aporte</div>
+          <span style="font-size: 12px; font-weight: 600; color: var(--semantic-emerald);">Zero Vendas</span>
+        </div>
+
+        <div class="screen-body">
+          <!-- input-currency -->
+          <section class="input-card">
+            <label style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Valor disponível para aporte no mês</label>
+            <div class="input-currency-box">
+              <span class="currency-prefix">R$</span>
+              <span class="currency-val">5.000,00</span>
+            </div>
+            <div class="btn-primary">Calcular Aporte pelo Diagrama + Graham</div>
+          </section>
+
+          <!-- Card 1: Priority 1 with Expanded Accordion -->
+          <article class="gps-card priority-1">
+            <div class="gps-top">
+              <div><span class="ticker-badge">BBAS3</span> <span style="font-size: 12px; color: var(--text-secondary);">Ações BR · Nota 9</span></div>
+              <span class="badge-graham">✨ Oportunidade Graham + Cerrado (1.30x)</span>
+            </div>
+            <div class="gps-amount-row">
+              <span class="gps-amount">R$ 2.380,00</span>
+              <span class="gps-shares">85 ações × R$ 28,00 (cotas inteiras)</span>
+            </div>
+            <div class="accordion-trigger">
+              <span>Por que estes ativos? (Memória de cálculo)</span>
+              <span>▴</span>
+            </div>
+            <div class="accordion-body">
+              <div class="metric-cell">Classe Ações BR<strong>35,8% → Meta 40,0% (-4,2%)</strong></div>
+              <div class="metric-cell">Ativo (Pré → Meta → Pós)<strong>6,8% → 8,5% → 7,3%</strong></div>
+              <div class="metric-cell">Nota &amp; Teto de Risco<strong>Nota 9/10 · Teto Máx 10,0%</strong></div>
+              <div class="metric-cell">Margem de Graham (VI)<strong>+28,0% (VI R$ 38,89 · Bônus 1.30x)</strong></div>
+            </div>
+          </article>
+
+          <!-- Card 2: Spillover integer shares -->
+          <article class="gps-card">
+            <div class="gps-top">
+              <div><span class="ticker-badge">WEGE3</span> <span style="font-size: 12px; color: var(--text-secondary);">Ações BR · Nota 9</span></div>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">2º na Fila (Transbordamento)</span>
+            </div>
+            <div class="gps-amount-row">
+              <span class="gps-amount">R$ 1.596,00</span>
+              <span class="gps-shares">38 ações × R$ 42,00 (cotas inteiras)</span>
+            </div>
+          </article>
+
+          <!-- Card 3: Residual spillover to FIIs / Fixed Income -->
+          <article class="gps-card">
+            <div class="gps-top">
+              <div><span class="ticker-badge">HGLG11</span> <span style="font-size: 12px; color: var(--text-secondary);">FIIs Tijolo · Nota 8</span></div>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">3º na Fila (Troco Alocado)</span>
+            </div>
+            <div class="gps-amount-row">
+              <span class="gps-amount">R$ 960,00</span>
+              <span class="gps-shares">6 cotas × R$ 160,00 (troco R$ 64 → Tesouro)</span>
+            </div>
+          </article>
+
+          <!-- cvm-regulatory-footer -->
+          <footer class="cvm-footer">
+            <strong>ℹ️ Aviso Regulatório (CVM 19/20):</strong> A distribuição acima é um cálculo matemático automatizado baseado exclusivamente nas metas e Notas de Qualidade configuradas por você e em indicadores fundamentalistas públicos. O Kerno não realiza recomendação personalizada nem consultoria de valores mobiliários.
+          </footer>
+        </div>
+
+        <nav class="bottom-nav">
+          <div class="nav-item"><span>📊</span><span>Carteira</span></div>
+          <div class="nav-item active"><span>🧭</span><span>GPS de Aporte</span></div>
+          <div class="nav-item"><span>✨</span><span>Kerno AI</span></div>
+          <div class="nav-item"><span>🎯</span><span>Diagrama</span></div>
+        </nav>
+      </div>
+    </section>
+
+    <!-- COLUMN 2: RISK CEILING SATURATION + D-1 -->
+    <section class="frame-wrapper">
+      <div class="frame-caption">2. Estado Alternativo — Cotação D-1 + Saturação Global de Tetos de Risco (<code>unallocatedRiskProtectedBalance &gt; 0</code>)</div>
+      <div class="phone-frame">
+        <div class="global-header">
+          <div class="brand-logo">Kerno · GPS de Aporte</div>
+          <span style="background: var(--semantic-amber-surface); color: var(--semantic-amber); border: 1px solid var(--semantic-amber-border); padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700;">🕒 Cotações de fechamento (D-1)</span>
+        </div>
+
+        <div class="screen-body">
+          <section class="input-card">
+            <label style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Aporte extraordinário (Venda de imóvel)</label>
+            <div class="input-currency-box">
+              <span class="currency-prefix">R$</span>
+              <span class="currency-val">180.000,00</span>
+            </div>
+          </section>
+
+          <!-- risk-ceiling-saturation-card -->
+          <article class="saturation-card">
+            <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 16px; font-weight: 700;">
+              <span>🛡️</span>
+              <span>Saldo Excedente Protegido por Teto de Risco (R$ 42.350,00)</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-primary);">
+              Todos os ativos individuais elegíveis da sua carteira atingiram seus respectivos <strong>Tetos Máximos de Risco</strong> (<code>10,0%</code> para Notas 8–10 e <code>6,0%</code> para Notas 5–7). Para proteger seu patrimônio contra concentração excessiva em emissor único, o saldo remanescente de <strong>R$ 42.350,00</strong> não foi forçado sobre ativos saturados.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+              <div class="btn-primary" style="background: var(--semantic-amber);">＋ Cadastrar Novo Ativo Elegível na Macro Classe</div>
+              <div class="accordion-trigger" style="background: var(--surface-elevated); color: var(--text-primary);">
+                <span>Direcionar excedente para Tesouro Direto / ETF Amplo (Isentos)</span>
+                <span>→</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Quarantine collapsed section -->
+          <article class="gps-card" style="background: var(--surface-subtle);">
+            <div class="gps-top">
+              <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary);">⏸ Ativos Protegidos em Quarentena (R$ 0,00 alocados)</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted);">
+              <strong>COGN3 (Nota 3 · Quarentena de Aporte)</strong> e <strong>VALE3 (Evento Corporativo &gt; 40%)</strong> permanecem visíveis no patrimônio consolidado, mas com teto de novos aportes bloqueado em <code>0,0%</code>.
+            </p>
+          </article>
+
+          <footer class="cvm-footer">
+            <strong>ℹ️ Aviso Regulatório (CVM 19/20):</strong> Cálculo matemático automatizado parametrizado pelo próprio investidor. Zero recomendação de venda ou consultoria de valores mobiliários.
+          </footer>
+        </div>
+
+        <nav class="bottom-nav">
+          <div class="nav-item"><span>📊</span><span>Carteira</span></div>
+          <div class="nav-item active"><span>🧭</span><span>GPS de Aporte</span></div>
+          <div class="nav-item"><span>✨</span><span>Kerno AI</span></div>
+          <div class="nav-item"><span>🎯</span><span>Diagrama</span></div>
+        </nav>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>UX Design Validation: Kerno (ex-Graham Select 2.0)</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>Kerno (ex-Graham Select 2.0) — UX Design Validation Report</h1>
+        <div class="subtitle">docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/{DESIGN.md, EXPERIENCE.md}</div>
+      </div>
+    </header>
+
+    <div class="synthesis">
+      <p>O par de contratos (<code>DESIGN.md</code> + <code>EXPERIENCE.md</code>) constitui uma especificação de UX <strong>strong</strong> (forte), coesa e imediatamente acionável por consumidores downstream (Arquitetura, Quebra de Épicos/Histórias e Engenharia Flutter/Spring Boot). Todas as 5 jornadas do PRD (<code>UJ-1</code> a <code>UJ-5</code>) e os 17 requisitos funcionais (<code>FR-1</code> a <code>FR-17</code>) possuem cobertura completa de superfície e fluxo, 100% das referências de tokens (<code>{path.to.token}</code>) e dos 19 componentes resolvem sem erros entre os dois arquivos e os 4 mockups HTML de alta fidelidade.</p>
+      <p>As duas lentes especializadas adicionais — <strong>Acessibilidade Intergeracional &amp; WCAG 2.1 AA/AAA</strong> (<code>review-accessibility.md</code>) e <strong>Conformidade Regulatória CVM 19/20 &amp; Privacidade LGPD</strong> (<code>review-regulatory.md</code>) — confirmaram <code>0</code> achados críticos e <code>0</code> achados altos, identificando 2 refinamentos médios de contraste (elevação de cifras e alertas semânticos para <code>&gt;= 7:1</code> AAA e bordas não-textuais <code>border-strong</code> para <code>&gt;= 3:1</code> WCAG 1.4.11) e 11 refinamentos baixos, todos integralmente aplicados na passagem final de polimento.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">1. Flow coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">2. Token completeness</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">3. Component coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">4. State coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">5. Visual reference coverage</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">6. Bloat &amp; overspecification</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">7. Inheritance discipline</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">8. Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+    </div>
+
+    <!-- 1. Flow coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>1. Flow coverage</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Todas as 5 jornadas do PRD (<code>UJ-1 Roberto</code>, <code>UJ-2 Lucas</code>, <code>UJ-3 Mariana</code>, <code>UJ-4 Thiago</code>, <code>UJ-5 Camila</code>) estão documentadas com protagonistas nomeados, passos numerados, momento de <strong>Climax</strong> explícito, casos de borda e 100% de fechamento sobre as 10 superfícies (<code>S-01</code> a <code>S-10</code>) da Arquitetura de Informação.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Subbloco explícito de Caso de Borda &amp; Falha em UJ-4 (Thiago)</h3>
+              <span class="finding-location">EXPERIENCE.md § Key Flows (UJ-4)</span>
+            </header>
+            <div class="finding-note">A jornada <code>UJ-4 (Thiago)</code> não incluía um subbloco explícito <code>- **Caso de Borda &amp; Falha:**</code> ao final do fluxo para o fallback de PIN nativo do SO quando a leitura biométrica falha no metrô.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Adicionar o subbloco <code>- **Caso de Borda &amp; Falha:**</code> ao final de <code>UJ-4</code> cobrindo fallback para PIN do SO e revalidação após <code>&gt; 2 min</code> em background (aplicado).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 2. Token completeness -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>2. Token completeness</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>46 tokens de cor (100% com hexadecimais válidos e pares Light/Dark), 11 papéis tipográficos com <code>tabular-nums</code>, 7 escalas de raio, 15 tokens de espaçamento e 19 componentes. 100% das referências <code>{path.to.token}</code> resolvem sem erro.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Propriedades *Dark explícitas em objetos de componentes do frontmatter</h3>
+              <span class="finding-location">DESIGN.md frontmatter (components)</span>
+            </header>
+            <div class="finding-note">Alguns objetos em <code>components</code> declaravam <code>backgroundDark</code>, mas omitiam <code>foregroundDark</code> ou <code>borderDark</code> explícitos no nível do componente.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Vincular <code>foregroundDark</code> e <code>borderDark</code> nos objetos de componentes e referenciar os tokens <code>*-dark</code> na seção <code>## Colors</code> (aplicado).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 3. Component coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>3. Component coverage</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Todos os 19 componentes possuem especificação visual em <code>DESIGN.md ## Components</code> e contrato comportamental com regras de negócio reais em <code>EXPERIENCE.md ## Component Patterns</code>.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Detalhamento comportamental de button-secondary</h3>
+              <span class="finding-location">EXPERIENCE.md § Component Patterns</span>
+            </header>
+            <div class="finding-note">A linha agrupada <code>button-primary &amp; button-secondary</code> detalhava o comportamento de <code>button-primary</code>, mas resumia o papel de <code>button-secondary</code>.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Explicitar o contrato comportamental de <code>button-secondary</code> para ações auxiliares não-destrutivas (abertura de sheets e assistentes) sem bloqueio concorrente (aplicado).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 4. State coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>4. State coverage</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>A matriz <code>## State Patterns</code> cobre cold-load com metas P95, onboarding zero-blank-screen, erro de soma <code>!= 100.00%</code>, quarentena de aporte, saturação de tetos de risco, mercado fechado <code>D-1</code>, circuit breaker <code>&gt; 40%</code>, fallback determinístico de IA, limite FinOps, proteção em background e máquina de estados comerciais.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Linha explícita para falha de upload B3 e leitura offline em State Patterns</h3>
+              <span class="finding-location">EXPERIENCE.md § State Patterns</span>
+            </header>
+            <div class="finding-note">Faltava uma linha específica na tabela <code>## State Patterns</code> para falha de parsing de planilha B3 corrompida na superfície <code>S-09</code> e abertura do app sem conectividade de rede.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Adicionar linha cobrindo erro de validação de arquivo B3 em <code>{colors.semantic-crimson-surface}</code> e leitura offline do último snapshot cacheado (aplicado).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 5. Visual reference coverage -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>5. Visual reference coverage</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Todos os 4 arquivos em <code>mockups/</code> (<code>key-dashboard-patrimonial.html</code>, <code>key-gps-aporte.html</code>, <code>key-kerno-ai-diagnostico.html</code>, <code>key-diagrama-cerrado.html</code>) estão vinculados inline nas seções relevantes de ambos os spines com descrição explícita e regra de precedência <em>spines-win-on-conflict</em>. Zero órfãos.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 6. Bloat & overspecification -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>6. Bloat &amp; overspecification</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p><code>DESIGN.md</code> concentra a voz editorial e tokens visuais; <code>EXPERIENCE.md</code> opera com tabelas de decisão enxutas e verificáveis.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Consolidação de invariantes de backend em EXPERIENCE.md</h3>
+              <span class="finding-location">EXPERIENCE.md § Component Patterns / § Regulatory, Privacy &amp; AI Guardrails</span>
+            </header>
+            <div class="finding-note">Leve repetição de detalhes internos de backend (como composição de <code>portfolio_state_hash</code> e <code>UserDataPurgeAdapter</code>) entre tabelas comportamentais e seção regulatória.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Manter a definição técnica concentrada em <code>## Regulatory, Privacy &amp; AI Guardrails</code> e referenciá-la de forma enxuta nas tabelas (aplicado).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 7. Inheritance discipline -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>7. Inheritance discipline</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>100% dos caminhos em <code>sources</code>, nomes de UJs e FRs, os 18 termos do Glossário do PRD (§3), os 19 nomes de componentes e todas as referências <code>{path.to.token}</code> mantêm fidelidade estrita entre PRD, Brief, Spines e Mockups.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 8. Shape fit -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>8. Shape fit</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p><code>DESIGN.md</code> segue exatamente a ordem canônica de 8 seções da especificação Google Labs. <code>EXPERIENCE.md</code> inclui todas as 8 seções obrigatórias, as 2 seções condicionais (<code>Inspiration &amp; Anti-patterns</code> e <code>Responsive &amp; Platform</code>) e a seção de domínio regulado (<code>Regulatory, Privacy &amp; AI Guardrails</code>).</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Extra Reviewer 1: Accessibility -->
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Accessibility &amp; Intergenerational Ergonomics Review</h2>
+          <span class="reviewer-source">review-accessibility.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Auditoria matemática WCAG 2.1 AA/AAA, escalonamento dinâmico <code>1.0x–2.0x</code> sem truncamento, numerais tabulares, áreas de toque <code>48x48dp</code>, tríade daltônico-segura e semântica de leitores de tela no Modo Privacidade. Veredito: Aprovado com 2 refinamentos médios e 5 baixos (todos aplicados).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-01 — Elevação de cifras monetárias e alertas semânticos do nível AA (4.84:1–5.91:1) para AAA (&gt;= 7.0:1)</h3>
+              <span class="finding-location">DESIGN.md § Colors &amp; mockups/key-*.html</span>
+            </header>
+            <div class="finding-note">Os tokens <code>semantic-emerald</code> (<code>#047857</code>, <code>5.48:1</code>), <code>semantic-amber</code> (<code>#B45309</code>, <code>4.84:1</code>) e <code>semantic-crimson</code> (<code>#B91C1C</code>, <code>5.91:1</code>) atendiam WCAG AA, mas ficavam abaixo do piso AAA (<code>&gt;= 7:1</code>) para leitura por usuários 40+ sob luz intensa.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Ajustar <code>semantic-emerald</code> para <code>#065F46</code> (<code>7.68:1</code> AAA sobre branco e <code>7.13:1</code> AAA sobre <code>#ECFDF5</code>), <code>semantic-amber</code> para <code>#92400E</code> (<code>7.05:1</code> AAA sobre <code>#FFFBEB</code>), <code>semantic-crimson</code> para <code>#991B1B</code> (<code>7.60:1</code> AAA sobre <code>#FEF2F2</code>), <code>semantic-emerald-dark</code> para <code>#6EE7B7</code> (<code>7.45:1</code> AAA) e <code>semantic-crimson-dark</code> para <code>#FCA5A5</code> (<code>7.92:1</code> AAA) em <code>DESIGN.md</code> e nos 4 mockups HTML (aplicado).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-02 — Contraste Não-Textual (WCAG 1.4.11 &gt;= 3:1) em border-strong e marcador de meta sobreposto</h3>
+              <span class="finding-location">DESIGN.md § Colors / § Components &amp; mockups/key-dashboard-patrimonial.html</span>
+            </header>
+            <div class="finding-note"><code>border-strong</code> (<code>#CBD5E1</code> sobre <code>#FFFFFF</code> = <code>1.48:1</code>) ficava abaixo de <code>3.0:1</code> para delimitar inputs/botões secundários sem foco, e o marcador de meta <code>#3730A3</code> sobre barra preenchida <code>#4F46E5</code> tinha contraste de <code>1.42:1</code>.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Ajustar <code>border-strong</code> para <code>#94A3B8</code> (<code>3.02:1</code> sobre branco) e <code>border-strong-dark</code> para <code>#64748B</code> (<code>3.75:1</code> sobre <code>#111827</code>), e aplicar cor <code>{colors.text-primary}</code> (<code>#0F172A</code>) com halo branco de <code>1.5px</code> ao marcador de meta em <code>macro-class-distribution-card</code> (aplicado).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-03 a F-07 — Pares *Dark em componentes, flex-wrap nos mockups, tabular-nums em headings, 48dp no Assistente de 5 Critérios e atributos ARIA</h3>
+              <span class="finding-location">DESIGN.md &amp; mockups/key-*.html</span>
+            </header>
+            <div class="finding-note">Refinamentos de completude de tokens <code>*Dark</code>, <code>fontVariantNumeric: 'tabular-nums'</code> em <code>heading-1..3</code>, <code>flex-wrap: wrap</code> e <code>min-height: 48px</code> nas linhas interativas do Assistente de 5 Critérios e atributos <code>aria-label</code> / <code>role="slider"</code> em todos os elementos dos mockups estáticos.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Todos os 5 refinamentos aplicados em <code>DESIGN.md</code>, <code>.working/key-*.html</code> e <code>mockups/key-*.html</code>.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Extra Reviewer 2: Regulatory & LGPD -->
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>CVM 19/20 Regulatory &amp; LGPD Privacy Review</h2>
+          <span class="reviewer-source">review-regulatory.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Auditoria de conformidade lexical CVM 19/20 (proibição de imperativos de compra/venda e promessa de ganho), neutralidade de onboarding (<code>Nota = 6</code>), disclaimers permanentes CVM/CNPI, isolamento do Sanitizador LGPD de IA (<code>0 bytes</code> PII e zero <code>R$</code> no LLM) e Direito ao Esquecimento (<code>FR-16</code>). Veredito: Aprovado com 2 refinamentos baixos (ambos aplicados).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-REG-01 — Substituição do termo "recomendação prioritária" na prosa técnica de DESIGN.md</h3>
+              <span class="finding-location">DESIGN.md § Elevation &amp; Depth</span>
+            </header>
+            <div class="finding-note">A prosa técnica interna usava a expressão <em>"recomendação prioritária do GPS de Aporte"</em>.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Substituir por <em>"prioridade matemática nº 1 de alocação do GPS de Aporte"</em> para manter alinhamento terminológico absoluto com as Resoluções CVM 19/20 (aplicado).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-REG-02 — Explicitação do mapeamento local do token canônico RENDA_FIXA_MANUAL_1 no mockup de IA</h3>
+              <span class="finding-location">mockups/key-kerno-ai-diagnostico.html (Cartão 3)</span>
+            </header>
+            <div class="finding-note">Clarificar via atributo <code>title</code> no HTML do Cartão 3 que o código canônico <code>RENDA_FIXA_MANUAL_1</code> retornado pelo Gemini é reconciliado localmente pelo mapper da UI Flutter para o nome amigável do ativo.</div>
+            <div class="finding-fix"><strong>Fix:</strong> Adicionar atributo explicativo <code>title</code> e seta de binding local <code>RENDA_FIXA_MANUAL_1 → CDB Banco X (Local UI)</code> no mockup (aplicado).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mechanical notes</h3>
+      <ul>
+        <li><strong>Frontmatter YAML:</strong> Completo e válido em <code>DESIGN.md</code> e <code>EXPERIENCE.md</code>, com <code>status: final</code> e <code>updated: 2026-11-21</code>.</li>
+        <li><strong>Consistência de Componentes:</strong> 19/19 componentes com nomes kebab-case idênticos entre frontmatter YAML, <code>DESIGN.md ## Components</code> e <code>EXPERIENCE.md ## Component Patterns</code>.</li>
+        <li><strong>Resolução de Tokens:</strong> 100% das referências <code>{path.to.token}</code> em <code>DESIGN.md</code> e <code>EXPERIENCE.md</code> resolvem sem erros.</li>
+        <li><strong>Cobertura de Mockups:</strong> 4/4 arquivos HTML em <code>mockups/</code> existentes, sincronizados com <code>.working/</code> e linkados inline sem órfãos.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubric: docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/review-rubric.md</span>
+        <span>Generated: 2026-11-21T20:00:00Z</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

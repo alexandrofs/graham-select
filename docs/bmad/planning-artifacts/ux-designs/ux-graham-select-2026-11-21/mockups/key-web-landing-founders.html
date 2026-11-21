@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerno — Frontend Web: Landing Page Pública (`/`) &amp; Login OAuth2 (`/login`)</title>
+  <style>
+    /*
+     * GOVERNING SPINE SECTIONS:
+     * - DESIGN.md: ## Brand & Style, ## Colors (Light-First #F8FAFC/#FFFFFF, Kerno Indigo #4F46E5, Founder Gold #92400E/#FEF3C7),
+     *   ## Typography (Plus Jakarta Sans + Inter tabular-nums), ## Components (#10. button-primary, #10. button-secondary, #12. badge-founder)
+     * - EXPERIENCE.md: ## Information Architecture (Superfície 1 `/` HomePage, `/docs` DocsScreen, Superfície 2 `/login` LoginScreen),
+     *   ## Responsive & Platform (SEO index, follow em `/`, FCP < 1.2s), ## Key Flows (UJ-5 Camila — Conversão Membro Founder Vitalício)
+     * - BROWNFIELD RESTYLING TARGETS: frontend/lib/src/features/home/presentation/pages/home_page.dart,
+     *   frontend/lib/src/features/auth/presentation/login_screen.dart, frontend/lib/src/features/docs/presentation/pages/docs_screen.dart
+     * - RULE: Offline 1:1 HTML mock. Zero JS, zero network. DESIGN.md & EXPERIENCE.md win on conflict.
+     */
+    :root {
+      --surface-base: #F8FAFC;
+      --surface-elevated: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #475569;
+      --text-on-primary: #FFFFFF;
+      --brand-primary: #4F46E5;
+      --brand-primary-hover: #4338CA;
+      --brand-primary-deep: #3730A3;
+      --brand-accent-soft: #EEF2FF;
+      --semantic-emerald: #065F46;
+      --semantic-emerald-surface: #ECFDF5;
+      --semantic-emerald-border: #A7F3D0;
+      --founder-gold: #92400E;
+      --founder-gold-surface: #FEF3C7;
+      --founder-gold-border: #F59E0B;
+      --border-subtle: #E2E8F0;
+      --border-strong: #94A3B8;
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #E2E8F0;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-variant-numeric: tabular-nums;
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+    .page-header { max-width: 1180px; margin: 0 auto 24px; }
+    .page-header h1 { font-family: var(--font-display); font-size: 24px; margin-bottom: 6px; }
+    .page-header p { font-size: 14px; color: var(--text-secondary); }
+    .browser-stack {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .browser-window {
+      background: var(--surface-base);
+      border-radius: 20px;
+      border: 2px solid #0F172A;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+    .browser-chrome {
+      background: #0F172A;
+      color: #F8FAFC;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 9999px; background: #475569; }
+    .url-bar {
+      background: #1E293B;
+      color: #CBD5E1;
+      padding: 4px 16px;
+      border-radius: 9999px;
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+    }
+    /* Navbar Public */
+    .public-nav {
+      background: var(--surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-logo {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--brand-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .btn-primary {
+      min-height: 48px;
+      padding: 0 24px;
+      background: var(--brand-primary);
+      color: var(--text-on-primary);
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-secondary {
+      min-height: 48px;
+      padding: 0 20px;
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Hero Section */
+    .hero-grid {
+      padding: 48px 32px;
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 36px;
+      align-items: center;
+    }
+    .founder-banner {
+      background: var(--founder-gold-surface);
+      color: var(--founder-gold);
+      border: 1.5px solid var(--founder-gold-border);
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .hero-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.55;
+    }
+    .pillars-strip {
+      padding: 0 32px 40px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .pillar-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pillar-card h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: var(--text-primary);
+    }
+    .pillar-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    /* Login Screen + Docs Preview Split */
+    .split-screens {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .auth-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Kerno — Reestilização das Rotas Públicas: `HomePage` (`/`), `LoginScreen` (`/login`) e `DocsScreen` (`/docs`)</h1>
+    <p>Substituição completa da identidade legada <em>Graham Select</em> pela marca <strong>Kerno ("O núcleo inteligente do seu dinheiro")</strong> no Frontend Flutter Web, aplicando o <strong>Design System Intergeracional</strong> (Light-First, Plus Jakarta Sans + Inter, WCAG AAA) e o destaque do <strong>Programa Founders</strong> (<code>FR-1</code>, <code>FR-14</code>, <code>FR-15</code>, <code>UJ-5 Camila</code>).</p>
+  </header>
+
+  <main class="browser-stack">
+    <!-- WINDOW 1: HOME PAGE (/) -->
+    <section class="browser-window">
+      <div class="browser-chrome">
+        <div class="browser-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="url-bar">🔒 https://kerno.afsdigital.com.br/ (HomePage reestilizada · SEO: index, follow · FCP &lt; 1.2s)</div>
+        <span>Viewport Desktop &gt; 1024dp</span>
+      </div>
+
+      <nav class="public-nav">
+        <div class="brand-logo">● Kerno <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">O núcleo inteligente do seu dinheiro</span></div>
+        <div class="nav-links">
+          <span>Diagrama do Cerrado + Graham</span>
+          <span>Kerno AI</span>
+          <span>App Mobile (iOS &amp; Android)</span>
+          <span>Documentação (<code>/docs</code>)</span>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <div class="btn-secondary">Entrar (<code>/login</code>)</div>
+          <div class="btn-primary">👑 Garantir Vaga de Founder</div>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <div>
+          <div class="founder-banner">
+            👑 PROGRAMA FOUNDERS DE LANÇAMENTO: Lote Inicial de 250 Vagas com Acesso Pro Gratuito Vitalício
+          </div>
+          <h2 class="hero-title">Do caos das planilhas ao núcleo inteligente das suas finanças.</h2>
+          <p class="hero-subtitle">
+            Consolide sua carteira da B3 e múltiplos CPFs familiares, descubra exatamente onde alocar o aporte do mês pelo <strong>Diagrama do Cerrado</strong> somado à <strong>Margem de Segurança de Graham</strong> — sem girar patrimônio nem vender ativos vencedores — e audite riscos ocultos com o <strong>Kerno AI</strong>.
+          </p>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+            <div class="btn-primary" style="padding: 0 28px; font-size: 16px;">
+              Garantir Minha Vaga de Founder Gratuitamente →
+            </div>
+            <div class="btn-secondary">Ver Demonstração do GPS de Aporte</div>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 12px;">
+            ✓ Autenticação Google em 1 clique · ✓ Selo Membro Founder Vitalício ao ativar sua carteira · ✓ Trial Pro de 90 dias para coortes seguintes
+          </p>
+        </div>
+
+        <!-- Hero Interactive Preview Card -->
+        <div style="background: var(--surface-elevated); border: 1.5px solid var(--brand-primary); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 700; color: var(--brand-primary-deep);">SIMULAÇÃO EM 25 SEGUNDOS · GPS DE APORTE</span>
+            <span style="background: var(--founder-gold-surface); color: var(--founder-gold); border: 1px solid var(--founder-gold-border); padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700;">👑 Membro Founder</span>
+          </div>
+          <div style="background: var(--surface-subtle); padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; color: var(--text-secondary);">Aporte disponível no mês:</span>
+            <strong style="font-size: 22px; color: var(--text-primary);">R$ 5.000,00</strong>
+          </div>
+          <div style="border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <strong>BBAS3 · Nota 9/10</strong>
+              <span style="display: block; font-size: 12px; color: var(--semantic-emerald); font-weight: 600;">✨ Oportunidade Graham + Cerrado (Margem +28,0% · Bônus 1.30x)</span>
+            </div>
+            <strong style="font-size: 18px; color: var(--semantic-emerald);">R$ 2.380,00 (85 ações)</strong>
+          </div>
+          <div style="border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <strong>WEGE3 · Nota 9/10</strong>
+              <span style="display: block; font-size: 12px; color: var(--text-secondary);">2º na Fila (Regra de Transbordamento · Cotas Inteiras)</span>
+            </div>
+            <strong style="font-size: 18px; color: var(--semantic-emerald);">R$ 1.596,00 (38 ações)</strong>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted);">
+            ℹ️ Ferramenta tecnológica de consolidação e calculadora matemática parametrizada pelo próprio investidor (Resoluções CVM 19/20). Zero vendas forçadas.
+          </p>
+        </div>
+      </div>
+
+      <div class="pillars-strip">
+        <article class="pillar-card">
+          <h3>1. Diagrama do Cerrado + Graham</h3>
+          <p>Una a gestão de risco por Notas de Qualidade (1–10), Teto Máximo de Risco (6%/10%) e Quarentena de Aporte ao filtro fundamentalista de Valor Intrínseco de Benjamin Graham.</p>
+        </article>
+        <article class="pillar-card">
+          <h3>2. Kerno AI (Diagnóstico Blindado LGPD)</h3>
+          <p>Diagnóstico executivo em 4 cartões ancorado em aritmética BigDecimal determinística. O Sanitizador LGPD de IA remove 100% de CPF, nome e valores em R$ antes de consultar o LLM.</p>
+        </article>
+        <article class="pillar-card">
+          <h3>3. Ecossistema Completo (Web &amp; Mobile)</h3>
+          <p>Evolução Patrimonial, Calendário de Proventos, Metas Financeiras, Auxiliar de Bens e Direitos (IRPF), Holding Familiar Multi-CPF e App Nativo com Modo Privacidade.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- WINDOW 2: LOGIN (/login) & DOCS (/docs) RESTYLING -->
+    <section class="browser-window">
+      <div class="browser-chrome">
+        <div class="browser-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="url-bar">🔒 https://kerno.afsdigital.com.br/login &amp; /docs (Reestilização de LoginScreen e DocsScreen)</div>
+        <span>Light-First + Dark Mode Parity</span>
+      </div>
+
+      <div class="split-screens">
+        <!-- /login restyled -->
+        <article class="auth-card">
+          <div class="brand-logo">● Kerno</div>
+          <h3 style="font-family: var(--font-display); font-size: 24px;">Acesse o núcleo do seu patrimônio (`LoginScreen` `/login`)</h3>
+          <p style="font-size: 14px; color: var(--text-secondary);">
+            Autenticação segura OAuth2 / Google Sign-In com sessão criptografada (<code>flutter_secure_storage</code>) e desbloqueio biométrico instantâneo no celular.
+          </p>
+          <div class="founder-banner" style="margin-bottom: 0;">
+            👑 Lote Founders Ativo: Sua conta receberá o selo Membro Founder Vitalício automaticamente no cadastro.
+          </div>
+          <div class="btn-primary" style="width: 100%; font-size: 16px;">
+            G Continuar com Google (1 Clique)
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            Protegido por TLS 1.3, isolamento Multi-Tenant e conformidade integral com a LGPD (Direito ao Esquecimento em 1 clique).
+          </p>
+        </article>
+
+        <!-- /docs restyled -->
+        <article class="auth-card">
+          <span style="font-size: 12px; font-weight: 700; color: var(--brand-primary);">DOCUMENTAÇÃO &amp; METODOLOGIA (`DocsScreen` `/docs`)</span>
+          <h3 style="font-family: var(--font-display); font-size: 22px;">Guia Transparente: Diagrama do Cerrado, Fórmula de Graham e Privacidade LGPD</h3>
+          <p style="font-size: 14px; color: var(--text-secondary);">
+            A rota existente <code>/docs</code> recebe a tipografia <strong>Plus Jakarta Sans + Inter</strong> em fundo <code>#FFFFFF</code> com contraste <code>17.85:1</code> AAA, documentando abertamente as fórmulas matemáticas do produto:
+          </p>
+          <div style="background: var(--surface-subtle); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px; font-size: 13px; display: flex; flex-direction: column; gap: 6px;">
+            <div>• <strong>Valor Intrínseco de Graham:</strong> <code>VI = √(22,5 × LPA × VPA)</code> com Multiplicador <code>1.30x</code>.</div>
+            <div>• <strong>Meta Bruta no Diagrama:</strong> <code>(Nota_i / Σ Notas Elegíveis da Classe) × Meta_Classe%</code>.</div>
+            <div>• <strong>Tetos Máximos de Risco:</strong> Notas 8–10 = <code>10%</code> · Notas 5–7 = <code>6%</code> · Notas 1–4 = <code>0% (Quarentena)</code>.</div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -64,7 +64,7 @@
   .synthesis {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 3px solid var(--muted);
+    border-left: 3px solid var(--verdict-strong);
     border-radius: 8px;
     padding: 18px 22px;
     margin-bottom: 24px;
@@ -203,16 +203,15 @@
 
     <header class="report-header">
       <div class="title">
-        <h1>Kerno (ex-Graham Select 2.0) — Validation Report</h1>
+        <h1>Kerno (ex-Graham Select 2.0) — Relatório de Validação</h1>
         <div class="subtitle">docs/bmad/planning-artifacts/prds/prd-graham-select-2026-11-21/prd.md</div>
       </div>
       <div class="grade grade-excellent">Excellent</div>
     </header>
 
     <div class="synthesis">
-      <p><strong>Status Pós-Remediação (17/17 Autofixes Aplicados):</strong> Todos os 17 apontamentos identificados abaixo (3 da Rubrica Estrutural + 14 do Revisor Adversarial Red Team) foram integralmente incorporados ao <code>prd.md</code> e ao <code>addendum.md</code> em 2026-11-21.</p>
-      <p><strong>Veredito da Rubrica Estrutural (7/7 Strong):</strong> O PRD do <strong>Kerno (Ciclo 2.0)</strong> e seu <code>addendum.md</code> constituem uma especificação de produto madura, coesa e pronta para execução (<em>decision-ready</em> / <code>status: final</code>), articulando com precisão a transição <em>brownfield</em> do legado <em>Graham Select</em> para um ecossistema Web e Mobile apoiado pelo <strong>Diagrama do Cerrado</strong>, <strong>Margem de Segurança de Graham</strong> e <strong>Kerno AI (Diagnóstico de Carteira)</strong>. Todas as questões abertas e premissas críticas de negócio (<code>A-1</code> a <code>A-7</code>) foram deliberadas e travadas com critérios de aceite testáveis, restando apenas três refinamentos pontuais de baixa severidade na rubrica (gatilho exato de concessão do status <strong>Membro Founder</strong>, alinhamento da variável de margem mínima no <strong>Multiplicador de Graham</strong> e teto residual da <strong>Macro Classe</strong> na fórmula de <em>Spillover</em> quando há ativos em <strong>Quarentena de Aporte</strong>).</p>
-      <p><strong>Stress-Test do Revisor Adversarial (Red Team FinTech / CVM / Matemática / FinOps):</strong> A revisão adversarial complementar levantou 14 pontos de atenção de borda (3 críticos, 6 altos, 4 médios e 1 baixo) para blindar o produto antes ou durante a quebra de histórias: (1) o risco regulatório CVM 19/20 caso o "catálogo base versionado" traga notas qualitativas editoriais pré-julgadas em vez de notas neutras (<code>6</code>) ou puramente quantitativas; (2) a aplicação do <strong>Teto Máximo de Risco</strong> (<code>6%</code> / <code>10%</code>) sobre títulos soberanos do <em>Tesouro Direto</em> e ETFs amplos na classe <em>Internacional</em>, que travaria carteiras conservadoras ou com 1 único ETF antes de atingir a meta da <strong>Macro Classe</strong>; e (3) a proteção de <em>Unit Economics</em> (FinOps) no cruzamento entre <code>FOUNDER_LIFETIME</code>, a geração do <strong>Resumo Executivo</strong> na camada Free e a invalidação diária do <code>portfolio_state_hash</code>.</p>
+      <p>O PRD do <strong>Kerno (Ciclo 2.0)</strong> atinge um nível excepcional de maturidade, rigor e clareza de engenharia após a incorporação de todos os apontamentos das revisões anteriores. A modelagem matemática do <strong>Diagrama do Cerrado + Graham</strong>, a blindagem regulatória (CVM 19/20 e LGPD), a arquitetura <em>Deterministic-First</em> de IA com sanitização de PII e a especificação dos fluxos comerciais (Founders, Trial de 90 dias e deferimento de billing) estão completamente alinhadas, com todas as dimensões avaliadas como <strong>strong</strong>.</p>
+      <p>As análises adicionais adversariais e de conformidade regulatória confirmam que os riscos de concorrência em transações (lote atômico de Founders), assimetria de cotas inteiras in-loop, abuso FinOps (taxas e templates determinísticos) e rejeição nas lojas móveis (ausência de checkouts web externos no app) estão 100% blindados por arquitetura e consequências testáveis.</p>
     </div>
 
     <div class="dimension-summary">
@@ -246,296 +245,194 @@
       </div>
     </div>
 
+    <!-- 1. Decision-readiness -->
     <section class="dimension">
       <details>
         <summary>
-          <h2>Decision-readiness</h2>
+          <h2>1. Decision-readiness</h2>
           <span class="verdict-pill verdict-strong">strong</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>O documento apresenta postura decisória exemplar para um PRD com <code>status: final</code>. Todas as tensões arquiteturais e de produto levantadas na descoberta foram convertidas em decisões explícitas em <strong>§11. Open Questions</strong> (100% resolvidas) e <strong>§12. Confirmed Decisions &amp; Assumptions Index</strong> (<code>A-1</code> a <code>A-7</code>), eliminando ambiguidades para a engenharia.</p>
-            <p>Os <em>trade-offs</em> são assumidos com transparência e mostram claramente o que foi sacrificado em prol do foco do MVP 2.0: o Nível 2 do <strong>Diagrama do Cerrado</strong> (<strong>Subclasses</strong>) foi deliberadamente definido como agrupador analítico de exposição sem trava percentual intermediária no <strong>GPS de Aporte</strong> (<code>§3</code>, <code>FR-4</code>, <code>FR-5</code> e <code>Addendum §1.1</code>); o <strong>Kerno AI (Diagnóstico de Carteira)</strong> foi desenhado sob arquitetura <em>Deterministic-First</em> com omissão total de valores em <code>R$</code> no payload enviado ao <strong>Google Gemini</strong> (<code>FR-10</code>, <code>A-6</code>) para blindar a conformidade LGPD e o <strong>Modo Privacidade</strong>; e a matriz de rebranding (<code>Addendum §5</code>) documenta com clareza comercial e jurídica o descarte de alternativas como <em>Aura</em> e <em>Aloca</em>.</p>
-          </div>
-        </div>
-        <div class="findings-list">
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-low">low</span>
-              <h3 class="finding-title">Definição do evento exato de ativação para concessão do status Membro Founder</h3>
-              <span class="finding-location">§2.3 UJ-5, §4.5 FR-15</span>
-            </header>
-            <div class="finding-note">Em <code>UJ-5</code>, Camila recebe o selo <strong>Membro Founder</strong> ativo <em>"Em menos de 1 minuto após aterrissar na página"</em> logo após o login Google Sign-In, enquanto <code>FR-15</code> menciona <em>"Usuários que criarem conta e realizarem a ativação de uso no lote inicial de lançamento (controlado por flag/limite configurável de vagas do Programa Founders no backend)"</em>.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Explicitar na história de implementação de <code>FR-15</code> se a atribuição de <code>plan_tier = FOUNDER_LIFETIME</code> ocorre atomicamente no momento da criação da conta (<code>OAuth2 sign-up</code> enquanto <code>founder_slots_remaining &gt; 0</code>, conforme <code>UJ-5</code>) ou após o primeiro marco de onboarding, definindo também o valor padrão inicial da flag de limite de vagas.</div>
-          </article>
-        </div>
-      </details>
-    </section>
-
-    <section class="dimension">
-      <details>
-        <summary>
-          <h2>Substance over theater</h2>
-          <span class="verdict-pill verdict-strong">strong</span>
-        </summary>
-        <div class="dim-body">
-          <div class="dim-judgment">
-            <p>Não há seções decorativas ou preenchimento genérico no PRD. A seção <strong>§1. Vision</strong> diagnostica três fricções concretas do investidor <em>Buy &amp; Hold</em> brasileiro (paralisia de alocação sem giro patrimonial/DARF, atrito visual intergeracional em tabelas densas e ausência de experiência móvel com síntese por IA) e conecta cada uma a mecanismos verificáveis do produto.</p>
-            <p>As jornadas de usuário (<strong>§2.3 Key User Journeys</strong>, <code>UJ-1</code> a <code>UJ-5</code>) são protagonizadas por personas distintas que exercitam decisões reais de design e engenharia: <code>Roberto (52 anos)</code> valida escala tipográfica <code>1.3x</code> e fluxo de aporte em 25 segundos; <code>Lucas (27 anos)</code> exercita os <strong>Templates de Alocação</strong>, a <strong>Nota de Qualidade (1–10)</strong> e a <strong>Quarentena de Aporte</strong>; <code>Mariana (38 anos)</code> valida o diagnóstico estruturado do <strong>Kerno AI</strong> e seu fallback determinístico; <code>Thiago (31 anos)</code> exercita o <strong>Modo Privacidade</strong> no transporte público; e <code>Camila (34 anos)</code> valida a conversão na <strong>Landing Page</strong> via <strong>Programa Founders</strong>. Da mesma forma, os requisitos não-funcionais (<strong>§7. Cross-Cutting NFRs</strong>, <code>NFR-1</code> a <code>NFR-8</code>) evitam adjetivos vagos e estabelecem limites numéricos claros (<code>&lt; 1.0s P95</code> para 100 ativos, <code>60fps / &lt; 300ms</code>, <code>&lt; 400ms</code> para leitura de cache de IA, timeout rígido de <code>15s</code> com fallback determinístico e <code>BigDecimal</code> / <code>NUMERIC(19,4)</code>).</p>
+            <p>O documento formaliza todas as decisões e trade-offs fundamentais com total transparência e sem neutralizações artificiais. O índice de decisões e premissas (§12, A-1 a A-8) consolida parâmetros numéricos explícitos para tetos de risco por faixa de nota, bônus do multiplicador de Graham, rate limits e cotas FinOps, timeouts mobile/biométricos, nota neutra inicial 6, allowlists regex para sanitização de IA, a política atômica do lote de 250 Founders e a inclusão da 5ª Macro Classe (Criptoativos).</p>
+            <p>Todas as 4 questões abertas em §11 registram suas respectivas resoluções e aceitações conscientes de risco, notadamente a estratégia de lançamento simultâneo Web+IA+Mobile.</p>
           </div>
         </div>
       </details>
     </section>
 
+    <!-- 2. Substance over theater -->
     <section class="dimension">
       <details>
         <summary>
-          <h2>Strategic coherence</h2>
+          <h2>2. Substance over theater</h2>
           <span class="verdict-pill verdict-strong">strong</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>A tese estratégica do <strong>Kerno</strong> — unir a disciplina de gestão de risco por novos aportes do <strong>Diagrama do Cerrado</strong> ao filtro de desconto da <strong>Margem de Segurança de Graham</strong>, traduzidos por um diagnóstico de IA determinístico em uma interface intergeracional de bolso — atravessa todo o documento com consistência.</p>
-            <p>O escopo do MVP (<strong>§6. MVP Scope</strong>) e as exclusões explícitas (<strong>§5. Non-Goals</strong>) protegem a tese tanto do ponto de vista técnico quanto regulatório (Resoluções CVM 19 e 20), recusando sugestões de venda (<em>Zero Forced Selling</em>), execução de ordens em corretoras e chat livre de IA neste ciclo, ao mesmo tempo em que preparam a fundação modular via <em>feature flags</em> (<code>FR-13</code>) para o futuro módulo de Controle de Gastos. As Métricas de Sucesso (<strong>§10. Success Metrics</strong>, <code>SM-1</code> a <code>SM-6</code>) medem diretamente a validação da tese, sendo equilibradas por contra-métricas rigorosas (<code>SM-C1</code> exigindo <code>0.0%</code> de divergência numérica e <code>0 bytes</code> de PII no LLM; <code>SM-C2</code> limitando o custo FinOps a <code>&lt;= R$ 0,50 / usuário ativo / mês</code>; e <code>SM-C3</code> protegendo a precisão da ingestão B3).</p>
+            <p>O PRD é isento de conteúdos decorativos ou clichês de template. A Vision (§1) diagnostica com precisão cirúrgica as dores do investidor no momento de transição de Graham Select para Kerno (paralisia de alocação mensal, atrito visual intergeracional e necessidade de acompanhamento móvel com IA explicável).</p>
+            <p>Os NFRs (§7) trazem limiares numéricos verificáveis e realistas (&lt; 1.0s P95 no GPS de Aporte, 60fps / &lt; 1.5s no mobile, &lt; 400ms cache / &lt; 10s geração IA com timeout de 15s, BigDecimal / NUMERIC(19,4) para moeda e regras estritas de observabilidade e migração de AGENTS.md).</p>
+          </div>
+          <div class="findings-list">
+            <article class="finding">
+              <header>
+                <span class="badge badge-sev-low">low</span>
+                <h3 class="finding-title">Número de personas nas jornadas de usuário</h3>
+                <span class="finding-location">§2.3 / UJ-1 a UJ-5</span>
+              </header>
+              <div class="finding-note">O PRD define 5 personas nomeadas (Roberto, Lucas, Mariana, Thiago e Camila), o que ultrapassa ligeiramente a diretriz prática de até 4 personas. Contudo, cada persona mapeia diretamente para uma jornada de usuário estritamente necessária e que ancora capacidades arquiteturais distintas (acessibilidade no UJ-1, onboarding no UJ-2, diagnóstico de IA/LGPD no UJ-3, privacidade/offline no UJ-4 e Founders no UJ-5).</div>
+              <div class="finding-fix"><strong>Fix:</strong> Manter as 5 personas conforme estruturadas, pois todas são comprovadamente funcionais e direcionam requisitos específicos.</div>
+            </article>
           </div>
         </div>
       </details>
     </section>
 
+    <!-- 3. Strategic coherence -->
     <section class="dimension">
       <details>
         <summary>
-          <h2>Done-ness clarity</h2>
+          <h2>3. Strategic coherence</h2>
           <span class="verdict-pill verdict-strong">strong</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>Os 17 Requisitos Funcionais (<code>FR-1</code> a <code>FR-17</code>) possuem subseções <code>Consequences (testable)</code> detalhadas e diretamente verificáveis por testes automatizados de unidade, integração e interface. Destacam-se pela precisão de engenharia: a especificação exata da composição do <code>portfolio_state_hash</code> via SHA-256 (<code>FR-9</code> e <code>Addendum §2.1</code>), a trava de saturação global de tetos de risco com retorno do saldo protegido (<code>FR-6</code> — <em>"Saldo Excedente Protegido por Teto de Risco"</em> / <code>unallocatedRiskProtectedBalance</code>), o assistente opcional de 5 critérios objetivos para a <strong>Nota de Qualidade (1–10)</strong> (<code>FR-5</code>), a matriz exata de permissões e paywall entre <strong>Membro Founder</strong>, Trial PLG de 90 dias e camada Free (<code>FR-15</code>), e o <em>circuit breaker</em> para variações diárias anômalas <code>&gt; 40%</code> (<code>FR-17</code>).</p>
-            <p>Há apenas dois detalhes matemáticos finos entre o texto dos FRs e as fórmulas do <code>addendum.md</code> que merecem alinhamento explícito para evitar interpretações divergentes durante a codificação do motor de cálculo.</p>
-          </div>
-        </div>
-        <div class="findings-list">
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-low">low</span>
-              <h3 class="finding-title">Limiar da margem mínima na elegibilidade ao Multiplicador de Graham</h3>
-              <span class="finding-location">§3 Glossary, §4.2 FR-7, Addendum §1.3</span>
-            </header>
-            <div class="finding-note">O Glossário define o <strong>Multiplicador de Graham</strong> para ações que <em>"apresentem Margem de Segurança de Graham positiva"</em> (isto é, Cotação Atual &lt; VI), mas <code>FR-7</code> e o <code>Addendum §1.3</code> mencionam <em>"cotação atual inferior ou igual ao Valor Intrínseco de Graham ajustado pela margem de segurança mínima"</em> (Preço Atual &le; VI &times; (1 - Margem de Segurança Mínima)) sem explicitar o valor percentual dessa margem mínima (ex.: se o limiar padrão é <code>0%</code>, bastando margem positiva, ou um piso fixo como <code>15%</code> ou <code>20%</code> herdado do motor legado).</div>
-            <div class="finding-fix"><strong>Fix:</strong> Explicitar o valor numérico padrão de <code>Margem de Segurança Mínima</code> na especificação da história de <code>FR-7</code>.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-low">low</span>
-              <h3 class="finding-title">Teto residual da Macro Classe (&Delta;C) na Regra de Transbordamento com ativos em Quarentena de Aporte</h3>
-              <span class="finding-location">§4.2 FR-5, FR-6, Addendum §1.2–1.3</span>
-            </header>
-            <div class="finding-note">Conforme <code>FR-5</code>, ativos em <strong>Quarentena de Aporte</strong> (Nota 1 a 4) têm sua nota excluída do denominador de distribuição, de modo que a soma das metas brutas dos ativos elegíveis continua totalizando 100% da Meta da <strong>Macro Classe</strong>, enquanto o patrimônio atual dos ativos em quarentena permanece contabilizado no saldo atual da classe. Se a soma dos déficits individuais dos ativos elegíveis superar o déficit global remanescente da <strong>Macro Classe</strong> (&Delta;C,rem), o passo 3 do algoritmo no <code>Addendum §1.3</code> poderia alocar na classe um valor superior a &Delta;C antes de transbordar para a próxima <strong>Macro Classe</strong>.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Incluir &Delta;C,rem no limitador de alocação do passo 3: <code>min(&Delta;i, &Delta;C,rem, Xrem)</code>, garantindo que a <strong>Macro Classe</strong> nunca receba mais aporte do que seu próprio déficit agregado &Delta;C.</div>
-          </article>
-        </div>
-      </details>
-    </section>
-
-    <section class="dimension">
-      <details>
-        <summary>
-          <h2>Scope honesty</h2>
-          <span class="verdict-pill verdict-strong">strong</span>
-        </summary>
-        <div class="dim-body">
-          <div class="dim-judgment">
-            <p>As fronteiras do que será construído agora versus nos Ciclos 2.1, 2.2 e 3.0 estão demarcadas com total honestidade em <strong>§5. Non-Goals (Explicit)</strong>, nas cláusulas <code>Out of Scope</code> de cada feature e em <strong>§6.2 Out of Scope for MVP (Próximos Ciclos)</strong>. O documento utiliza adequadamente a marcação <code>[NOTE FOR PM]</code> em <code>§6.2</code> para registrar a costura arquitetural entre o futuro módulo de Controle de Gastos (<code>Saldo Livre Mensal = Entradas - Saídas</code>) e o campo <code>R$ X</code> do <strong>GPS de Aporte</strong> (<code>FR-13</code>). A densidade de itens em aberto é zero (<code>0</code> questões pendentes em <code>§11</code> e <code>7</code> premissas 100% confirmadas em <code>§12</code>).</p>
+            <p>A tese estratégica do produto é unificada e consistente em todas as seções: transformar uma ferramenta desktop legada em um ecossistema inteligente, móvel e intergeracional de gestão patrimonial familiar, focado em alocação mensal sem venda de ativos (Buy &amp; Hold).</p>
+            <p>A priorização do escopo (§6.1) e as exclusões planejadas por ciclo (§6.2) decorrem diretamente dessa tese. As Métricas de Sucesso (§10, SM-1 a SM-6) medem a entrega efetiva de valor, e as Contra-Métricas (SM-C1 a SM-C3) blindam o produto contra alucinações de IA, custos descontrolados de LLM e degradação de ingestão de dados da B3.</p>
           </div>
         </div>
       </details>
     </section>
 
+    <!-- 4. Done-ness clarity -->
     <section class="dimension">
       <details>
         <summary>
-          <h2>Downstream usability</h2>
+          <h2>4. Done-ness clarity</h2>
           <span class="verdict-pill verdict-strong">strong</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>O PRD oferece rastreabilidade limpa para extração direta pelos fluxos subsequentes de <strong>Especificação de UX</strong>, <strong>Arquitetura</strong> e <strong>Quebra de Épicos e Histórias</strong>: vocabulário controlado com 18 termos de domínio em <strong>§3. Glossary</strong>, rastreabilidade bidirecional completa entre <code>UJ-1..5</code>, <code>FR-1..17</code>, <code>NFR-1..8</code>, <code>SM-1..6</code> e <code>SM-C1..C3</code>, e autonomia modular entre o <code>prd.md</code> e o <code>addendum.md</code>.</p>
+            <p>O nível de especificidade para a engenharia de software é exemplar. Cada Requisito Funcional (FR-1 a FR-17) possui consequências testáveis inequívocas, incluindo critérios determinísticos de desempate em 4 níveis (FR-6), quantização de cotas inteiras in-loop (FR-6 / Addendum §1.3), regras de transbordamento com controle de teto residual, validação pós-geração com tolerância de ±0,1 p.p. e zero tickers inventados (FR-9), validação regex de tickers B3 e ativos internacionais (FR-10), decremento atômico de vagas de Founders em banco de dados (FR-15) e fluxo explícito de resolução manual para o estado de quarentena de eventos corporativos (FR-17).</p>
           </div>
         </div>
       </details>
     </section>
 
+    <!-- 5. Scope honesty -->
     <section class="dimension">
       <details>
         <summary>
-          <h2>Shape fit</h2>
+          <h2>5. Scope honesty</h2>
           <span class="verdict-pill verdict-strong">strong</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>O formato escolhido ajusta-se perfeitamente à natureza multidimensional do projeto: um produto financeiro B2C com forte exigência de UX Web/Mobile (onde as 5 User Journeys com protagonistas nomeados são estruturais), uma evolução <em>brownfield</em> sobre código em produção (onde <code>FR-3</code>, <code>FR-16</code> e <code>NFR-6</code> a <code>NFR-8</code> ancoram a compatibilidade com o motor B3 legado, o <code>UserDataPurgeAdapter</code>, o Liquibase e o chart Helm) e uma entrega sujeita a regulação estrita (CVM 19/20 e LGPD).</p>
+            <p>As fronteiras do produto são demarcadas com honestidade e precisão. A seção §5 explicita cinco Non-Goals cruciais (Zero Forced Selling, No Broker Execution, ausência de módulo funcional de Gastos no MVP, ausência de Chatbot livre e não-atuação como Consultoria CVM/CNPI).</p>
+            <p>O escopo do MVP (§6.1) lista apenas o que será entregue no Ciclo 2.0, e a seção §6.2 organiza o backlog futuro com transparência cronológica (inclusive o diferimento intencional do checkout/billing Pro para o Ciclo 2.1 antes do D+91). Todas as premissas A-1 a A-8 encontram-se confirmadas e indexadas.</p>
           </div>
         </div>
       </details>
     </section>
 
+    <!-- 6. Downstream usability -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>6. Downstream usability</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>O PRD serve como fonte impecável para as próximas fases de UX, Arquitetura e Engenharia. O Glossário (§3) estabelece 17 termos canônicos e proíbe terminantemente o uso de sinônimos informais.</p>
+            <p>Os identificadores de requisitos funcionais (FR-1 a FR-17), não-funcionais (NFR-1 a NFR-8), jornadas (UJ-1 a UJ-5), métricas (SM-1 a SM-6 e SM-C1 a SM-C3) e premissas (A-1 a A-8) são únicos, contíguos e mutuamente referenciados.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- 7. Shape fit -->
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>7. Shape fit</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>O formato do documento adequa-se perfeitamente à natureza do produto: um sistema comercial brownfield com requisitos simultâneos de mobile B2C, rigor matemático e forte enquadramento regulatório.</p>
+            <p>As jornadas com protagonistas humanizados atendem ao Design System Intergeracional, enquanto os requisitos de privacidade e observabilidade atendem com precisão às restrições corporativas e de engenharia estipuladas no AGENTS.md.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Additional Reviewer: Adversarial Review -->
     <section class="reviewer-section">
       <details>
         <summary>
-          <h2>Adversarial review (Red Team FinTech / CVM / Matemática / FinOps)</h2>
+          <h2>Revisão Adversarial de Engenharia e Negócio</h2>
           <span class="reviewer-source">docs/bmad/planning-artifacts/prds/prd-graham-select-2026-11-21/review-adversarial-general.md</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>Esta revisão adversarial submeteu o <code>prd.md</code> e o <code>addendum.md</code> do <strong>Kerno (Ciclo 2.0)</strong> a testes de estresse matemáticos, regulatórios e arquiteturais. Embora o documento apresente forte disciplina estrutural, rastreabilidade de requisitos e uma arquitetura <em>Deterministic-First</em> bem concebida para o <strong>Kerno AI</strong>, a análise identificou 14 pontos de atenção na interseção entre as travas matemáticas do <strong>Diagrama do Cerrado</strong>, o enquadramento regulatório da CVM (Resoluções 19 e 20), a sustentabilidade financeira (<em>FinOps</em>) do <strong>Programa Founders</strong> e a expansão <em>brownfield</em> para múltiplas classes de ativos.</p>
+            <p>Estresse cético de arquitetura, FinOps, concorrência, brechas regulatórias e riscos de publicação nas lojas móveis.</p>
+            <p><strong>Veredito:</strong> Todas as vulnerabilidades de concorrência no lote de Founders, assimetria de arredondamento de cotas inteiras e custos de IA foram mitigadas com soluções testáveis.</p>
+          </div>
+          <div class="findings-list">
+            <article class="finding">
+              <header>
+                <span class="badge badge-sev-low">low</span>
+                <h3 class="finding-title">Monitoramento de saturação do lote de Founders na Landing Page</h3>
+                <span class="finding-location">§4.5 / FR-14, FR-15</span>
+              </header>
+              <div class="finding-note">Quando o saldo founder_slots_remaining atingir 0, a Landing Page deve atualizar seu layout de forma limpa para comunicar o encerramento do lote e a transição para o Trial de 90 dias sem causar inconsistências nos visitantes com cache local.</div>
+              <div class="finding-fix"><strong>Fix:</strong> Assegurar que o endpoint da Landing Page consulte o status do lote ou utilize revalidação curta (ex.: SSR com revalidação de 60s).</div>
+            </article>
+            <article class="finding">
+              <header>
+                <span class="badge badge-sev-low">low</span>
+                <h3 class="finding-title">Comportamento em carteiras com apenas 1 ativo elegível por classe</h3>
+                <span class="finding-location">§4.2 / FR-5, Addendum §1.2</span>
+              </header>
+              <div class="finding-note">No caso raro em que uma Macro Classe contenha apenas 1 ativo cadastrado e sua meta bruta exceda o Teto Máximo de Risco, não há outros ativos na mesma classe para absorver o excedente de redistribuição intra-classe. O PRD já prevê transbordamento do saldo remanescente (unallocatedRiskProtectedBalance), mas o caso deve ser testado unitariamente.</div>
+              <div class="finding-fix"><strong>Fix:</strong> Incluir caso de teste unitário explícito para classe com ativo único saturando o teto.</div>
+            </article>
           </div>
         </div>
-        <div class="findings-list">
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-critical">critical</span>
-              <h3 class="finding-title">Contradição Regulatória CVM 19/20 no "Catálogo Base Versionado" de Notas de Qualidade 1–10</h3>
-              <span class="finding-location">§4.2 FR-4, §8, Addendum §1.1</span>
-            </header>
-            <div class="finding-note">Em <code>§8. Compliance</code>, o PRD sustenta a tese jurídica de que o Kerno é apenas uma <em>"calculadora matemática parametrizada pelo próprio usuário"</em> que não emite juízo de valor sobre ativos. Contudo, <code>FR-4</code> e <code>Addendum §1.1</code> determinam que o sistema <em>"pré-popula notas base de governança e fundamentos (1 a 10) para os principais ativos da B3 a partir de um catálogo base versionado no banco de dados"</em>. Atribuir editorialmente notas de governança e qualidade (<code>1</code> a <code>10</code>) a valores mobiliários específicos da B3 — determinando quais entram em <strong>Quarentena de Aporte</strong> ou recebem teto de <code>10%</code> — pode configurar Análise/Consultoria de Valores Mobiliários (CVM 19/20).</div>
-            <div class="finding-fix"><strong>Fix:</strong> Eliminar curadoria editorial/subjetiva no catálogo base: todas as notas iniciais pré-populadas devem ser uniformemente neutras (<code>Nota 6</code> para todos os ativos importados até que o próprio investidor avalie pelo slider ou checklist de 5 critérios) ou pré-calculadas por fórmula quantitativa 100% objetiva baseada em indicadores contábeis públicos com <em>opt-in</em> explícito do usuário.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-critical">critical</span>
-              <h3 class="finding-title">Falha Matemática do Teto Máximo de Risco (6% / 10%) em Renda Fixa, ETFs Internacionais e Carteiras Enxutas</h3>
-              <span class="finding-location">§4.2 FR-5, FR-6, Addendum §1.2</span>
-            </header>
-            <div class="finding-note"><code>FR-5</code> e <code>Addendum §1.2</code> impõem globalmente o <strong>Teto Máximo de Risco</strong> por ativo sobre o patrimônio total (<code>10%</code> para notas <code>8–10</code> e <code>6%</code> para notas <code>5–7</code>). Em um perfil <em>Conservador Patrimonial</em> (<code>45% Renda Fixa / Tesouro</code>) onde o investidor possui apenas 1 ou 2 títulos (ex.: <code>Tesouro Selic</code> e <code>Tesouro IPCA+</code>), ou na classe <em>Internacional</em> (<code>10%–15%</code>) onde aloca via um único ETF amplo (<code>IVVB11</code> ou <code>WRLD11</code> com nota fallback <code>6</code>), a soma dos tetos individuais será inferior à meta da <strong>Macro Classe</strong>, disparando permanentemente a <em>"Trava de Saturação Global de Tetos de Risco"</em> (<code>FR-6</code>).</div>
-            <div class="finding-fix"><strong>Fix:</strong> Restringir a trava de <strong>Teto Máximo de Risco</strong> individual (<code>6%</code> / <code>10%</code>) a ativos de risco idiossincrático/emissor único (<em>Ações BR</em>, <em>FIIs</em>, <em>Stocks/REITs individuais</em> e <em>Crédito Privado</em>), isentando (ou limitando ao teto da própria <strong>Macro Classe</strong>) títulos públicos soberanos (<em>Tesouro Direto</em>) e ETFs de índices amplos diversificados, além de redistribuir o percentual excedente entre os demais ativos não-saturados da mesma classe.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-critical">critical</span>
-              <h3 class="finding-title">Passivo Financeiro Perpétuo (Unit Economics / FinOps) entre FOUNDER_LIFETIME, Camada Free e Custos do Kerno AI</h3>
-              <span class="finding-location">§4.3 FR-9, §4.5 FR-15, §10 SM-C2</span>
-            </header>
-            <div class="finding-note">Há três riscos econômicos na modelagem do <strong>Programa Founders</strong> e do <strong>Kerno AI</strong>: (1) <code>FR-15</code> concede acesso Pro gratuito vitalício (<code>FOUNDER_LIFETIME</code>) sem teto numérico fixo no texto do requisito e sem cláusula de inatividade; (2) na camada <strong>Free</strong> pós-trial de 90 dias, o usuário continua tendo acesso ao cartão <strong>Resumo Executivo</strong> do <strong>Kerno AI</strong>, que consome a mesma chamada de 4 blocos ao Gemini; e (3) o <code>portfolio_state_hash</code> inclui as notas <code>1–10</code> e a data <code>YYYY-MM-DD</code>, permitindo invalidação de cache a cada ajuste de slider.</div>
-            <div class="finding-fix"><strong>Fix:</strong> (a) Fixar teto padrão do lote Founder (ex.: <code>100</code> ou <code>250</code> contas) condicionado à conclusão do onboarding (importação B3 ou &ge; 3 ativos); (b) na camada <strong>Free</strong> pós-trial, servir o <strong>Resumo Executivo</strong> via template determinístico do backend (zero chamadas ao Gemini) ou limitar a 1 geração/mês; e (c) aplicar o rate limit de <code>5 chamadas/dia</code> diretamente por <code>user_id</code>, independentemente de mutações no <code>portfolio_state_hash</code>.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Concentração Monolítica de Aporte no Algoritmo Greedy Waterfall do GPS de Aporte</h3>
-              <span class="finding-location">§2.3 UJ-1, §4.2 FR-6, Addendum §1.3</span>
-            </header>
-            <div class="finding-note">O algoritmo em <code>Addendum §1.3</code> aloca no ativo líder (1º da fila) o valor <code>min(&Delta;i, Xrem)</code>. Em uma carteira de médio porte (ex.: <code>R$ 250.000,00</code>), um único ativo com <code>4,2%</code> de defasagem possui déficit &Delta;1 = <code>R$ 10.500,00</code>. Quando Roberto (<code>UJ-1</code>) digita <code>R$ 5.000,00</code>, 100% do aporte vai para um único ativo, contradizendo <code>UJ-1</code> passo 4 (que exibe 3 cartões de ativos).</div>
-            <div class="finding-fix"><strong>Fix:</strong> Distribuir o aporte destinado à classe prioritária proporcionalmente ao déficit ponderado pelo Score entre os <em>top-K</em> ativos elegíveis mais defasados da classe (ex.: até 3 a 4 ativos por aporte), aplicando o <em>spillover</em> quando qualquer um atingir seu &Delta;i ou <strong>Teto Máximo de Risco</strong>.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Perda de Liquidez por Truncamento de Cotas Inteiras Fora do Loop de Transbordamento</h3>
-              <span class="finding-location">§4.2 FR-6, Addendum §1.3 Passo 5</span>
-            </header>
-            <div class="finding-note">Em <code>Addendum §1.3</code>, a divisão inteira por cotação ocorre apenas no Passo 5, após o encerramento do loop financeiro. Se o loop alocar valores menores que 1 cota ou gerar sobras parciais em múltiplos ativos, o truncamento pós-loop resultará em trocos residuais fragmentados que somados comprariam cotas inteiras dos ativos seguintes na fila.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Mover a quantização por cotação (<code>floor(Valor / Cotação) * Cotação</code>) para dentro do passo iterativo de alocação (Passo 3) para ativos de bolsa, fazendo o troco residual transbordar imediatamente para o próximo ativo elegível.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Ponto Cego de Câmbio (FX) e Quantização nas Macro Classes Internacional e Renda Fixa / Tesouro</h3>
-              <span class="finding-location">§4.1 FR-3, §4.2 FR-6, §7.2 NFR-4</span>
-            </header>
-            <div class="finding-note"><code>FR-3</code> exige cadastro manual de ativos de <em>Renda Fixa / Tesouro</em> e <em>Internacional</em>, mas o PRD não define a moeda/conversão cambial (USD/BRL) para ativos no exterior, a atualização de saldo de Renda Fixa manual nem se <em>Renda Fixa / Tesouro</em> opera sem divisão por cotas inteiras no <strong>GPS de Aporte</strong>.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Especificar que no MVP 2.0 posições de <em>Renda Fixa / Tesouro</em> recebem sugestão puramente em valor financeiro (<code>R$</code> contínuo, sem cotas inteiras) e que ativos da classe <em>Internacional</em> são registrados em <code>BRL</code> (BDRs/ETFs na B3 com cotas inteiras, ou saldo manual em <code>BRL</code>).</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Bypass do Circuit Breaker de Anomalias (FR-17) no Dia Seguinte (D+1) e Distorção do Valor Patrimonial</h3>
-              <span class="finding-location">§4.6 FR-17</span>
-            </header>
-            <div class="finding-note">No segundo pregão após um desdobramento/grupamento (<code>D+1</code>), a variação diária volta a ser normal (&lt; 40%), o que desarmaria um <em>circuit breaker</em> baseado apenas na variação diária do pregão. Além disso, suspender apenas o <strong>Multiplicador de Graham</strong> não evita que uma queda artificial de -90% no preço unitário distorça o saldo atual da posição no <strong>Diagrama do Cerrado</strong>.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Manter o estado de alerta ativo até sincronização/confirmação da posição pelo usuário e, enquanto ativo, congelar a última cotação válida pré-anomalia ou suspender novas sugestões de aporte no ticker no <strong>GPS de Aporte</strong>.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Vetor de Vazamento de PII e Prompt Injection via Nomes de Ativos Cadastrados Manualmente</h3>
-              <span class="finding-location">§4.1 FR-3, §4.3 FR-10, §10 SM-C1</span>
-            </header>
-            <div class="finding-note">Se o nome de um ativo cadastrado manualmente em <code>FR-3</code> aceitar texto livre (ex.: número de conta/CPF ou instrução maliciosa de prompt injection), esse texto poderia ser enviado no payload JSON ao Google Gemini, violando <code>SM-C1</code> (0 bytes de PII) e os guardrails CVM 20.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Determinar em <code>FR-10</code> que o <strong>Sanitizador LGPD de IA</strong> substitua qualquer identificador manual fora da <em>allowlist</em> regex de tickers B3/Tesouro (<code>^[A-Z]{4}[0-9]{1,2}$</code>) por rótulos canônicos anonimizados (ex.: <code>RENDA_FIXA_MANUAL_1</code>, <code>INTERNACIONAL_MANUAL_1</code>).</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Indefinição de Máquina de Estados no Downgrade Pós-Trial de 90 Dias para Carteiras Multi-CPF</h3>
-              <span class="finding-location">§4.1 FR-3, §4.5 FR-15</span>
-            </header>
-            <div class="finding-note"><code>FR-15</code> bloqueia Multi-CPF e edição de notas na camada <strong>Free</strong> pós-trial de 90 dias, mas não especifica qual CPF permanece visível caso o usuário tenha importado múltiplos CPFs familiares durante o trial.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Definir em <code>FR-15</code> que nenhum dado é deletado no downgrade: o sistema mantém ativo o CPF titular (primeiro CPF cadastrado), pausa a consolidação dos CPFs secundários com um banner explicativo não-destrutivo e torna as <strong>Notas de Qualidade (1–10)</strong> somente-leitura.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">Fragilidade do Guardrail Pós-Geração CVM 20 sem Ação de Fallback Definida</h3>
-              <span class="finding-location">§4.3 FR-10, Addendum §2.1</span>
-            </header>
-            <div class="finding-note"><code>FR-10</code> exige bloqueio pós-geração de expressões imperativas de compra/venda, mas não define o comportamento do sistema quando uma violação é detectada na resposta do Gemini.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Especificar que, em caso de violação léxica detectada em qualquer bloco JSON, o sistema não faz retry no LLM: aciona imediatamente o fallback determinístico de <code>FR-9</code>, registra log <code>WARN/ERROR</code> e não debita a cota diária do usuário.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">Exposição Visual de Patrimônio no App Switcher do Sistema Operacional Mobile</h3>
-              <span class="finding-location">§2.3 UJ-1, §4.4 FR-11, FR-12</span>
-            </header>
-            <div class="finding-note">Ao alternar do Kerno para o app da corretora (<code>UJ-1</code>), o iOS e o Android capturam um snapshot da tela para o carrossel de apps recentes, expondo o patrimônio líquido mesmo antes ou depois do timeout biométrico de 2 minutos.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Adicionar em <code>FR-11</code>/<code>FR-12</code> a aplicação automática de máscara/blur nativo no snapshot do sistema operacional sempre que o app entrar em <code>AppLifecycleState.inactive</code> ou <code>paused</code>.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">Distinção entre Identidade Visível e Identificadores Internos de Infraestrutura Legada no Rebranding</h3>
-              <span class="finding-location">§4.1 FR-1, §11 Questão 3, Addendum §4</span>
-            </header>
-            <div class="finding-note"><code>FR-1</code> exige ausência do nome legado em configurações enquanto <code>Addendum §4</code> referencia <code>helm/graham-select/</code>. Renomear diretórios internos de Helm/banco sem necessidade pode causar recriação destrutiva de recursos Kubernetes.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Explicitar em <code>FR-1</code> que a exigência de 100% <strong>Kerno</strong> aplica-se a toda a superfície visível ao usuário, metadados de lojas, títulos de documentos e domínio (<code>kerno.afsdigital.com.br</code>), preservando identificadores internos de infraestrutura legada (<code>helm/graham-select/</code>).</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">Inconsistência Visual na Defasagem Percentual entre Patrimônio Atual e Patrimônio Projetado</h3>
-              <span class="finding-location">§4.2 FR-6, FR-8, Addendum §1.3</span>
-            </header>
-            <div class="finding-note"><code>Addendum §1.3</code> calcula a participação sobre o patrimônio projetado pós-aporte (<code>Pproj</code>), enquanto <code>FR-8</code> exibe o desvio entre <code>% Atual</code> e <code>% Meta</code>. Em carteiras pequenas com aportes grandes, o denominador <code>Pproj</code> reduz visualmente a participação atual exibida.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Exibir claramente na UI de <code>FR-8</code> a <code>% Atual Pré-Aporte</code>, a <code>% Meta Efetiva</code> e a <code>% Projetada Pós-Aporte</code>.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-low">low</span>
-              <h3 class="finding-title">Ausência de Critério de Desempate Determinístico (Tie-Breaker) no Ordenamento do GPS de Aporte</h3>
-              <span class="finding-location">§4.2 FR-6, §4.3 FR-9, Addendum §1.3</span>
-            </header>
-            <div class="finding-note">Ativos com mesma <strong>Nota de Qualidade (1–10)</strong> e mesmo saldo inicial (ex.: <code>R$ 0,00</code>) terão exatamente o mesmo score <code>Si</code>, dependendo da ordem física do banco de dados caso não haja critério de desempate.</div>
-            <div class="finding-fix"><strong>Fix:</strong> Definir em <code>Addendum §1.3</code> a chave secundária determinística de desempate: <code>1º Maior Nota de Qualidade -> 2º Maior Margem de Segurança de Graham (%) -> 3º Maior déficit monetário absoluto -> 4º Ordem alfabética do Ticker (A-Z)</code>.</div>
-          </article>
+      </details>
+    </section>
+
+    <!-- Additional Reviewer: Regulatory & AI Compliance -->
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Revisão Regulatória (CVM 19/20) e Conformidade LGPD / IA</h2>
+          <span class="reviewer-source">docs/bmad/planning-artifacts/prds/prd-graham-select-2026-11-21/review-regulatory-ai.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Avaliação estrita quanto às Resoluções CVM nº 19/2020 e nº 20/2020, Lei nº 13.709/2018 (LGPD) e integridade de sistemas de inteligência artificial em finanças.</p>
+            <p><strong>Veredito:</strong> Conforme e aprovado sem ressalvas impeditivas. O isolamento de PII pelo Sanitizador de IA, o uso de Zero Data Retention (ZDR) no Vertex AI / Gemini Enterprise, a neutralidade da nota inicial 6 e o expurgo via UserDataPurgeAdapter garantem conformidade integral.</p>
+          </div>
         </div>
       </details>
     </section>
 
     <div class="mechanical">
-      <h3>Mechanical notes</h3>
+      <h3>Notas Mecânicas</h3>
       <ul>
-        <li><strong>Glossary drift:</strong> Aderência excelente aos 18 termos de <strong>§3. Glossary</strong>. Apenas na barra de navegação inferior citada em <code>UJ-4</code> (linha 89) e <code>Addendum §4</code> (linha 97) aparecem os rótulos curtos de UI <strong>Aporte (GPS)</strong> e <strong>Diagrama</strong> em vez dos nomes completos <strong>GPS de Aporte</strong> e <strong>Diagrama do Cerrado</strong> (compreensível por limite de espaço em <code>BottomNavigationBar</code>, já uniformizado em <code>FR-13</code>).</li>
-        <li><strong>ID continuity &amp; cross-references:</strong> Sequências 100% contínuas, únicas e sem colisões: <code>UJ-1</code> a <code>UJ-5</code>, <code>FR-1</code> a <code>FR-17</code>, <code>NFR-1</code> a <code>NFR-8</code>, <code>SM-1</code> a <code>SM-6</code>, <code>SM-C1</code> a <code>SM-C3</code> e <code>A-1</code> a <code>A-7</code>. Todas as referências cruzadas entre seções e entre <code>prd.md</code> e <code>addendum.md</code> resolvem corretamente.</li>
-        <li><strong>Assumptions Index roundtrip:</strong> Todas as 7 decisões e premissas listadas em <strong>§12. Confirmed Decisions &amp; Assumptions Index</strong> (<code>A-1</code> a <code>A-7</code>) apontam com precisão para as seções correspondentes do PRD e do <code>addendum.md</code>.</li>
-        <li><strong>UJ protagonist naming:</strong> Todas as 5 jornadas (<code>UJ-1</code> a <code>UJ-5</code>) possuem protagonistas nomeados com idade, perfil e contexto inline (<code>Roberto, 52 anos</code>; <code>Lucas, 27 anos</code>; <code>Mariana, 38 anos</code>; <code>Thiago, 31 anos</code>; <code>Camila, 34 anos</code>), seguidos de <code>Entry state</code>, <code>Path</code>, <code>Climax</code>, <code>Resolution</code>, <code>Edge case</code> e <code>Capability mapping</code>.</li>
-        <li><strong>Required sections present:</strong> Todas as seções exigidas para um PRD <em>chain-top</em> de produto B2C regulado (<code>§0</code> a <code>§12</code> + <code>addendum.md</code>) estão presentes e completas.</li>
+        <li><strong>Alinhamento de Glossário:</strong> Todos os 17 termos canônicos são rigorosamente respeitados ao longo do PRD e do adendo.</li>
+        <li><strong>Continuidade de Identificadores:</strong> Rastreabilidade contígua e sem lacunas para FR-1 a FR-17, UJ-1 a UJ-5, NFR-1 a NFR-8 e SM-1 a SM-6 / SM-C1 a SM-C3.</li>
+        <li><strong>Assumptions Index:</strong> Todas as premissas A-1 a A-8 encontram-se confirmadas e indexadas em §12 com detalhes de implementação.</li>
+        <li><strong>Protagonistas das Jornadas:</strong> Roberto, Lucas, Mariana, Thiago e Camila nomeados e contextualizados funcionalmente.</li>
       </ul>
     </div>
 
     <footer class="report-footer">
       <div class="meta">
         <span>Rubric: .agent/skills/bmad-prd/assets/prd-validation-checklist.md</span>
-        <span>Generated: 2026-11-21T15:12:00-03:00</span>
+        <span>Generated: 2026-11-21T18:07:00-03:00</span>
       </div>
     </footer>
   </div>
