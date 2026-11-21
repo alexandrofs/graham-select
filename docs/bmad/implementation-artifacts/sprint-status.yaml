@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-13
-last_updated: 2026-11-20
+last_updated: 11-21-2026 12:39
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -103,4 +103,33 @@ development_status:
   epic-11: done
   11-1-alertas-via-whatsapp-gatilhos-de-meta: done
   11-2-web-push-para-zona-de-compra-graham: done
-  epic-11-retrospective: optional
+  epic-11-retrospective: done
+action_items:
+  - id: "epic-11-retro-item-1-mapear-variaveis-e-secrets-whatsapp_-e-w"
+    epic: 11
+    action: "Mapear variaveis e Secrets WHATSAPP_* e WEBPUSH_*/VAPID no chart Helm
+      (helm/) e pipeline de deploy"
+    owner: "Winston (System Architect)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-11-retro-2026-11-21.md"
+  - id: "epic-11-retro-item-2-implementar-expurgo-real-lgpd-substituin"
+    epic: 11
+    action: "Implementar expurgo real LGPD substituindo EmptyUserDataPurgeAdapter
+      incluindo as 5 tabelas de notificacoes do Epico 11"
+    owner: "Amelia (Senior Software Engineer)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-11-retro-2026-11-21.md"
+  - id: "epic-11-retro-item-3-adicionar-checagem-obrigatoria-de-helm-e"
+    epic: 11
+    action: "Adicionar checagem obrigatoria de helm/ e conformidade LGPD ao checklist
+      de historias em AGENTS.md/project-context.md"
+    owner: "Alex (Project Lead)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-11-retro-2026-11-21.md"
+  - id: "epic-11-retro-item-4-eliminar-ciclo-de-pacotes-common-dividen"
+    epic: 11
+    action: "Eliminar ciclo de pacotes common.dividends <-> common.notifications e
+      substituir ForkJoinPool.commonPool() por Executor Spring"
+    owner: "Amelia (Senior Software Engineer)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-11-retro-2026-11-21.md"
