@@ -102,6 +102,12 @@ import 'src/features/tax/data/repositories/tax_repository_impl.dart';
 import 'src/features/tax/presentation/providers/tax_provider.dart';
 import 'src/features/tax/presentation/pages/tax_declaration_page.dart';
 
+// WhatsApp Notifications Feature Imports
+import 'src/features/notifications/data/datasources/whatsapp_notifications_remote_data_source.dart';
+import 'src/features/notifications/data/repositories/whatsapp_notifications_repository.dart';
+import 'src/features/notifications/presentation/providers/whatsapp_notifications_provider.dart';
+import 'src/features/notifications/presentation/pages/whatsapp_notifications_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -195,6 +201,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final TaxRemoteDataSource taxRemoteDataSource;
   late final TaxRepositoryImpl taxRepository;
 
+  late final WhatsappNotificationsRemoteDataSource whatsappNotificationsRemoteDataSource;
+  late final WhatsappNotificationsRepository whatsappNotificationsRepository;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -286,6 +295,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     taxRemoteDataSource = TaxRemoteDataSource(apiClient: effectiveApiClient);
     taxRepository = TaxRepositoryImpl(remoteDataSource: taxRemoteDataSource);
 
+    // WhatsApp Notifications Feature DI
+    whatsappNotificationsRemoteDataSource = WhatsappNotificationsRemoteDataSource(apiClient: effectiveApiClient);
+    whatsappNotificationsRepository = WhatsappNotificationsRepository(remoteDataSource: whatsappNotificationsRemoteDataSource);
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -324,6 +337,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/graham-recommendations', builder: (context, state) => const GrahamRecommendationsPage()),
             GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
+            GoRoute(path: '/notifications/whatsapp', builder: (context, state) => const WhatsappNotificationsPage()),
             GoRoute(path: '/family-profiles', builder: (context, state) => const FamilyProfilesPage()),
             GoRoute(path: '/tags', builder: (context, state) => const TagManagementPage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
@@ -380,6 +394,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => DividendProvider(repository: dividendRepository)),
         ChangeNotifierProvider(create: (_) => OpenFinanceProvider(repository: openFinanceRepository)),
         ChangeNotifierProvider(create: (_) => TaxProvider(repository: taxRepository)),
+        ChangeNotifierProvider(create: (_) => WhatsappNotificationsProvider(repository: whatsappNotificationsRepository)),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminDlqProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminTickerProvider(repository: adminRepository)),

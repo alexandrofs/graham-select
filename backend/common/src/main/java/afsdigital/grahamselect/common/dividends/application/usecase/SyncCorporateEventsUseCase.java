@@ -7,15 +7,16 @@ import afsdigital.grahamselect.common.dividends.application.repository.RelevantF
 import afsdigital.grahamselect.common.dividends.application.repository.RelevantFactPort;
 import afsdigital.grahamselect.common.dividends.domain.entities.DividendAnnouncement;
 import afsdigital.grahamselect.common.dividends.domain.entities.RelevantFact;
+import afsdigital.grahamselect.common.notifications.application.usecase.NotifyDividendAlertsUseCase;
 import afsdigital.grahamselect.valuation.application.repository.CustodyTickerPort;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-@RequiredArgsConstructor
 public class SyncCorporateEventsUseCase {
 
     private final CustodyTickerPort custodyTickerPort;
@@ -23,6 +24,34 @@ public class SyncCorporateEventsUseCase {
     private final RelevantFactCrawlerPort relevantFactCrawlerPort;
     private final DividendAnnouncementPort dividendAnnouncementPort;
     private final RelevantFactPort relevantFactPort;
+    private final NotifyDividendAlertsUseCase notifyDividendAlertsUseCase;
+
+    public SyncCorporateEventsUseCase(
+            CustodyTickerPort custodyTickerPort,
+            DividendCrawlerPort dividendCrawlerPort,
+            RelevantFactCrawlerPort relevantFactCrawlerPort,
+            DividendAnnouncementPort dividendAnnouncementPort,
+            RelevantFactPort relevantFactPort
+    ) {
+        this(custodyTickerPort, dividendCrawlerPort, relevantFactCrawlerPort,
+                dividendAnnouncementPort, relevantFactPort, null);
+    }
+
+    public SyncCorporateEventsUseCase(
+            CustodyTickerPort custodyTickerPort,
+            DividendCrawlerPort dividendCrawlerPort,
+            RelevantFactCrawlerPort relevantFactCrawlerPort,
+            DividendAnnouncementPort dividendAnnouncementPort,
+            RelevantFactPort relevantFactPort,
+            NotifyDividendAlertsUseCase notifyDividendAlertsUseCase
+    ) {
+        this.custodyTickerPort = custodyTickerPort;
+        this.dividendCrawlerPort = dividendCrawlerPort;
+        this.relevantFactCrawlerPort = relevantFactCrawlerPort;
+        this.dividendAnnouncementPort = dividendAnnouncementPort;
+        this.relevantFactPort = relevantFactPort;
+        this.notifyDividendAlertsUseCase = notifyDividendAlertsUseCase;
+    }
 
     public CorporateEventSyncSummaryDTO execute() {
         return execute(null);
@@ -45,6 +74,7 @@ public class SyncCorporateEventsUseCase {
         int newDividends = 0;
         int updatedDividends = 0;
         int newFacts = 0;
+        List<DividendAnnouncement> newAnnouncements = new ArrayList<>();
 
         try {
             // 1. Proventos
@@ -59,16 +89,28 @@ public class SyncCorporateEventsUseCase {
                                 announcement.getType(),
                                 announcement.getRate()
                         );
-                        dividendAnnouncementPort.save(announcement);
+                        DividendAnnouncement saved = dividendAnnouncementPort.save(announcement);
                         if (exists) {
                             updatedDividends++;
                         } else {
                             newDividends++;
+                            newAnnouncements.add(saved != null ? saved : announcement);
                         }
                     } catch (Exception e) {
                         log.error("Erro ao persistir anúncio de provento para ticker={}: {}", announcement.getTicker(), e.getMessage(), e);
                     }
                 }
+            }
+
+            if (notifyDividendAlertsUseCase != null && !newAnnouncements.isEmpty()) {
+                List<DividendAnnouncement> snapshot = List.copyOf(newAnnouncements);
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        notifyDividendAlertsUseCase.notifyForNewAnnouncements(snapshot);
+                    } catch (Exception e) {
+                        log.error("Erro ao disparar alertas WhatsApp para novos proventos: {}", e.getMessage(), e);
+                    }
+                });
             }
 
             // 2. Fatos Relevantes
