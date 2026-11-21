@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: apache/kafka
+  repository: docker.io/apache/kafka
   tag: "3.7.0"
   pullPolicy: IfNotPresent
 
