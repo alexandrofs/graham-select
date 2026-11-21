@@ -147,7 +147,7 @@ jobs:
         run: |
           flutter pub get
           flutter build web --release \
-            --dart-define=API_BASE_URL="https://graham.afsdigital.com.br" \
+            --dart-define=API_BASE_URL="https://graham.afsdigital.com.br/api/v1" \
             --dart-define=GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
             --dart-define=FIREBASE_API_KEY="${{ vars.FIREBASE_API_KEY }}" \
             --dart-define=FIREBASE_AUTH_DOMAIN="${{ vars.FIREBASE_AUTH_DOMAIN }}" \
