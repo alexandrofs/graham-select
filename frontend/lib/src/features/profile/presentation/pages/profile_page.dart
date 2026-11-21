@@ -294,6 +294,34 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
 
+          const SizedBox(height: 16),
+
+          Card(
+            color: AppTheme.surfaceColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: ListTile(
+              key: const Key('profile_web_push_notifications_button'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              leading: CircleAvatar(
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                child: const Icon(Icons.mark_chat_unread_outlined, color: AppTheme.primaryColor),
+              ),
+              title: const Text(
+                'Alertas Web Push (Graham)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text(
+                'Receba notificações no navegador quando um ativo entrar na Zona de Compra de Graham.',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/notifications/web-push'),
+            ),
+          ),
+
           const SizedBox(height: 40),
           // Botão de Sair (Opcional, mas útil no perfil)
           SizedBox(

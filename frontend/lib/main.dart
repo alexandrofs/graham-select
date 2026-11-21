@@ -108,6 +108,13 @@ import 'src/features/notifications/data/repositories/whatsapp_notifications_repo
 import 'src/features/notifications/presentation/providers/whatsapp_notifications_provider.dart';
 import 'src/features/notifications/presentation/pages/whatsapp_notifications_page.dart';
 
+// Web Push Notifications Feature Imports
+import 'src/features/notifications/data/datasources/web_push_notifications_remote_data_source.dart';
+import 'src/features/notifications/data/repositories/web_push_notifications_repository.dart';
+import 'src/features/notifications/data/services/web_push_browser_client.dart';
+import 'src/features/notifications/presentation/providers/web_push_notifications_provider.dart';
+import 'src/features/notifications/presentation/pages/web_push_notifications_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
@@ -204,6 +211,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final WhatsappNotificationsRemoteDataSource whatsappNotificationsRemoteDataSource;
   late final WhatsappNotificationsRepository whatsappNotificationsRepository;
 
+  late final WebPushNotificationsRemoteDataSource webPushNotificationsRemoteDataSource;
+  late final WebPushNotificationsRepository webPushNotificationsRepository;
+  late final WebPushBrowserClient webPushBrowserClient;
+
   late final AuthStateListenable authListenable;
   late final GoRouter router;
 
@@ -299,6 +310,11 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     whatsappNotificationsRemoteDataSource = WhatsappNotificationsRemoteDataSource(apiClient: effectiveApiClient);
     whatsappNotificationsRepository = WhatsappNotificationsRepository(remoteDataSource: whatsappNotificationsRemoteDataSource);
 
+    // Web Push Notifications Feature DI
+    webPushNotificationsRemoteDataSource = WebPushNotificationsRemoteDataSource(apiClient: effectiveApiClient);
+    webPushNotificationsRepository = WebPushNotificationsRepository(remoteDataSource: webPushNotificationsRemoteDataSource);
+    webPushBrowserClient = WebPushBrowserClient();
+
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
     router = GoRouter(
@@ -338,6 +354,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
             GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
             GoRoute(path: '/notifications/whatsapp', builder: (context, state) => const WhatsappNotificationsPage()),
+            GoRoute(path: '/notifications/web-push', builder: (context, state) => const WebPushNotificationsPage()),
             GoRoute(path: '/family-profiles', builder: (context, state) => const FamilyProfilesPage()),
             GoRoute(path: '/tags', builder: (context, state) => const TagManagementPage()),
             GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
@@ -395,6 +412,12 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => OpenFinanceProvider(repository: openFinanceRepository)),
         ChangeNotifierProvider(create: (_) => TaxProvider(repository: taxRepository)),
         ChangeNotifierProvider(create: (_) => WhatsappNotificationsProvider(repository: whatsappNotificationsRepository)),
+        ChangeNotifierProvider(
+          create: (_) => WebPushNotificationsProvider(
+            repository: webPushNotificationsRepository,
+            browserClient: webPushBrowserClient,
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => AdminObservabilityProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminDlqProvider(repository: adminRepository)),
         ChangeNotifierProvider(create: (_) => AdminTickerProvider(repository: adminRepository)),

@@ -3,6 +3,7 @@ package afsdigital.grahamselect.api.common.web;
 import afsdigital.grahamselect.common.family.application.service.exceptions.DuplicateFamilyProfileException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.InvalidCpfException;
+import afsdigital.grahamselect.common.notifications.application.exceptions.WebPushSubscriptionNotFoundException;
 import afsdigital.grahamselect.common.tags.application.service.exceptions.DuplicateTagException;
 import afsdigital.grahamselect.common.tags.application.service.exceptions.TagNotFoundException;
 import afsdigital.grahamselect.common.user.application.service.exceptions.DeletionAlreadyPendingException;
@@ -184,6 +185,14 @@ public class GlobalExceptionHandler {
                 "Operação bloqueada por conflito ou vínculo de integridade referencial."
         );
         problem.setTitle("Data Integrity Violation");
+        return problem;
+    }
+
+    @ExceptionHandler(WebPushSubscriptionNotFoundException.class)
+    public ProblemDetail handleWebPushSubscriptionNotFound(WebPushSubscriptionNotFoundException ex) {
+        log.error("WebPush subscription not found: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Web Push Subscription Not Found");
         return problem;
     }
 }

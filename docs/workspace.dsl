@@ -10,6 +10,10 @@ workspace {
             description "Gateway externo para entrega de alertas financeiros via WhatsApp."
         }
 
+        browserPushServices = softwareSystem "Browser Push Services (W3C Web Push)" {
+            description "Serviços de Push dos navegadores (FCM, Mozilla Autopush, Apple Push) via protocolo W3C Web Push e autenticação VAPID (RFC 8291/8292)."
+        }
+
         softwareSystem = softwareSystem "GrahamSelect" {
         
             description "Aplicativo para calcular as 10 empresas mais baratas usando a regra de Benjamin Graham."
@@ -56,9 +60,16 @@ workspace {
                     whatsappNotificationsService -> database "Lê e grava preferências e logs de envio WhatsApp"
                     whatsappNotificationsService -> whatsappCloudApi "Envia alertas via WhatsApp Cloud API (ou Mock local)"
                 }
+                webPushNotificationsService = component "Web Push Notifications Service" {
+                    description "Gerencia preferências LGPD, assinaturas de navegadores, avaliação de Zona de Compra Graham, disparo VAPID/RFC 8291 e histórico de logs"
+                    technology "Java Service, ShedLock, RestClient, JDK 21 Crypto"
+                    webPushNotificationsService -> database "Lê e grava preferências, assinaturas e logs de Web Push"
+                    webPushNotificationsService -> browserPushServices "Envia alertas cifrados via VAPID RFC 8291/8292 (ou Mock local)"
+                }
                 apiController -> geradorEventosService 
                 apiController -> rankCompaniesService
                 apiController -> whatsappNotificationsService "Expõe endpoints /api/v1/notifications/whatsapp/*"
+                apiController -> webPushNotificationsService "Expõe endpoints /api/v1/notifications/web-push/*"
                 geradorEventosService -> producerService
                 producerService -> kafka "Publica evento de dados de empresas"
             }
@@ -68,6 +79,7 @@ workspace {
                 technology "Flutter"
                 webApplication -> apiController "Chama API de consulta de empresas mais baratas"
                 webApplication -> apiController "Chama API de Upload de arquivo de dados"
+                webApplication -> browserPushServices "Registra service worker e subscreve a notificações push"
             }
             
             dataProcessor = container "Financial Data Processor" {
