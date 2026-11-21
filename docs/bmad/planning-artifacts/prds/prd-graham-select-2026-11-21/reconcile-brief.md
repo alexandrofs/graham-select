@@ -1,0 +1,38 @@
+# Relatório de Reconciliação de Entradas (Brief vs. PRD) — Kerno (Ciclo 2.0)
+
+- **Data:** 2026-11-21
+- **Fontes Analisadas (Brief):**
+  - [brief.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/briefs/brief-graham-select-2026-11-21/brief.md)
+  - [addendum.md (Brief)](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/briefs/brief-graham-select-2026-11-21/addendum.md)
+  - *Expansão solicitada pelo Product Owner durante a elaboração do PRD:* Inclusão do módulo de **Análise de Carteira com Inteligência Artificial (*Kerno AI — Diagnóstico de Carteira*)** no escopo do MVP do Ciclo 2.0.
+- **Alvos Auditados (PRD):**
+  - [prd.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/prds/prd-graham-select-2026-11-21/prd.md)
+  - [addendum.md (PRD)](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/prds/prd-graham-select-2026-11-21/addendum.md)
+- **Status Geral da Reconciliação:** **100% Reconciliado (Zero Lacunas de Entrada)**
+
+---
+
+## 1. Matriz de Rastreabilidade (Brief + Expansão PO → PRD + Addendum)
+
+| Eixo / Requisito de Entrada (Brief & Addendum) | Tipo | Cobertura no PRD (`prd.md` / `addendum.md`) | Status |
+| :--- | :--- | :--- | :--- |
+| **1. Rebranding para Kerno ("O núcleo inteligente do seu dinheiro")**<br>Transição completa de *Graham Select* para **Kerno** (Web, Mobile, Landing Page, metadados), posicionamento neutro e *AI-ready*, mais matriz de nomes descartados (*Aura* por saturação/INPI/SEO no Brasil, *Lumina*, *Plano*, *Nexus*, *Valora*, *Synap*, *Aloca*, *Cerrado Invest*). | Qualitativo & Estratégico | `prd.md` (§1, §3, §4.1 `FR-1`, §6.1, §11 Q3 domínio `kerno.afsdigital.com.br`) e `addendum.md` (§4, §5 Matriz completa de alternativas descartadas). | **Coberto Integralmente** |
+| **2. Tom, Voz, Sensação & Inspiração Nubank (Usabilidade Intergeracional)**<br>Redução de ruído visual, substituição de tabelas densas por cartões fluidos em telas móveis, atendimento simultâneo ao "CFO da Família" (40+ anos) e ao "Jovem Digital Native" (20–35 anos). | Qualitativo / UX | `prd.md` (§1, §2.1 JTBD, §2.3 `UJ-1` a `UJ-4`, §3, §4.1 `FR-2` e `FR-3`). | **Coberto Integralmente** |
+| **3. Especificações Técnicas do Design System Intergeracional**<br>Contraste WCAG 2.1 AA (4.5:1 / 3:1) e AAA (7:1 em saldos), fontes `Inter` ou `Plus Jakarta Sans` com numerais tabulares (`tabular-nums`), suporte a *Dynamic Type* / `textScaler` até `2.0x` sem truncamento, alvos de toque de `48x48dp` e toggle de **Modo Privacidade** (`R$ ••••••`). | Quantitativo & Técnico | `prd.md` (§4.1 `FR-2`, §4.4 `FR-12`, §7.1 `NFR-2`) e `addendum.md` (§3 Diretrizes Técnicas de Design System). | **Coberto Integralmente** |
+| **4. Carteira & Rebalanceamento pelo Diagrama do Cerrado + Graham**<br>Filosofia *Buy & Hold* via novos aportes (zero venda forçada / sem geração de DARF), templates iniciais (40% Ações BR, 30% FIIs, 20% Renda Fixa, 10% Internacional), hierarquia de 3 níveis (Macro Classes, Subclasses Tijolo/Papel e Defensivo/Crescimento, Nota 1–10), fórmula $\Delta_i = (P_{\text{atual}} + X) \times \text{Meta}_i\% - V_{\text{atual},i}$ e Regra de Transbordamento (*Spillover*). | Quantitativo & Algorítmico | `prd.md` (§3, §4.2 `FR-4` a `FR-8`, §5 Non-Goals, §7.2 `NFR-4`) e `addendum.md` (§1.1 a §1.3). | **Coberto Integralmente** |
+| **5. Resolução dos 3 Handoffs `[A definir no PRD]` do Addendum do Brief**<br>1) Mapeamento Nota 1–10 → peso proporcional + teto máximo de risco;<br>2) Ordenação por gap percentual relativo vs. absoluto;<br>3) Fator de ponderação do Multiplicador de Graham. | Quantitativo / Decisão de Produto | Todos resolvidos e confirmados em `prd.md` (`FR-5`, `FR-6`, `FR-7`, §11 Q1, §12 `A-1`, `A-2`, `A-5`) e `addendum.md` (§1.2 e §1.3):<br>• Tetos: Notas `8–10` = teto `10%`; `5–7` = teto `6%`; `1–4` = `0%` (**Quarentena de Aporte**) + checklist opcional de 5 critérios;<br>• Priorização por defasagem percentual relativa ($G_i$);<br>• **Multiplicador de Graham** fixado em `1.30x` (`+30%`). | **Coberto e Resolvido** |
+| **6. MVP Mobile (iOS & Android) & Fundação Modular**<br>Login Google/OAuth2 + `flutter_secure_storage` + desbloqueio biométrico (FaceID/Digital via `local_auth`), Dashboard Patrimonial, GPS de Aporte ("em segundos"), `BottomNavigationBar` controlada por *feature flags* e preparação arquitetural para Controle de Gastos ($\text{Entradas} - \text{Saídas} \rightarrow R\$ X$) e Copiloto Conversacional. | Qualitativo & Arquitetural | `prd.md` (§4.4 `FR-11` a `FR-13`, §6.2, §9, §12 `A-4` timeout biométrico de 2 min) e `addendum.md` (§4 Âncoras Arquiteturais Mobile). | **Coberto Integralmente** |
+| **7. Nova Landing Page de Alta Conversão**<br>Storytelling *"Do caos das planilhas ao núcleo inteligente das suas finanças"*, vitrine mobile, explicação da combinação Diagrama do Cerrado + Graham (+ Kerno AI) e CTA direto. | Qualitativo & Comercial | `prd.md` (§2.3 `UJ-5`, §4.5 `FR-14` e `FR-15` com Trial PLG de 90 dias, §12 `A-7`). | **Coberto Integralmente** |
+| **8. Expansão Solicitada pelo Usuário: Análise de Carteira com IA (*Kerno AI*)**<br>Antecipação do diagnóstico inteligente de carteira para o Ciclo 2.0 (mantendo o chat conversacional livre fora do escopo do MVP). | Expansão de Escopo (PO) | `prd.md` (§1, §2.1, §2.3 `UJ-3`, §3, §4.3 `FR-9` e `FR-10`, §5, §6.1, §7.1 `NFR-3`, §8, §10 `SM-5`, `SM-C1`, `SM-C2`, §11 Q2 Google Gemini, §12 `A-3`, `A-6`) e `addendum.md` (§2.1 Pipeline *Deterministic-First*, `PiiSanitizer` LGPD, 4 blocos JSON Schema e guardrails CVM 19/20). | **Coberto com Excelência** |
+| **9. Critérios Quantitativos de Sucesso (5 Metas do Brief)**<br>• $\ge 60\%$ adoção do motor de aporte em 60 dias;<br>• $\ge 65\%$ acessos semanais pré-aporte via Mobile em 60 dias;<br>• $< 30\text{s}$ velocidade de decisão (*Time-to-Action*);<br>• $+25\%$ conversão na Landing Page;<br>• $> 85\%$ aprovação de usabilidade intergeracional ($<35$ e $40+$ anos). | Quantitativo (KPIs) | `prd.md` (§10 `SM-1` = 60%, `SM-2` < 30s, `SM-3` = 65%, `SM-4` +25%, `SM-6` > 85%, acrescidos de `SM-5` para o Kerno AI e contra-métricas `SM-C1` a `SM-C3`). | **Coberto Integralmente (100% Paridade Numérica)** |
+
+---
+
+## 2. Análise de Divergências e Lacunas
+
+### 2.1 Lacunas de Conteúdo (Brief → PRD)
+- **Nenhuma lacuna identificada (Zero Gaps).** Todas as ideias qualitativas (tom, voz, inspiração Nubank, acessibilidade intergeracional, narrativa da Landing Page, justificativa de rebranding e modularidade mobile) e todos os parâmetros quantitativos (fórmula do Diagrama do Cerrado, metas de sucesso de 60%, 65%, 30s, 25% e 85%) foram preservados sem perda de informação.
+- A única mudança deliberada de escopo em relação ao `brief.md` original (que listava ferramentas de IA em *Out of Scope*) decorre diretamente da **expansão solicitada pelo usuário**, que promoveu o **Kerno AI (Diagnóstico de Carteira)** estruturado para o MVP (`FR-9`, `FR-10`), mantendo o **Copiloto Conversacional (Chat Aberto)** em *Out of Scope* (`§5` e `§6.2`), de forma totalmente coerente e rastreável.
+
+### 2.2 Observação Editorial Menor (Consistência Interna do PRD)
+- Na seção `§0. Document Purpose` de `prd.md` (linha 14), o texto introdutório menciona intervalos `FR-1 a FR-19`, `SM-1 a SM-7` e `§14. Assumptions Index`, enquanto a numeração efetiva consolidada no documento vai de `FR-1 a FR-17`, `SM-1 a SM-6` (mais `SM-C1` a `SM-C3`) e `§12. Confirmed Decisions & Assumptions Index`. Trata-se apenas de um detalhe cosmético de referência cruzada no parágrafo de abertura, sem qualquer impacto sobre a completude funcional ou sobre a reconciliação com o Product Brief.

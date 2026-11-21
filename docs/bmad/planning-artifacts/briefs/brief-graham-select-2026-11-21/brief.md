@@ -1,105 +1,94 @@
 ---
-title: "Product Brief: Graham Select 2.0 (Modernização, App Mobile & Diagrama do Cerrado)"
-status: "draft"
+title: "Product Brief: Kerno (ex-Graham Select 2.0)"
+status: "final"
 created: "2026-11-21"
 updated: "2026-11-21"
 author: "Alex"
 ---
 
-# Product Brief: Graham Select 2.0
+# Product Brief: Kerno
 
 ## Executive Summary
 
-O **Graham Select 2.0** representa o salto de maturidade da plataforma de inteligência patrimonial Graham Select. Nascido para eliminar o atrito de planilhas e a ansiedade de aportes às cegas com base nos fundamentos de Benjamin Graham, o produto agora expande sua proposta de valor para dois novos horizontes: **acessibilidade multiplataforma com experiência de uso de ponta** e **rebalanceamento patrimonial ativo guiado pelo Diagrama do Cerrado**.
+O **Kerno** marca a evolução e o rebranding oficial do *Graham Select*. Concebida originalmente em torno da margem de segurança de Benjamin Graham e da consolidação automática de carteiras via B3, a plataforma amadurece para se tornar um ecossistema completo de finanças pessoais e patrimônio **preparado para Inteligência Artificial (*AI-ready*)**. A adoção de um nome neutro e moderno supera o posicionamento restritivo anterior — abrindo espaço para unir investimentos, rebalanceamento estratégico, futuro controle de gastos e ferramentas de IA sob a mesma identidade.
 
-A versão 2.0 entrega um frontend web e mobile unificado, inspirado no padrão de clareza, elegância e acessibilidade cognitiva do Nubank — perfeitamente equilibrado para acolher jovens investidores dinâmicos e investidores mais maduros que exigem legibilidade, sobriedade e hierarquia direta. Em paralelo ao poder analítico da web, é introduzido o **MVP Mobile**, concebido como um companheiro de bolso instantâneo: login seguro, dashboard da carteira consolidada e a lista de sugestões de aporte calculada em segundos. Ao adotar o Diagrama do Cerrado, o Graham Select resolve a maior dúvida do investidor de longo prazo: *onde colocar exatamente o dinheiro do novo aporte este mês sem girar patrimônio e sem pagar imposto de venda à toa*.
+O foco deste ciclo é remover o atrito visual e operacional do investidor de longo prazo: entregar uma experiência limpa, acessível entre gerações e disponível no bolso (iOS/Android), acoplada a um motor prático de alocação pelo **Diagrama do Cerrado** que responde, em segundos, onde aplicar o dinheiro do mês sem girar patrimônio.
 
 ---
 
 ## The Problem
 
-1. **Atrito Cognitivo e Ruído Visual:** Plataformas tradicionais de investimento (e interfaces web sobrecarregadas) distanciam dois públicos cruciais: jovens que esperam interfaces minimalistas e rápidas, e investidores experientes ou maduros que se irritam com densidade visual excessiva, fontes diminutas e fluxos labirínticos.
-2. **A Paralisia do Rebalanceamento:** Mesmo com a carteira consolidada via B3, investidores sofrem ao decidir onde colocar o novo dinheiro do mês. Rebalanceamentos acadêmicos tradicionais mandam "vender o que subiu para comprar o que caiu", gerando eventos tributários indesejados (DARF) e desfazendo posições em empresas excelentes. 
-3. **Falta de Presença Mobile de Bolso:** No momento em que o investidor está na corretora ou recebendo o salário, abrir o computador para consultar planilhas ou sistemas web pesados adiciona atrito. O usuário precisa de uma visão sintetizada na palma da mão em menos de 10 segundos.
-4. **Landing Page Desconectada da Nova Identidade:** A página de entrada atual reflete a versão inicial focada apenas no ranking quantitativo simples, sem demonstrar a sofisticação do acompanhamento de carteira, a inteligência de alocação e o futuro app móvel.
+1. **Atrito Cognitivo e Ruído Visual:** Plataformas tradicionais de investimento afastam dois públicos essenciais: jovens habituados à fluidez de fintechs modernas e investidores mais maduros que sofrem com telas poluídas, tipografia diminuta e fluxos labirínticos.
+2. **A Paralisia do Rebalanceamento:** Embora a plataforma já consolide a carteira automaticamente via dados da B3, muitos investidores travam na hora de decidir onde alocar o novo aporte mensal. Rebalanceamentos clássicos que exigem vender ativos vencedores geram custos tributários (DARF) e interrompem os juros compostos.
+3. **Ausência de Experiência Mobile de Bolso:** No momento de receber o salário ou abrir a corretora, depender do computador adiciona fricção. O usuário precisa consultar seu patrimônio e saber exatamente onde aportar em segundos pelo celular.
+4. **Landing Page Desatualizada:** A página inicial atual ainda comunica um *screener* quantitativo simples, sem refletir a proposta de valor expandida de gestão de carteira, rebalanceamento inteligente e app mobile.
+5. **Posicionamento Restritivo da Marca Anterior:** O nome *Graham Select* restringia o produto à imagem de uma ferramenta exclusiva para seleção de ações por Benjamin Graham, incompatível com uma plataforma ampla de finanças pessoais, patrimônio e futuras ferramentas de IA.
 
 ---
 
 ## The Solution
 
-O Graham Select 2.0 se estrutura em quatro pilares de evolução:
+O **Kerno** se estrutura em cinco pilares estratégicos:
 
-1. **Design System Inspirado no Nubank (Intergeracional):**
-   - Redesenho completo da identidade visual: fundos limpos com contraste WCAG AA/AAA, tipografia generosa e escalável, cartões de métricas fluidos e redução drástica de ruído visual.
-   - Navegação direta que respeita a clareza para públicos maduros (tabelas legíveis, números destacados, sem termos crípticos) e encanta jovens com micro-interações responsivas e visual moderno.
-
-2. **Mecanismo de Alocação & Rebalanceamento por Diagrama do Cerrado:**
-   - Implementação da filosofia de *Buy & Hold* por novos aportes: o usuário define as porcentagens-alvo por classe (Ações BR, FIIs, Renda Fixa, Exterior, etc.) e notas de qualidade/risco para os ativos.
-   - A cada mês, o investidor apenas informa o valor que deseja aportar. O algoritmo calcula a distância de cada ativo em relação à meta e aponta onde aplicar o dinheiro para equilibrar o risco, respeitando tetos de exposição máxima [ASSUMPTION: os critérios padrão de notas de risco e governança virão pré-configurados com sugestões de boas práticas, permitindo ajuste pelo usuário].
-
-3. **MVP Mobile de Alto Desempenho (Flutter Multi-Surface):**
-   - Entrega de compilação mobile dedicada e fluida contendo:
-     - **Autenticação Biométrica / Login Rápido** (com persistência de sessão segura).
-     - **Dashboard Patrimonial:** Patrimônio total, rentabilidade histórica e distribuição por classes.
-     - **Central de Sugestões de Aporte:** O "GPS do Aporte" em destaque, dizendo onde alocar os recursos do mês.
-   - [ASSUMPTION: Arquitetura em camadas e modularizada em `frontend/lib/src/features/` para suportar nativamente a inclusão do futuro módulo de **Controle de Gastos e Orçamento** sem refatorações estruturais].
-
-4. **Nova Landing Page Focada em Conversão:**
-   - Reformulação da página inicial com storytelling moderno, demonstrando a dor de quem tem dinheiro espalhado e a solução instantânea: "Do upload B3 ao GPS de Aporte em minutos".
-   - Demonstração visual do aplicativo mobile, metodologia Graham + Diagrama do Cerrado e CTA direto para teste gratuito ou login.
+1. **Rebranding Oficial para Kerno (Neutro & AI-Ready):**
+   - Adoção do nome **Kerno** ("o núcleo inteligente do seu dinheiro"), logotipo e identidade visual unificada no Web, Mobile e Landing Page, construindo uma marca ampla pronta para evoluir com orçamento pessoal e ferramentas nativas de Inteligência Artificial.
+2. **Design System Intergeracional:**
+   - Redesenho completo da interface — inspirado no padrão de clareza, leveza e acessibilidade do Nubank — com fundos limpos, contraste acessível (WCAG AA/AAA), tipografia generosa e escalável, cartões de métricas fluidos e redução drástica de ruído visual. Moderno para jovens; cristalino e confortável para públicos maduros.
+3. **Carteira & Rebalanceamento pelo Diagrama do Cerrado:**
+   - Implementação da metodologia de *Buy & Hold* via novos aportes: o sistema oferece templates pré-configurados de alocação por classes (Ações BR, FIIs, Renda Fixa, Exterior) e notas de qualidade/risco editáveis pelo usuário.
+   - Ao informar o valor disponível para investir no mês, o motor calcula a distância de cada classe e ativo em relação à meta, respeita tetos máximos de exposição por risco e cruza prioridades com as oportunidades de valor de Benjamin Graham — dizendo exatamente onde aportar sem vender ativos bons.
+4. **MVP Mobile Enxuto e Escalável (iOS & Android):**
+   - Experiência móvel dedicada com escopo cirúrgico no Dia 1:
+     - **Login Seguro e Rápido:** Reuso da autenticação existente (Google/OAuth2) com persistência segura e desbloqueio biométrico (FaceID/Digital).
+     - **Dashboard Patrimonial:** Visão imediata de patrimônio consolidado, rentabilidade e distribuição por classes (com toggle de privacidade).
+     - **Seção de Sugestões de Aporte:** O "GPS de Aporte" pronto para ação em segundos.
+   - Construído sobre arquitetura modular preparada para incorporar novos módulos — como **Controle de Gastos** e **Copiloto de IA** — sem refatoração estrutural.
+5. **Nova Landing Page de Alta Conversão:**
+   - Refatoração completa da página inicial com storytelling direto ("Do caos das planilhas ao núcleo inteligente das suas finanças"), vitrine do app mobile, explicação clara da combinação Graham + Diagrama do Cerrado e CTA proeminente.
 
 ---
 
 ## What Makes This Different
 
-- **Rebalanceamento Sem Venda Forçada (*Tax-Efficient Buy & Hold*):** Ao contrário de robôs de investimento tradicionais que forçam vendas e rebalanceamentos fiscais caros, a combinação Graham + Cerrado educa e orienta o aporte novo, potencializando juros compostos.
-- **União do "O que Comprar" com o "Onde Alocar":** O mercado se divide entre apps de carteira (que só mostram gráficos passivos) e casas de análise (que recomendam ações isoladas). O Graham Select junta o filtro de Graham (segurança de preço/valor) com a bússola do Cerrado (disciplina de risco da sua própria carteira).
-- **Usabilidade Acessível Real:** Interfaces bancárias e de corretoras são ou simplistas demais ou densas como terminais Bloomberg. Nosso diferencial de UX é a simplicidade acolhedora com profundidade matemática sob o capô.
+- **Rebalanceamento Eficiente Sem Venda Forçada:** Em vez de forçar giro de carteira e imposto, o Kerno direciona cada novo aporte para equilibrar risco e aproveitar descontos.
+- **Ponte Entre "O que Comprar" e "Onde Alocar":** Une o filtro fundamentalista de margem de segurança (Graham) com a disciplina de gestão de risco individual (Diagrama do Cerrado), sobre uma base preparada para recomendações assistidas por IA.
+- **Simplicidade Intergeracional Real:** Foge tanto da superficialidade de apps genéricos quanto da complexidade intimidadora de terminais financeiros, entregando clareza imediata sobre um motor analítico robusto.
 
 ---
 
 ## Who This Serves
 
-- **O "CFO" da Família (Investidor Maduro / 40+ anos):**
-  - *Cenário:* Cuida do dinheiro da casa, preza por segurança, detesta perder tempo decifrando interfaces confusas com letras miúdas.
-  - *Sucesso:* Abre o app no celular no dia do pagamento, visualiza o patrimônio familiar equilibrado e em 15 segundos sabe exatamente qual ativo comprar para balancear a carteira sem ansiedade.
-- **O Investidor Jovem / Digital Native (20 a 35 anos):**
-  - *Cenário:* Começando a acumular patrimônio, acostumado à experiência fluida do Nubank/Inter, busca método confiável para não cair em modismos de redes sociais.
-  - *Sucesso:* Entende a regra do jogo através de um visual limpo, adota o hábito mensal de aportes e acompanha a evolução patrimonial com sensação de progresso real.
+- **O "CFO" da Família (Investidor Maduro / 40+ anos):** Cuida do patrimônio familiar, preza por segurança e legibilidade, e rejeita interfaces confusas. Sucesso significa abrir o app no celular no dia do aporte, conferir o equilíbrio da carteira e saber onde investir em menos de 30 segundos.
+- **O Investidor Jovem / Digital Native (20 a 35 anos):** Em fase de acumulação, acostumado a apps financeiros fluidos e interessado em tecnologia, busca um método disciplinado contra o efeito manada. Sucesso significa criar o hábito mensal de aportes guiados com sensação clara de progresso.
 
 ---
 
 ## Scope
 
-### In Scope (Graham Select 2.0)
-- **Design System & Reestilização:** Novo tema global no Flutter (paleta contemporânea inspirada no Nubank, tipografia aprimorada, contraste alto, componentes modulares).
-- **MVP Mobile (iOS & Android):**
-  - Fluxo de autenticação rápida/segura.
-  - Dashboard consolidado com métricas-chave de patrimônio e alocação.
-  - Tela/Seção de Sugestões de Aporte baseada no Diagrama do Cerrado.
-  - Estrutura de navegação modular preparada para novas abas (ex: Controle de Gastos).
-- **Módulo Diagrama do Cerrado (Backend & Frontend):**
-  - Configuração de metas patrimoniais por classes e pesos/notas por ativos.
-  - Motor de cálculo de aporte inteligente (distância para a meta + tetos de exposição).
-  - Integração com as oportunidades detectadas pela fórmula de Graham.
-- **Nova Landing Page:** Redesenho completo da `home_page.dart` e assets visuais com comunicação clara da proposta de valor, previews interativos e alta conversão.
+### In Scope (Ciclo 2.0)
+- **Marca:** Transição completa de *Graham Select* para **Kerno** (identidade visual, textos institucionais e metadados de app).
+- **Interface:** Novo Design System intergeracional aplicado ao Web e Mobile.
+- **Mobile MVP:** Login (Google/OAuth2 + biometria), Dashboard da Carteira e Sugestões de Aporte, com navegação modular preparada para expansão.
+- **Motor de Aporte:** Carteira e rebalanceamento pelo Diagrama do Cerrado (metas por classe, notas por ativo, templates iniciais e cruzamento com Graham).
+- **Aquisição:** Redesenho completo da página inicial alinhado à marca Kerno.
 
-### Out of Scope (Parked for Next Cycles)
-- **Controle de Gastos e Orçamento Pessoal:** Não entra no MVP Mobile do dia 1; apenas a fundação arquitetural de dados/navegação será deixada pronta.
-- **Execução Automática de Ordens (Home Broker Integration):** O app sugere e direciona; a execução da compra física permanece na corretora do usuário.
-- **Open Finance Bancário Automático para Despesas:** Conexão direta com contas correntes para rastrear gastos bancários será tratada no futuro ciclo do módulo de gastos.
+### Out of Scope (Próximos Ciclos)
+- **Módulo de Controle de Gastos e Orçamento Pessoal:** Não entra funcionalmente no MVP Mobile; apenas a fundação arquitetural e de navegação será entregue pronta.
+- **Ferramentas e Copiloto Conversacional de IA:** Chat financeiro e análise autônoma de despesas entrarão na sequência, sobre a marca e arquitetura preparadas neste ciclo.
+- **Execução Automática de Ordens em Corretoras:** O Kerno recomenda e calcula o aporte; a execução permanece no home broker do usuário.
 
 ---
 
 ## Success Criteria
 
-1. **Adoção Mobile:** Mais de 65% dos acessos semanais de checagem pré-aporte ocorrendo via dispositivo móvel nos primeiros 60 dias de lançamento do app.
-2. **Eficiência de Decisão (Time-to-Action):** Usuário leva menos de 30 segundos entre abrir o app e identificar a recomendação de aporte ideal.
-3. **Conversão da Nova Landing Page:** Aumento de pelo menos 25% na taxa de conversão de visitantes únicos em contas criadas / usuários ativos.
-4. **Satisfação de Usabilidade (CSAT/NPS):** Avaliação de facilidade e clareza visual superior a 85% positiva tanto na faixa etária < 35 anos quanto > 50 anos.
+1. **Adoção do Motor de Aporte:** Pelo menos 60% dos usuários ativos com metas do Diagrama do Cerrado configuradas e simulações/aportes recorrentes nos primeiros 60 dias.
+2. **Adoção Mobile:** Pelo menos 65% dos acessos semanais de consulta pré-aporte originados no app mobile nos primeiros 60 dias após o lançamento.
+3. **Velocidade de Decisão (Time-to-Action):** Usuário identifica a recomendação exata de aporte em menos de 30 segundos após abrir o aplicativo.
+4. **Conversão da Landing Page:** Aumento mínimo de 25% na conversão de visitantes únicos para contas criadas em comparação à página anterior.
+5. **Usabilidade Intergeracional:** Aprovação de facilidade e clareza visual superior a 85% em pesquisas com usuários tanto abaixo de 35 anos quanto acima de 40 anos.
 
 ---
 
 ## Vision
 
-Transformar o Graham Select no ecossistema financeiro definitivo de construção de patrimônio familiar no Brasil. Nos próximos 2 anos, a plataforma unirá o **cuidado com a saída de capital** (controle de gastos e fluxo de caixa simplificado no celular) com o **direcionamento inteligente da entrada de capital** (Graham + Cerrado), tudo protegido por uma IA que atua como o consultor financeiro de bolso do investidor, blindando seu patrimônio contra o efeito manada e a inflação.
+Consolidar o **Kerno** nos próximos 2 a 3 anos como o sistema operacional financeiro da vida pessoal e familiar no Brasil — unindo o **controle inteligente das saídas** (gastos, faturas e orçamento) ao **direcionamento preciso das entradas** (Diagrama do Cerrado + fundamentos de Graham), orquestrado por ferramentas de **Inteligência Artificial** que atuam como um consultor financeiro de bolso acessível, transparente e à prova de decisões emocionais.
