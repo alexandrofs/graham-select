@@ -175,14 +175,13 @@ class _AssetTagSelectorSheetState extends State<AssetTagSelectorSheet> {
       child: SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxSheetHeight),
-          child: Container(
-            key: const Key('asset_tag_selector_sheet'),
-            decoration: const BoxDecoration(
-              color: AppTheme.surfaceColor,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-            child: SingleChildScrollView(
+          child: Material(
+            color: AppTheme.surfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            child: Container(
+              key: const Key('asset_tag_selector_sheet'),
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+              child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -465,6 +464,7 @@ class _AssetTagSelectorSheetState extends State<AssetTagSelectorSheet> {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),

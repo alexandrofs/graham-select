@@ -423,19 +423,18 @@ class _UntaggedAssetsQuickSheetState extends State<UntaggedAssetsQuickSheet> {
         .toList();
 
     return SafeArea(
-      child: Container(
-        key: const Key('untagged_assets_quick_sheet'),
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.75,
-        ),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Material(
+        color: AppTheme.surfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: Container(
+          key: const Key('untagged_assets_quick_sheet'),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
@@ -543,6 +542,7 @@ class _UntaggedAssetsQuickSheetState extends State<UntaggedAssetsQuickSheet> {
               ),
           ],
         ),
+      ),
       ),
     );
   }
