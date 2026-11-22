@@ -1,90 +1,107 @@
-# Validation Report — Kerno (ex-Graham Select 2.0)
+# Validation Report — graham-select (Kerno)
 
 - **DESIGN.md:** `docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/DESIGN.md`
 - **EXPERIENCE.md:** `docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/EXPERIENCE.md`
-- **Run at:** 2026-11-21T20:00:00Z
+- **Run at:** 2026-11-21T18:22:00-03:00
 
 ## Overall verdict
 
-O par de contratos (`DESIGN.md` + `EXPERIENCE.md`) constitui uma especificação de UX **strong** (forte), coesa e imediatamente acionável por consumidores downstream (Arquitetura, Quebra de Épicos/Histórias e Engenharia Flutter/Spring Boot). Todas as 5 jornadas do PRD (`UJ-1` a `UJ-5`) e os 17 requisitos funcionais (`FR-1` a `FR-17`) possuem cobertura completa de superfície e fluxo, 100% das referências de tokens (`{path.to.token}`) e dos 19 componentes resolvem sem erros entre os dois arquivos e os 4 mockups HTML de alta fidelidade.
+A auditoria integrada das especificações de UX do projeto **Kerno** (`DESIGN.md` e `EXPERIENCE.md`) atesta uma maturidade de engenharia e coesão contratual de padrão **STRONG** (forte), com conformidade mecânica total em fluxos, tokens, componentes, estados e referências visuais para os consumidores downstream (Arquitetura Técnica, Decomposição de Épicos e Implementação Flutter/Spring Boot).
 
-As duas lentes especializadas adicionais — **Acessibilidade Intergeracional & WCAG 2.1 AA/AAA** (`review-accessibility.md`) e **Conformidade Regulatória CVM 19/20 & Privacidade LGPD** (`review-regulatory.md`) — confirmaram `0` achados críticos e `0` achados altos, identificando 2 refinamentos médios de contraste (elevação de cifras e alertas semânticos para `>= 7:1` AAA e bordas não-textuais `border-strong` para `>= 3:1` WCAG 1.4.11) e 11 refinamentos baixos, todos integralmente resolvidos e aplicados nos contratos finais (`status: final`).
+Paralelamente, as lentes especializadas de **Acessibilidade (WCAG 2.1 AA)** e **Regulatório & Compliance (CVM e LGPD)** confirmaram inovações de destaque no ecossistema de fintechs — como o silenciamento semântico de cifras monetárias no Modo Privacidade no VoiceOver/TalkBack, a institucionalização da Regra da Tríade (Cor + Ícone + Rótulo) para daltônicos e a blindagem de 0 PII no Sanitizador LGPD de IA. Foram detectados **4 apontamentos Críticos** e **6 de Alta severidade** concentrados estritamente em ajustes finos pré-implementação: correção de cálculo de contraste no token `border-strong` (de 2.56:1 para >= 3.0:1), declaração de propriedades de primeiro plano dark no frontmatter, obrigatoriedade de disclaimer CVM no Ranking Graham (`/ranking`), consentimento explícito aos Termos e Privacidade no onboarding OAuth2 de 1 clique e salvaguarda de overflow no Dynamic Type 2.0x.
 
 ## Category verdicts
-- Flow coverage — strong
-- Token completeness — strong
-- Component coverage — strong
-- State coverage — strong
-- Visual reference coverage — strong
-- Bloat & overspecification — strong
-- Inheritance discipline — strong
-- Shape fit — strong
+
+- Flow coverage — **strong**
+- Token completeness — **strong**
+- Component coverage — **strong**
+- State coverage — **strong**
+- Visual reference coverage — **strong**
+- Bloat & overspecification — **strong**
+- Inheritance discipline — **strong**
+- Shape fit — **strong**
+- Accessibility Review (WCAG 2.1 AA) — **adequate** *(Aprovado com Ressalvas Pontuais)*
+- Regulatory & Compliance Review (CVM & LGPD) — **adequate** *(Aprovado com Ressalvas Pontuais)*
+
+---
 
 ## Findings by severity
 
-### Critical (0)
-Nenhum achado crítico.
+### Critical (4)
 
-### High (0)
-Nenhum achado alto.
+- **[Accessibility — WCAG 1.4.11] Falha no Contraste Não-Textual no token `border-strong` (`#94A3B8`) sobre `#FFFFFF`** (`DESIGN.md` § L52, L279, L291, L405)  
+  *Descrição:* A documentação afirma que `{colors.border-strong}` entrega contraste de 3.02:1, mas o cálculo matemático exato de luminância sobre `#FFFFFF` é de **2.56:1**, falhando no piso mínimo de 3.0:1 exigido pela WCAG 2.1 SC 1.4.11 para bordas de campos de entrada (`input-currency`) e botões secundários (`button-secondary`).  
+  *Fix:* Atualizar o token no frontmatter e texto para `#64748B` (Slate 500, contraste **3.98:1** sobre `#FFFFFF`).
 
-### Medium (2)
+- **[Accessibility — WCAG 1.4.3] Ausência de tokens Dark Mode nos componentes `bottom-nav-bar`, `multi-cpf-selector` e `privacy-toggle`** (`DESIGN.md` § L328–342, L353–360)  
+  *Descrição:* Os nós desses componentes no frontmatter definem apenas propriedades light. Caso consumidos sem variantes dark declaradas sobre `{colors.surface-elevated-dark}` (`#111827`), a razão de contraste cai para **2.82:1** e **2.34:1**, violando o critério WCAG 1.4.3.  
+  *Fix:* Declarar explicitamente as chaves dark nos nós dos componentes (`activeForegroundDark: '{colors.brand-primary-dark}'`, `inactiveForegroundDark: '{colors.text-muted-dark}'`, `backgroundDark`, etc.).
 
-**[review-accessibility]** — F-01: Cifras Monetárias de Aporte (`contribution-gps-card`) e Alertas Críticos Atendem WCAG AA (`4.84:1–5.91:1`), mas Ficam Abaixo do Piso WCAG AAA (`>= 7:1`) (`DESIGN.md § Colors`, `mockups/key-*.html`)
-Enquanto o saldo patrimonial principal (`{colors.text-primary}` `#0F172A` sobre `#FFFFFF`) entrega `17.85:1` (AAA), os tokens `semantic-emerald` (`#047857`, `5.48:1`), `semantic-amber` (`#B45309`, `4.84:1`) e `semantic-crimson` (`#B91C1C`, `5.91:1`) estavam na faixa AA.
-Fix: Ajustar `semantic-emerald` para `#065F46` (`7.68:1` AAA sobre `#FFFFFF` e `7.13:1` AAA sobre `#ECFDF5`), `semantic-amber` para `#92400E` (`7.05:1` AAA sobre `#FFFBEB`), `semantic-crimson` para `#991B1B` (`7.60:1` AAA sobre `#FEF2F2`), `semantic-emerald-dark` para `#6EE7B7` (`7.45:1` AAA sobre `#064E3B`) e `semantic-crimson-dark` para `#FCA5A5` (`7.92:1` AAA sobre `#450A0A`). *(Resolvido e aplicado)*
+- **[Regulatory — CVM 20/2021] Ausência de Disclaimer Regulatório CVM na Tela de Ranking Graham (`/ranking`) e no widget `FinancialDataTable`** (`EXPERIENCE.md` § L92, L124–128; `DESIGN.md` § L523–526, L538–544)  
+  *Descrição:* A tela de `/ranking` ordena ações com base na Margem Graham. A Resolução CVM nº 20/2021 exige aviso inequívoco de que rankings sem disclaimer podem ser interpretados como relatórios de análise ou carteiras recomendadas, expondo a plataforma a sanções por exercício não registrado de análise de valores mobiliários.  
+  *Fix:* Tornar obrigatória a presença do componente `{components.cvm-regulatory-footer}` no topo e base de `/ranking`: *"Aviso Regulatório (CVM 20/2021): O Ranking Graham é uma ferramenta de triagem quantitativa estritamente baseada em dados públicos passados das demonstrações contábeis. Não constitui carteira recomendada ou indicação de compra."*
 
-**[review-accessibility]** — F-02: Contraste Não-Textual (WCAG 1.4.11 `>= 3:1`) em `border-strong` e Marcador de Meta Sobreposto em `macro-class-distribution-card` (`DESIGN.md § Colors / § Components`, `mockups/key-dashboard-patrimonial.html`)
-O token `border-strong` (`#CBD5E1` sobre `#FFFFFF` = `1.48:1`) ficava abaixo de `3.0:1` para delimitar inputs/botões secundários sem foco, e o marcador de meta `#3730A3` sobre barra preenchida `#4F46E5` tinha contraste de `1.42:1`.
-Fix: Ajustar `border-strong` para `#94A3B8` (`3.02:1` sobre `#FFFFFF`) e `border-strong-dark` para `#64748B` (`3.75:1` sobre `#111827`), e aplicar `{colors.text-primary}` (`#0F172A`) com halo branco de `1.5px` ao marcador de meta `barFillTarget`. *(Resolvido e aplicado)*
+- **[Regulatory — LGPD Arts. 7 e 8] Ausência de Consentimento Explícito e Links de Termos e Privacidade no Onboarding OAuth2 de 1 clique** (`EXPERIENCE.md` § L32–33, L79–85, L316; `DESIGN.md` § L541)  
+  *Descrição:* A jornada UJ-5 descreve cadastro via CTA de 1 clique pelo Google OAuth2 sem exibir previamente aceite dos Termos de Uso e Política de Privacidade, expondo a base de dados a autuações da ANPD por falta de transparência e consentimento viciado. As rotas `/terms` e `/privacy` também não constam na tabela do `GoRouter`.  
+  *Fix:* Criar as rotas públicas `/terms` e `/privacy` no `GoRouter` e inserir texto legal mandatório junto ao botão OAuth: *"Ao continuar, você concorda com os [Termos de Uso](/terms) e confirma ciência da [Política de Privacidade](/privacy)"*, persistindo o aceite com timestamp.
 
-### Low (11)
+---
 
-**[Flow coverage / review-rubric]** — Subbloco explícito de Caso de Borda & Falha em `UJ-4 (Thiago)` (`EXPERIENCE.md § Key Flows`)
-A jornada `UJ-4` não incluía o subbloco `- **Caso de Borda & Falha:**` ao final do fluxo.
-Fix: Adicionar o subbloco referenciando o fallback para PIN nativo do SO quando a leitura biométrica falha no metrô e a revalidação após `> 2 min` em background. *(Resolvido e aplicado)*
+### High (6)
 
-**[Token completeness / review-rubric & review-accessibility F-03]** — Propriedades `*Dark` explícitas nos objetos de componentes (`DESIGN.md frontmatter`)
-Alguns objetos em `components` declaravam `backgroundDark`, mas omitiam `foregroundDark` ou `borderDark`.
-Fix: Vincular `foregroundDark` e `borderDark` nos componentes do frontmatter e referenciar todos os tokens `*-dark` na seção `## Colors`. *(Resolvido e aplicado)*
+- **[Accessibility — WCAG 1.4.4] Risco de `RenderFlex overflow` no Header Global (`_TopBar`) e `_BottomNavBar` sob Dynamic Type `2.0x`** (`DESIGN.md` § L353–360, L416–420, L520–527; `EXPERIENCE.md` § L182–185)  
+  *Descrição:* Em smartphones compactos (360dp de largura) com Dynamic Type configurado em 2.0x, rótulos de navegação e botões em linha única sofrem quebra de linha com estouro vertical ou corte de texto.  
+  *Fix:* Sob `textScaler > 1.35x`, a `_BottomNavBar` deve comutar para ícones com `LargeContentPresenter` (toque longo expande balão acessível) e a `_TopBar` deve mover badges secundários para o menu do avatar/perfil.
 
-**[Component coverage / review-rubric]** — Papel comportamental explícito de `button-secondary` (`EXPERIENCE.md § Component Patterns`)
-A célula agrupada `button-primary & button-secondary` não explicitava o contrato comportamental de `button-secondary`.
-Fix: Explicitar que `{components.button-secondary}` aciona fluxos auxiliares não-destrutivos (como abrir `{components.b3-ingestion-crud-sheet}` ou o Assistente de 5 Critérios) sem bloquear a ação primária. *(Resolvido e aplicado)*
+- **[Accessibility — WCAG 2.4.1] Ausência de Link de Atalho "Pular para o Conteúdo Principal" (Skip to Main Content) no Flutter Web** (`EXPERIENCE.md` § L77–101, L175–176, L209–216)  
+  *Descrição:* No Desktop Web SPA, a barra lateral possui 18 rotas; usuários de teclado ou leitores de tela precisam pressionar dezenas de vezes a tecla `Tab` a cada navegação para chegar ao conteúdo da página.  
+  *Fix:* Incluir na especificação de `MainLayout` o widget `SkipToContentLink` (`FocusableActionDetector`), acessível no primeiro foco de `Tab` para saltar diretamente ao container principal.
 
-**[State coverage / review-rubric]** — Linha para falha de upload de planilha B3 e abertura offline (`EXPERIENCE.md § State Patterns`)
-Faltava uma linha específica na tabela `## State Patterns` para falha de validação/parsing de planilha B3 e leitura offline.
-Fix: Adicionar linha dedicada em `## State Patterns` cobrindo erro de formato de arquivo B3 em `{colors.semantic-crimson-surface}` e leitura offline do último snapshot cacheado. *(Resolvido e aplicado)*
+- **[Accessibility — WCAG 1.1.1 / 4.1.2] Falta de Contrato Semântico para Barras de Progresso e Gráficos (`CustomPainter`)** (`DESIGN.md` § L472–475; `EXPERIENCE.md` § L186–187)  
+  *Descrição:* As barras horizontais de distribuição de Macro Classes e curvas de rentabilidade em `EvolutionPage` utilizam Canvas/`CustomPainter` sem diretriz explícita de nós `Semantics` para leitores de tela.  
+  *Fix:* Definir em `EXPERIENCE.md.Accessibility Floor` que todo `CustomPainter` de distribuição deve implementar `semanticsBuilder` ou ser envolvido por widget `Semantics` descrevendo percentuais e valores comparativos.
 
-**[Bloat & overspecification / review-rubric]** — Consolidação de detalhes internos de backend (`EXPERIENCE.md § Component Patterns / § Regulatory, Privacy & AI Guardrails`)
-Leve repetição de detalhes internos (`portfolio_state_hash`, `UserDataPurgeAdapter`) entre seções.
-Fix: Concentrar a mecânica técnica na seção `## Regulatory, Privacy & AI Guardrails` e manter as células de tabela enxutas. *(Resolvido e aplicado)*
+- **[Regulatory — CVM 20/2021] Uso do Substantivo "Oportunidade" no Selo do Multiplicador de Graham (`badge-graham-bonus`)** (`DESIGN.md` § L401, L478, L516; `EXPERIENCE.md` § L118, L189)  
+  *Descrição:* O selo semântico renderiza o texto *"Oportunidade Graham + Cerrado"*. O termo possui carga promocional e indutiva de compra, conflitante com o posicionamento algorítmico neutro exigido pela CVM.  
+  *Fix:* Substituir por nomenclatura puramente matemática: *"Margem Graham Positiva"*, *"Fator Graham Elegível (1.30x)"* ou *"Desconto Contábil Graham"*.
 
-**[review-accessibility]** — F-04: Adição de `flex-wrap: wrap` e grid auto-fit nos mockups HTML para reflow até `2.0x` (`mockups/key-*.html`)
-Linhas flex nos mockups estáticos não declaravam `flex-wrap: wrap`.
-Fix: Adicionar `flex-wrap: wrap; gap: 4px 8px;` e `grid-template-columns: repeat(auto-fit, minmax(145px, 1fr))` nos 4 mockups HTML. *(Resolvido e aplicado)*
+- **[Regulatory — B3 Market Data & CDC] Ausência de Aviso de Defasagem de Cotações Intradiárias (Delay de 15 Minutos da B3) Durante o Pregão** (`DESIGN.md` § L390, L469, L486; `EXPERIENCE.md` § L135, L162, L256)  
+  *Descrição:* A especificação cobre cotações de fechamento (D-1), mas omite aviso durante o pregão aberto de que cotações de varejo operam com atraso de no mínimo 15 minutos em relação ao book da B3.  
+  *Fix:* Especificar carimbo de data/hora acompanhado do status: *"Cotações B3 com atraso de 15 min (Última atualização às HH:mm:ss)"* durante o pregão.
 
-**[review-accessibility]** — F-05: Inclusão de `fontVariantNumeric: 'tabular-nums'` em `heading-1..3` (`DESIGN.md frontmatter`)
-Os tokens `heading-1`, `heading-2` e `heading-3` não declaravam `fontVariantNumeric: 'tabular-nums'` para títulos que contêm valores em `R$` ou `%`.
-Fix: Incluir `fontVariantNumeric: 'tabular-nums'` em `heading-1`, `heading-2` e `heading-3`. *(Resolvido e aplicado)*
+- **[Regulatory — CVM] Exposição da Palavra "Recommendations" em Rota e Alias Técnico (`/graham-recommendations`)** (`EXPERIENCE.md` § L70, L89; `DESIGN.md` § L445, L543)  
+  *Descrição:* A menção da palavra em inglês "recommendations" colide diretamente com a tese regulatória perante a CVM de que a plataforma não emite recomendações individuais.  
+  *Fix:* Renomear rota canônica para `/gps-aporte` ou `/alocacao-mensal`, mantendo redirect interno de rede sem exposição pública em links, breadcrumbs ou telemetria.
 
-**[review-accessibility]** — F-06: Altura mínima de toque `48dp` nas linhas interativas do Assistente de 5 Critérios Objetivos (`DESIGN.md § Components`, `mockups/key-diagrama-cerrado.html`)
-As linhas `.criteria-item` no mockup estavam compactas (`~18px`).
-Fix: Especificar e estilizar `.criteria-item` com `min-height: 48px` e controles de pontuação `0 / 1 / 2 pts` acessíveis ao toque. *(Resolvido e aplicado)*
+---
 
-**[review-accessibility]** — F-07: Atributos `aria-label` em todos os `R$ ••••••` e `role="slider"` nos sliders (`mockups/key-dashboard-patrimonial.html`, `mockups/key-diagrama-cerrado.html`)
-Apenas o saldo principal possuía `aria-label` no mockup do Modo Privacidade, e os thumbs de slider não declaravam `role="slider"`.
-Fix: Adicionar `aria-label="Valor monetário oculto pelo Modo Privacidade"` em todas as ocorrências de `R$ ••••••` e `role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="..."` nos sliders. *(Resolvido e aplicado)*
+### Medium (8)
 
-**[review-regulatory]** — F-REG-01: Substituição de "recomendação prioritária" na prosa técnica (`DESIGN.md § Elevation & Depth`)
-A linha 416 de `DESIGN.md` usava o termo *"recomendação prioritária"*.
-Fix: Substituir por *"prioridade matemática nº 1 de alocação do GPS de Aporte"*. *(Resolvido e aplicado)*
+- **[Accessibility — WCAG 2.5.5 / 2.5.8]** Alvos de toque visuais de badges e chips menores que 48x48dp sem preenchimento explícito (`EXPERIENCE.md` § L178–181). *Fix:* Aplicar `MaterialTapTargetSize.padded` ou `BoxConstraints(minWidth: 48, minHeight: 48)` na área de clique.
+- **[Accessibility — WCAG 1.4.1]** Falta de padrões de traço distintos (linhas tracejadas/pontilhadas) para curvas comparativas em gráficos (`DESIGN.md` § L396–403). *Fix:* Utilizar traço contínuo para a carteira e tracejado para benchmarks (IBOV/CDI).
+- **[Accessibility — WCAG 2.4.11]** Espessura de 1.5px na borda de foco de cartões interativos abaixo dos 2px recomendados (`DESIGN.md` § L455). *Fix:* Ajustar indicador de foco para 2px de espessura.
+- **[Accessibility — TTS]** Ausência de padronização na pronúncia semântica de valores monetários em modo normal para sintetizadores de voz (`EXPERIENCE.md` § L180–185). *Fix:* Especificar rótulo `Semantics(label: "X reais e Y centavos")` em modo normal.
+- **[Regulatory — Engenharia Financeira]** Omissão de regra visual e aritmética para empresas com LPA ou VPA negativos na fórmula de Graham (`DESIGN.md` § L486–487; `EXPERIENCE.md` § L139, L253). *Fix:* Exibir badge informativo *"Fórmula de Graham Inaplicável (Empresa com Prejuízo ou PL Negativo)"* e fixar multiplicador em 1.00x.
+- **[Regulatory — LGPD / Marco Civil]** Promessa de expurgo total sem menção à retenção legal obrigatória de registros de conexão por 6 meses pelo Marco Civil da Internet (`EXPERIENCE.md` § L231–235). *Fix:* Incluir na microcópia do modal de exclusão a ressalva do art. 15 da Lei 12.965/2014.
+- **[Regulatory — LGPD Art. 14]** Falta de declaração de representação/guarda legal para dados de dependentes menores de idade no seletor Multi-CPF (`EXPERIENCE.md` § L36, L97, L243–250). *Fix:* Inserir checkbox de declaração de guarda legal ao cadastrar CPF de menor.
+- **[Regulatory — LGPD Art. 18, V]** Ausência de opção de portabilidade de dados (download JSON/CSV) antes do expurgo definitivo (`EXPERIENCE.md` § L231–235). *Fix:* Disponibilizar botão *"Exportar Meus Dados (JSON/CSV)"* no painel de conta.
 
-**[review-regulatory]** — F-REG-02: Explicitação do binding local de `RENDA_FIXA_MANUAL_1` no mockup de IA (`mockups/key-kerno-ai-diagnostico.html`)
-Clarificar no HTML que o código canônico retornado pelo Gemini é traduzido localmente pela UI Flutter.
-Fix: Adicionar `title` explicativo e notação `RENDA_FIXA_MANUAL_1 → CDB Banco X (Local UI)`. *(Resolvido e aplicado)*
+---
+
+### Low (7)
+
+- **[Rubric — Token]** Token `{colors.semantic-crimson-border}` definido no YAML mas não citado nominalmente na prosa de `## Colors` (`DESIGN.md` § L44, L403). *Fix:* Adicionar menção textual como borda sutil de alertas carmesim.
+- **[Rubric — Token]** Chaves `borderDark` e `foregroundDark` ausentes nos nós YAML de badges (`DESIGN.md` § L304–360). *Fix:* Espelhar chaves dark nos nós para geração declarativa de temas Flutter.
+- **[Rubric — Bloat]** Leve redundância de fórmulas algébricas e adapters entre seções de `EXPERIENCE.md` (`EXPERIENCE.md` § L113–117, L195–207). *Fix:* Concentrar detalhes de infraestrutura na seção regulatória.
+- **[Accessibility]** Omissão cosmética de `borderDark` em `risk-ceiling-saturation-card` (`DESIGN.md` § L253). *Fix:* Adicionar propriedade no frontmatter YAML.
+- **[Accessibility]** Ausência de anúncio auditivo assíncrono via `SemanticsService.announce` ao concluir o cálculo do GPS de Aporte (`EXPERIENCE.md` § L188). *Fix:* Disparar anúncio de voz na finalização do cálculo.
+- **[Regulatory]** Expansão de termos proibidos indiretos no guardrail léxico do Kerno AI (`EXPERIENCE.md` § L110, L229). *Fix:* Enriquecer regex com termos como `sobreponder|subponder|imperdivel|lucro certo`.
+- **[Regulatory]** Transparência e consumo auditável em tempo real do contador de vagas do Programa Founders (`EXPERIENCE.md` § L32, L315, L320). *Fix:* Vincular contador da landing page ao endpoint `/api/v1/founders/slots`.
+
+---
 
 ## Reviewer files
-- `review-rubric.md`
-- `review-accessibility.md`
-- `review-regulatory.md`
+
+- [review-rubric.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/review-rubric.md) — Rubric Walker (Pass 1 Cobertura Mecânica & Pass 2 Julgamento)
+- [review-accessibility.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/review-accessibility.md) — Auditoria WCAG 2.1 AA & Ergonomia Mobile
+- [review-regulatory.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/review-regulatory.md) — Auditoria Regulatória CVM (Res. 19/20) & Privacidade LGPD

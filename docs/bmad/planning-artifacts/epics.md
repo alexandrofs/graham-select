@@ -1,860 +1,485 @@
-  - step-03-create-stories (All Epics 1-10)
+---
+status: final
+stepsCompleted:
+  - step-01-validate-prerequisites
+  - step-02-design-epics
+  - step-03-create-stories
+  - step-04-final-validation
 inputDocuments:
-  - docs/bmad/planning-artifacts/prd.md
-  - docs/bmad/planning-artifacts/architecture.md
-  - docs/bmad/planning-artifacts/ux-design-specification.md
+  - docs/bmad/planning-artifacts/prds/prd-graham-select-2026-11-21/prd.md
+  - docs/bmad/planning-artifacts/architecture/architecture-graham-select-2026-11-21/ARCHITECTURE-SPINE.md
+  - docs/bmad/planning-artifacts/architecture/architecture-graham-select-2026-11-21/solution-design.md
+  - docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/DESIGN.md
+  - docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/EXPERIENCE.md
 ---
 
-# graham-select - Epic Breakdown
+# Kerno (ex-Graham Select 2.0) - Epic Breakdown
 
 ## Overview
 
-Este documento fornece a decomposição completa de épicos e histórias para o graham-select, transformando os requisitos do PRD, UX Design e Architecture em histórias implementáveis.
+This document provides the complete epic and story breakdown for Kerno (ex-Graham Select 2.0), decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories.
 
 ## Requirements Inventory
 
 ### Functional Requirements
 
-- **FR1:** Usuários podem criar uma conta na plataforma utilizando e-mail ou provedores sociais (Google/Apple).
-- **FR2:** Usuários podem visualizar e alterar seu nível atual de assinatura (Gratuito ou Premium).
-- **FR3:** O Sistema deve restringir o acesso à recomendação baseada em Inteligência Artificial para contas no tier Gratuito (após o Trial expirar).
-- **FR4:** Usuários Premium podem vincular e visualizar múltiplos perfis/CPFs (Holding Familiar) sob uma mesma conta matriz.
-- **FR5:** O Sistema deve permitir a exclusão definitiva da conta e expurgo total dos dados financeiros atrelados ao CPF (Direito ao Esquecimento LGPD).
-- **FR6:** Usuários podem realizar o upload manual de arquivos extraídos da Área Logada da B3 (PDF, XLS ou XML).
-- **FR7:** O Sistema deve extrair, estruturar e salvar as operações históricas contidas no arquivo em background (Assíncrono).
-- **FR8:** O Sistema deve notificar o usuário sobre o sucesso ou falha do processamento do arquivo importado.
-- **FR9 (New/Post-MVP):** Usuários poderão realizar o upload das Notas de Corretagem padrão (SINACOR) em arquivo PDF para alimentar as operações sem depender exclusivamente dos relatórios da bolsa.
-- **FR10 (New/Post-MVP):** O Sistema permitirá a integração, cadastro manual ou parse de dados oriundos de corretoras internacionais (Nyse/Nasdaq) e carteiras/plataformas de criptoativos, viabilizando a recomendação de alocação de "All-in-One Global Portfolio".
-- **FR11 (Post-MVP):** Usuários poderão conectar suas contas via Open Finance para sincronização automática total de custódia nacional e proventos.
-- **FR12:** Usuários podem visualizar a custódia atualizada do seu portfólio (posições ativas).
-- **FR13:** Usuários podem visualizar o histórico de proventos recebidos e aportes realizados.
-- **FR14:** Usuários podem criar "Tags de Carteira" personalizadas (ex: Aposentadoria, Hold, Dividendos) e associar ativos a essas tags (como "Progressive Profiling" em etapas pós-cadastro).
-- **FR15:** O Sistema deve permitir a visualização de consolidações, rentabilidade e recomendação de IA filtradas especificamente por essas Tags de Carteira.
-- **FR16:** Usuários podem inserir, editar ou deletar (CRUD) operações de ativos manualmente.
-- **FR17:** O Sistema deve manter uma trilha de auditoria imutável (log) de toda criação, alteração ou deleção manual.
-- **FR18:** O Sistema deve acessar via integração (API) as cotações financeiras atualizadas (end-of-day ou real-time) dos ativos custodiados.
-- **FR19:** O Sistema deve acessar e armazenar atualizações dos indicadores fundamentalistas das empresas acompanhadas (P/L, DY, P/VP, etc.).
-- **FR20:** Usuários Premium podem definir uma "Meta Percentual" de alocação por classe de ativos e por ativo específico.
-- **FR21:** O Sistema deve cruzar a carteira atual do usuário, as metas definidas e o Filtro Fundamentalista (Filtro de Graham) para gerar recomendações primárias de compra com o capital disponível (Isolado e configurado via backend em Engine dedicada).
-- **FR22:** O Sistema deve apresentar abertamente o racional matemático por trás da recomendação de ativo gerada pela IA (Explainable AI - Fallback).
-- **FR23:** Usuários podem configurar um valor financeiro alvo como "Meta de Independência Financeira" ou "Renda Passiva Mensal Alvo".
-- **FR24:** O Sistema deve projetar e visualizar o tempo de vida restante (anos/meses) para atingir a meta financeira com base na taxa de rentabilidade e aportes atuais.
-- **FR25:** (Post-MVP) O Sistema enviará alertas acionáveis via WhatsApp contendo resumos do recebimento de proventos e gatilhos de rebalanceamento.
-- **FR26:** Administradores do sistema podem visualizar o volume e as taxas de falha (tracing) das importações de arquivos B3 de forma anonimizada.
-- **FR27:** Administradores podem disparar o reprocessamento em lote (fila manual) de arquivos que falharam no parser após a subida de um hotfix corretivo.
+FR1: Identidade de Marca Unificada Kerno — O sistema deve exibir o nome Kerno, logotipo, paleta cromática institucional, favicon, ícones de aplicativo (iOS/Android), títulos de página, metadados SEO/PWA e textos institucionais atualizados em 100% das telas públicas e autenticadas, operando diretamente sob o domínio oficial `kerno.afsdigital.com.br`, preservando identificadores internos de infraestrutura para evitar recriação destrutiva no Kubernetes.
+FR2: Design System Intergeracional & Acessibilidade Visual — A interface Web e Mobile deve aplicar os tokens do Design System Intergeracional, garantindo contraste mínimo WCAG 2.1 AA (4.5:1 para texto normal e 7:1 AAA para saldos primários), tipografia com numerais tabulares (`tabular-nums`), áreas de toque mínimas de 48x48dp, suporte nativo ao escalonamento de fonte do SO (`textScaler` até 2.0x sem truncamento/ellipsis) e cartões estruturados empilhados sem scroll horizontal móvel.
+FR3: Preservação e Adaptação Visual dos Fluxos Brownfield (Ingestão B3, CRUD Multi-Classe e Multi-CPF) — Os fluxos existentes de importação assíncrona da B3 (com descarte imediato do arquivo bruto com PII), edição manual de posições/proventos nas 5 Macro Classes (Ações BR, FIIs, Renda Fixa / Tesouro, Internacional e Criptoativos) e filtro de CPFs (Holding Familiar com consentimento LGPD expresso) devem operar integralmente sob o Design System Intergeracional e identidade Kerno com 100% dos testes de regressão aprovados.
+FR4: Onboarding com Templates de Alocação e Metas de Macro Classes — O investidor autenticado pode escolher explicitamente (sem pré-seleção automática) um Template de Alocação pré-configurado (*Modelo Equilibrado Cerrado*, *Modelo Moderado Patrimonial*, *Modelo Acumulação Arrojada*) ou definir manualmente as metas percentuais das 5 Macro Classes (soma estrita obrigatória de 100.00% validada visualmente e via HTTP 422), com inicialização das Notas de Qualidade neutras padrão iguais a 6 (sem viés editorial CVM).
+FR5: Gestão de Notas de Qualidade (1–10), Teto Máximo de Risco e Quarentena de Aporte — O investidor pode atribuir ou editar a Nota de Qualidade (1–10) de cada ativo via slider direto ou assistente opcional de autoavaliação com 5 critérios objetivos (Governança, Lucro 5 anos, Dívida, Vantagem Competitiva, Proventos), calculando a meta percentual proporcional dentro da Macro Classe em `BigDecimal`, aplicando o Teto Máximo de Risco (8–10: 10%; 5–7: 6%; 1–4: quarentena 0% de novos aportes) com isenção restrita a títulos soberanos e ETFs de índices amplos, redistribuindo excedentes de teto intra-classe.
+FR6: Cálculo do GPS de Aporte com Regra de Transbordamento (Spillover) — Quando o investidor informa um valor disponível (`R$ X > 0`), o sistema calcula de forma stateless o patrimônio projetado, determina as defasagens relativas de Macro Classes e ativos, e distribui matematicamente o aporte priorizando maiores defasagens sem sugerir venda de posições, resolvendo empates por tie-breaker determinístico (Nota -> Margem Graham -> Déficit monetário -> Ticker A-Z), quantizando cotas inteiras in-loop e fazendo o troco/excedente transbordar para os próximos ativos elegíveis.
+FR7: Integração do Multiplicador de Graham no GPS de Aporte — Durante a priorização de Ações BR, o motor do GPS de Aporte cruza os ativos elegíveis no Diagrama com o cálculo da Margem de Segurança de Graham ($VI = \sqrt{22.5 \times LPA \times VPA}$) e aplica o Multiplicador de Graham configurável (padrão 1.30x) sobre o score de defasagem das ações com margem positiva (Cotação < VI), exibindo o selo *"Elegível com Margem de Segurança (Graham)"* sem jamais ultrapassar o Teto Máximo de Risco.
+FR8: Transparência Matemática e Explicabilidade do Aporte (Conformidade CVM) — Cada simulação gerada pelo GPS de Aporte apresenta um painel expansível (*"Por que estes ativos?"*) detalhando % Atual Pré-Aporte, % Meta Efetiva, % Projetada Pós-Aporte, Nota, Teto de Risco, e dados de Graham (LPA, VPA, VI, Margem), acompanhado de disclaimer de conformidade CVM permanente informando que se trata de simulação matemática automatizada baseada nas metas do próprio investidor.
+FR9: Geração de Diagnóstico Estruturado da Carteira via Kerno AI — O investidor pode solicitar sob demanda diagnóstico completo integrado ao Google Cloud Vertex AI / Gemini Enterprise (modelo pinado `gemini-2.5-flash` com Zero Data Retention) via porta agnóstica `AiPortfolioAnalyzerPort`, gerando 4 seções estruturadas (Resumo Executivo, Pontos Fortes, Alertas de Risco/Concentração, Racional do Plano de Aporte), com validador determinístico de ancoragem numérica e de entidades, cache de 24h por `portfolio_state_hash`, rate limiting (5/dia e 30/mês por usuário Pro/Founder) e degradação graciosa com fallback quantitativo local em caso de erro ou timeout > 15s.
+FR10: Sanitização LGPD de PII, ZDR e Guardrails Regulatórios CVM no Kerno AI — Toda requisição ao LLM passa pelo Sanitizador LGPD de IA que remove 100% dos dados pessoais e valores absolutos em R$, valida tickers contra allowlists da B3/Exterior e tabelas fechadas de Tesouro/Cripto, convertendo ativos manuais em rótulos canônicos (`RENDA_FIXA_MANUAL_1`), além de aplicar guardrail léxico pós-geração com bloqueio de modos imperativos/exortativos de compra/venda da CVM, ativando fallback determinístico imediato sem retry síncrono.
+FR11: Autenticação Mobile OAuth2/Google com Persistência Segura e Desbloqueio Biométrico — Aplicativo Mobile (iOS e Android) autentica via Google Sign-In / OAuth2 + JWT, armazena tokens exclusivamente via `flutter_secure_storage` (Keychain / Keystore), exige desbloqueio biométrico nativo via `local_auth` na abertura ou após 2 minutos de inatividade em background, com suporte a fallback de credencial do SO e cache offline criptografado do Dashboard e Diagrama.
+FR12: Dashboard Patrimonial Mobile com Modo Privacidade e Proteção de Snapshot em Background — O Dashboard Patrimonial apresenta patrimônio consolidado, rentabilidade e gráfico de Macro Classes atual vs. meta, com toggle de Modo Privacidade no cabeçalho mascarando valores monetários (`R$ ••••••`) persistido localmente, e proteção nativa de snapshot (`FLAG_SECURE` / overlay de máscara) ao entrar em background para evitar exposição no App Switcher do SO.
+FR13: Arquitetura de Navegação Modular com Feature Flags (Pronta para Controle de Gastos) — Navegação principal (`BottomNavigationBar` no Mobile e Sidebar na Web) estruturada com 4 áreas no lançamento (Carteira, GPS de Aporte, Kerno AI, Diagrama) e slot pré-mapeado para Controle de Gastos (`features/expenses`) sob feature flag `enable_expenses_module = false`, com contrato de entrada do GPS de Aporte desacoplado para aceitar tanto valor manual quanto saldo livre mensal futuro.
+FR14: Landing Page Kerno de Alta Conversão com Destaque do Programa Founders e Isolamento SEO — Landing Page pública servida em HTML estático/SSR leve com First Contentful Paint < 1.2s sob a marca Kerno, com seção de destaque do Programa Founders (primeiras 250 contas com acesso Pro vitalício), demonstração visual do GPS, Diagrama e Kerno AI, disclaimers CVM no rodapé e isolamento SEO via `robots.txt` bloqueando rotas autenticadas.
+FR15: Elegibilidade ao Status de Membro Founder (Acesso Vitalício) e Camadas Comerciais (Free vs. Pro com Trial de 90 Dias) — Concessão atômica de `plan_tier = FOUNDER_LIFETIME` com selo Founder e acesso gratuito vitalício a todos os recursos Pro para os primeiros cadastros enquanto `founder_slots_remaining > 0` (lote padrão de 250 vagas), concedendo PLG Trial de 90 dias para cadastros posteriores, com transição não-destrutiva para Free (Resumo Executivo determinístico, sem chamadas ao LLM e sem perda de dados cadastrados).
+FR16: Expurgo Integral LGPD das Entidades do Diagrama do Cerrado e Kerno AI (Direito ao Esquecimento) — Quando o usuário solicita exclusão de conta ou exclusão granular de CPF secundário, o `UserDataPurgeAdapter` cancela jobs assíncronos e realiza hard-delete atômico em cascata de todas as tabelas (Macro Classes, Notas de Qualidade, Snapshots/Diagnósticos de IA, caches e contadores), validado obrigatoriamente no teste de integração `AccountDeletionIT`.
+FR17: Proteção contra Anomalias de Cotações (Circuit Breaker de Dados de Mercado) — Validação de variações diárias > 40% não ajustadas em renda variável B3 e Exterior, ativando o estado `QUARENTENA_EVENTO_CORPORATIVO`, congelando a última cotação válida para patrimônio, suspendendo simulações de aporte no ticker no GPS e oferecendo fluxo de resolução manual para o usuário confirmar ou retomar cotação.
 
 ### NonFunctional Requirements
 
-- **NFR1 (Tempo de Parse):** O processamento assíncrono do arquivo bruto da B3 (PDF/XLS/XML) e a consolidação inicial da carteira no banco de dados deve ocorrer em até `< 5 minutos` (P95) para arquivos extensos.
-- **NFR2 (Responsividade UX):** Como o front-end é construído utilizando renderização com base nativa (Flutter), as transições visuais (Dashboard, Portfólio, Sugestões) não devem exceder `< 300ms` via requisições REST/GraphQL, garantindo a sensação de fluidez ("app-like").
-- **NFR3 (Recomendação IA):** O cálculo da recomendação de aportes, que cruza saldos (Tenant), API de Fundamentos e as Tags do Usuário, deve responder em `< 2 segundos`.
-- **NFR4 (Isolamento de Tenant - LGPD):** Nenhuma query ou extração do backend deve ter arquitetura suscetível ao vazamento acidental de histórico de ordens entre IDs (Implementação estrutural de Multi-tenancy lógica via Row-Level Security no DB).
-- **NFR5 (Data Sanitization & GDPR):** A solicitação de fechamento da conta deve invocar em menos de 24 horas um expurgo efetivo (Hard Delete) dos espelhos de transações B3 e recomendações.
-- **NFR6 (Criptografia):** Elementos sensíveis (PIIs, saldos reais, e posteriormente tokens Open Finance) devem habitar banco cifrado em repouso (AES-256) e transitar criptografados (TLS 1.3).
-- **NFR7 (Ingestão Elástica):** A arquitetura do parser e do *Engine Core* da IA precisará tolerar e isolar cargas em filas elásticas (bus/workers) caso o volume de upload simultâneo ocorra todo mês nos "dias mundiais de aporte" (ex: dia útil 05 ou dia 10 de recebimento de P/L). A fila pesada não pode quebrar o app visual do NFR2.
-- **NFR8 (Graceful Degradation):** Em caso de queda momentânea da API terceira de Cotações ou do módulo da B3 parceira, o aplicativo deve continuar operável. O front-end exibirá as posições com um indicador tático de "Cotação em Cache - Desatualizado" no último fechamento (D-1/D-X), permitindo navegação sem telas "em branco".
+NFR1: Velocidade do GPS de Aporte — O cálculo completo do GPS de Aporte (cruzando Diagrama do Cerrado, Regra de Transbordamento e Multiplicador de Graham) deve responder em < 1.0 segundo (P95) para carteiras de até 100 ativos.
+NFR2: Fluidez de UI Web e Mobile — As transições de tela e ativação do Modo Privacidade no Flutter devem ocorrer a 60fps (< 300ms de resposta visual), e o carregamento do Dashboard Patrimonial autenticado deve concluir em < 1.5 segundo (P95) no Mobile nativo e < 2.5 segundos em cold-start no Web.
+NFR3: Latência e Cache do Kerno AI — Leituras de diagnósticos cacheados do Kerno AI devem responder em < 400ms (P95); novas gerações via LLM devem retornar em < 10 segundos (P95), com timeout rígido e fallback determinístico em 15 segundos.
+NFR4: Aritmética Decimal Estrita — 100% dos cálculos patrimoniais, pesos do Diagrama, Teto Máximo de Risco, Margem de Graham e distribuições do GPS devem utilizar tipos decimais exatos (`BigDecimal` com `RoundingMode.HALF_EVEN` no Java e `NUMERIC(19,4)` no PostgreSQL), sendo proibido uso de float/double.
+NFR5: Isolamento Multi-Tenant e Criptografia — Todos os dados de carteira, metas do Diagrama e diagnósticos de IA devem respeitar isolamento estrito por `user_id` no banco, com criptografia TLS 1.3 em trânsito, AES-256 em repouso e armazenamento local restrito ao Keychain/Keystore via `flutter_secure_storage`.
+NFR6: Rastreabilidade e Logs Obrigatórios — Toda entrada de requisição REST, consumo de filas Kafka e chamadas externas deve registrar log estruturado contextual (sem vazar PII/tokens); capturas e lançamentos de exceção devem ser logados no nível ERROR com stack trace completo.
+NFR7: Imutabilidade de Migrations Liquibase — Nenhuma migration Liquibase existente pode ser alterada retroativamente; todas as novas tabelas e colunas devem ser criadas via novos changesets incrementais e idempotentes.
+NFR8: Paridade Helm e CI/CD — Todas as novas variáveis de ambiente e propriedades (como chaves de IA, quotas de rate limit, feature flags) devem ser obrigatoriamente refletidas em `application.yml`, no chart Helm (`helm/graham-select/values.yaml`, `configmap.yaml`, `secret.yaml`) e em `.github/workflows/deploy.yml`, mantendo validação `*IT.java` e `flutter analyze` com zero erros/warnings.
 
 ### Additional Requirements
 
-**Arquitetura:**
-- Stack: Java 21, Spring Boot 3.4.13, Flutter, Apache Kafka, MySQL
-- Projeto multi-module Maven (api, valuation-service, common)
-- Clean Architecture com regra de dependência (domain ← application ← infrastructure)
-- Google Sign-In via Firebase Auth (frontend Flutter + backend validação JWT)
-- 5 tópicos Kafka: `file-uploaded`, `trade-extracted`, `trade-extracted-dlq`, `valuation-requested`, `valuation-completed`
-- Liquibase para database migrations
-- RFC 7807 ProblemDetail para error handling
-- REST com versionamento por path `/api/v1/`
-- CI/CD via GitHub Actions
-- Docker Compose para deploy MVP
-- Observabilidade: Spring Boot Actuator + Micrometer
-- Cache: Spring Cache + Caffeine (in-memory, TTL 24h para rankings)
-- Rate limiting: Bucket4j
-- Use Cases como POJOs com método `execute()` — sem Spring annotations
+- Starter Template / Greenfield vs. Brownfield: Arquitetura brownfield construída diretamente sobre a base estável do Graham Select 1.0, preservando os fluxos assíncronos Kafka e o modelo relacional existente.
+- Padrão Arquitetural Backend: Arquitetura Hexagonal (Ports & Adapters) em Java 21 / Spring Boot 3.4.13, isolando o núcleo matemático (`common/domain`) de adaptadores web e de persistência.
+- Portas e Adaptadores de Domínio: Porta de IA `AiPortfolioAnalyzerPort` implementada pelo adaptador corporativo `VertexAiGeminiAdapter` (Google Cloud Vertex AI com ZDR e modelo fixo `gemini-2.5-flash`), `MarketDataPort` para cotações e `UserDataPurgeAdapter` para expurgo LGPD.
+- Padrão Arquitetural Frontend: Flutter SDK ^3.11.0 / Dart 3.7+ estruturado no padrão Feature-First com Provider e GoRouter, gerando binários nativos ARM64 para iOS/Android e SPA Web.
+- Persistência Relacional e Migrations: Criação incremental de tabelas `tb_cerrado_preferences`, `tb_cerrado_asset_grade`, `tb_ai_diagnostic_cache`, `tb_ai_usage_counter` e colunas de controle de Founders em `tb_user`, com índices compostos por `user_id`.
+- Estratégia de Cache e Hash de Estado: Cache-aside com chave SHA-256 baseada no `portfolio_state_hash` (composto por tickers, quantidades, metas e notas) com TTL de 24 horas.
+- Header HTTP de Rastreabilidade e Interceptor PII: Propagação obrigatória do cabeçalho `X-Correlation-ID` em todas as camadas e interceptor de segurança para sanitização de requisições.
+- Concorrência Transacional de Founders: Decremento atômico de `founder_slots_remaining` com trava pessimista/otimista para garantir o teto exato de 250 contas vitalícias.
 
-**UX Design:**
-- Onboarding bifurcado: Upload B3 ou Inserção Manual como caminhos equivalentes
-- 7 componentes custom: `B3UploadZone`, `ManualOperationEntry`, `PortfolioKpiCard`, `FinancialDataTable`, `ReasoningBox`, `AnalyticalLensTabs`, `AnomalyAlert`
-- Material Design 3 customizado com paleta Navy Blue (#1B2A4A), Emerald (#10B981), Amber Gold (#F59E0B)
-- Desktop-first responsivo com breakpoints: Desktop (≥1024px), Tablet (768-1023px), Mobile (<768px)
-- Acessibilidade WCAG 2.1 AA obrigatória (contraste, teclado, screen readers)
-- Dark/Light mode nativo via `ColorScheme.fromSeed()`
-- Skeleton screens obrigatórios (nunca spinner genérico)
-- Tipografia: DM Sans (headers) + Inter (body/dados) + JetBrains Mono (valores financeiros)
-- Sidebar colapsável (NavigationRail desktop) + NavigationBar (bottom mobile)
-- Feature-first structure: `lib/src/features/{feature}/data|domain|presentation`
-- Animações: fade+slide 300ms, crossfade 250ms, sidebar 200ms
+### UX Design Requirements
+
+UX-DR1: Tokens de Cores e Temas do Design System Intergeracional — Implementação dos tokens Light-First (`#F8FAFC`, `#FFFFFF`, brand-primary `#4F46E5`) e Dark Mode nativo (`#0B0F19`, `#111827`, brand-primary-dark `#818CF8`), paleta semântica esmeralda/âmbar/carmesim e founder-gold.
+UX-DR2: Rampa Tipográfica Escalonável e Numerais Tabulares — Definição das 11 escalas tipográficas (`display-wealth` a `caption`) com famílias Plus Jakarta Sans e Inter, configuração obrigatória de `fontVariantNumeric: 'tabular-nums'` e suporte a `textScaler` de 1.0x até 2.0x sem truncamento (`TextOverflow.ellipsis` proibido em cifras e tickers).
+UX-DR3: Acessibilidade de Toque e Contraste WCAG — Garantia de áreas de toque mínimas de 48x48dp para todos os botões, chips e sliders, com contraste mínimo 4.5:1 para textos e 7.0:1 (WCAG AAA) para cifras patrimoniais e saldos principais.
+UX-DR4: Componente Wealth Hero Card — Cartão elevado com contraste 17.85:1 AAA para patrimônio total, rentabilidade, suporte nativo ao Modo Privacidade (`R$ ••••••`), indicador discreto de cotações B3 (delay 15 min ou D-1) e reflow vertical sob fontes ampliadas.
+UX-DR5: Componente Macro Class Distribution Card — Card analítico de exposição das 5 Macro Classes e Subclasses com barras de progresso duplo (atual vs. meta), sem rolagem horizontal em viewports móveis (`< 600dp`).
+UX-DR6: Componente Contribution GPS Card — Cartão estruturado de sugestão de aporte por ativo destacando quantidade inteira de ações/cotas, valor alocado em R$, percentuais pré e pós-aporte e selo visual de bonificação de Graham.
+UX-DR7: Componente Math Transparency Accordion — Acordeão expansível *"Por que estes ativos?"* detalhando % atual pré-aporte, % meta efetiva, % projetada pós-aporte, Nota de Qualidade, Teto de Risco, métricas de Graham (LPA, VPA, VI) e disclaimer regulatório CVM.
+UX-DR8: Componente Risk Ceiling Saturation Card — Card semântico em âmbar informando com clareza o saldo excedente protegido por teto de risco (`unallocatedRiskProtectedBalance`), classes vazias e troco residual.
+UX-DR9: Componente Cerrado Template Selector Card — Seletor visual dos 3 templates pré-configurados (*Equilibrado*, *Moderado*, *Acumulação*) com destaque de borda/fundo na seleção, inicialização de notas neutras `= 6` e trava de soma 100%.
+UX-DR10: Componente Cerrado Quality Card — Card de ativo com slider de toque 48x48dp para Nota de Qualidade (1–10), acionador do assistente de autoavaliação com 5 critérios objetivos e badge de Quarentena de Aporte.
+UX-DR11: Componente Kerno AI Diagnostic Card — Cartão estruturado para os 4 blocos analíticos (Resumo Executivo, Pontos Fortes, Alertas de Risco/Concentração, Racional do Plano de Aporte), com badges monetários locais determinísticos em R$ e narrativa do LLM em %, botões de feedback útil/não-útil (👍/👎) e indicador de cota diária FinOps.
+UX-DR12: Componente B3 Ingestion CRUD Sheet — Bottom Sheet responsivo de nível único para upload assíncrono de planilhas B3 e formulário de cadastro/edição manual de ativos nas 5 Macro Classes em moeda nacional (BRL).
+UX-DR13: Componentes de Entrada Monetária e Badges Semânticos — Implementação do widget `InputCurrency` (com tipografia `metric-hero`), `PrivacyToggleButton`, `BadgeGrahamBonus`, `BadgeQuarantine`, `BadgeFounder` e `CvmRegulatoryFooter` afixado nas telas de recomendação e ranking.
+UX-DR14: Reestruturação da Navegação e Reestilização de 100% das 18 Rotas Legadas — Migração da navegação móvel para `BottomNavigationBar` de 4 abas (Carteira, GPS, Kerno AI, Diagrama) + 5º slot modular de gastos sob feature flag, sidebar desktop agrupada com `SkipToContentLink`, e reestilização completa de todas as 18 páginas existentes no `GoRouter` para o Design System Intergeracional.
+UX-DR15: Proteção de Privacidade Mobile no App Switcher — Máscara automática de privacidade com `FLAG_SECURE` no Android e overlay nativo no iOS sempre que o aplicativo entrar em estado inativo/segundo plano (`AppLifecycleState.inactive`/`paused`).
 
 ### FR Coverage Map
 
-| FR | Épico | Descrição |
-|---|---|---|
-| FR1 | Epic 1 | Criação de conta |
-| FR2 | Epic 1 | Gestão de assinatura |
-| FR3 | Epic 1 | Restrição por tier |
-| FR4 | Epic 7 | Multi-CPF (Post-MVP) |
-| FR5 | Epic 1 | Exclusão LGPD |
-| FR6 | Epic 2 | Upload B3 |
-| FR7 | Epic 2 | Processamento assíncrono |
-| FR8 | Epic 2 (Story 2.2) | Notificação processamento |
-| FR9 | Epic 9 | Notas corretagem (Post-MVP) |
-| FR10 | Epic 9 | Internacional/Cripto (Post-MVP) |
-| FR11 | Epic 9 | Open Finance (Post-MVP) |
-| FR12 | Epic 3 | Custódia atualizada |
-| FR13 | Epic 3 | Histórico proventos |
-| FR14 | Epic 8 (Story 8.1) | Tags de Carteira (Post-MVP) |
-| FR15 | Epic 8 (Story 8.2) | Filtros por Tags (Post-MVP) |
-| FR16 | Epic 2 | CRUD operações manuais |
-| FR17 | Epic 2 | Trilha de auditoria |
-| FR18 | Epic 4 | Cotações API |
-| FR19 | Epic 4 | Indicadores fundamentalistas |
-| FR20 | Epic 4 | Meta percentual de alocação |
-| FR21 | Epic 4 | Motor de recomendação Graham |
-| FR22 | Epic 4 | Explainable AI |
-| FR23 | Epic 5 | Meta financeira |
-| FR24 | Epic 5 | Projeção tempo de vida |
-| FR25 | Epic 10 | WhatsApp (Post-MVP) |
-| FR26 | Epic 6 | Painel admin |
-| FR27 | Epic 6 | Reprocessamento lote |
-
-### Stories Adicionais (sem FR próprio no PRD)
-
-> Estas stories não mapeiam diretamente a um FR do PRD mas são necessárias para completar a experiência do produto ou suportar outros FRs.
-
-| Story | Épico | Descrição | Vinculação |
-|-------|-------|-----------|------------|
-| Story 1.5 | Epic 1 | Perfil do Investidor (KYC/Suitability) | Calibra FR20 (meta de alocação) e FR21 (motor Graham) com o perfil de risco do usuário |
+FR1: Epic 1 - Identidade de Marca Unificada Kerno em todas as superfícies públicas e autenticadas
+FR2: Epic 2 - Design System Intergeracional, acessibilidade visual e suporte a textScaler até 2.0x
+FR3: Epic 2 - Preservação e adaptação dos fluxos B3, CRUD multi-classe e multi-CPF com consentimento LGPD
+FR4: Epic 3 - Onboarding com Templates de Alocação e metas das Macro Classes (soma estrita 100%)
+FR5: Epic 3 - Gestão de Notas de Qualidade (1–10), Teto Máximo de Risco e Quarentena de Aporte
+FR6: Epic 4 - Cálculo stateless do GPS de Aporte com Regra de Transbordamento (Spillover)
+FR7: Epic 4 - Integração do Multiplicador de Graham (1.30x) no GPS de Aporte
+FR8: Epic 4 - Transparência matemática ("Por que estes ativos?") e conformidade regulatória CVM
+FR9: Epic 5 - Diagnóstico estruturado da carteira via Kerno AI (Vertex AI Enterprise ZDR)
+FR10: Epic 5 - Sanitização LGPD de PII, allowlists de tickers e guardrails regulatórios CVM pós-geração
+FR11: Epic 2 - Autenticação Mobile Google OAuth2 + JWT, flutter_secure_storage e biometria nativa
+FR12: Epic 2 - Dashboard Patrimonial com Modo Privacidade e proteção de snapshot no App Switcher
+FR13: Epic 2 - Navegação modular com feature flags (slot desacoplado para Controle de Gastos)
+FR14: Epic 1 - Landing Page Kerno de alta conversão, destaque do Programa Founders e isolamento SEO
+FR15: Epic 1 - Concessão atômica do status Membro Founder e camadas comerciais (Free vs. Pro Trial 90d)
+FR16: Epic 5 - Expurgo integral LGPD de dados e novas entidades (Direito ao Esquecimento / AccountDeletionIT)
+FR17: Epic 4 - Proteção contra anomalias de cotações (Circuit Breaker de mercado e quarentena de evento)
 
 ## Epic List
 
-### Épicos MVP
+### Epic 1: Rebranding Kerno, Vitrine Pública & Programa Founders
+Novos usuários e visitantes conhecem a nova marca Kerno através da Landing Page de alta conversão (`kerno.afsdigital.com.br`), garantem sua vaga exclusiva de Membro Founder (com acesso Pro vitalício gratuito auditado atômica e transacionalmente) e realizam cadastro/login com 1 clique via Google OAuth2 com termos de conformidade e privacidade claros.
+**FRs covered:** FR1, FR14, FR15.
 
-#### Epic 1: Fundação & Autenticação
-O usuário consegue criar conta, fazer login via Google e ter seu perfil provisionado automaticamente com segurança.
+### Epic 2: Design System Intergeracional, Experiência Mobile & Dashboard Patrimonial
+Investidores acessam seu patrimônio consolidado no celular (iOS/Android) ou no navegador desktop com desbloqueio biométrico nativo (FaceID/Digital), tipografia de alto contraste escalonável até 2.0x sem truncamento, proteção total no dia a dia (Modo Privacidade `R$ ••••••` e Máscara no App Switcher do SO), navegação modular desacoplada e gestão contínua de posições multi-classe e multi-CPF (Holding Familiar).
+**FRs covered:** FR2, FR3, FR11, FR12, FR13.
 
-**FRs cobertos:** FR1, FR2, FR3, FR5
-**NFRs impactados:** NFR4 (isolamento tenant), NFR6 (criptografia)
-**Stories adicionais:** Story 1.5 (KYC/Suitability — sem FR próprio; calibra o motor de alocação do Epic 4)
-**Notas:** Google Sign-In via Firebase Auth. Auto-provisioning no primeiro acesso. Subscription tier logic (Gratuito/Premium/Trial) e exclusão LGPD.
+### Epic 3: Alocação Estratégica pelo Diagrama do Cerrado
+O investidor estrutura sua estratégia patrimonial de longo prazo sem paralisia de tela em branco a partir de Templates de Alocação pré-configurados (Equilibrado, Moderado, Acumulação), define metas das 5 Macro Classes (Ações BR, FIIs, Renda Fixa / Tesouro, Internacional, Criptoativos) com validação estrita de soma 100%, e avalia a qualidade de cada ativo (Notas 1–10) com proteção automática por Teto Máximo de Risco e Quarentena de Aporte.
+**FRs covered:** FR4, FR5.
 
----
+### Epic 4: GPS de Aporte Inteligente com Bônus de Graham e Resiliência
+No dia do aporte mensal, o investidor digita o valor disponível em R$ e recebe em menos de 1 segundo a distribuição matemática simulada exata de onde alocar — priorizando maiores defasagens sem sugerir venda de ativos, com cotas inteiras e transbordamento automático (spillover), bonificação de Graham (1.30x) para ações descontadas, painel de transparência matemática explicativa ("Por que estes ativos?") e proteção contra anomalias de mercado (circuit breaker).
+**FRs covered:** FR6, FR7, FR8, FR17.
 
-#### Epic 2: Ingestão de Dados — Upload B3 & Entrada Manual
-O usuário consegue alimentar sua carteira com dados reais — arrastando o arquivo da B3 ou digitando operações manualmente — e recebe feedback sobre o resultado.
+### Epic 5: Diagnóstico de Carteira Assistido por IA (Kerno AI) & Conformidade LGPD
+O investidor obtém auditoria executiva de riscos, concentração e coerência da sua carteira em linguagem natural através do Kerno AI em 4 cartões objetivos, com garantia inegociável de privacidade de dados (zero PII no LLM sob contrato Google Cloud Vertex AI Enterprise ZDR), guardrail regulatório CVM (sem imperativos de compra/venda) e conformidade integral com a LGPD através do expurgo de dados em cascata (Direito ao Esquecimento).
+**FRs covered:** FR9, FR10, FR16.
 
-**FRs cobertos:** FR6, FR7, FR8, FR16, FR17
-**NFRs impactados:** NFR1 (processamento < 5min), NFR7 (ingestão elástica)
-**Notas:** Padrão Splitter via Kafka. Onboarding bifurcado (Upload B3 / Manual). Componentes `B3UploadZone` e `ManualOperationEntry`. Trilha de auditoria para CRUD manual.
+## Epic 1: Rebranding Kerno, Vitrine Pública & Programa Founders
 
----
+Novos usuários e visitantes conhecem a nova marca Kerno através da Landing Page de alta conversão (`kerno.afsdigital.com.br`), entendem a proposta de valor (Cerrado + Graham + IA), garantem vaga de Membro Founder (com acesso Pro vitalício gratuito auditado de forma atômica em lote de 250 vagas) e realizam cadastro/login com 1 clique via Google OAuth2 com consentimento aos Termos de Uso e Política de Privacidade, sob isolamento SEO estrito.
 
-#### Epic 3: Portfólio & Dashboard Consolidado
-O usuário visualiza todo seu patrimônio consolidado — posições ativas, proventos, aportes — com atualizações em tempo real e dashboard rico.
+### Story 1.1: Identidade Visual Institucional Kerno e Migração de Metadados Públicos
 
-**FRs cobertos:** FR12, FR13
-**NFRs impactados:** NFR2 (responsividade < 300ms), NFR8 (graceful degradation)
-**Notas:** Componentes `PortfolioKpiCard`, `FinancialDataTable`. Skeleton screens. Trust indicators ("Atualizado em DD/MM").
-
----
-
-#### Epic 4: Market Data & Motor de Recomendação (Filtro de Graham)
-O usuário Premium recebe recomendações de aporte baseadas no Filtro de Graham com transparência total do raciocínio matemático.
-
-**FRs cobertos:** FR18, FR19, FR20, FR21, FR22
-**NFRs impactados:** NFR3 (recomendação < 2s), NFR8 (cache de cotações)
-**Notas:** Integração API de cotações. Indicadores fundamentalistas. Motor de ranking via `valuation-service` + Kafka. Componente `ReasoningBox` (Explainable AI).
-
----
-
-#### Epic 5: Metas & Projeção Financeira (Time-to-Goal)
-O usuário configura suas metas de independência financeira e visualiza projeções de quanto tempo falta para atingi-las.
-
-**FRs cobertos:** FR23, FR24
-**Notas:** Gamificação via "relógio motivacional" de anos/meses restantes. Projeção baseada em yield atual e aportes.
-
----
-
-#### Epic 6: Administração & Operações
-Administradores podem monitorar a saúde do sistema e reprocessar importações falhas.
-
-**FRs cobertos:** FR26, FR27
-**Notas:** Painel admin com métricas anonimizadas. Reprocessamento via dead-letter queue do Kafka.
-
----
-
-### Épicos Post-MVP
-
-#### Epic 7: Holding Familiar (Multi-CPF)
-Usuários Premium podem vincular múltiplos CPFs e alternar entre visões familiares/individuais.
-
-**FRs cobertos:** FR4
-**Notas:** "Lentes Analíticas" com filtro por Tag/CPF. Componente `AnalyticalLensTabs`.
-
----
-
-#### Epic 10: Relatórios & Benchmarking
-Funcionalidades de comparação de performance e relatórios fiscais (IR).
-**FRs cobertos:** FR12, FR13
-
-#### Epic 11: Notificações Multicanal
-Alertas via Web Push e WhatsApp (Post-MVP).
-**FRs cobertos:** FR25
-
----
-
-
----
-
-## Detailed Stories
-
-### Epic 1: Fundação & Autenticação
-**Related PRD Requirements:** FR1, FR2, FR3, FR5
-**NFRs impactados:** NFR4 (Disponibilidade), NFR5 (LGPD Expurge), NFR6 (Segurança/Logs)
-
-
-**Goal:** O usuário consegue criar conta, fazer login via Google e ter seu perfil provisionado automaticamente com segurança.
-
-#### Story 1.1: Registro e Login via Google Sign-In
-
-**Related FRs/NFRs:** FR1
-
-**As a** investidor pessoa física,
-**I want** me cadastrar e fazer login usando minha conta Google,
-**So that** eu acesse a plataforma de forma rápida e segura, sem precisar criar mais uma senha.
+As a visitante ou investidor da plataforma,
+I want visualizar a nova identidade de marca Kerno em 100% dos textos institucionais, logotipos, favicons e metadados públicos,
+So that eu reconheça a marca oficial Kerno com clareza em todas as superfícies e canais de acesso.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário acessa a tela de login pela primeira vez
-- **When** ele clica em "Entrar com Google" e autoriza o acesso
-- **Then** o sistema cria a conta com dados do perfil Google (nome, e-mail, foto)
-- **And** provisiona automaticamente o tenant isolado (Row-Level Security)
-- **And** define o tier como "Trial" com validade de 30 dias
-- **And** garante que este log seja imutável (sem API de deleção/edição para o log)
+**Given** que um visitante acessa a aplicação web sob o domínio oficial `kerno.afsdigital.com.br`
+**When** a página inicial ou qualquer tela pública é renderizada
+**Then** o título HTML, favicons, meta tags OpenGraph e textos visíveis exibem *"Kerno — O núcleo inteligente do seu dinheiro"*, sem menção ao nome legado *"Graham Select"* (exceto quando em referência à fórmula de Benjamin Graham)
+**And** identificadores internos de infraestrutura (como diretório de chart Helm `helm/graham-select/` e recursos de banco) permanecem intactos para evitar recriação destrutiva no Kubernetes.
 
-- **Given** que o usuário já possui conta
-- **When** ele clica em "Entrar com Google"
-- **Then** o sistema valida o JWT Firebase e inicia a sessão
-- **And** redireciona para o dashboard principal
+### Story 1.2: Infraestrutura de Controle Transacional do Lote de Membros Founders
 
-- **Given** que o token JWT é inválido ou expirado
-- **When** o sistema tenta validar a autenticação
-- **Then** retorna erro RFC 7807 (401 Unauthorized)
-- **And** redireciona para a tela de login
-
-#### Story 1.2: Gestão de Tier de Assinatura
-
-**Related FRs/NFRs:** FR2, FR3
-
-**As a** usuário da plataforma,
-**I want** visualizar meu nível atual de assinatura (Trial/Gratuito/Premium),
-**So that** eu saiba quais funcionalidades estão disponíveis para mim.
+As a sistema Kerno,
+I want gerenciar o lote inicial de vagas Founders com trava atômica transacional no banco de dados e expor um endpoint público de consulta de vagas,
+So that exatamente os primeiros usuários cadastrados recebam o plano Pro vitalício gratuito (`FOUNDER_LIFETIME`) sem condições de corrida.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário está autenticado
-- **When** ele acessa a página de perfil/assinatura
-- **Then** o sistema exibe o tier atual (Trial, Gratuito ou Premium)
-- **And** se Trial, mostra os dias restantes até expiração
-- **And** exibe um comparativo de funcionalidades por tier
+**Given** uma nova migration incremental do Liquibase (`tb_user` e `tb_founder_quota`)
+**When** aplicada no banco de dados
+**Then** a tabela de controle de cota é criada com a coluna `founder_slots_remaining` inicializada com o teto configurável (padrão de 250 vagas) e `tb_user` passa a suportar os campos `commercial_plan` e `trial_expires_at`
+**And** a requisição `GET /api/v1/founders/slots` retorna HTTP 200 com JSON `{ "totalSlots": 250, "remainingSlots": X, "isLoteActive": true/false }`, registrando log estruturado da entrada sem expor PII
+**And** quando múltiplos cadastros ocorrem simultaneamente, a transação decrementa a cota com bloqueio atômico (`UPDATE tb_founder_quota SET founder_slots_remaining = founder_slots_remaining - 1 WHERE founder_slots_remaining > 0`), concedendo `commercial_plan = 'FOUNDER_LIFETIME'` apenas a quem obteve sucesso no decremento, enquanto os cadastros excedentes recebem automaticamente `commercial_plan = 'PRO_TRIAL'` com expiração em 90 dias.
 
-- **Given** que o período de Trial de 30 dias expirou
-- **When** o sistema verifica o tier do usuário
-- **Then** atualiza automaticamente o tier para "Gratuito"
-- **And** restringe acesso às funcionalidades Premium (ex: motor de recomendação)
+### Story 1.3: Landing Page Pública de Alta Conversão com Destaque do Programa Founders
 
-#### Story 1.3: Restrição de Funcionalidades por Tier
-
-**Related FRs/NFRs:** FR3
-
-**As a** sistema,
-**I want** controlar o acesso a funcionalidades Premium baseado no tier do usuário,
-**So that** apenas assinantes Premium acessem recomendações de IA e metas de alocação.
+As a visitante interessado em alocação patrimonial,
+I want acessar uma Landing Page rápida e responsiva que explique o método Kerno, mostre o contador de vagas de Membro Founder e isole áreas privadas do SEO,
+So that eu compreenda o valor da plataforma em menos de 1 minuto e decida criar minha conta.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário tem tier "Gratuito"
-- **When** ele tenta acessar o motor de recomendação (FR21) ou metas de alocação (FR20)
-- **Then** o sistema exibe uma mensagem explicando que a funcionalidade é Premium
-- **And** oferece opção de upgrade
+**Given** um visitante acessando a rota pública raiz `/`
+**When** a página é servida via HTML estático/SSR leve
+**Then** o First Contentful Paint (FCP) conclui em `< 1.2s`, apresentando a proposta de valor, preview visual do GPS de Aporte, Diagrama do Cerrado e Kerno AI, e disclaimer CVM obrigatório no rodapé
+**And** enquanto houver vagas disponíveis (`remainingSlots > 0`), a seção do Programa Founders exibe badge de destaque *"Seja um Membro Founder — Acesso Pro Vitalício Gratuito"* com CTA *"Garantir Minha Vaga de Founder Gratuitamente"*
+**And** o arquivo `robots.txt` e meta tags garantem `index, follow` exclusivamente para as rotas públicas institucionais (`/`, `/terms`, `/privacy`, `/docs`), aplicando `noindex, nofollow` em todas as rotas autenticadas (`/app/*`, `/dashboard/*`, `/api/*`).
 
-- **Given** que o usuário tem tier "Trial" dentro da validade
-- **When** ele acessa funcionalidades Premium
-- **Then** o sistema permite acesso normalmente
-- **And** exibe badge "Trial — X dias restantes"
+### Story 1.4: Onboarding com Google OAuth2, Aceite de Termos e Concessão de Camada Comercial
 
-- **Given** que o usuário tem tier "Premium"
-- **When** ele acessa qualquer funcionalidade
-- **Then** o sistema permite acesso completo sem restrições
-
-#### Story 1.4: Exclusão de Conta e Expurgo LGPD
-
-**As a** usuário da plataforma,
-**I want** poder excluir permanentemente minha conta e todos meus dados,
-**So that** meu direito ao esquecimento (LGPD) seja respeitado.
+As a novo usuário que clicou no CTA da Landing Page ou acessou `/login`,
+I want me autenticar via Google Sign-In com 1 clique, confirmando meu aceite aos Termos e Política de Privacidade,
+So that minha conta seja criada instantaneamente com meu status de Membro Founder garantido.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário está autenticado
-- **When** ele solicita exclusão de conta na página de configurações
-- **Then** o sistema exige confirmação dupla (modal + digitação "EXCLUIR")
-- **And** registra a solicitação com timestamp
+**Given** o card de login na tela `/login` e na Landing Page
+**When** o usuário clica em *"Continuar com Google"*
+**Then** a interface apresenta links diretos e texto claro informando que a autenticação implica no aceite aos Termos de Uso (`/terms`) e à Política de Privacidade (`/privacy`)
+**And** ao validar o token OAuth2 do Google no backend, o usuário cadastrado com vaga Founder disponível recebe `commercial_plan = 'FOUNDER_LIFETIME'`, e a primeira tela autenticada exibe o badge exclusivo `{components.badge-founder}` (*"Founder"*)
+**And** usuários cadastrados após o esgotamento do lote Founder recebem `commercial_plan = 'PRO_TRIAL'` com `trial_expires_at = now() + 90 dias` e pill visual informando *"Trial Pro: 90 dias restantes"*.
 
-- **Given** que a solicitação de exclusão foi confirmada
-- **When** o job de expurgo é executado
-- **Then** realiza Hard Delete de todas as operações, posições, metas e dados financeiros
-- **And** remove todos os PIIs (nome, e-mail, CPF)
-- **And** conclui o expurgo em menos de 24 horas (NFR5)
-- **And** envia e-mail de confirmação antes de deletar os dados de autenticação
+## Epic 2: Design System Intergeracional, Experiência Mobile & Dashboard Patrimonial
 
-#### Story 1.5: Perfil do Investidor (KYC/Suitability)
+Investidores acessam seu patrimônio consolidado no celular (iOS/Android) ou no navegador desktop com desbloqueio biométrico nativo (FaceID/Digital), tipografia de alto contraste escalonável até 2.0x sem truncamento, proteção total no dia a dia (Modo Privacidade `R$ ••••••` e Máscara no App Switcher do SO), navegação modular desacoplada e gestão contínua de posições multi-classe e multi-CPF (Holding Familiar).
 
-**Related FRs/NFRs:** _(Story adicional — sem FR próprio no PRD. Calibra FR20 e FR21 via perfil de risco do usuário)_
+### Story 2.1: Fundação do Design System Intergeracional (Tokens, Tipografia e Acessibilidade)
 
-**As a** investidor,
-**I want** responder um questionário rápido sobre meus objetivos e tolerância a risco,
-**So that** as recomendações do sistema sejam adequadas ao meu perfil.
-
-**Acceptance Criteria:**
-- **Given** que o usuário fez o primeiro login
-- **When** ele acessa o dashboard inicial
-- **Then** o sistema sugere o preenchimento do perfil de investidor
-- **And** salva o perfil (Conservador, Moderado, Arrojado) para calibrar o motor de alocação (Epic 4).
-
-### Epic 2: Ingestão de Dados (B3 & Manual)
-**Related PRD Requirements:** FR16, FR17, FR26, FR6, FR7, FR8, NFR1, NFR7
-
-**Goal:** Garantir que o usuário possa consolidar seu histórico de investimentos de forma automatizada (CDB/B3) ou manual, com processamento assíncrono e resiliente.
-
-#### Story 2.1: Upload de Relatório de Negociação B3 (Excel)
-
-**Related FRs/NFRs:** FR6
-
-**As a** investidor,
-**I want** fazer o upload da minha planilha de negociação da B3,
-**So that** eu não precise cadastrar centenas de operações manualmente.
-
-**Acceptance Criteria:**
-- **Given** que o usuário está na tela de "Importação"
-- **When** ele seleciona um arquivo `.xlsx` (Relatório oficial da B3)
-- **Then** o sistema realiza o upload para o Storage (Claim Check Pattern)
-- **And** valida os cabeçalhos do arquivo (Ticker, Data, Quantidade, Preço)
-- **And** emite o evento `file-uploaded` no Kafka
-
-#### Story 2.2: Processamento Assíncrono e Splitter (Worker)
-
-**Related FRs/NFRs:** FR7, FR8, NFR1, NFR7
-
-**As a** sistema,
-**I want** processar o arquivo Excel em segundo plano, fragmentando-o em operações individuais e notificando o usuário sobre cada etapa do progresso,
-**So that** grandes volumes de dados não bloqueiem a interface, sejam tolerantes a falhas e o usuário saiba exatamente o que está acontecendo com o seu arquivo.
+As a investidor utilizando o Kerno no celular ou na Web,
+I want visualizar interfaces com contraste elevado (WCAG AA/AAA), numerais tabulares alinhados e tipografia que respeita a escala de acessibilidade do meu sistema operacional sem cortar palavras,
+So that eu leia meus dados financeiros com conforto e precisão, independentemente da minha faixa etária ou iluminação ambiente.
 
 **Acceptance Criteria:**
 
-**Cenário 1 — Processamento com sucesso total**
-- **Given** um evento `file-uploaded` no Kafka
-- **When** o `ingestion-service` consome o evento e lê o arquivo (Streaming via FastExcel)
-- **Then** fragmenta o arquivo (Splitter Pattern) em eventos `trade-extracted` (um por linha)
-- **And** envia linhas corrompidas para o tópico `trade-extracted-dlq` (DLQ)
-- **And** ao concluir o processamento, publica evento `upload-completed` via SSE (D16) com payload: `{ status: "SUCCESS", total: N, imported: N, duplicates: 0, errors: 0 }`
-- **And** o Flutter exibe notificação in-app: ✅ "Importação concluída! {N} operações carregadas com sucesso."
+**Given** os tokens de cores definidos em `DESIGN.md`
+**When** o aplicativo é inicializado no tema Light (padrão) ou Dark
+**Then** a superfície aplica contraste mínimo de `4.5:1` para textos corridos e `7.0:1` (WCAG AAA) para saldos patrimoniais, com áreas de toque interativas de no mínimo `48x48dp`
+**And** quando um dispositivo móvel opera com escalonamento de texto nativo configurado entre `1.0x` e `2.0x` (`MediaQuery.textScalerOf(context)`), nenhum valor monetário, ticker ou percentual sofre truncamento com reticências (`...`) ou sobreposição de linha, expandindo verticalmente com reflow natural
+**And** todos os valores numéricos exibidos em colunas e listas utilizam obrigatoriamente a propriedade `fontVariantNumeric: 'tabular-nums'` para alinhamento vertical exato de dígitos.
 
-**Cenário 2 — Progresso em tempo real durante o processamento (NFR1)**
-- **Given** que o usuário está com a tela de upload aberta após enviar o arquivo
-- **When** o `ingestion-service` processa as linhas do arquivo em lote
-- **Then** publica eventos `upload-progress` via SSE (D16) a cada 10% de progresso com payload: `{ status: "PROCESSING", processed: X, total: N, percent: P }`
-- **And** o Flutter atualiza a barra de progresso orgânica progressivamente (sem tela em branco)
+### Story 2.2: Autenticação Mobile Segura, Biometria Nativa e Cache Offline Criptografado
 
-**Cenário 3 — Processamento concluído com erros parciais**
-- **Given** que o arquivo possui algumas linhas corrompidas ou inválidas
-- **When** o `ingestion-service` conclui o processamento com parte das linhas enviadas para a DLQ
-- **Then** publica evento `upload-completed` via SSE com payload: `{ status: "PARTIAL", total: N, imported: X, duplicates: D, errors: E }`
-- **And** o Flutter exibe notificação: ⚠️ "Importação concluída com atenção: {X} operações carregadas, {E} linhas não puderam ser lidas."
-- **And** exibe link "Ver detalhes" que navega para o Histórico de Importação (Story 2.5)
-
-**Cenário 4 — Falha crítica no processamento**
-- **Given** que o `ingestion-service` encontra um erro crítico irrecuperável ao processar o arquivo (ex: arquivo corrompido, formato não reconhecido)
-- **When** o processamento é abortado após 3 tentativas com backoff exponencial
-- **Then** publica evento `upload-completed` via SSE com payload: `{ status: "FAILED", errorCode: "PARSE_ERROR", message: "descrição do erro" }`
-- **And** o Flutter exibe notificação: ❌ "Não foi possível processar o arquivo. Verifique se é o arquivo correto da B3 e tente novamente."
-- **And** registra log de nível ERROR: `[INGESTION] Falha crítica ao processar arquivo {fileId} para usuário {userId}: {erro}`
-
-**Cenário 5 — Usuário não está com a tela aberta (notificação assíncrona)**
-- **Given** que o processamento é concluído (sucesso ou parcial) enquanto o usuário não está com o dashboard aberto
-- **When** o usuário retorna ao dashboard
-- **Then** o sistema exibe um banner de "Nova importação disponível" no topo do dashboard com o resumo do resultado
-- **And** o badge de notificação na navegação indica a presença de uma atualização pendente
-
-#### Story 2.3: Dedução de Operações
-
-**Related FRs/NFRs:** FR7
-
-**As a** investidor,
-**I want** que o sistema identifique e ignore operações que eu já importei anteriormente,
-**So that** meu saldo e preço médio não fiquem duplicados e incorretos.
-
-**Acceptance Criteria:**
-- **Given** uma operação extraída do Excel
-- **When** o sistema verifica se já existe uma operação idêntica (Ticker + Data + Qtd + Preço + Corretora) para o usuário
-- **Then** ignora a duplicata e registra apenas as novas operações
-- **And** o total de "duplicatas" é incluído no payload do evento `upload-completed` (Story 2.2, Cenário 1)
-
-#### Story 2.4: Cadastro Manual de Operação (Fallback)
-
-**Related FRs/NFRs:** FR16, FR17
-
-**As a** investidor,
-**I want** cadastrar uma compra ou venda manualmente,
-**So that** eu possa registrar operações que não estão na planilha da B3 (ex: Tesouro Direto antigo ou ajustes).
-
-**Acceptance Criteria:**
-- **Given** que o usuário acessa o formulário de "Nova Operação"
-- **When** preenche Ativo, Tipo (Compra/Venda), Quantidade, Preço Unitário e Taxas
-- **Then** o sistema valida os dados e salva na tabela de operações
-- **And** dispara o recálculo imediato da posição do ativo
-
-#### Story 2.5: Trilha de Auditoria das Importações
-
-**Related FRs/NFRs:** FR17, FR26
-
-**As a** investidor,
-**I want** ver um histórico de todos os arquivos que já importei,
-**So that** eu saiba quando foi minha última atualização de dados.
-
-**Acceptance Criteria:**
-- **Given** que o usuário acessa a aba "Histórico de Importação"
-- **When** o dashboard carrega
-- **Then** lista Nome do Arquivo, Data de Upload, Status (Sucesso/Parcial/Erro) e Qtd. de Linhas Processadas
-
-### Epic 3: Portfólio & Dashboard Consolidado
-**Related PRD Requirements:** FR12, FR13, NFR2, NFR8
-
-**Goal:** O usuário visualiza todo seu patrimônio consolidado — posições ativas, proventos, aportes — com atualizações em tempo real e dashboard rico.
-
-#### Story 3.1: Dashboard KPI (Componente `PortfolioKpiCard`)
-
-**Related FRs/NFRs:** FR12, NFR2
-
-**As a** investidor,
-**I want** ver um resumo visual do meu patrimônio (Valor Total, Lucro/Prejuízo, Dividend Yield),
-**So that** eu tenha uma visão rápida da saúde financeira da minha carteira.
+As a investidor utilizando o aplicativo móvel do Kerno,
+I want salvar minha sessão com segurança no cofre de chaves do aparelho e desbloquear o aplicativo via biometria (FaceID ou impressão digital),
+So that eu acesse minha carteira em menos de 5 segundos sem digitar senhas e sem expor minhas credenciais em repouso.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário está logado e possui operações cadastradas
-- **When** ele acessa a `HomeScreen`
-- **Then** o sistema calcula e exibe cards com: Patrimônio Total (R$), Rendimento Bruto (%), Dividendos Acumulados e Projeção Mensal
-- **And** usa Skeleton Screens durante o carregamento (NFR2)
-- **And** utiliza as cores Emerald (lucro) e Navy Blue (neutro) conforme o Design System
-- **And** as transições entre visões ocorrem em < 300ms
+**Given** a autenticação Google OAuth2 no app mobile (iOS/Android)
+**When** os tokens de sessão (`access_token`, `refresh_token`) são recebidos
+**Then** são persistidos exclusivamente através de `flutter_secure_storage` (iOS Keychain e Android EncryptedSharedPreferences/Keystore), nunca em texto puro
+**And** ao abrir o aplicativo ou retornar do background após mais de `2 minutos` de inatividade, o gate biométrico nativo (`local_auth`) é acionado compulsoriamente antes de exibir qualquer dado patrimonial, oferecendo fallback para o PIN/credencial do sistema operacional
+**And** em situações sem conexão de rede ou com sinal intermitente, após a biometria aprovada o aplicativo renderiza o último snapshot válido do Dashboard a partir de cache local criptografado, exibindo timestamp discreto da última sincronização
+**And** ao acionar logout ou confirmar exclusão de conta, o `flutter_secure_storage` e todos os caches locais do dispositivo são limpos integralmente.
 
-#### Story 3.2: Tabela de Custódia Atualizada (Componente `FinancialDataTable`)
+### Story 2.3: Shell de Navegação Multi-Superfície e Fundação Modular com Feature Flags
 
-**Related FRs/NFRs:** FR12, NFR8
-
-**As a** investidor,
-**I want** ver a lista de todos os ativos que possuo hoje,
-**So that** eu acompanhe o preço médio e a valorização de cada papel individualmente.
+As a investidor navegando pelo Kerno,
+I want uma navegação simples com 4 abas claras no celular e barra lateral agrupada no computador, com arquitetura preparada para novos módulos,
+So that eu alterne rapidamente entre Carteira, GPS de Aporte, Kerno AI e Diagrama sem excesso de cliques.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário acessa a aba "Portfólio"
-- **When** o sistema consolida as operações manuais e de upload
-- **Then** agrupa ativos por Ticker e exibe: Quantidade, Preço Médio, Cotação Atual (D-0 ou Cache), Valor de Mercado e % de Ganho/Perda
-- **And** permite ordenação por qualquer coluna
-- **And** exibe indicador "Atualizado em [Horário]" ou "Preço em Cache" (NFR8)
+**Given** a interface Mobile (`largura < 600dp`)
+**When** a barra de navegação inferior (`BottomNavigationBar`) é renderizada
+**Then** exibe exatamente 4 abas primárias (**Carteira**, **GPS de Aporte**, **Kerno AI**, **Diagrama**) com ícones e rótulos acessíveis de `48dp`, eliminando a sobrecarga de 10 ícones legados da versão anterior
+**And** quando a feature flag `enable_expenses_module` está desativada (`false`), o 5º slot modular (Gastos / `features/expenses`) permanece oculto na UI, mantendo a árvore de rotas desacoplada e pronta para ativação no Ciclo 2.1
+**And** na interface Desktop Web (`largura >= 1024dp`), a `Sidebar` exibe agrupamentos lógicos de navegação com `SkipToContentLink` para acessibilidade de teclado, com todas as 18 rotas legadas reestilizadas operando sob o novo tema.
 
-#### Story 3.3: Histórico de Proventos e Aportes
+### Story 2.4: Dashboard Patrimonial com Modo Privacidade e Proteção de Snapshot em Background
 
-**Related FRs/NFRs:** FR13
-
-**As a** investidor,
-**I want** visualizar graficamente quanto recebi de dividendos e quanto aportei por mês,
-**So that** eu visualize a evolução do meu efeito "bola de neve".
+As a investidor consultando meu patrimônio em ambientes públicos,
+I want ocultar todos os valores monetários em R$ com um toque e ter a garantia de que a miniatura do app no celular não revela meu saldo,
+So that pessoas próximas não vejam meu patrimônio financeiro no metrô ou no seletor de aplicativos.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário acessa a visão de "Evolução"
-- **When** o sistema filtra as operações por tipo `DIVIDENDO` e `COMPRA`
-- **Then** plota um gráfico de barras comparativo por mês dos últimos 12 meses
-- **And** permite alternar para visão de tabela detalhada com filtros de data
+**Given** o `DashboardPage` autenticado
+**When** renderizado
+**Then** apresenta o componente `WealthHeroCard` com patrimônio líquido consolidado e rentabilidade, acompanhado de aviso discreto de delay de 15 min B3 ou fechamento D-1, e o `MacroClassDistributionCard` com barras de progresso duplo para as 5 Macro Classes e Subclasses sem rolagem horizontal no mobile
+**And** ao tocar no botão de cabeçalho `PrivacyToggleButton` (ícone de olho), todos os saldos e valores monetários em `R$` são substituídos instantaneamente por `R$ ••••••`, mantendo percentuais (`%`) e gráficos visíveis, com o estado persistido localmente para os próximos acessos
+**And** sempre que o aplicativo móvel entrar em estado inativo ou segundo plano (`AppLifecycleState.inactive` ou `AppLifecycleState.paused`), o app ativa automaticamente proteção visual (`FLAG_SECURE` no Android e snapshot mask no iOS), impedindo que saldos ou telas fiquem visíveis no *App Switcher* do SO.
 
-#### Story 3.4: Visualização de Alocação por Classe (Gráfico de Rosca)
+### Story 2.5: Adaptação Visual da Ingestão B3, CRUD Manual Multi-Classe e Holding Familiar Multi-CPF
 
-**Related FRs/NFRs:** FR12
-
-**As a** investidor,
-**I want** visualizar o balanceamento da minha carteira entre as diferentes classes de ativos (Ações, FIIs, Tesouro, etc.),
-**So that** eu possa verificar se a minha diversificação está de acordo com a minha estratégia.
-
-**Acceptance Criteria:**
-
-- **Given** que o usuário possui ativos de diferentes classes na carteira
-- **When** ele acessa o dashboard de Portfólio
-- **Then** o sistema exibe um gráfico de rosca (Donut Chart) com a distribuição percentual por classe
-- **And** permite clicar em uma classe para detalhar os ativos dentro dela
-- **And** exibe a legenda com o valor financeiro total por categoria
-
-#### Story 3.5: Atualização em Tempo Real (Event-Driven UI)
-
-**Related FRs/NFRs:** NFR2
-
-**As a** usuário,
-**I want** que meu dashboard se atualize automaticamente quando um novo upload ou operação manual for concluído,
-**So that** eu não precise dar "refresh" na página manualmente.
+As a investidor com ativos na B3, títulos de renda fixa, investimentos internacionais e criptoativos na família,
+I want importar planilhas da B3 e cadastrar ativos manualmente nas 5 Macro Classes com filtro de Holding Familiar sob o novo design,
+So that eu mantenha meu patrimônio completo consolidado sem perder as funcionalidades existentes.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário está com o Dashboard aberto
-- **When** o Kafka processa um evento `trade-extracted` (Epic 2)
-- **Then** o backend envia uma notificação push/socket
-- **And** o Dashboard recarrega apenas os componentes de dados afetados com uma animação de fade (250ms)
+**Given** o botão *"Atualizar Carteira / + Ativo"* no Dashboard
+**When** acionado pelo usuário
+**Then** abre o Bottom Sheet responsivo `B3IngestionCrudSheet` de nível único, permitindo upload assíncrono de planilhas B3 (descartando o arquivo bruto com PII imediatamente após o parsing) e cadastro manual de posições nas 5 Macro Classes (*Ações BR*, *FIIs*, *Renda Fixa / Tesouro*, *Internacional* e *Criptoativos*) em `BRL`
+**And** ao vincular um CPF secundário ou de dependente menor na visão Holding Familiar, o sistema exige aceite de declaração de representação legal e consentimento conforme LGPD (Art. 14), permitindo alternar a visualização da carteira entre o consolidado familiar e cada CPF individual
+**And** 100% dos testes de regressão dos módulos legados de cálculo de posição passam sem quebra de comportamento analítico anterior.
 
-### Epic 4: Market Data & Motor de Recomendação (Filtro de Graham)
-**Related PRD Requirements:** FR18, FR19, FR20, FR21, FR22, NFR3, NFR8
+## Epic 3: Alocação Estratégica pelo Diagrama do Cerrado
 
-**Goal:** O usuário Premium recebe recomendações de aporte baseadas no Filtro de Graham com transparência total do raciocínio matemático.
+O investidor estrutura sua estratégia patrimonial de longo prazo sem paralisia de tela em branco a partir de Templates de Alocação pré-configurados (Equilibrado, Moderado, Acumulação), define metas das 5 Macro Classes (Ações BR, FIIs, Renda Fixa / Tesouro, Internacional, Criptoativos) com validação estrita de soma 100%, e avalia a qualidade de cada ativo (Notas 1–10) com proteção automática por Teto Máximo de Risco e Quarentena de Aporte.
 
-#### Story 4.1: Integração de Market Data (Cotações & Indicadores)
+### Story 3.1: Modelo de Dados Relacional e Migrations para o Diagrama do Cerrado
 
-**Related FRs/NFRs:** FR18, FR19, NFR8
-
-**As a** sistema (backend),
-**I want** buscar cotações atualizadas e indicadores fundamentalistas (P/L, DY, P/VP),
-**So that** o cálculo do Filtro de Graham use dados de mercado confiáveis.
+As a sistema Kerno,
+I want persistir as preferências de alocação de Macro Classes e as Notas de Qualidade de cada ativo em tabelas relacionais dedicadas,
+So that as configurações estratégicas de cada usuário sejam salvas com isolamento estrito e precisão decimal.
 
 **Acceptance Criteria:**
 
-- **Given** que o sistema possui ativos em custódia
-- **When** o `market-data-service` executa o sync agendado
-- **Then** consulta APIs externas (ex: Yahoo Finance, Brapi) e atualiza cotação e indicadores
-- **And** armazena em cache por 24h para indicadores (Spring Cache/Caffeine)
-- **And** usa cotação em cache se a API externa falhar (Graceful Degradation - NFR8)
+**Given** uma nova migration incremental do Liquibase
+**When** executada no banco de dados
+**Then** cria as tabelas `tb_cerrado_preferences` (com colunas `user_id`, metas percentuais das 5 Macro Classes em `NUMERIC(5,2)`, multiplicador de Graham e flags) e `tb_cerrado_asset_grade` (com `user_id`, `ticker`, `macro_class`, `sub_class`, `quality_grade` de 1 a 10, `custom_risk_ceiling` e `quarantine_corporate_event`) com índices por `user_id` e integridade referencial
+**And** qualquer gravação de percentuais de metas ou tetos utiliza obrigatoriamente colunas `NUMERIC(19,4)` ou `NUMERIC(5,2)`, sendo proibido o uso de tipos de ponto flutuante (`float`/`double`).
 
-#### Story 4.2: Configuração de Metas de Alocação (Tier Premium)
+### Story 3.2: Motor de Domínio da Hierarquia do Cerrado, Aritmética de Metas e Redistribuição de Teto
 
-**Related FRs/NFRs:** FR20
-
-**As a** investidor Premium,
-**I want** definir uma meta percentual de alocação para cada classe (ex: 50% Ações, 30% FIIs) e ativos específicos,
-**So that** o sistema saiba onde eu quero chegar.
+As a investidor que definiu suas metas e notas de qualidade,
+I want que o motor de cálculo determine a meta percentual proporcional de cada ativo na carteira aplicando o Teto Máximo de Risco e a Quarentena,
+So that nenhum ativo ultrapasse o limite prudencial de risco sem deixar resíduos de alocação na classe.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário é Premium
-- **When** ele acessa "Configurações de Estratégia"
-- **Then** o sistema permite atribuir % alvo para classes e ativos
-- **And** valida se a soma dos percentuais fecha em 100%
-- **And** salva o plano de alocação por usuário (isolamento RLS)
+**Given** as metas das 5 Macro Classes informadas pelo usuário
+**When** a soma percentual for diferente de `100.00%` (ex.: `95%` ou `105%`)
+**Then** o serviço de domínio rejeita a operação com erro de validação (HTTP `422 Unprocessable Entity`), impedindo inconsistências na carteira
+**And** a meta bruta de cada ativo $i$ na Macro Classe $C$ é calculada como $\left(\frac{\text{Nota}_i}{\sum \text{Notas elegíveis de } C}\right) \times \text{Meta}_C\%$ utilizando estritamente `BigDecimal` com escala 4 e arredondamento `HALF_EVEN`
+**And** para ativos de risco emissor único com nota entre 8–10 (teto 10%) ou 5–7 (teto 6%), caso sua meta bruta exceda o teto permitido, o teto é aplicado e o excedente é redistribuído iterativamente de forma proporcional à nota entre os demais ativos elegíveis não-saturados da mesma Macro Classe até que a soma das metas iguale $\text{Meta}_C\%$
+**And** títulos públicos soberanos (*Tesouro Direto*) e ETFs de índices amplos (`is_diversified_broad_etf = true`, ex.: `IVVB11`, `WRLD11`, `BOVA11`) são isentos da trava de emissor único, limitando-se apenas à meta total da própria Macro Classe
+**And** qualquer ativo com Nota de Qualidade entre 1 e 4 recebe compulsoriamente status de **Quarentena de Aporte** (teto de novos aportes = `0%`) e sua nota é excluída do denominador da classe, mantendo seu valor patrimonial existente intacto.
 
-#### Story 4.3: Motor do Filtro de Graham (`valuation-service`)
+### Story 3.3: API REST para Gestão de Metas de Macro Classes e Templates de Onboarding
 
-**Related FRs/NFRs:** FR21, NFR3, NFR8
-
-**As a** sistema,
-**I want** processar o algoritmo de Graham cruzando cotação, indicadores e metas do usuário,
-**So that** eu gere sugestões de compra precisas e confiáveis, bloqueando automaticamente recomendações baseadas em dados corrompidos ou desatualizados.
-
-**Acceptance Criteria:**
-
-**Cenário 1 — Happy Path: Cálculo com dados íntegros**
-- **Given** um gatilho de cálculo de valuation
-- **When** o `valuation-service` consome cotações e indicadores com dados completos e dentro dos thresholds de integridade
-- **Then** aplica o Filtro de Graham (Valor Intrínseco vs Preço Atual)
-- **And** identifica ativos que estão abaixo do Valor Intrínseco e abaixo da meta de alocação do usuário
-- **And** gera a recomendação de aporte em < 2 segundos (NFR3)
-- **And** publica o evento `valuation-completed` no Kafka com o payload de recomendações
-
-**Cenário 2 — Dados Fundamentalistas Ausentes (Circuit Breaker)**
-- **Given** um gatilho de cálculo de valuation
-- **When** o `valuation-service` detecta que um ou mais indicadores obrigatórios (P/L, P/VP, DY) estão ausentes ou nulos para um ativo
-- **Then** exclui esse ativo específico do ranking de recomendações
-- **And** registra log de nível WARN: `[VALUATION] Ativo {ticker} excluído do ranking — indicadores ausentes: {lista}`
-- **And** prossegue normalmente com os demais ativos que possuem dados íntegros
-- **And** o payload do `valuation-completed` inclui uma lista `excludedTickers` com os ativos excluídos e o motivo
-
-**Cenário 3 — Dados Fundamentalistas Desatualizados (Stale Data)**
-- **Given** um gatilho de cálculo de valuation
-- **When** o `valuation-service` detecta que os indicadores de um ativo têm `updatedAt` superior a 7 dias corridos
-- **Then** exclui esse ativo do ranking de recomendações por dado desatualizado
-- **And** registra log de nível WARN: `[VALUATION] Ativo {ticker} excluído — dados fundamentalistas desatualizados ({dias} dias)`
-- **And** inclui o ativo na lista `excludedTickers` com motivo `STALE_DATA`
-
-**Cenário 4 — Outlier de Preço / Falso-Positivo (Circuit Breaker de Valuation)**
-- **Given** um gatilho de cálculo de valuation
-- **When** o `valuation-service` calcula o Valor Intrínseco de Graham e o resultado indica desconto superior a 80% em relação ao preço de mercado atual
-- **Then** aciona o circuit breaker de outlier: suspende a recomendação desse ativo
-- **And** registra log de nível ERROR: `[VALUATION] Circuit breaker ativado para {ticker} — desconto calculado de {X}% excede threshold de 80%. Possível dado corrompido.`
-- **And** exclui o ativo do ranking de recomendações com motivo `OUTLIER_PRICE`
-- **And** NÃO publica recomendação de compra para esse ativo até que os dados sejam validados e o cache invalidado
-
-**Cenário 5 — Falha total de dados de mercado**
-- **Given** um gatilho de cálculo de valuation
-- **When** o `valuation-service` não consegue obter cotações nem do provider primário nem do cache (NFR8)
-- **Then** aborta o cálculo de valuation completamente
-- **And** registra log de nível ERROR: `[VALUATION] Cálculo abortado — sem cotações disponíveis (primário e cache indisponíveis)`
-- **And** NÃO publica evento `valuation-completed` para evitar recomendações com dados zerados
-- **And** publica evento `valuation-failed` no Kafka para que o `api` module notifique o usuário via SSE (D16) com mensagem: "Recomendações temporariamente indisponíveis. Tente novamente em alguns minutos."
-
-
-
-#### Story 4.4: Reasoning Box — Explainable AI (Componente `ReasoningBox`)
-
-**Related FRs/NFRs:** FR22
-
-**As a** investidor,
-**I want** visualizar o passo-a-passo matemático da recomendação,
-**So that** eu entenda por que o sistema está me sugerindo aquele aporte específico.
+As a investidor configurando o Diagrama do Cerrado pelo Web ou Mobile,
+I want consultar os templates pré-configurados e salvar minhas metas de alocação através de endpoints seguros,
+So that minha estratégia esteja disponível imediatamente em qualquer dispositivo.
 
 **Acceptance Criteria:**
 
-- **Given** que o sistema gerou uma recomendação de compra
-- **When** o usuário clica em "Por que comprar?"
-- **Then** abre o componente `ReasoningBox` exibindo as variáveis utilizadas (Preço atual, Graham Formula, Alocação Ideal vs Atual)
-- **And** destaca em Emerald Gold (#F59E0B) a vantagem competitiva encontrada
+**Given** o endpoint `GET /api/v1/cerrado/templates`
+**When** consultado
+**Then** retorna os 3 perfis oficiais (*Modelo Equilibrado Cerrado* com 1% Cripto, *Modelo Moderado Patrimonial* com 0% Cripto e 45% Renda Fixa, *Modelo Acumulação Arrojada* com 5% Cripto) contendo as metas de Macro Classes e a nota neutra padrão `6` para os ativos, acompanhados de disclaimer CVM
+**And** ao submeter `PUT /api/v1/cerrado/preferences` com as metas das 5 Macro Classes somando exatamente 100.00%, persiste a configuração associada ao `user_id` autenticado, registrando log estruturado da operação e invalidando o cache de IA existente (`portfolio_state_hash`)
+**And** 100% dos testes da suíte de integração `CerradoPreferencesIT` passam via Maven Failsafe, validando cenários de persistência, validação de soma 100% e isolamento por `user_id`.
 
-### Epic 5: Metas & Projeção Financeira (Time-to-Goal)
-**Related PRD Requirements:** FR23, FR24, FR25
+### Story 3.4: Interface do Diagrama do Cerrado: Seletor de Templates e Trava de Metas
 
-**Goal:** O usuário configura suas metas de independência financeira e visualiza projeções de quanto tempo falta para atingi-las (o famoso "Time-to-Goal").
-
-#### Story 5.1: Configuração de Metas de Patrimônio e Renda
-
-**Related FRs/NFRs:** FR23
-
-**As a** investidor,
-**I want** definir um objetivo financeiro (ex: R$ 1 Milhão ou R$ 5.000 de renda mensal),
-**So that** o sistema calcule minha rota de progresso.
+As a investidor acessando a Aba 4 (**Diagrama**),
+I want escolher um template de alocação com 1 clique ou ajustar as metas das 5 Macro Classes com feedback visual em tempo real da soma de 100%,
+So that eu configure minha estratégia sem erros matemáticos.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário acessa a tela de "Minhas Metas"
-- **When** ele preenche o formulário (Valor Alvo, Prazo Estimado, Aporte Mensal Pretendido)
-- **Then** o sistema valida os dados e salva no perfil do usuário
-- **And** exibe um resumo: "Você precisa de R$ X para atingir sua meta."
+**Given** a tela `/allocation-strategy` (Aba 4 Diagrama)
+**When** o usuário é recém-cadastrado
+**Then** apresenta os 3 cartões `CerradoTemplateSelectorCard` sem pré-seleção automática e com nota neutra inicial `6`, exibindo disclaimer regulatório de ausência de suitability
+**And** ao editar manualmente os percentuais das 5 Macro Classes (*Ações BR*, *FIIs*, *Renda Fixa / Tesouro*, *Internacional*, *Criptoativos*), se a soma for diferente de `100.00%` (ex.: `98,0%`), a interface exibe badge carmesim informando a diferença exata faltante (*"Faltam 2,00% para completar 100%"*) e desabilita visualmente o botão salvar
+**And** quando a soma atinge exatamente `100.00%`, o botão salvar é habilitado com destaque esmeralda e confirmação de gravação.
 
-#### Story 5.2: Relógio Motivacional Time-to-Goal (Componente UI Principal)
+### Story 3.5: Gestão Visual de Notas de Qualidade, Slider 48dp, Assistente de 5 Critérios e Quarentena
 
-**Related FRs/NFRs:** FR24
-
-**As a** investidor,
-**I want** ver um cronômetro ou contagem regressiva de anos/meses para minha meta,
-**So that** eu mantenha o foco no longo prazo.
-
-**Acceptance Criteria:**
-
-- **Given** que o usuário possui uma meta ativa e dados de portfólio
-- **When** ele acessa o dashboard central
-- **Then** o sistema calcula a projeção baseada no Yield Atual + Aporte Mensal + Juros Compostos
-- **And** exibe o componente visual "Tempo Restante para Independência": [X anos, Y meses]
-- **And** a interface usa uma animação de "tick" suave para reforçar a ideia de progressão temporal
-
-#### Story 5.3: Simulador de Sensibilidade ("E se?")
-
-**Related FRs/NFRs:** FR24
-
-**As a** investidor,
-**I want** simular como um aumento no aporte mensal ou na rentabilidade afetaria meu tempo para a meta,
-**So that** eu possa ajustar meu estilo de vida ou estratégia.
+As a investidor avaliando os ativos da minha carteira,
+I want ajustar a Nota de Qualidade (1–10) de cada ativo via slider direto de toque ou através de um assistente objetivo de 5 critérios,
+So that o sistema defina os pesos relativos e coloque em quarentena ativos que perderam qualidade fundamentalista.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário está na tela de projeção
-- **When** ele move um slider de "Aporte Mensal" ou "Rendimento Esperado (%)"
-- **Then** o sistema recalcula instantaneamente o Time-to-Goal e atualiza o gráfico de projeção
-- **And** exibe a diferença: "Isso encurtaria sua jornada em Z meses!"
+**Given** o cartão de ativo `CerradoQualityCard`
+**When** renderizado
+**Then** apresenta um slider interativo com polegar de toque de `48x48dp` permitindo selecionar notas inteiras de `1 a 10`, exibindo instantaneamente o Teto Máximo de Risco correspondente
+**And** ao acionar o botão *"Assistente de Autoavaliação"*, abre modal com os 5 critérios objetivos (*Governança*, *Lucro 5 anos*, *Endividamento*, *Vantagem Competitiva*, *Histórico de Proventos*) com pontuação de `0`, `1` ou `2` cada, somando automaticamente e atribuindo a nota resultante (1–10) sem auditoria da plataforma
+**And** ao atribuir uma nota entre `1 e 4`, o cartão exibe o badge visual `{components.badge-quarantine}` (*"Em Quarentena de Aporte — Novos Aportes = 0%"*), com trilha do slider destacada em âmbar
+**And** ao salvar as notas via `PUT /api/v1/cerrado/grades`, as notas são persistidas no backend e recalculam as metas efetivas de todos os ativos da carteira.
 
-#### Story 5.4: Checklist de Saúde da Meta
+## Epic 4: GPS de Aporte Inteligente com Bônus de Graham e Resiliência
 
-**Related FRs/NFRs:** FR25
+No dia do aporte mensal, o investidor digita o valor disponível em R$ e recebe em menos de 1 segundo a distribuição matemática simulada exata de onde alocar — priorizando maiores defasagens sem sugerir venda de ativos, com cotas inteiras e transbordamento automático (spillover), bonificação de Graham (1.30x) para ações descontadas, painel de transparência matemática explicativa ("Por que estes ativos?") e proteção contra anomalias de mercado (circuit breaker).
 
-**As a** investidor,
-**I want** receber alertas se meu ritmo atual de aportes ou rentabilidade estiver me afastando da meta,
-**So that** eu não tenha surpresas negativas no futuro.
+### Story 4.1: Motor Stateless do GPS de Aporte com Regra de Transbordamento (Spillover)
 
-**Acceptance Criteria:**
-
-- **Given** que a projeção atual ultrapassa o prazo estimado pelo usuário
-- **When** o dashboard é carregado
-- **Then** exibe um badge de atenção (Warning #EF4444)
-- **And** sugere ações: "Aumente seu aporte em R$ 200 para voltar ao trilho" ou "Revise seu yield alvo".
-
-### Epic 6: Administração & Operações (Saúde do Sistema)
-**Related PRD Requirements:** FR19, FR26, FR27
-
-**Goal:** Administradores podem monitorar a saúde do sistema e reprocessar importações falhas para garantir a integridade dos dados de todos os usuários.
-
-#### Story 6.1: Painel de Monitoramento Admin
-
-**Related FRs/NFRs:** FR26
-
-**As a** administrador do sistema,
-**I want** visualizar métricas agregadas de uso (número de usuários, volume de uploads, taxa de erro de parse),
-**So that** eu identifique problemas técnicos ou gargalos de infraestrutura proativamente.
+As a investidor informando meu capital disponível no mês,
+I want que o sistema calcule a distribuição ideal de novos aportes priorizando as maiores defasagens sem sugerir a venda de nenhuma posição existente,
+So that minha carteira reequilibre seu risco progressivamente sem giro patrimonial nem geração de impostos.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário possui a flag `role: ADMIN` no JWT
-- **When** ele acessa `/admin/dashboard`
-- **Then** o sistema exibe gráficos de: Usuários Ativos (24h), Sucesso vs Erro de Upload (Kafka) e Latência Média do Motor Graham
-- **And** os dados financeiros sensíveis (portfólio individual) aparecem anonimizados
+**Given** um valor de aporte disponível $X > 0$, o snapshot da custódia e as preferências do Diagrama do Cerrado
+**When** o motor `ContributionGpsSimulator` executa o cálculo em memória
+**Then** a operação é estritamente *stateless* (sem persistência em banco), calculando a defasagem relativa de cada classe e ativo contra o patrimônio projetado ($P_{\text{atual}} + X$)
+**And** quando múltiplos ativos apresentam o mesmo score de defasagem, aplica o desempate determinístico rigoroso: `1º Maior Nota (1–10) -> 2º Maior Margem de Segurança de Graham -> 3º Maior déficit monetário absoluto -> 4º Ordem alfabética do Ticker (A-Z)`
+**And** para ativos cotados em bolsa (*Ações BR*, *FIIs*, *ETFs*, *BDRs*), quantiza a quantidade inteira de cotas ($\lfloor \text{Valor} / \text{Cotação} \rfloor$) *in-loop* e deduz apenas o valor consumido pelas cotas inteiras em `BigDecimal`, fazendo qualquer saldo residual transbordar (*spillover*) imediatamente para o próximo ativo ou Macro Classe elegível
+**And** caso todos os ativos elegíveis atinjam seus respectivos tetos de risco ou restem apenas classes sem ativos cadastrados, encerra com saldo não alocado categorizado explicitamente em: `unallocatedRiskProtectedBalance`, `emptyClassUnallocatedBalance` e `residualChangeBalance`.
 
-#### Story 6.2: Reprocessamento de Importações Falhas (DLQ UI)
+### Story 4.2: Integração da Margem de Segurança de Graham e Multiplicador de Prioridade
 
-**Related FRs/NFRs:** FR27
-
-**As a** administrador,
-**I want** visualizar os arquivos que falharam no processamento e disparar o reprocessamento manual,
-**So that** o usuário não precise fazer o upload novamente em caso de erro transiente no servidor.
-
-**Acceptance Criteria:**
-
-- **Given** que existem mensagens na `trade-extracted-dlq` (Dead Letter Queue) do Kafka
-- **When** o administrador acessa a lista de "Falhas de Ingestão"
-- **Then** o sistema lista: Arquivo, Erro Reportado e Timestamp
-- **When** o administrador seleciona um item e clica em "Reprocessar"
-- **Then** o sistema repubblica a mensagem no tópico original para nova tentativa
-- **And** remove da lista de falhas se o reprocessamento for bem-sucedido
-
-#### Story 6.3: Gestão de Ativos e Tickers (Mestre de Dados)
-
-**Related FRs/NFRs:** FR19
-
-**As a** administrador,
-**I want** cadastrar novos tickers ou corrigir informações de classes de ativos,
-**So that** o sistema reconheça novos papéis que entrem no mercado (IPOs).
+As a investidor que segue a filosofia de Benjamin Graham na classe Ações BR,
+I want que ações com margem de segurança positiva recebam bônus na prioridade de aporte dentro da classe,
+So that eu aproveite descontos fundamentalistas do mercado sem ultrapassar o teto prudencial de risco.
 
 **Acceptance Criteria:**
 
-- **Given** que um novo ativo foi lançado na B3 e não está no banco
-- **When** o admin cadastra o Ticker e a Classe correspondente
-- **Then** o sistema atualiza o dicionário de ativos global
-- **And** limpa o cache de Market Data para forçar o carregamento das novas informações
+**Given** uma ação brasileira elegível no Diagrama (Nota $\ge 5$ e déficit $> 0$) com $LPA > 0$ e $VPA > 0$
+**When** sua cotação atual for inferior ao Valor Intrínseco de Graham ($VI = \sqrt{22.5 \times LPA \times VPA}$)
+**Then** o sistema marca o papel com a flag de Margem de Segurança positiva e aplica o **Multiplicador de Graham** parametrizável (padrão `1.30x`) sobre o score de defasagem da ação
+**And** o bônus altera a ordem de priorização dentro da classe *Ações BR*, mas a alocação máxima permanece estritamente limitada pelo Teto Máximo de Risco da Nota de Qualidade da ação
+**And** para ações com $LPA \le 0$ ou $VPA \le 0$, o cálculo de Graham é registrado explicitamente como `"N/A (LPA/VPA <= 0)"`, mantendo a priorização padrão baseada no Diagrama sem bônus multiplicador.
 
-### Epic 7: Holding Familiar (Multi-CPF)
-**Related PRD Requirements:** FR4
+### Story 4.3: Circuit Breaker de Cotações de Mercado e Quarentena de Eventos Corporativos
 
-**Goal:** Usuários Premium podem consolidar a visão de patrimônio de toda a família em um único dashboard.
-
-#### Story 7.1: Vínculo de Novo CPF à Conta Matriz
-**As a** usuário Premium e gestor familiar,
-**I want** vincular o CPF de um dependente à minha conta,
-**So that** eu possa gerenciar os investimentos da família centralizadamente.
-
-**Acceptance Criteria:**
-- **Given** que o usuário é Premium
-- **When** ele informa um novo CPF e Nome para vínculo
-- **Then** o sistema cria um sub-tenant lógico vinculado ao ID mestre
-- **And** permite upload de arquivos B3 específicos para esse novo perfil.
-
-### Epic 8: Tags de Carteira & Visões Personalizadas
-**Related PRD Requirements:** FR14, FR15
-
-**Goal:** Permitir que o usuário organize seus ativos em categorias lógicas personalizadas e visualize consolidações, rentabilidade e recomendações de IA filtradas por essas tags.
-
-**FRs cobertos:** FR14, FR15
-
-#### Story 8.1: Criação e Associação de Tags
-
-**Related FRs/NFRs:** FR14
-
-**As a** investidor,
-**I want** criar etiquetas como "Aposentadoria" ou "Longo Prazo" e associar aos meus ativos,
-**So that** eu veja a rentabilidade separada por estratégia.
+As a sistema de inteligência de investimentos Kerno,
+I want identificar oscilações extremas e anomalias de preços em ativos de renda variável,
+So that o investidor não receba simulações de aporte distorcidas por eventos corporativos pendentes de ajuste pela B3.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário está na tela de ativos
-- **When** ele seleciona um ativo e cria/associa uma Tag
-- **Then** o sistema persiste a relação ativo-tag-usuário (isolado por `userId`)
-- **And** atualiza os filtros de dashboard para incluir essa nova tag
-- **And** permite associar um mesmo ativo a múltiplas tags simultaneamente
+**Given** uma variação diária de cotação não ajustada `> 40%` em renda variável (excluindo Criptoativos)
+**When** detectada pelo ingestor de cotações de mercado
+**Then** o ticker é colocado no estado persistente `QUARENTENA_EVENTO_CORPORATIVO`, congela a última cotação válida pré-anomalia para fins patrimoniais e suspende novas simulações de aporte para aquele ativo no GPS
+**And** ao acessar o detalhe do ativo ou alerta na interface e acionar *"Confirmar posição atual / Retomar cotação"*, a API `POST /api/v1/market/tickers/{ticker}/override-quarantine` encerra o estado de quarentena e reabilita o ativo para simulação de aporte.
 
-- **Given** que o usuário quer renomear ou excluir uma Tag
-- **When** ele acessa a tela de gerência de Tags
-- **Then** o sistema permite renomear (refletindo em todos os ativos vinculados) ou excluir (desassociando os ativos sem excluí-los)
+### Story 4.4: API REST do GPS de Aporte com Explicabilidade Matemática e Auditoria CVM
 
-#### Story 8.2: Filtros de Dashboard e Recomendações por Tag
-
-**Related FRs/NFRs:** FR15, NFR2, NFR3
-
-**As a** investidor,
-**I want** filtrar todo o dashboard — consolidação, rentabilidade e recomendações de IA — por uma Tag de Carteira específica,
-**So that** eu analise cada estratégia de investimento de forma isolada, sem misturar carteiras com objetivos distintos.
+As a investidor submetendo uma simulação pelo celular ou Web,
+I want receber a distribuição de aportes em menos de 1 segundo acompanhada de todos os números que justificam a simulação,
+So that eu compreenda a matemática por trás de cada centavo sugerido sob conformidade CVM.
 
 **Acceptance Criteria:**
 
-- **Given** que o usuário possui ativos com Tags associadas (Story 8.1 concluída)
-- **When** ele seleciona uma Tag no seletor de "Lente Analítica" (`AnalyticalLensTabs`)
-- **Then** o dashboard exibe apenas os ativos vinculados àquela Tag
-- **And** os KPIs (Patrimônio Total, Rendimento, DY) são recalculados considerando somente esses ativos
-- **And** a transição visual ocorre em crossfade de 250ms (NFR2)
+**Given** o endpoint `POST /api/v1/gps/simulate`
+**When** chamado com o valor de aporte disponível (`R$ X`)
+**Then** o cálculo completo responde em `< 1.0 segundo` (P95) para carteiras de até 100 ativos, conforme validado na suíte de testes de integração `ContributionGpsIT`
+**And** a resposta JSON contém para cada ativo: `% Atual Pré-Aporte`, `% Meta Efetiva`, `% Projetada Pós-Aporte`, `Quantidade de Cotas Inteiras`, `Valor Alocado em R$`, `Nota de Qualidade`, `Teto de Risco`, métricas de Graham (`LPA`, `VPA`, `VI`, `% Margem`), saldo não alocado protegido e texto de disclaimer CVM informando que se trata de simulação matemática automatizada
+**And** para usuários na camada Free pós-trial (`FR-15`), a resposta agrega os valores exclusivamente no nível de Macro Classes, com indicador visual de upgrade para detalhamento por ativo.
 
-- **Given** que o filtro por Tag está ativo
-- **When** o usuário acessa a seção de Recomendações (Epic 4)
-- **Then** o Motor de Graham considera apenas o saldo e a alocação dos ativos da Tag selecionada
-- **And** as sugestões de aporte levam em conta somente a meta percentual configurada para aquela Tag (se definida)
-- **And** o cálculo responde em < 2 segundos (NFR3)
+### Story 4.5: Interface do GPS de Aporte: Calculadora, Cotas Inteiras e Acordeão de Transparência
 
-- **Given** que o filtro por Tag está ativo
-- **When** o usuário acessa o histórico de proventos e aportes
-- **Then** são exibidos apenas os eventos relacionados aos ativos da Tag
-- **And** um badge visível indica "Visualizando: [Nome da Tag]" para evitar confusão com a visão global
+As a investidor na Aba 2 (**GPS de Aporte**),
+I want digitar o valor em R$ do meu aporte mensal e ver os cartões limpos com as quantidades de ações a comprar e a justificativa matemática detalhada,
+So that eu execute minhas ordens no app da corretora em menos de 30 segundos.
 
-- **Given** que o usuário quer voltar à visão completa
-- **When** ele seleciona "Visão Geral" no seletor de Lente
-- **Then** o dashboard retorna a consolidação de todos os ativos sem filtro ativo
+**Acceptance Criteria:**
 
-- **Given** que o usuário possui ativos sem Tag associada
-- **When** ele aplica qualquer filtro de Tag
-- **Then** esses ativos sem Tag não aparecem na visão filtrada
-- **And** um aviso sutil indica "X ativos sem tag não estão sendo exibidos" com link para associar
+**Given** a tela `/gps-aporte` (Aba 2)
+**When** o investidor digita o valor disponível no componente `InputCurrency` e clica em *"Calcular Aporte"*
+**Then** a tela renderiza os cartões `ContributionGpsCard` em lista empilhada destacando o ticker, quantidade inteira de ações/cotas e valor em R$, exibindo o selo `{components.badge-graham-bonus}` (*"Margem Graham Positiva"*) nos papéis bonificados
+**And** o acordeão `MathTransparencyAccordion` (*"Por que estes ativos?"*), quando expandido pelo usuário, exibe a comparação percentual pré vs. pós-aporte, a meta do Diagrama e os múltiplos fundamentalistas de Graham de forma transparente e em numerais tabulares
+**And** em situações em que reste saldo protegido por teto de risco, a interface renderiza o `RiskCeilingSaturationCard` em âmbar explicando o motivo pelo qual aquele saldo não foi distribuído
+**And** o rodapé da tela exibe permanentemente o `CvmRegulatoryFooter` informando a natureza estritamente matemática e não-recomendatória da ferramenta.
 
-### Epic 9: Expansão de Ingestão de Dados (Post-MVP)
-**Related PRD Requirements:** FR9, FR10, FR11
+## Epic 5: Diagnóstico de Carteira Assistido por IA (Kerno AI) & Conformidade LGPD
 
-**Goal:** Expandir a coleta de dados (Crawler, PDF e APIs externas).
+O investidor obtém auditoria executiva de riscos, concentração e coerência da sua carteira em linguagem natural através do Kerno AI em 4 cartões objetivos, com garantia inegociável de privacidade de dados (zero PII no LLM sob contrato Google Cloud Vertex AI Enterprise ZDR), guardrail regulatório CVM (sem imperativos de compra/venda) e conformidade integral com a LGPD através do expurgo de dados em cascata (Direito ao Esquecimento).
 
-#### Story 9.1: Importação de Nota de Corretagem (PDF)
-**As a** investidor,
-**I want** fazer upload de PDFs de notas de corretagem,
-**So that** os dados sejam extraídos automaticamente via Vision/Parser.
+### Story 5.1: Modelo de Dados de Cache Analítico, Controle FinOps e Migrations de IA
 
-#### Story 9.2: Web Crawler de Proventos e Fatos Relevantes
-**As a** sistema,
-**I want** buscar anúncios de dividendos nos canais oficiais,
-**So that** a agenda de proventos esteja sempre atualizada.
+As a sistema Kerno,
+I want armazenar diagnósticos gerados por IA vinculados ao hash de estado da carteira e controlar o consumo de chamadas por usuário,
+So that leituras repetidas sejam instantâneas (< 400ms) e os custos de inferência de LLM permaneçam blindados contra abusos (FinOps).
 
-#### Story 9.3: Conector Open Finance
-**As a** usuário,
-**I want** conectar minha conta de investimento diretamente,
-**So that** eu não precise fazer uploads manuais.
+**Acceptance Criteria:**
 
-### Epic 10: Relatórios & Benchmarking
-**Related PRD Requirements:** FR12, FR13
+**Given** uma nova migration incremental do Liquibase
+**When** executada no banco de dados
+**Then** cria as tabelas `tb_ai_diagnostic_cache` (com `portfolio_state_hash` SHA-256, `model_version`, `prompt_version`, `json_payload` e `expires_at` com TTL de 24 horas) e `tb_ai_usage_counter` (com contadores de chamadas diárias e mensais por `user_id`)
+**And** ao solicitar diagnóstico para uma carteira cujo `portfolio_state_hash` já exista em cache válido, a resposta é retornada em `< 400ms` (P95) sem chamar o provedor externo de LLM e sem debitar a cota de uso do usuário
+**And** quando um usuário atinge o limite de 5 gerações reais diárias no plano Pro/Founder e tenta uma 6ª análise sem mudança material de carteira, a API retorna HTTP 429 com mensagem orientativa de uso justo, servindo o último diagnóstico cacheado.
 
-**Goal:** Comparar performance com índices e gerar bases para IR.
+### Story 5.2: Sanitizador LGPD de PII, Normalização Canônica e Validador Pré-Payload
 
-#### Story 10.1: Relatório de Bens e Direitos (Informe Anual)
-**As a** investidor,
-**I want** gerar um relatório consolidado em 31/12,
-**So that** eu possa preencher o meu IR.
+As a encarregado de privacidade (DPO) e investidor do Kerno,
+I want garantir que nenhum dado pessoal identificável ou valor monetário absoluto em R$ seja enviado ao modelo externo de linguagem,
+So that a integração de IA respeite integralmente os Artigos 9º, 18 e 33 da LGPD.
 
-#### Story 10.2: Cálculo de Lucro Realizado e Isenção
-**As a** investidor,
-**I want** saber quanto tive de lucro e se passei dos R$ 20k,
-**So that** eu pague o DARF corretamente.
+**Acceptance Criteria:**
 
-### Epic 11: Notificações Multicanal
-**Related PRD Requirements:** FR25
+**Given** o snapshot determinístico da carteira gerado pelo backend
+**When** processado pela camada `PiiSanitizer`
+**Then** 100% dos dados pessoais (nome, CPF, e-mail, telefone, IDs nominais de conta) e valores monetários absolutos em `R$` são removidos, sendo enviado ao LLM exatamente `0 bytes` de PII
+**And** para ativos cadastrados manualmente pelo usuário com descrições livres, o sanitizador valida contra as allowlists oficiais (tickers B3 e ativos internacionais), substituindo qualquer texto livre fora das allowlists por rótulos anônimos canônicos (`RENDA_FIXA_MANUAL_1`, `CRIPTO_MANUAL_1`)
+**And** 100% dos testes da suíte automatizada do sanitizador confirmam a eliminação de dados sensíveis antes de qualquer saída de rede.
 
-**Goal:** Engajamento e alertas em tempo real.
+### Story 5.3: Adaptador Vertex AI Gemini Enterprise ZDR e Validação Determinística Pós-Geração
 
-#### Story 11.1: Alertas via WhatsApp (Gatilhos de Meta)
-**As a** investidor,
-**I want** receber zaps de rebalanceamento e proventos,
-**So that** eu tome decisões rápidas.
+As a sistema de inteligência financeira Kerno,
+I want gerar a síntese qualitativa da carteira via Google Cloud Vertex AI com cláusula de Zero Data Retention, validando a integridade numérica e os guardrails da CVM antes de exibir o resultado,
+So that o investidor receba uma análise executiva clara com zero alucinação aritmética e total conformidade regulatória.
 
-#### Story 11.2: Web Push para Zona de Compra (Graham)
-**As a** investidor,
-**I want** notificação no navegador quando o preço bater o Graham,
-**So that** eu aporte com desconto.
+**Acceptance Criteria:**
+
+**Given** a porta agnóstica de domínio `AiPortfolioAnalyzerPort` implementada pelo `VertexAiGeminiAdapter`
+**When** acionada para inferência
+**Then** conecta-se exclusivamente ao endpoint empresarial do Google Cloud Vertex AI sob contrato corporativo com Zero Data Retention (ZDR) utilizando o modelo fixo `gemini-2.5-flash` com temperatura `0.1`
+**And** o retorno JSON estruturado em 4 blocos (*Resumo Executivo*, *Pontos Fortes*, *Alertas de Risco e Concentração*, *Racional do Plano de Aporte*) é validado deterministicamente garantindo que zero tickers ou números foram inventados (tolerância máxima de arredondamento de ±0,1 p.p. contra o snapshot de entrada)
+**And** o validador léxico regulatório CVM 19/20 bloqueia qualquer sentença que contenha termos imperativos de compra ou venda (`\b(comprar?|vender?|lucro garantido)\b`), abortando imediatamente o uso da resposta do LLM sem retry síncrono
+**And** em caso de falha de validação, erro do provedor ou timeout `> 15 segundos`, o sistema ativa imediatamente o fallback quantitativo determinístico local, registrando log de auditoria `WARN/ERROR` com stack trace e sem debitar a cota diária do usuário.
+
+### Story 5.4: Interface do Kerno AI: Cartões de Diagnóstico, Feedback 👍/👎 e Fallback Gracioso
+
+As a investidor na Aba 3 (**Kerno AI**),
+I want visualizar meu diagnóstico estruturado em 4 cartões legíveis combinando valores em R$ locais com a síntese em %, avaliar a utilidade do relatório e ter acesso instantâneo a dados mesmo em caso de instabilidade da IA,
+So that eu identifique concentrações de risco e pontos de melhoria na minha carteira com total clareza.
+
+**Acceptance Criteria:**
+
+**Given** a tela `/kerno-ai` (Aba 3)
+**When** o diagnóstico é renderizado
+**Then** exibe os 4 cartões `KernoAiDiagnosticCard` (*Resumo Executivo*, *Pontos Fortes*, *Alertas de Risco e Concentração*, *Racional do Plano de Aporte*), combinando badges locais determinísticos em R$ com a narrativa percentual gerada pela IA, respeitando o Modo Privacidade
+**And** na primeira utilização do Kerno AI pelo usuário, exibe aviso transparente informando que a estrutura percentual anonimizada é processada por IA corporativa sob contrato de proteção e ZDR (Art. 9º LGPD)
+**And** ao clicar nos botões de avaliação útil/não-útil (👍/👎), registra a métrica de satisfação do usuário (`SM-5`) sem exigir comentários obrigatórios
+**And** em situações de timeout da IA externa ou em contas na camada Free pós-trial, renderiza o painel determinístico local com mensagem informativa não-bloqueante, garantindo continuidade de uso.
+
+### Story 5.5: Expurgo em Cascata LGPD (Direito ao Esquecimento) e Teste de Integração AccountDeletionIT
+
+As a titular de dados pessoais utilizando o Kerno,
+I want solicitar a exclusão definitiva da minha conta (ou a remoção individual de um CPF secundário),
+So that todos os meus dados cadastrais, posições, metas do Diagrama do Cerrado e diagnósticos de IA sejam expurgados de forma irreversível conforme a LGPD.
+
+**Acceptance Criteria:**
+
+**Given** a confirmação de exclusão definitiva de conta no Hub de Perfil (`/profile`)
+**When** o `UserDataPurgeAdapter` é acionado no backend
+**Then** cancela imediatamente quaisquer jobs assíncronos Kafka em processamento do usuário e executa hard-delete atômico em cascata de todas as tabelas: `tb_user`, `tb_user_cpf`, posições de custódia, `tb_cerrado_preferences`, `tb_cerrado_asset_grade`, `tb_ai_diagnostic_cache` e `tb_ai_usage_counter`, além de limpar chaves de rate limit e caches em memória
+**And** ao submeter a remoção granular de um CPF secundário da Holding Familiar pelo endpoint dedicado, remove atômica e exclusivamente as posições e o vínculo do respectivo CPF, preservando intactos o titular e os demais membros
+**And** 100% dos testes da suíte `AccountDeletionIT` passam via Maven Failsafe, validando a exclusão completa, o cancelamento de concorrência com workers assíncronos e a ausência absoluta de registros órfãos em todas as tabelas do Ciclo 2.0.
