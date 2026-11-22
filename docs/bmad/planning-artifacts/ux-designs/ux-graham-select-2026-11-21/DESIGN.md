@@ -49,7 +49,7 @@ colors:
   founder-gold-dark: '#FDE68A'
   founder-gold-surface-dark: '#78350F'
   border-subtle: '#E2E8F0'
-  border-strong: '#94A3B8'
+  border-strong: '#64748B'
   border-focus: '#4F46E5'
   border-subtle-dark: '#1E293B'
   border-strong-dark: '#64748B'
@@ -212,6 +212,7 @@ components:
     foreground: '{colors.semantic-amber}'
     foregroundDark: '{colors.semantic-amber-dark}'
     border: '{colors.semantic-amber-border}'
+    borderDark: '{colors.semantic-amber-border}'
     radius: '{rounded.lg}'
     padding: '{spacing.card-padding-mobile}'
   cerrado-template-selector-card:
@@ -301,6 +302,7 @@ components:
     foreground: '{colors.semantic-emerald}'
     foregroundDark: '{colors.semantic-emerald-dark}'
     border: '{colors.semantic-emerald-border}'
+    borderDark: '{colors.semantic-emerald-border}'
     radius: '{rounded.full}'
     paddingHorizontal: '{spacing.3}'
     paddingVertical: '{spacing.1}'
@@ -311,6 +313,7 @@ components:
     foreground: '{colors.semantic-amber}'
     foregroundDark: '{colors.semantic-amber-dark}'
     border: '{colors.semantic-amber-border}'
+    borderDark: '{colors.semantic-amber-border}'
     radius: '{rounded.full}'
     paddingHorizontal: '{spacing.3}'
     paddingVertical: '{spacing.1}'
@@ -321,21 +324,29 @@ components:
     foreground: '{colors.founder-gold}'
     foregroundDark: '{colors.founder-gold-dark}'
     border: '{colors.founder-gold-border}'
+    borderDark: '{colors.founder-gold-border}'
     radius: '{rounded.full}'
     paddingHorizontal: '{spacing.3}'
     paddingVertical: '{spacing.1}'
     font: '{typography.caption}'
   privacy-toggle:
     background: '{colors.surface-subtle}'
+    backgroundDark: '{colors.surface-subtle-dark}'
     backgroundActive: '{colors.brand-accent-soft}'
+    backgroundActiveDark: '{colors.brand-accent-soft-dark}'
     foreground: '{colors.text-primary}'
+    foregroundDark: '{colors.text-primary-dark}'
     foregroundActive: '{colors.brand-primary-deep}'
+    foregroundActiveDark: '{colors.brand-primary-dark}'
     radius: '{rounded.full}'
     size: '{spacing.touch-target-min}'
   multi-cpf-selector:
     background: '{colors.surface-subtle}'
+    backgroundDark: '{colors.surface-subtle-dark}'
     foreground: '{colors.text-primary}'
+    foregroundDark: '{colors.text-primary-dark}'
     border: '{colors.border-subtle}'
+    borderDark: '{colors.border-subtle-dark}'
     radius: '{rounded.full}'
     minHeight: '{spacing.touch-target-min}'
     paddingHorizontal: '{spacing.4}'
@@ -354,7 +365,9 @@ components:
     background: '{colors.surface-elevated}'
     backgroundDark: '{colors.surface-elevated-dark}'
     activeForeground: '{colors.brand-primary}'
+    activeForegroundDark: '{colors.brand-primary-dark}'
     inactiveForeground: '{colors.text-muted}'
+    inactiveForegroundDark: '{colors.text-muted-dark}'
     borderTop: '{colors.border-subtle}'
     borderTopDark: '{colors.border-subtle-dark}'
     itemMinSize: '{spacing.touch-target-min}'
@@ -398,11 +411,11 @@ A paleta do **Design System Intergeracional** é construída sob a filosofia **L
 
 Nenhuma cor semântica no **Kerno** pode transmitir significado sozinha (`FR-2`). Para garantir acessibilidade plena a portadores de protanopia, deuteranopia e tritanopia e leitura cristalina sob luz solar intensa por usuários 40+ (**WCAG 2.1 AAA `>= 7:1`** em todas as cifras e alertas):
 
-- **Esmeralda de Margem e Aporte (`{colors.semantic-emerald}` `#065F46` sobre `{colors.surface-elevated}` `#FFFFFF` com **`7.68:1` AAA** e sobre `{colors.semantic-emerald-surface}` `#ECFDF5` com **`7.13:1` AAA**; Dark Mode `{colors.semantic-emerald-dark}` `#6EE7B7` sobre `{colors.semantic-emerald-surface-dark}` `#064E3B` com **`7.45:1` AAA**):** Representa exclusivamente **Margem de Segurança de Graham** positiva, elegibilidade ao **Multiplicador de Graham** (`1.30x`) e sugestões ativas de alocação no **GPS de Aporte**. Sempre acompanhado de ícone (`Sparkles` / `TrendingUp` / `CheckCircle`) e rótulo textual explícito (ex.: *"Oportunidade Graham + Cerrado"*).
+- **Esmeralda de Margem e Aporte (`{colors.semantic-emerald}` `#065F46` sobre `{colors.surface-elevated}` `#FFFFFF` com **`7.68:1` AAA** e sobre `{colors.semantic-emerald-surface}` `#ECFDF5` com **`7.13:1` AAA**; Dark Mode `{colors.semantic-emerald-dark}` `#6EE7B7` sobre `{colors.semantic-emerald-surface-dark}` `#064E3B` com **`7.45:1` AAA**):** Representa exclusivamente **Margem de Segurança de Graham** positiva, elegibilidade ao **Multiplicador de Graham** (`1.30x`) e sugestões ativas de alocação no **GPS de Aporte**. Sempre acompanhado de ícone (`Sparkles` / `TrendingUp` / `CheckCircle`) e rótulo textual explícito e estritamente neutro (ex.: *"Margem Graham Positiva"* ou *"Fator Graham Elegível (1.30x)"*).
 - **Âmbar de Atenção e Quarentena (`{colors.semantic-amber}` `#92400E` sobre `{colors.semantic-amber-surface}` `#FFFBEB` com **`7.05:1` AAA**; Dark Mode `{colors.semantic-amber-dark}` `#FBBF24` sobre `{colors.semantic-amber-surface-dark}` `#451A03` com **`8.80:1` AAA**):** Representa estados de contenção protetiva: ativos em **Quarentena de Aporte** (**Nota de Qualidade (1–10)** `< 5`), ativos em verificação de anomalia de mercado (`QUARENTENA_EVENTO_CORPORATIVO` `> 40%`), avisos de cotação de fechamento (`D-1`) e o cartão de *"Saldo Excedente Protegido por Teto de Risco"*. Sempre acompanhado de ícone (`ShieldAlert` / `PauseCircle` / `AlertTriangle`) e rótulo explícito.
-- **Carmesim de Erro e Bloqueio (`{colors.semantic-crimson}` `#991B1B` sobre `{colors.semantic-crimson-surface}` `#FEF2F2` com **`7.60:1` AAA**; Dark Mode `{colors.semantic-crimson-dark}` `#FCA5A5` sobre `{colors.semantic-crimson-surface-dark}` `#450A0A` com **`7.92:1` AAA**):** Reservado estritamente para erros de validação (como soma de **Macro Classes** diferente de `100.00%`), falhas críticas de upload de planilha da B3 e a confirmação final irreversível de exclusão de conta LGPD. **Nunca** utilizado para forçar ou sugerir venda de ativos em queda.
+- **Carmesim de Erro e Bloqueio (`{colors.semantic-crimson}` `#991B1B` sobre `{colors.semantic-crimson-surface}` `#FEF2F2` com **`7.60:1` AAA** e borda sutil `{colors.semantic-crimson-border}` `#FECACA`; Dark Mode `{colors.semantic-crimson-dark}` `#FCA5A5` sobre `{colors.semantic-crimson-surface-dark}` `#450A0A` com **`7.92:1` AAA**):** Reservado estritamente para erros de validação (como soma de **Macro Classes** diferente de `100.00%`), falhas críticas de upload de planilha da B3 e a confirmação final irreversível de exclusão de conta LGPD. O token `{colors.semantic-crimson-border}` delimita sutilmente os cartões e banners de erro. **Nunca** utilizado para forçar ou sugerir venda de ativos em queda.
 - **Ouro Founder (`{colors.founder-gold}` `#92400E` sobre `{colors.founder-gold-surface}` `#FEF3C7` com borda `{colors.founder-gold-border}` `#F59E0B`, contraste **`6.37:1` AA**; Dark Mode `{colors.founder-gold-dark}` `#FDE68A` sobre `{colors.founder-gold-surface-dark}` `#78350F`):** Reservado exclusivamente para o selo vitalício de **Membro Founder** no cabeçalho autenticado e nos destaques do **Programa Founders** na **Landing Page**.
-- **Bordas de Componentes Não-Textuais (WCAG 1.4.11 `>= 3:1`):** `{colors.border-strong}` (`#94A3B8`, contraste **`3.02:1`** sobre `#FFFFFF`) e `{colors.border-strong-dark}` (`#64748B`, contraste **`3.75:1`** sobre `#111827`) delimitam campos de entrada (`{components.input-currency}`) e botões secundários (`{components.button-secondary}`), transitando em foco para `{colors.border-focus}` (`#4F46E5`) / `{colors.border-focus-dark}` (`#818CF8`).
+- **Bordas de Componentes Não-Textuais (WCAG 1.4.11 `>= 3:1`):** `{colors.border-strong}` (`#64748B`, Slate 500, contraste **`3.98:1`** sobre `#FFFFFF`) e `{colors.border-strong-dark}` (`#64748B`, contraste **`3.75:1`** sobre `#111827`) delimitam campos de entrada (`{components.input-currency}`) e botões secundários (`{components.button-secondary}`), atendendo com folga matemática ao piso de 3.0:1 da WCAG 1.4.11 e transitando em foco para `{colors.border-focus}` (`#4F46E5`) / `{colors.border-focus-dark}` (`#818CF8`).
 
 ## Typography
 
@@ -417,6 +430,7 @@ A tipografia do **Kerno** combina a personalidade contemporânea e acolhedora da
 
 - **Honra Nativa ao `textScaler`:** Todos os tokens de tamanho de fonte listados no frontmatter representam a base em escala `1.0x` e multiplicam linearmente pelo `MediaQuery.textScalerOf(context)` do iOS e Android (ou zoom de acessibilidade do navegador) no intervalo de `1.0x` até `2.0x` (`FR-2`).
 - **Proibição Absoluta de Truncamento Financeiro:** É estritamente proibido aplicar `TextOverflow.ellipsis` (`...`), `maxLines: 1` com corte ou containers de altura fixa (`height: 80`) em widgets que exibam saldos em `R$`, tickers de ativos, percentuais de alocação ou valores de aporte. Quando o usuário opera em escala `1.3x` (como o protagonista Roberto em `UJ-1`) ou `2.0x`, os layouts horizontais de métricas convertem-se automaticamente via `Wrap` ou `Column` em empilhamento vertical, e o cartão expande sua altura livremente.
+- **Salvaguarda de Navegação sob Dynamic Type Acentuado (`textScaler > 1.35x`):** Em escalas superiores a `1.35x`, para prevenir `RenderFlex overflow` em smartphones de `360dp`, a `{components.bottom-nav-bar}` comuta para o padrão `LargeContentPresenter` nativo (exibindo ícones de `48x48dp` onde toque longo abre balão ampliado acessível com ícone + rótulo), e a `_TopBar` preserva apenas Logo, `{components.multi-cpf-selector}` e `{components.privacy-toggle}`, migrando o badge Founder e atalhos secundários para dentro do menu do perfil.
 
 ## Layout & Spacing
 
@@ -470,12 +484,12 @@ Cada componente abaixo possui seu par comportamental documentado na seção `## 
 - **Estado Modo Privacidade & Escala `2.0x`:** Quando o **Modo Privacidade** está ativo, o valor em `R$` é substituído instantaneamente (`< 300ms`) pelo bloco mascarado `R$ ••••••` na mesma altura de linha de `{typography.metric-hero}` (zero *layout shift*). Em escala de fonte `2.0x`, o cabeçalho do cartão quebra o badge e o saldo em linhas verticais empilhadas sem qualquer truncamento.
 
 ### 2. `macro-class-distribution-card` (Gráfico e Mapa de Macro Classes e Subclasses)
-- **Anatomia Visual:** Cartão `{components.macro-class-distribution-card.background}` com raio `{components.macro-class-distribution-card.radius}` (`{rounded.lg}`). Apresenta as 4 **Macro Classes** (*Ações BR*, *FIIs*, *Renda Fixa / Tesouro*, *Internacional*). Para cada classe, exibe uma barra horizontal dupla sobre trilha `{components.macro-class-distribution-card.barTrack}`: a barra principal em `{components.macro-class-distribution-card.barFillPrimary}` mostra o `% Atual` e um marcador vertical nítido em `{components.macro-class-distribution-card.barFillTarget}` (`{colors.text-primary}` `#0F172A` com halo branco lateral de `1.5px` para garantir contraste não-textual `>= 3:1` WCAG 1.4.11 mesmo quando a barra ultrapassa a meta) indica a `% Meta` do **Diagrama do Cerrado**. Ao lado (ou abaixo em `2.0x`), numerais em `{typography.body-base}` (`tabular-nums`) mostram `36,0% / Meta 40,0%` e o valor correspondente em `R$` (oculto em **Modo Privacidade**).
-- **Agrupadores Analíticos de Subclasse:** Ao expandir uma **Macro Classe**, chips em `{colors.surface-subtle}` exibem a exposição por **Subclasse** (*Setores Defensivos* vs. *Crescimento* em Ações BR; *Tijolo* vs. *Papel* em FIIs) (`FR-4`, `FR-5`).
+- **Anatomia Visual:** Cartão `{components.macro-class-distribution-card.background}` com raio `{components.macro-class-distribution-card.radius}` (`{rounded.lg}`). Apresenta as 5 **Macro Classes** (*Ações BR*, *FIIs*, *Renda Fixa / Tesouro*, *Internacional* e *Criptoativos*). Para cada classe, exibe uma barra horizontal dupla sobre trilha `{components.macro-class-distribution-card.barTrack}`: a barra principal em `{components.macro-class-distribution-card.barFillPrimary}` mostra o `% Atual` e um marcador vertical nítido em `{components.macro-class-distribution-card.barFillTarget}` (`{colors.text-primary}` `#0F172A` com halo branco lateral de `1.5px` para garantir contraste não-textual `>= 3:1` WCAG 1.4.11 mesmo quando a barra ultrapassa a meta) indica a `% Meta` do **Diagrama do Cerrado**. Ao lado (ou abaixo em `2.0x`), numerais em `{typography.body-base}` (`tabular-nums`) mostram `36,0% / Meta 39,0%` e o valor correspondente em `R$` (oculto em **Modo Privacidade**).
+- **Agrupadores Analíticos de Subclasse:** Ao expandir uma **Macro Classe**, chips em `{colors.surface-subtle}` exibem a exposição por **Subclasse** (*Setores Defensivos* vs. *Crescimento* em Ações BR; *Tijolo* vs. *Papel* em FIIs; *Reserva de Valor / Bitcoin* vs. *Altcoins / ETFs Cripto* em Criptoativos) (`FR-4`, `FR-5`).
 
 ### 3. `contribution-gps-card` (Cartão de Sugestão de Aporte por Ativo/Classe)
 - **Anatomia Visual:** Cartão `{components.contribution-gps-card.background}` com raio `{components.contribution-gps-card.radius}` (`{rounded.lg}`) e borda `{components.contribution-gps-card.border}` (ou `{components.contribution-gps-card.highlightBorder}` para o 1º ativo da fila de prioridade). Divide-se em três zonas verticais que se empilham perfeitamente até `2.0x`:
-  1. *Cabeçalho do Ativo:* Ticker em `{components.contribution-gps-card.tickerFont}` (`{typography.ticker-badge}`) dentro de um chip `{colors.surface-subtle}`, nome da empresa/título em `{typography.body-sm}`, tag da **Macro Classe** e, quando elegível ao **Multiplicador de Graham** (`1.30x`), o selo `{components.badge-graham-bonus}` (*"Oportunidade Graham + Cerrado"* ou *"Bônus Graham"*).
+  1. *Cabeçalho do Ativo:* Ticker em `{components.contribution-gps-card.tickerFont}` (`{typography.ticker-badge}`) dentro de um chip `{colors.surface-subtle}`, nome da empresa/título em `{typography.body-sm}`, tag da **Macro Classe** e, quando elegível ao **Multiplicador de Graham** (`1.30x`), o selo `{components.badge-graham-bonus}` (*"Margem Graham Positiva"* ou *"Fator Graham Elegível 1.30x"*).
   2. *Bloco de Alocação Calculada:* Valor exato a aportar em `R$` renderizado em `{components.contribution-gps-card.amountFont}` (`{typography.metric-card}`, `20px`, `{colors.semantic-emerald}`), acompanhado da quantidade inteira de cotas/ações (`ex.: 142 ações × R$ 24,50`) para ativos negociados em bolsa (*Ações BR*, *FIIs*, *ETFs e BDRs*) ou indicação de *"Aporte contínuo em R$"* para títulos manuais de *Renda Fixa / Tesouro* (`FR-6`).
   3. *Gatilho de Explicabilidade:* Botão de largura total com altura mínima `{spacing.touch-target-min}` (`48px`) rotulado *"Por que estes ativos?"* que expande o `{components.math-transparency-accordion}`.
 
@@ -489,7 +503,7 @@ Cada componente abaixo possui seu par comportamental documentado na seção `## 
 - **Anatomia Visual:** Cartão de destaque semântico `{components.risk-ceiling-saturation-card.background}` (`{colors.semantic-amber-surface}`) com borda `{components.risk-ceiling-saturation-card.border}` e texto `{components.risk-ceiling-saturation-card.foreground}`, acompanhado de ícone `ShieldAlert`. Exibido exclusivamente quando todos os ativos elegíveis da carteira atingem seu **Teto Máximo de Risco** e resta saldo não alocado ($X_{\text{rem}} > 0$, `FR-6`), destacando o título *"Saldo Excedente Protegido por Teto de Risco (R$ X_rem)"* em `{typography.heading-3}` e instruindo o cadastro de novo ativo ou alocação em Reserva/Renda Fixa.
 
 ### 6. `cerrado-template-selector-card` (Seletor de Templates de Alocação no Onboarding)
-- **Anatomia Visual:** Trio de cartões selecionáveis com superfície `{components.cerrado-template-selector-card.background}` (transitando para `{components.cerrado-template-selector-card.selectedBackground}` e borda de `2px` `{components.cerrado-template-selector-card.selectedBorder}` quando ativo). Apresenta os 3 **Templates de Alocação** oficiais (*Equilibrado Cerrado*, *Conservador Patrimonial* e *Acumulação Arrojada*), exibindo uma barra visual das 4 **Macro Classes** somando `100%` e o selo informativo *"Notas iniciais neutras = 6 (Editáveis)"* (`FR-4`).
+- **Anatomia Visual:** Trio de cartões selecionáveis com superfície `{components.cerrado-template-selector-card.background}` (transitando para `{components.cerrado-template-selector-card.selectedBackground}` e borda de `2px` `{components.cerrado-template-selector-card.selectedBorder}` quando ativo). Apresenta os 3 **Templates de Alocação** oficiais (*Equilibrado Cerrado*: 39% Ações BR / 30% FIIs / 20% Renda Fixa / 10% Internacional / 1% Criptoativos; *Conservador Patrimonial*: 40% Ações BR / 30% FIIs / 30% Renda Fixa / 0% Cripto; *Acumulação Arrojada*: 35% Ações BR / 25% FIIs / 15% Renda Fixa / 20% Internacional / 5% Criptoativos), exibindo uma barra visual das 5 **Macro Classes** somando `100%` e o selo informativo *"Notas iniciais neutras = 6 (Editáveis)"* (`FR-4`).
 
 ### 7. `cerrado-quality-card` (Cartão de Ativo e Nota de Qualidade 1–10 no Diagrama do Cerrado)
 - **Anatomia Visual:** Superfície `{components.cerrado-quality-card.background}` com raio `{components.cerrado-quality-card.radius}` (`{rounded.lg}`). No topo, exibe ticker, nome, **Macro Classe**, **Subclasse** e a meta efetiva calculada (`% Meta Efetiva`) ao lado do **Teto Máximo de Risco** (`Teto 10%` para notas `8–10`, `Teto 6%` para notas `5–7`, `Teto 0%` para notas `1–4`, ou `Teto da Classe` para Tesouro Direto e ETFs amplos como `IVVB11`/`BOVA11`). No centro, apresenta o slider interativo de `1` a `10` com *thumb* de `{components.cerrado-quality-card.thumbSize}` (`48px`) e trilha `{components.cerrado-quality-card.sliderTrackActive}` (que muda instantaneamente para `{components.cerrado-quality-card.sliderTrackQuarantine}` e exibe o `{components.badge-quarantine}` *"Quarentena de Aporte"* quando a nota cai entre `1` e `4`). Abaixo do slider, um botão secundário discreto abre o **Assistente de 5 Critérios Objetivos** (5 linhas interativas com altura mínima de toque `{spacing.touch-target-min}` `48px` e seletores `0 / 1 / 2 pontos` cada: Governança, Lucro Consistente 5a, Endividamento Controlado, Vantagem Competitiva/Perenidade e Histórico de Proventos/Crescimento). No modo Free pós-trial, o slider assume aparência *read-only* com ícone de cadeado sutil e CTA não-destrutivo de upgrade (`FR-15`).
@@ -503,7 +517,7 @@ Cada componente abaixo possui seu par comportamental documentado na seção `## 
 - **Isolamento Visual LGPD (`FR-10`):** Os valores monetários em `R$` aparecem **exclusivamente** em chips/cabeçalhos determinísticos renderizados localmente pelo app Flutter (respeitando o **Modo Privacidade**), enquanto o corpo narrativo vindo do LLM em `{components.kerno-ai-diagnostic-card.bodyFont}` exibe apenas percentuais (`%`), notas e tickers públicos ou rótulos canônicos traduzidos localmente. Na base do diagnóstico, renderizam os botões de feedback (*"Este diagnóstico foi útil?"* 👍 / 👎 com área `48x48dp`), o carimbo de data/hora do snapshot + contador de cota (`X/5 gerações diárias`) e o `{components.cvm-regulatory-footer}`.
 
 ### 9. `b3-ingestion-crud-sheet` (Bottom Sheet / Modal Drawer de Importação B3 e CRUD Manual Multi-Classe)
-- **Anatomia Visual:** Superfície modal `{components.b3-ingestion-crud-sheet.background}` com cantos superiores `{components.b3-ingestion-crud-sheet.radiusTop}` (`{rounded.xl}`) no Mobile (ou Drawer lateral de `480px` na Web). Agrupa duas abas internas claras: *Importar Planilha B3* (área de *dropzone*/seleção de arquivo `.xlsx`/`.csv` com barra de progresso assíncrona) e *Posição Manual Multi-Classe* (seletor das 4 **Macro Classes** — *Ações BR*, *FIIs*, *Renda Fixa / Tesouro* e *Internacional* —, seletor de CPF familiar vinculado, campo de ticker/identificador e input monetário em `BRL`/`R$`, `FR-3`).
+- **Anatomia Visual:** Superfície modal `{components.b3-ingestion-crud-sheet.background}` com cantos superiores `{components.b3-ingestion-crud-sheet.radiusTop}` (`{rounded.xl}`) no Mobile (ou Drawer lateral de `480px` na Web). Agrupa duas abas internas claras: *Importar Planilha B3* (área de *dropzone*/seleção de arquivo `.xlsx`/`.csv` com barra de progresso assíncrona) e *Posição Manual Multi-Classe* (seletor das 5 **Macro Classes** — *Ações BR*, *FIIs*, *Renda Fixa / Tesouro*, *Internacional* e *Criptoativos* —, seletor de CPF familiar vinculado, campo de ticker/identificador e input monetário em `BRL`/`R$`, onde ETFs de cripto na B3 como `HASH11`, `BITH11`, `QBTC11` operam com quantização de cotas inteiras e ativos diretos como `BTC`, `ETH` ou Renda Fixa operam por saldo fracionado/contínuo em `R$`, `FR-3`).
 
 ### 10. `button-primary` & `button-secondary` (Botões de Ação)
 - **Anatomia Visual:** `{components.button-primary}` utiliza preenchimento sólido `{colors.brand-primary}` (`#4F46E5`), texto `{colors.text-on-primary}` (`#FFFFFF`) em `{typography.body-base}` (`fontWeight: 600`), raio `{rounded.md}` (`10px`) e altura mínima `{spacing.touch-target-min}` (`48px`). Estados `hover` (`{colors.brand-primary-hover}`) e `active` (`{colors.brand-primary-deep}`) oferecem resposta tátil imediata. `{components.button-secondary}` utiliza fundo `{colors.surface-elevated}`, borda `{colors.border-strong}` (`1.5px`) e texto `{colors.text-primary}`.
@@ -513,7 +527,7 @@ Cada componente abaixo possui seu par comportamental documentado na seção `## 
 
 ### 12. `badge-graham-bonus`, `badge-quarantine` & `badge-founder` (Tríade de Selos Semânticos)
 - **Anatomia Visual:** Pílulas com raio `{rounded.full}`, fonte `{typography.caption}` (`12px`, `fontWeight: 600`) e borda de `1px` para garantir nitidez tanto no modo claro quanto no escuro:
-  - `{components.badge-graham-bonus}`: Fundo `{colors.semantic-emerald-surface}`, texto `{colors.semantic-emerald}`, ícone `Sparkles` + texto *"Oportunidade Graham + Cerrado"* (ou *"Bônus Graham +30%"*).
+  - `{components.badge-graham-bonus}`: Fundo `{colors.semantic-emerald-surface}`, texto `{colors.semantic-emerald}`, ícone `Sparkles` + texto *"Margem Graham Positiva"* (ou *"Fator Graham Elegível 1.30x"* ou *"Desconto Contábil Graham"*).
   - `{components.badge-quarantine}`: Fundo `{colors.semantic-amber-surface}`, texto `{colors.semantic-amber}`, ícone `PauseCircle` (para Nota `< 5`: *"Quarentena de Aporte — Nota < 5"*) ou `AlertTriangle` (para `FR-17`: *"Cotação em verificação de evento corporativo"*).
   - `{components.badge-founder}`: Fundo `{colors.founder-gold-surface}`, texto `{colors.founder-gold}`, borda `{colors.founder-gold-border}`, ícone `Crown` + texto *"Membro Founder — Vitalício"*.
 
@@ -522,7 +536,7 @@ Cada componente abaixo possui seu par comportamental documentado na seção `## 
 
 ### 14. `cvm-regulatory-footer` & `bottom-nav-bar` (Rodapé Regulatório e Navegação Modular)
 - **Anatomia Visual:**
-  - `{components.cvm-regulatory-footer}`: Bloco permanente em `{colors.surface-subtle}` com borda `{colors.border-subtle}`, ícone `Info` e texto legal em `{typography.caption}` (`{colors.text-secondary}`) afixado na base do **GPS de Aporte** (`FR-8`) e do **Kerno AI (Diagnóstico de Carteira)** (`FR-10`), atestando a natureza de calculadora matemática parametrizada pelo usuário sob as Resoluções CVM 19 e 20.
+  - `{components.cvm-regulatory-footer}`: Bloco permanente em `{colors.surface-subtle}` com borda `{colors.border-subtle}`, ícone `Info` e texto legal em `{typography.caption}` (`{colors.text-secondary}`) afixado obrigatoriamente na base do **GPS de Aporte** (`FR-8`), do **Kerno AI (Diagnóstico de Carteira)** (`FR-10`), da tela de **Ranking Graham** (`/ranking`) e de tabelas públicas `FinancialDataTable`, atestando a natureza de calculadora matemática e filtro quantitativo parametrizado pelo usuário sob as Resoluções CVM 19 e 20.
   - `{components.bottom-nav-bar}`: Barra inferior fixa no Mobile (`< 600dp`) com superfície `{colors.surface-elevated}` e borda superior `{colors.border-subtle}`. Corrige o problema ergonômico legado de `MainLayout._BottomNavBar` (que espremia 10 destinos na barra inferior móvel) ao exibir as 4 abas primárias do MVP (**Carteira**, **GPS de Aporte**, **Kerno AI**, **Diagrama**) com área mínima de toque `{spacing.touch-target-min}` (`48x48dp`) por item, ícone + rótulo sempre visíveis (ícone ativo em `{colors.brand-primary}`) e arquitetura elástica pronta para acomodar o 5º item (**Gastos**) quando a *feature flag* `enable_expenses_module` for ativada (`FR-13`).
 
 ### 15. Contrato de Reestilização de `AppTheme`, `MainLayout`, `FinancialDataTable` e Todas as Seções Brownfield (`frontend/lib/`)
@@ -532,15 +546,15 @@ Para garantir que **100% das telas existentes no frontend Flutter** sejam reesti
   - A família `GoogleFonts.dmSans` do código legado é substituída por `GoogleFonts.plusJakartaSans` nos papéis de título/display e `GoogleFonts.inter` com `FontFeature.tabularFigures()` em todo o `textTheme`.
 - **`MainLayout` (`frontend/lib/src/core/widgets/main_layout.dart`):**
   - `_TopBar` exibe o logotipo **Kerno**, os filtros analíticos (`DashboardTagFilterBar` e `AnalyticalLensTabs` quando na visão de carteira), o seletor `{components.multi-cpf-selector}`, o botão `{components.privacy-toggle}`, o selo `{components.badge-founder}`, o botão de notificações e o atalho `Painel Admin` (`role == 'ADMIN'`).
-  - `_Sidebar` (Desktop `> 1024dp`, largura `240dp–260dp`, e Tablet `600dp–1024dp` em `NavigationRail` recolhida) organiza todas as rotas existentes em 5 grupos visuais limpos (ver [mockups/key-web-desktop-restyling.html](mockups/key-web-desktop-restyling.html)).
+  - `_Sidebar` (Desktop `> 1024dp`, largura `240dp–260dp`, e Tablet `600dp–1024dp` em `NavigationRail` recolhida) organiza todas as rotas existentes em 5 grupos visuais limpos (ver [mockups/key-web-desktop-restyling.html](mockups/key-web-desktop-restyling.html)). Incorpora o widget de acessibilidade `SkipToContentLink` (WCAG 2.4.1) no primeiro foco de `Tab`.
   - `_BottomNavBar` (Mobile `< 600dp`) exibe exclusivamente as 4 abas nucleares (**Carteira**, **GPS de Aporte**, **Kerno AI**, **Diagrama**), enquanto as demais seções existentes permanecem a 1 toque de distância dentro de seus respectivos Hubs (Sub-abas em **Carteira** para *Evolução*, *Proventos*, *Metas*, *IRPF* e *Importação B3/Tags*; Sub-aba em **Diagrama** para *Ranking Graham*; e *Menu de Perfil* no Header Global para *Holding Familiar*, *Suitability*, *Notificações WhatsApp/Web Push*, *LGPD* e *Admin*).
 - **`FinancialDataTable` (`frontend/lib/src/core/widgets/financial_data_table.dart`):**
-  - Em viewports `>= 600dp` (usado em `RankingPage`, `DividendsPage`, `TaxDeclarationPage` e `AdminTickersPage`), renderiza cabeçalho em `{colors.surface-subtle}`, bordas `{colors.border-subtle}` e células numéricas alinhadas com `tabular-nums`.
+  - Em viewports `>= 600dp` (usado em `RankingPage`, `DividendsPage`, `TaxDeclarationPage` e `AdminTickersPage`), renderiza cabeçalho em `{colors.surface-subtle}`, bordas `{colors.border-subtle}`, células numéricas alinhadas com `tabular-nums` e o `{components.cvm-regulatory-footer}` anexado à base do painel.
   - Em viewports móveis (`< 600dp`), o widget comuta automaticamente via `LayoutBuilder` para uma `ListView` de cartões empilhados (`{colors.surface-elevated}`, raio `{rounded.lg}`), eliminando 100% do `SingleChildScrollView(scrollDirection: Axis.horizontal)` em smartphones (`FR-2`).
 - **Páginas Brownfield Reestilizadas (`FR-1`, `FR-2`, `FR-3`):**
-  - `HomePage` (`/`), `LoginScreen` (`/login`) e `DocsScreen` (`/docs`): Reestilizadas com a identidade **Kerno** e o **Programa Founders** (ver [mockups/key-web-landing-founders.html](mockups/key-web-landing-founders.html)).
-  - `DashboardPage` (`/dashboard`), `EvolutionPage` (`/evolution`), `GoalsPage` (`/metas`), `DividendsPage` (`/dividends`) e `TaxDeclarationPage` (`/tax`): Recebem os cartões `{colors.surface-elevated}`, gráficos em `{colors.brand-primary}` / `{colors.semantic-emerald}` e **obedecem integralmente ao `{components.privacy-toggle}`** (mascarando qualquer cifra em `R$` como `R$ ••••••`).
-  - `AllocationStrategyPage` (`/allocation-strategy`) e `GrahamRecommendationsPage` (`/graham-recommendations`): Evoluem visual e funcionalmente para o **Diagrama do Cerrado** e o **GPS de Aporte**, mantendo compatibilidade de rota no `GoRouter`.
+  - `HomePage` (`/`), `LoginScreen` (`/login`), `DocsScreen` (`/docs`), Termos de Uso (`/terms`) e Privacidade (`/privacy`): Reestilizadas com a identidade **Kerno** e o **Programa Founders** (ver [mockups/key-web-landing-founders.html](mockups/key-web-landing-founders.html)), incluindo links legais e consentimento explícito no login de 1 clique OAuth2.
+  - `DashboardPage` (`/dashboard`), `EvolutionPage` (`/evolution`), `GoalsPage` (`/metas`), `DividendsPage` (`/dividends`) e `TaxDeclarationPage` (`/tax`): Recebem os cartões `{colors.surface-elevated}`, gráficos com padrões de traço distintos para benchmarks (WCAG 1.4.1) e suporte a nós `Semantics` no `CustomPainter`, além de **obedecerem integralmente ao `{components.privacy-toggle}`** (mascarando qualquer cifra em `R$` como `R$ ••••••`).
+  - `AllocationStrategyPage` (`/allocation-strategy`) e `GpsAportePage` (`/gps-aporte`, com redirect legado `/graham-recommendations` mantido sem exposição pública): Evoluem visual e funcionalmente para o **Diagrama do Cerrado** e o **GPS de Aporte**, com aviso de defasagem de 15 minutos da B3 durante o pregão.
   - `RankingPage` (`/ranking`), `UploadPage` (`/upload` com `B3UploadZone` e `OpenFinanceProvider`), `TagManagementPage` (`/tags` e `AssetTagSelectorSheet`), `FamilyProfilesPage` (`/family-profiles`), `ProfilePage` (`/profile`), `InvestorProfilePage` (`/suitability`), `WhatsappNotificationsPage` (`/notifications/whatsapp`), `WebPushNotificationsPage` (`/notifications/web-push`) e páginas de governança (`AdminDashboardPage` `/admin/dashboard`, `AdminDlqPage` `/admin/dlq`, `AdminTickersPage` `/admin/tickers`): Todas migradas para os tokens de superfície, tipografia tabular, bordas `>= 3:1` e botões de `48dp` deste `DESIGN.md` (ver [mockups/key-web-desktop-restyling.html](mockups/key-web-desktop-restyling.html)).
 
 ## Do's and Don'ts

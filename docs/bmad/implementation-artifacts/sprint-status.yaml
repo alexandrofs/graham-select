@@ -1,109 +1,80 @@
-# generated: 2026-03-12
-# last_updated: 2026-11-21
-# project: graham-select
-# project_key: NOKEY
-# tracking_system: file-system
-# story_location: docs/bmad/implementation-artifacts
-
 # STATUS DEFINITIONS:
 # ==================
 # Epic Status:
 #   - backlog: Epic not yet started
 #   - in-progress: Epic actively being worked on
 #   - done: All stories in epic completed
-#
-# Epic Status Transitions:
-#   - backlog → in-progress: Automatically when first story is created (via create-story)
-#   - in-progress → done: Manually when all stories reach 'done' status
-#
+
 # Story Status:
 #   - backlog: Story only exists in epic file
-#   - ready-for-dev: Story file created in stories folder
+#   - ready-for-dev: Story file created, ready for development
 #   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
+#   - review: Implementation complete, ready for review
 #   - done: Story completed
-#
+
 # Retrospective Status:
 #   - optional: Can be completed but not required
 #   - done: Retrospective has been completed
-#
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
 # WORKFLOW NOTES:
 # ===============
-# - Epic transitions to 'in-progress' automatically when first story is created
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
 # - Stories can be worked in parallel if team capacity allows
-# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
-
-generated: 2026-06-13
-last_updated: 11-21-2026 12:39
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: '2026-06-13'
+last_updated: 11-22-2026 11:26
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
 story_location: docs/bmad/implementation-artifacts
-
 development_status:
-  epic-1: done
-  1-1-google-oauth2-auto-provisioning: done
-  1-1-f-google-sign-in-frontend: done
-  1-2-subscription-tier-management: done
-  1-2-f-subscription-tier-frontend: done
-  1-3-tier-based-access-control: done
-  1-4-account-deletion-lgpd-purge: done
-  1-5-investor-profile-kyc-suitability: done
-  epic-1-retrospective: done
-  epic-2: done
-  2-1-b3-upload-excel-ingestion: done
-  2-2-async-kafka-splitter-processing: done
-  2-3-smart-trade-deduplication: done
-  2-4-manual-operation-fallback-crud: done
-  2-5-ingestion-audit-history: done
-  epic-2-retrospective: done
-  epic-3: done
-  3-1-portfolio-kpi-dashboard: done
-  3-2-valuation-custody-table: done
-  3-3-dividend-contribution-history: done
-  3-4-asset-allocation-donut-chart: done
-  3-5-event-driven-ui-updates: done
-  epic-3-retrospective: done
-  epic-4: done
-  4-1-market-data-indicator-integration: done
-  4-2-premium-allocation-strategy-config: done
-  4-3-graham-valuation-engine: done
-  4-4-explainable-ai-reasoning-box: done
-  spec-fix-valuation-circuit-breaker: done
-  epic-4-retrospective: done
-  epic-5: done
-  5-1-wealth-income-goal-setup: done
-  5-2-time-to-goal-motivational-clock: done
-  5-3-what-if-sensitivity-simulator: done
-  5-4-goal-health-alert-checklist: done
-  epic-5-retrospective: done
-  epic-6: done
-  6-1-admin-observability-dashboard: done
-  6-2-failed-ingestion-dlq-management: done
-  6-3-master-data-ticker-management: done
-  epic-6-retrospective: done
-  epic-7: done
-  7-1-vinculo-de-novo-cpf-a-conta-matriz: done
-  epic-7-retrospective: done
-  epic-8: done
-  8-1-criacao-e-associacao-de-tags: done
-  8-2-filtros-de-dashboard-e-recomendacoes-por-tag: done
-  8-3-templates-e-onboarding-de-tags: cancelled
-  epic-8-retrospective: done
-  epic-9: done
-  9-1-importacao-de-nota-de-corretagem-pdf: done
-  9-2-web-crawler-de-proventos-e-fatos-relevantes: done
-  9-3-conector-open-finance: done
-  epic-9-retrospective: done
-  epic-10: done
-  10-1-relatorio-de-bens-e-direitos-informe-anual: done
-  10-2-calculo-de-lucro-realizado-e-isencao: done
-  epic-10-retrospective: done
-  epic-11: done
-  11-1-alertas-via-whatsapp-gatilhos-de-meta: done
-  11-2-web-push-para-zona-de-compra-graham: done
-  epic-11-retrospective: done
+  epic-1: backlog
+  1-1-identidade-visual-institucional-kerno-e-migração-de-metadado: backlog
+  1-2-infraestrutura-de-controle-transacional-do-lote-de-membros-f: backlog
+  1-3-landing-page-pública-de-alta-conversão-com-destaque-do-progr: backlog
+  1-4-onboarding-com-google-oauth2-aceite-de-termos-e-concessão-de: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-fundação-do-design-system-intergeracional-tokens-tipografia: backlog
+  2-2-autenticação-mobile-segura-biometria-nativa-e-cache-offline: backlog
+  2-3-shell-de-navegação-multi-superfície-e-fundação-modular-com-f: backlog
+  2-4-dashboard-patrimonial-com-modo-privacidade-e-proteção-de-sna: backlog
+  2-5-adaptação-visual-da-ingestão-b3-crud-manual-multi-classe-e-h: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: backlog
+  3-2-motor-de-domínio-da-hierarquia-do-cerrado-aritmética-de-meta: backlog
+  3-3-api-rest-para-gestão-de-metas-de-macro-classes-e-templates-d: backlog
+  3-4-interface-do-diagrama-do-cerrado-seletor-de-templates-e-trav: backlog
+  3-5-gestão-visual-de-notas-de-qualidade-slider-48dp-assistente-d: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-motor-stateless-do-gps-de-aporte-com-regra-de-transbordament: backlog
+  4-2-integração-da-margem-de-segurança-de-graham-e-multiplicador: backlog
+  4-3-circuit-breaker-de-cotações-de-mercado-e-quarentena-de-event: backlog
+  4-4-api-rest-do-gps-de-aporte-com-explicabilidade-matemática-e-a: backlog
+  4-5-interface-do-gps-de-aporte-calculadora-cotas-inteiras-e-acor: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-modelo-de-dados-de-cache-analítico-controle-finops-e-migrati: backlog
+  5-2-sanitizador-lgpd-de-pii-normalização-canônica-e-validador-pr: backlog
+  5-3-adaptador-vertex-ai-gemini-enterprise-zdr-e-validação-determ: backlog
+  5-4-interface-do-kerno-ai-cartões-de-diagnóstico-feedback-e-fall: backlog
+  5-5-expurgo-em-cascata-lgpd-direito-ao-esquecimento-e-teste-de-i: backlog
+  epic-5-retrospective: optional
+
+# Action items committed during retrospectives (section created by the retrospective workflow)
 action_items:
   - id: "epic-11-retro-item-1-mapear-variaveis-e-secrets-whatsapp_-e-w"
     epic: 11

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerno 2.0 — Architecture Walkthrough Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0F19;
+      --bg-card: #111827;
+      --bg-card-hover: #1F2937;
+      --primary: #6366F1;
+      --primary-light: #818CF8;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-crimson: #EF4444;
+      --text-main: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --border-color: #374151;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), #4338CA);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary-light);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .deck-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .btn-nav {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      background: var(--bg-card-hover);
+      border-color: var(--primary-light);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .slide-container {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .slide-container.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+
+    .slide-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--primary-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--primary);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .badge-ad {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary-light);
+      border: 1px solid var(--primary);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .highlight-box {
+      background: rgba(99, 102, 241, 0.08);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .diagram-container {
+      background: #090D16;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+    }
+
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: rgba(31, 41, 55, 0.7);
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--primary-light);
+      font-family: var(--font-mono);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .pill-green { background: rgba(16, 185, 129, 0.2); color: #34D399; }
+    .pill-indigo { background: rgba(99, 102, 241, 0.2); color: #A5B4FC; }
+    .pill-amber { background: rgba(245, 158, 11, 0.2); color: #FBBF24; }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">K</div>
+      <div class="brand-title">Kerno 2.0</div>
+      <span class="brand-badge">Architecture Walkthrough</span>
+    </div>
+    <div class="deck-nav">
+      <button class="btn-nav" id="btn-prev" onclick="prevSlide()">Anterior</button>
+      <span class="slide-counter" id="slide-num">1 / 7</span>
+      <button class="btn-nav" id="btn-next" onclick="nextSlide()">Próximo</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- SLIDE 1: Capa & Contexto -->
+    <div class="slide-container active" id="slide-1">
+      <div class="slide-header">
+        <div class="slide-tag">01 · Visão Geral & Rebranding</div>
+        <h1 class="slide-title">Kerno: O Núcleo Inteligente do Seu Dinheiro</h1>
+        <p class="slide-subtitle">Evolução do Graham Select 1.0 para uma plataforma patrimonial integrada, multi-classes e com IA de nível corporativo.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🎯 Desafios Resolvidos no Ciclo 2.0</div>
+          <p class="card-text">
+            <strong>1. Alocação sem Giro Patrimonial:</strong> Fim da paralisia de escolha mensal através do <em>Diagrama do Cerrado</em> combinado ao <em>Filtro de Graham</em>, orientando aportes sem vendas e sem DARF.<br><br>
+            <strong>2. Design System Intergeracional:</strong> Interface limpa inspirada no Nubank, com contraste WCAG AAA e tipografia escalável para públicos de 20 a 50+ anos.<br><br>
+            <strong>3. Diagnóstico de IA Confiável:</strong> Geração de análises em linguagem natural ancoradas em dados determinísticos, com Zero Data Retention (LGPD) e guardrails CVM.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🏗️ Pilares da Arquitetura</div>
+          <p class="card-text">
+            <strong>• Backend Hexagonal:</strong> Java 21 LTS + Spring Boot 3.4.13 com motores de domínio puros e imutáveis.<br><br>
+            <strong>• Frontend Feature-First:</strong> Flutter SDK (^3.11.0 / Dart 3.7+) nativo iOS/Android e Web SPA unificada.<br><br>
+            <strong>• Infraestrutura e Governança:</strong> Migrations Liquibase imutáveis, expurgo de dados LGPD (<em>UserDataPurgeAdapter</em>) e deploy Helm/K8s com observabilidade total.
+          </p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        💡 <strong>Invariante Estratégico:</strong> Preservação total de ativos brownfield (Kafka Splitter, autenticação Google OAuth2 e banco de dados existente) com expansão incremental não-destrutiva.
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Paradigma & Arquitetura de Contêineres -->
+    <div class="slide-container" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-tag">02 · Arquitetura do Sistema</div>
+        <h1 class="slide-title">Topologia de Contêineres & Clean Architecture</h1>
+        <p class="slide-subtitle">Desacoplamento estrito entre superfícies cliente, serviços de API e motores matemáticos.</p>
+      </div>
+      <div class="diagram-container">
+        <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="40" width="220" height="240" rx="12" fill="#111827" stroke="#6366F1" stroke-width="2"/>
+          <text x="130" y="70" fill="#818CF8" font-size="14" font-weight="700" text-anchor="middle">Camada Cliente (Flutter)</text>
+          <rect x="40" y="95" width="180" height="40" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="130" y="120" fill="#F9FAFB" font-size="12" text-anchor="middle">Mobile iOS / Android</text>
+          <rect x="40" y="145" width="180" height="40" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="130" y="170" fill="#F9FAFB" font-size="12" text-anchor="middle">Web Desktop SPA</text>
+          <rect x="40" y="195" width="180" height="40" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="130" y="220" fill="#F9FAFB" font-size="12" text-anchor="middle">Landing Page Founders</text>
+
+          <line x1="240" y1="160" x2="340" y2="160" stroke="#818CF8" stroke-width="2" stroke-dasharray="4"/>
+          <text x="290" y="150" fill="#9CA3AF" font-size="11" text-anchor="middle">HTTPS/JWT</text>
+
+          <rect x="340" y="40" width="240" height="240" rx="12" fill="#111827" stroke="#10B981" stroke-width="2"/>
+          <text x="460" y="70" fill="#34D399" font-size="14" font-weight="700" text-anchor="middle">Backend Core (Spring Boot)</text>
+          <rect x="360" y="95" width="200" height="35" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="460" y="118" fill="#F9FAFB" font-size="11" text-anchor="middle">kerno-api (REST & PII Filter)</text>
+          <rect x="360" y="140" width="200" height="35" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="460" y="163" fill="#F9FAFB" font-size="11" text-anchor="middle">Cerrado & Graham Engine</text>
+          <rect x="360" y="185" width="200" height="35" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="460" y="208" fill="#F9FAFB" font-size="11" text-anchor="middle">Stateless GPS Simulator</text>
+          <rect x="360" y="230" width="200" height="35" rx="6" fill="#1F2937" stroke="#374151"/>
+          <text x="460" y="253" fill="#F9FAFB" font-size="11" text-anchor="middle">UserDataPurgeAdapter (LGPD)</text>
+
+          <line x1="580" y1="110" x2="680" y2="80" stroke="#F59E0B" stroke-width="2"/>
+          <line x1="580" y1="160" x2="680" y2="160" stroke="#6366F1" stroke-width="2"/>
+          <line x1="580" y1="210" x2="680" y2="240" stroke="#EF4444" stroke-width="2"/>
+
+          <rect x="680" y="40" width="200" height="60" rx="8" fill="#1F2937" stroke="#F59E0B"/>
+          <text x="780" y="68" fill="#FBBF24" font-size="12" font-weight="600" text-anchor="middle">Google Vertex AI</text>
+          <text x="780" y="86" fill="#9CA3AF" font-size="10" text-anchor="middle">Gemini 2.5 Flash ZDR</text>
+
+          <rect x="680" y="130" width="200" height="60" rx="8" fill="#1F2937" stroke="#6366F1"/>
+          <text x="780" y="158" fill="#818CF8" font-size="12" font-weight="600" text-anchor="middle">PostgreSQL 16 / MySQL</text>
+          <text x="780" y="176" fill="#9CA3AF" font-size="10" text-anchor="middle">Liquibase Migrations</text>
+
+          <rect x="680" y="220" width="200" height="60" rx="8" fill="#1F2937" stroke="#EF4444"/>
+          <text x="780" y="248" fill="#FCA5A5" font-size="12" font-weight="600" text-anchor="middle">Apache Kafka 3.8</text>
+          <text x="780" y="266" fill="#9CA3AF" font-size="10" text-anchor="middle">B3 Splitter & DLQ</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Motor de Alocação Cerrado + Graham -->
+    <div class="slide-container" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-tag">03 · Motor Matemático & Regras de Aporte</div>
+        <h1 class="slide-title">Diagrama do Cerrado + Filtro de Graham</h1>
+        <p class="slide-subtitle">Hierarquia de 3 níveis, proteção prudencial de risco e transbordamento (spillover) in-loop.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <span class="badge-ad">AD-2</span>
+          <div class="card-title">1. Macro Classes (100%)</div>
+          <p class="card-text">
+            Divisão mandatória em 5 classes: <em>Ações BR, FIIs, Renda Fixa/Tesouro, Internacional e Cripto</em>.<br>
+            A soma das metas percentuais deve somar impreterivelmente <strong>100.00%</strong>.
+          </p>
+        </div>
+        <div class="card">
+          <span class="badge-ad">AD-2</span>
+          <div class="card-title">2. Notas & Tetos de Risco</div>
+          <p class="card-text">
+            Cada ativo recebe nota $N_i \in [1, 10]$ (padrão neutro 6).<br>
+            • <strong>Nota 8–10:</strong> Teto máx 10% do total.<br>
+            • <strong>Nota 5–7:</strong> Teto máx 6% do total.<br>
+            • <strong>Nota &lt; 5:</strong> Quarentena (0% novos aportes).
+          </p>
+        </div>
+        <div class="card">
+          <span class="badge-ad">AD-1</span>
+          <div class="card-title">3. Multiplicador de Graham</div>
+          <p class="card-text">
+            Ações BR com Margem de Segurança positiva ($\text{Preço} &lt; \sqrt{22.5 \times LPA \times VPA}$) recebem multiplicador configurável ($M_{\text{Graham}} = 1.30\times$) na fila de alocação.
+          </p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        🔄 <strong>Algoritmo de Transbordamento (Spillover In-Loop):</strong> Ao quantizar compras em cotas inteiras de bolsa, o saldo residual não consumido por frações transborda imediatamente para o próximo ativo da fila dentro do mesmo ciclo, garantindo zero capital ocioso.
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Kerno AI & Guardrails CVM -->
+    <div class="slide-container" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-tag">04 · Inteligência Artificial Segura</div>
+        <h1 class="slide-title">Pipeline Kerno AI: Determinístico-Primeiro</h1>
+        <p class="slide-subtitle">Arquitetura de proteção regulatória CVM 19/20 e privacidade de dados com Zero Data Retention.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <span class="badge-ad">AD-3</span>
+          <div class="card-title">🛡️ Sanitização LGPD & ZDR</div>
+          <p class="card-text">
+            • <strong>PiiSanitizer:</strong> O backend remove 100% de CPF, nomes, e-mails e valores monetários em R$ antes da chamada externa.<br><br>
+            • <strong>Vertex AI Enterprise:</strong> Contrato corporativo com o Google Cloud ativando <em>Zero Data Retention (ZDR)</em> — proibição absoluta de treinamento ou retenção de dados.<br><br>
+            • <strong>Modelo Pinado:</strong> Versão imutável <code>gemini-2.5-flash</code> com temperatura 0.1 e output JSON estruturado em 4 blocos.
+          </p>
+        </div>
+        <div class="card">
+          <span class="badge-ad">AD-3</span>
+          <div class="card-title">⚖️ Validação Pós-Geração (CVM)</div>
+          <p class="card-text">
+            • <strong>Ancoragem Numérica:</strong> O backend verifica que nenhum ticker ou percentual foi inventado pelo modelo.<br><br>
+            • <strong>Filtro Léxico Imperativo:</strong> Regex com fronteiras de palavras bloqueia termos imperativos de compra (<em>"compre agora"</em>, <em>"invista em"</em>, <em>"lucro garantido"</em>).<br><br>
+            • <strong>Fallback Sem Erro:</strong> Qualquer violação descarta o output do LLM e entrega templates determinísticos locais, sem quebrar a experiência do usuário.
+          </p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        💰 <strong>FinOps & Cache:</strong> Cache determinístico baseado no hash SHA-256 do estado da carteira com TTL de 24h. Rate limit de 5 gerações/dia e 30/mês por usuário Pro/Founder. Custo &lt; R$ 0,50/usuário/mês.
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Frontend Flutter & Segurança Mobile -->
+    <div class="slide-container" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-tag">05 · Frontend Multi-Superfície</div>
+        <h1 class="slide-title">Flutter Feature-First & Segurança Mobile</h1>
+        <p class="slide-subtitle">Design System Intergeracional, biometria nativa e proteção de privacidade patrimonial.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <span class="badge-ad">AD-4</span>
+          <div class="card-title">🔐 Biometria & Tokens</div>
+          <p class="card-text">
+            • <code>local_auth</code>: Desafio biométrico (FaceID/TouchID/Digital) na abertura e após 2 min de inatividade.<br>
+            • <code>flutter_secure_storage</code>: Tokens JWT mantidos em Keychain (iOS) e Keystore cifrada (Android).
+          </p>
+        </div>
+        <div class="card">
+          <span class="badge-ad">AD-4</span>
+          <div class="card-title">👁️ Modo Privacidade</div>
+          <p class="card-text">
+            • <em>Discrete Mode:</em> Oculta instantaneamente saldos em reais (<code>R$ ••••••</code>), preservando gráficos e metas em percentuais para consulta segura em público.<br>
+            • <strong>FLAG_SECURE:</strong> Bloqueia captura de tela e máscara no App Switcher.
+          </p>
+        </div>
+        <div class="card">
+          <span class="badge-ad">AD-6</span>
+          <div class="card-title">♿ Acessibilidade Universal</div>
+          <p class="card-text">
+            • Suporte a escala tipográfica até <strong>2.0x</strong> sem truncamento.<br>
+            • Numerais tabulares obrigatórios para alinhamento contábil.<br>
+            • Áreas de toque mínimas de <strong>48x48dp</strong> para conforto motor 40+.
+          </p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        🧩 <strong>Modularidade Pré-Mapeada:</strong> Estrutura de rotas do GoRouter com o 5º slot reservado para o futuro módulo de <em>Controle de Gastos</em> (Ciclo 2.1), ativado via Feature Flag.
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Governança, Liquibase & Expurgo LGPD -->
+    <div class="slide-container" id="slide-6">
+      <div class="slide-header">
+        <div class="slide-tag">06 · Governança de Engenharia</div>
+        <h1 class="slide-title">Conformidade LGPD, Liquibase & DevOps</h1>
+        <p class="slide-subtitle">Regras estritas de repositório, imutabilidade de banco e rastreabilidade total.</p>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Dimensão</th>
+              <th>Regra Arquitetural (Spine AD)</th>
+              <th>Mecanismo de Verificação</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Liquibase</strong></td>
+              <td>Imutabilidade de migrations já aplicadas; novos schemas apenas via changesets incrementais.</td>
+              <td>Testes de inicialização Spring Boot com validação de checksum Liquibase.</td>
+              <td><span class="pill pill-green">Imutável</span></td>
+            </tr>
+            <tr>
+              <td><strong>Expurgo LGPD</strong></td>
+              <td>Exclusão total de dados (metas do Cerrado, notas, histórico de IA e posições) via <em>UserDataPurgeAdapter</em>.</td>
+              <td>Suíte de testes de integração <code>AccountDeletionIT</code> com quebra de CI/CD.</td>
+              <td><span class="pill pill-green">Auditado</span></td>
+            </tr>
+            <tr>
+              <td><strong>DevOps / Helm</strong></td>
+              <td>Paridade absoluta de variáveis de ambiente entre <code>application.yml</code>, Helm e GitHub Actions.</td>
+              <td>Pipeline CI/CD <code>.github/workflows/deploy.yml</code> e charts Kubernetes.</td>
+              <td><span class="pill pill-indigo">Automatizado</span></td>
+            </tr>
+            <tr>
+              <td><strong>Observabilidade</strong></td>
+              <td>Logs estruturados em todas as entradas REST e Kafka com <code>X-Correlation-ID</code> e stack trace em erros.</td>
+              <td>Filtros HTTP interceptors e logs no formato JSON para indexação no Grafana/ELK.</td>
+              <td><span class="pill pill-indigo">Rastreável</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Roadmap de Lançamento -->
+    <div class="slide-container" id="slide-7">
+      <div class="slide-header">
+        <div class="slide-tag">07 · Estratégia de Entrega</div>
+        <h1 class="slide-title">Lançamento Kerno 2.0 & Próximos Ciclos</h1>
+        <p class="slide-subtitle">Da fundação de investimentos ao ecossistema completo de gestão financeira familiar.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">🚀 Ciclo 2.0 (Atual)</div>
+          <p class="card-text">
+            • Rebranding oficial para Kerno.<br>
+            • Landing Page com Programa Founders (250 vagas vitalícias).<br>
+            • Diagrama do Cerrado + Graham.<br>
+            • GPS de Aporte Stateless.<br>
+            • Diagnóstico Kerno AI (Vertex AI).<br>
+            • App Mobile Flutter com Biometria.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">💳 Ciclo 2.1 (Planejado)</div>
+          <p class="card-text">
+            • Ativação do módulo de Controle de Gastos Pessoais.<br>
+            • Importação de extratos OFX / Open Finance.<br>
+            • Integração do <em>Saldo Livre Mensal</em> diretamente no GPS de Aporte.<br>
+            • Notificações push de quarentena.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">💬 Ciclo 2.2 (Visão)</div>
+          <p class="card-text">
+            • Copiloto Conversacional Interativo por Voz/Chat Streaming.<br>
+            • Memória contextual de longo prazo do investidor.<br>
+            • Relatórios avançados de tributação e IRPF de bens e direitos.
+          </p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        🏁 <strong>Conclusão da Arquitetura:</strong> A espinha arquitetural (<code>ARCHITECTURE-SPINE.md</code>) e o desenho de solução (<code>solution-design.md</code>) estão finalizados e validados. O sistema está pronto para a etapa de <strong>Quebra de Épicos e Histórias</strong> (<code>bmad-create-epics-and-stories</code>).
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Kerno 2.0 — Architecture Spine & Solution Design · 2026-11-21 · Winston (System Architect)
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 7;
+
+    function updateSlide() {
+      document.querySelectorAll('.slide-container').forEach((el, index) => {
+        el.classList.toggle('active', index + 1 === currentSlide);
+      });
+      document.getElementById('slide-num').innerText = `${currentSlide} / ${totalSlides}`;
+      document.getElementById('btn-prev').disabled = currentSlide === 1;
+      document.getElementById('btn-next').disabled = currentSlide === totalSlides;
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>

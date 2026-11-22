@@ -1,127 +1,229 @@
-# Revisão de Acessibilidade e Ergonomia Intergeracional (`review-accessibility.md`)
+# Accessibility Review (WCAG 2.1 AA) — graham-select (Kerno)
 
-- **Escopo Auditado:** `DESIGN.md`, `EXPERIENCE.md` e `mockups/key-*.html` (`key-dashboard-patrimonial.html`, `key-gps-aporte.html`, `key-kerno-ai-diagnostico.html`, `key-diagrama-cerrado.html`)
-- **Lente de Auditoria:** Acessibilidade Financeira Intergeracional (Investidores *Digital Natives* 20–35 anos e *CFOs da Família* 40+ anos) & Conformidade **WCAG 2.1 AA / AAA**
-- **Data:** 2026-11-21
-- **Veredito Geral:** **APROVADO COM RESSALVAS MENORES (PASS WITH MINOR REFINEMENTS)** — `0` críticos, `0` altos, `2` médios, `5` baixos.
-
----
-
-## 1. Resumo Executivo da Auditoria
-
-O **Design System Intergeracional do Kerno** (`DESIGN.md` + `EXPERIENCE.md`) e seus 4 mockups HTML de referência demonstram maturidade exemplar em acessibilidade financeira:
-1. **Contraste Tipográfico Principal (WCAG AAA):** O par principal `{colors.text-primary}` (`#0F172A`) sobre `{colors.surface-elevated}` (`#FFFFFF`) atinge **`17.85:1`** no modo claro e **`16.96:1`** (`#F8FAFC` sobre `#111827`) no modo escuro — mais que o dobro do piso **WCAG 2.1 AAA (`>= 7:1`)**. Até mesmo o texto atenuado `{colors.text-muted}` (`#475569` sobre `#FFFFFF`) mantém **`7.58:1`** (AAA).
-2. **Elasticidade Tipográfica (`1.0x–2.0x`) e Banimento de Tabelas:** Ambos os documentos proíbem explicitamente `TextOverflow.ellipsis` (`...`), `maxLines: 1` e tabelas com rolagem horizontal em `< 600dp`, e nenhum dos 4 mockups HTML utiliza `<table>`, `text-overflow: ellipsis` ou `white-space: nowrap`.
-3. **Numerais Tabulares e Ergonomia Motora (`48x48dp`):** `tabular-nums` / `FontFeature.tabularFigures()` é obrigatório em toda a rampa numérica e `48x48dp` é aplicado consistentemente aos alvos primários (botões, `{components.privacy-toggle}`, `{components.multi-cpf-selector}`, `{components.bottom-nav-bar}`, gatilho do acordeão e *thumb* do slider).
-4. **Tríade Daltônico-Segura e Leitores de Tela no Modo Privacidade:** Todos os estados semânticos combinam **Cor + Ícone + Rótulo Textual Explícito**, e `EXPERIENCE.md` especifica o bloqueio semântico (`Semantics`) para que o **Modo Privacidade** (`R$ ••••••`) jamais exponha valores em reais por voz no VoiceOver/TalkBack.
-
-As oportunidades de melhoria identificadas abaixo (2 de severidade `[medium]` e 5 de severidade `[low]`) tratam de contrastes de bordas de componentes não-textuais (WCAG 1.4.11 `>= 3:1`), elevação de valores monetários em `semantic-emerald` e alertas críticos do nível AA para AAA (`>= 7:1`), e atributos ARIA/reflow nos mockups HTML estáticos.
+> **Auditor Responsável:** Especialista Revisor de Acessibilidade (Accessibility Reviewer — WCAG 2.1 AA & Mobile Ergonomics)  
+> **Artefatos Auditados:**  
+> - `DESIGN.md`: [docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/DESIGN.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/DESIGN.md)  
+> - `EXPERIENCE.md`: [docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/EXPERIENCE.md](file:///c:/Users/afssi/projects/graham-select/docs/bmad/planning-artifacts/ux-designs/ux-graham-select-2026-11-21/EXPERIENCE.md)  
+> **Data da Auditoria:** 21 de Novembro de 2026  
+> **Padrões de Referência:** WCAG 2.1 Nível AA (com extensões AAA selecionadas), WCAG 2.2 (Target Size e Focus Appearance), Boas Práticas de Acessibilidade Mobile Flutter (iOS VoiceOver e Android TalkBack).
 
 ---
 
-## 2. Verificação Matemática de Contrastes (WCAG 2.1 AA / AAA)
+## Overall verdict
 
-| Par de Tokens (`DESIGN.md`) | Hex (Texto / Elemento) | Hex (Fundo) | Razão Calculada | Meta Exigida | Status |
-|---|---|---|---|---|---|
-| `text-primary` / `surface-elevated` (Saldos `R$` Hero & Input) | `#0F172A` | `#FFFFFF` | **`17.85:1`** | `>= 7.0:1` (AAA) | ✅ PASS |
-| `text-primary` / `surface-base` | `#0F172A` | `#F8FAFC` | **`17.06:1`** | `>= 7.0:1` (AAA) | ✅ PASS |
-| `text-secondary` / `surface-elevated` | `#334155` | `#FFFFFF` | **`10.35:1`** | `>= 4.5:1` (AA) | ✅ PASS (AAA) |
-| `text-muted` / `surface-elevated` | `#475569` | `#FFFFFF` | **`7.58:1`** | `>= 4.5:1` (AA) | ✅ PASS (AAA) |
-| `text-primary-dark` / `surface-elevated-dark` | `#F8FAFC` | `#111827` | **`16.96:1`** | `>= 7.0:1` (AAA) | ✅ PASS |
-| `text-secondary-dark` / `surface-elevated-dark` | `#CBD5E1` | `#111827` | **`11.95:1`** | `>= 4.5:1` (AA) | ✅ PASS (AAA) |
-| `text-muted-dark` / `surface-elevated-dark` | `#94A3B8` | `#111827` | **`6.92:1`** | `>= 4.5:1` (AA) | ✅ PASS |
-| `text-on-primary` / `brand-primary` (`button-primary`) | `#FFFFFF` | `#4F46E5` | **`6.29:1`** | `>= 4.5:1` (AA) | ✅ PASS |
-| `brand-primary-deep` / `brand-accent-soft` | `#3730A3` | `#EEF2FF` | **`8.88:1`** | `>= 4.5:1` (AA) | ✅ PASS (AAA) |
-| `semantic-emerald` / `semantic-emerald-surface` | `#047857` | `#ECFDF5` | **`5.21:1`** | `>= 4.5:1` (AA) | ✅ PASS (AA) |
-| `semantic-emerald` / `surface-elevated` (`contribution-gps-card` `R$`) | `#047857` | `#FFFFFF` | **`5.48:1`** | `>= 7.0:1` (AAA cifra central) | ⚠️ AA (ver `[medium]` F-01) |
-| `semantic-amber` / `semantic-amber-surface` (Alertas / Quarentena) | `#B45309` | `#FFFBEB` | **`4.84:1`** | `>= 7.0:1` (AAA alerta crítico) | ⚠️ AA (ver `[medium]` F-01) |
-| `semantic-crimson` / `semantic-crimson-surface` (Bloqueio Soma 100%) | `#B91C1C` | `#FEF2F2` | **`5.91:1`** | `>= 7.0:1` (AAA alerta crítico) | ⚠️ AA (ver `[medium]` F-01) |
-| `founder-gold` / `founder-gold-surface` (`badge-founder`) | `#92400E` | `#FEF3C7` | **`6.37:1`** | `>= 4.5:1` (AA) | ✅ PASS |
-| `border-strong` / `surface-elevated` (Borda de input/botão secundário) | `#CBD5E1` | `#FFFFFF` | **`1.48:1`** | `>= 3.0:1` (WCAG 1.4.11 UI) | ⚠️ Abaixo de 3:1 (ver `[medium]` F-02) |
+O par de especificações de UX do **Kerno** (`DESIGN.md` e `EXPERIENCE.md`) apresenta um nível de maturidade e rigor de acessibilidade **excepcionalmente elevado**, muito acima da média do setor financeiro e de fintechs. Destacam-se como pontos de referência de classe mundial:
+
+1. **Inovação em Privacidade Acessível:** A proteção semântica no **Modo Privacidade**, que instrui a árvore `Semantics` do Flutter a silenciar os valores monetários em sintetizadores de voz para evitar vazamento sonoro em ambientes públicos (transporte público), anunciando apenas percentuais e metas relativas.
+2. **Independência Cromática Rigorosa:** A institucionalização da **Regra da Tríade** (**Cor + Ícone Distinto + Rótulo Textual Explícito**) para 100% dos status patrimoniais (oportunidades de Graham, Quarentena de Aporte, tetos de risco e travas de alocação), eliminando qualquer dependência do binômio verde/vermelho para usuários daltônicos (protanopia, deuteranopia e tritanopia).
+3. **Ergonomia e Elasticidade Tipográfica:** A proibição inegociável de truncamento financeiro (`TextOverflow.ellipsis`, `maxLines: 1`) e de tabelas horizontais em smartphones (`< 600dp`), garantindo empilhamento em cartões verticais e elasticidade de `1.0x` a `2.0x` no `Dynamic Type` do sistema operacional.
+
+Contudo, a auditoria rigorosa identificou **2 problemas críticos** e **3 de alta prioridade** que exigem correções pontuais para assegurar conformidade formal e prática inquestionável com o padrão **WCAG 2.1 AA**:
+- **Erro de cálculo no contraste não-textual (WCAG 1.4.11):** O token `border-strong` (`#94A3B8`) sobre `#FFFFFF` atinge apenas **`2.56:1`** (e não `3.02:1` como afirmado no texto), ficando abaixo do limiar obrigatório de `3.0:1` para contornos de inputs e botões secundários;
+- **Tokens Dark Mode ausentes no frontmatter:** Componentes de navegação como `bottom-nav-bar` não declaram variantes dark para primeiro plano ativo/inativo, o que provocaria razão de contraste inadequada (`2.82:1` e `2.34:1`) caso mapeados sem fallback correto;
+- **Riscos de overflow no Dynamic Type 2.0x:** Cabeçalho global (`_TopBar`) e barra de navegação inferior (`_BottomNavBar`) contêm nós horizontais fixos que podem sofrer `RenderFlex overflow` em escala `2.0x` em smartphones compactos;
+- **Falta de Bypass Blocks (WCAG 2.4.1) no Flutter Web:** Ausência de atalho de teclado ("Skip to Main Content") para saltar a sidebar de 18 rotas;
+- **Lacuna de semântica para `CustomPainter`:** Barras de progresso e gráficos de evolução não possuem contrato explícito de nó `Semantics`.
+
+**Veredicto Final:** **Aprovado com Ressalvas Pontuais (Correções Mandatórias Pré-Implementação)**. A arquitetura é sólida e os ajustes necessários são pontuais e de baixo esforço.
 
 ---
 
-## 3. Achados Detalhados por Severidade
+## Findings by Severity
 
-### `[medium]` F-01 — Cifras Monetárias de Aporte (`contribution-gps-card`) e Alertas Críticos Atendem WCAG AA (`4.84:1–5.91:1`), mas Ficam Abaixo do Piso WCAG AAA (`>= 7:1`)
+### Critical (2)
 
-- **Localização:**
-  - `DESIGN.md`: linhas 31–45 (`semantic-emerald: '#047857'`, `semantic-amber: '#B45309'`, `semantic-crimson: '#B91C1C'`), linha 201 (`risk-ceiling-saturation-card.foreground`), linha 444 (`contribution-gps-card` valor em `R$` usando `{colors.semantic-emerald}`).
-  - `mockups/key-gps-aporte.html`: linhas 177–181 (`.gps-amount { color: var(--semantic-emerald); }`) e linhas 218–227 (`.saturation-card`).
-  - `mockups/key-diagrama-cerrado.html`: linhas 306–309 (card carmesim de bloqueio de soma `95,0% != 100,0%`) e linhas 319–335 (card âmbar de quarentena).
-- **Problema:** Enquanto o saldo patrimonial principal (`{colors.text-primary}` `#0F172A` sobre `#FFFFFF`) entrega `17.85:1` (AAA), o valor monetário central de cada sugestão do **GPS de Aporte** (`R$ 2.380,00` em `.gps-amount`) utiliza `{colors.semantic-emerald}` (`#047857`) sobre fundo branco (`#FFFFFF`), resultando em **`5.48:1`** (AA). Da mesma forma, os textos de alertas críticos em `{colors.semantic-amber}` (`#B45309` sobre `#FFFBEB` = **`4.84:1`**) e `{colors.semantic-crimson}` (`#B91C1C` sobre `#FEF2F2` = **`5.91:1`**) cumprem WCAG 2.1 AA (`>= 4.5:1`), mas não atingem `>= 7:1` (AAA) para leitura sob luz solar intensa por usuários 40+ com presbiopia. No modo escuro, `{colors.semantic-emerald-dark}` (`#34D399` sobre `#064E3B` = **`5.06:1`**) e `{colors.semantic-crimson-dark}` (`#F87171` sobre `#450A0A` = **`5.84:1`**) também ficam na faixa AA.
-- **Correção Recomendada:**
-  1. Em `contribution-gps-card`, exibir o valor monetário principal em `R$` com `{colors.text-primary}` (`#0F172A`, `17.85:1` AAA) ou escurecer `{colors.semantic-emerald}` para `#065F46` (**`7.68:1` AAA** sobre `#FFFFFF` e **`7.13:1` AAA** sobre `#ECFDF5`).
-  2. Para atingir AAA (`>= 7:1`) também nos alertas críticos no modo claro, ajustar `{colors.semantic-amber}` para `#92400E` (**`7.05:1` AAA** sobre `#FFFBEB`) e `{colors.semantic-crimson}` para `#991B1B` (**`7.60:1` AAA** sobre `#FEF2F2`), e no modo escuro ajustar `{colors.semantic-emerald-dark}` para `#6EE7B7` sobre `#064E3B` (**`7.45:1` AAA**) e `{colors.semantic-crimson-dark}` para `#FCA5A5` sobre `#450A0A` (**`7.92:1` AAA**).
+- **[critical] Falha no Critério de Contraste Não-Textual (WCAG 1.4.11) no token `border-strong` (`#94A3B8`) sobre `#FFFFFF`** (`DESIGN.md` linhas 52, 279, 291, 405).  
+  *Descrição:* A documentação afirma em `DESIGN.md` (linha 405) que `{colors.border-strong}` (`#94A3B8`) entrega razão de contraste de `3.02:1` sobre `#FFFFFF`. O cálculo matemático exato de luminância relativa resulta em **`2.56:1`**. Como esse token é utilizado para delimitar as bordas de campos de entrada (`{components.input-currency}`) e botões secundários (`{components.button-secondary}`), ele falha diretamente no critério de sucesso **WCAG 2.1 SC 1.4.11 (Non-text Contrast)**, que exige no mínimo `3.0:1` para componentes de interface e estados visuais.  
+  *Impacto:* Usuários com baixa acuidade visual, idosos (40+) com perda de sensibilidade ao contraste e usuários utilizando o aplicativo sob luz solar direta não conseguirão discernir os limites físicos dos campos de digitação e botões secundários em fundo branco.  
+  *Fix:* Atualizar o token `border-strong` no frontmatter e texto para `#768696` (contraste `3.24:1` sobre `#FFFFFF`) ou adotar diretamente o tom ardósia `#64748B` (Slate 500, contraste **`3.98:1`** sobre `#FFFFFF`), garantindo conformidade matemática robusta com WCAG 1.4.11.
 
----
-
-### `[medium]` F-02 — Contraste Não-Textual (WCAG 1.4.11 `>= 3:1`) Insuficiente nas Bordas de `input-currency` (Sem Foco), `button-secondary` e Marcador de Meta Sobreposto em `macro-class-distribution-card`
-
-- **Localização:**
-  - `DESIGN.md`: linhas 52 e 55 (`border-strong: '#CBD5E1'`, `border-strong-dark: '#334155'`), linhas 176–178 (`macro-class-distribution-card.barTrack` / `barFillPrimary` / `barFillTarget`), linha 254 (`button-secondary.border`), linha 263 (`input-currency.border`).
-  - `mockups/key-dashboard-patrimonial.html`: linhas 275–293 (`.macro-bar-track`, `.macro-bar-fill`, `.macro-target-marker`) e linhas 338–350 (`.btn-secondary-touch`).
-- **Problema:**
-  1. O token `{colors.border-strong}` (`#CBD5E1`) sobre `{colors.surface-elevated}` (`#FFFFFF`) possui razão de contraste de apenas **`1.48:1`** (e `{colors.border-strong-dark}` `#334155` sobre `#111827` possui **`1.86:1`**). Como `input-currency` (quando não focado) e `button-secondary` dependem dessa borda para delimitar sua área clicável, o contraste fica abaixo do piso de **`3.0:1`** da WCAG 2.1 Critério 1.4.11 (*Non-text Contrast*).
-  2. No gráfico de barras `{components.macro-class-distribution-card}`, quando o `% Atual` ultrapassa a `% Meta` (como em *FIIs: 30,2% / Meta 30,0%* e *Renda Fixa: 24,0% / Meta 20,0%* em `mockups/key-dashboard-patrimonial.html` linhas 435–453), o marcador `.macro-target-marker` (`#3730A3`) fica sobreposto à barra `.macro-bar-fill` (`#4F46E5`), gerando contraste de apenas **`1.42:1`** entre o marcador de meta e o preenchimento da barra.
-- **Correção Recomendada:**
-  1. Escurecer `{colors.border-strong}` para `#94A3B8` (**`3.02:1`** sobre `#FFFFFF`) e clarear `{colors.border-strong-dark}` para `#64748B` (**`3.75:1`** sobre `#111827`).
-  2. Adicionar ao `.macro-target-marker` (`barFillTarget`) um halo/borda lateral de `1px solid #FFFFFF` (`box-shadow: 0 0 0 1.5px var(--surface-elevated)`) e cor `{colors.text-primary}` (`#0F172A`, contraste **`3.11:1`** contra `#4F46E5` e **`15.8:1`** contra `#F1F5F9`), garantindo visibilidade nítida mesmo quando a barra ultrapassa a meta.
-
----
-
-### `[low]` F-03 — Omissão de Propriedades `*Dark` Explícitas em Alguns Componentes do Frontmatter de `DESIGN.md`
-
-- **Localização:** `DESIGN.md`, linhas 168–328 (`components:` YAML frontmatter).
-- **Problema:** Embora a paleta global defina todos os tokens `*-dark` necessários (linhas 15–56), apenas `wealth-hero-card` e os três `badge-*` declaram explicitamente `foregroundDark`. Componentes como `macro-class-distribution-card`, `contribution-gps-card`, `math-transparency-accordion`, `cerrado-quality-card`, `kerno-ai-diagnostic-card`, `input-currency` e `bottom-nav-bar` declaram `backgroundDark`, mas omitem `foregroundDark: '{colors.text-primary-dark}'` e `borderDark: '{colors.border-subtle-dark}'`.
-- **Correção Recomendada:** Explicitar os pares `*Dark` (`foregroundDark`, `borderDark`, `barTrackDark`) nos objetos de componente do frontmatter de `DESIGN.md` para evitar que geradores de código mapeiem texto escuro `#0F172A` sobre fundo `#111827` no Dark Mode.
-
----
-
-### `[low]` F-04 — Linhas Flexbox/Grid nos Mockups HTML Sem `flex-wrap: wrap` para Simular o Reflow Vertical em `1.3x–2.0x`
-
-- **Localização:**
-  - `mockups/key-dashboard-patrimonial.html`: linhas 269–274 (`.macro-header`), linhas 318–322 (`.asset-top`), linhas 332–337 (`.asset-metrics`).
-  - `mockups/key-gps-aporte.html`: linhas 173–176 (`.gps-amount-row`), linhas 208–210 (`.accordion-body` com `grid-template-columns: 1fr 1fr` fixo).
-  - `mockups/key-kerno-ai-diagnostico.html`: linhas 109–116 (`.ai-card-header`).
-- **Problema:** Os contratos `DESIGN.md` (linhas 386 e 448) e `EXPERIENCE.md` (linhas 156–157) determinam acertadamente que, em escalas `1.3x–2.0x`, linhas com rótulo à esquerda e valor à direita convertem-se em empilhamento vertical (`Wrap` / `Column`) e o acordeão de 2 colunas passa para 1 coluna em `>= 1.5x`. Nos mockups HTML estáticos, porém, `.macro-header`, `.asset-metrics`, `.gps-amount-row` e `.ai-card-header` não possuem `flex-wrap: wrap`, e `.accordion-body` fixa `grid-template-columns: 1fr 1fr`.
-- **Correção Recomendada:** Adicionar `flex-wrap: wrap; gap: 4px 8px;` a `.macro-header`, `.asset-top`, `.asset-metrics`, `.gps-amount-row` e `.ai-card-header`, e alterar `.accordion-body` para `grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));`.
-
----
-
-### `[low]` F-05 — Tokens `heading-1`, `heading-2` e `heading-3` sem `fontVariantNumeric: 'tabular-nums'` no Frontmatter de `DESIGN.md`
-
-- **Localização:** `DESIGN.md`, linhas 65–82 (`typography.heading-1..3`) vs. linha 454 (`risk-ceiling-saturation-card` exibindo `R$ X_rem` em `{typography.heading-3}`) e `mockups/key-gps-aporte.html` linha 368 (`Saldo Excedente Protegido por Teto de Risco (R$ 42.350,00)`).
-- **Problema:** A regra de ouro de `DESIGN.md` (linhas 381 e 497) exige `tabular-nums` em 100% dos valores em `R$` e `%`. Como `heading-3` é usado em títulos de cartões que embutem cifras em `R$` (como o `risk-ceiling-saturation-card`) e em cabeçalhos de soma percentual (`Soma: 95,0%`), a ausência de `fontVariantNumeric: 'tabular-nums'` nos tokens `heading-1..3` do frontmatter pode causar largura proporcional nos dígitos em Flutter caso o estilo não herde `tabularFigures()`.
-- **Correção Recomendada:** Incluir `fontVariantNumeric: 'tabular-nums'` nos tokens `heading-1`, `heading-2` e `heading-3` do frontmatter de `DESIGN.md`.
+- **[critical] Ausência de tokens Dark Mode nos componentes `bottom-nav-bar`, `multi-cpf-selector` e `privacy-toggle` no frontmatter de `DESIGN.md`** (`DESIGN.md` linhas 328-342, 353-360).  
+  *Descrição:* O frontmatter de componentes em `DESIGN.md` define tokens sem paridade de modo escuro para componentes estruturais. Especificamente na `{components.bottom-nav-bar}`, declaram-se apenas `activeForeground: '{colors.brand-primary}'` (`#4F46E5`) e `inactiveForeground: '{colors.text-muted}'` (`#475569`). Se esses tokens forem consumidos diretamente pelo tema escuro sobre `{colors.surface-elevated-dark}` (`#111827`), a razão de contraste cai para **`2.82:1`** (ícone ativo) e **`2.34:1`** (ícone inativo), violando gravemente o critério **WCAG 1.4.3 (Contraste Mínimo 4.5:1 / 3:1)**. Omissões similares ocorrem em `privacy-toggle` e `multi-cpf-selector`.  
+  *Impacto:* No modo escuro, os ícones e rótulos da barra de navegação inferior e dos botões de controle de privacidade tornam-se quase ilegíveis para qualquer usuário, com contraste abaixo de 3:1.  
+  *Fix:* Declarar explicitamente as chaves dark no frontmatter de `DESIGN.md`:
+  ```yaml
+  bottom-nav-bar:
+    background: '{colors.surface-elevated}'
+    backgroundDark: '{colors.surface-elevated-dark}'
+    activeForeground: '{colors.brand-primary}'
+    activeForegroundDark: '{colors.brand-primary-dark}' # #818CF8 (5.95:1 sobre #111827)
+    inactiveForeground: '{colors.text-muted}'
+    inactiveForegroundDark: '{colors.text-muted-dark}' # #94A3B8 (6.92:1 sobre #111827)
+    borderTop: '{colors.border-subtle}'
+    borderTopDark: '{colors.border-subtle-dark}'
+    itemMinSize: '{spacing.touch-target-min}'
+  privacy-toggle:
+    background: '{colors.surface-subtle}'
+    backgroundDark: '{colors.surface-subtle-dark}'
+    backgroundActive: '{colors.brand-accent-soft}'
+    backgroundActiveDark: '{colors.brand-accent-soft-dark}'
+    foreground: '{colors.text-primary}'
+    foregroundDark: '{colors.text-primary-dark}'
+    foregroundActive: '{colors.brand-primary-deep}'
+    foregroundActiveDark: '{colors.brand-primary-dark}'
+    radius: '{rounded.full}'
+    size: '{spacing.touch-target-min}'
+  multi-cpf-selector:
+    background: '{colors.surface-subtle}'
+    backgroundDark: '{colors.surface-subtle-dark}'
+    foreground: '{colors.text-primary}'
+    foregroundDark: '{colors.text-primary-dark}'
+    border: '{colors.border-subtle}'
+    borderDark: '{colors.border-subtle-dark}'
+    radius: '{rounded.full}'
+    minHeight: '{spacing.touch-target-min}'
+    paddingHorizontal: '{spacing.4}'
+    font: '{typography.body-sm}'
+  ```
 
 ---
 
-### `[low]` F-06 — Linhas do Assistente de 5 Critérios Objetivos (`cerrado-quality-card`) Sem Altura Mínima de Toque `48dp` no Mockup
+### High (3)
 
-- **Localização:**
-  - `DESIGN.md`: linha 460 (`cerrado-quality-card` — Assistente de 5 Critérios Objetivos com 5 chaves de `0 a 2 pontos`).
-  - `mockups/key-diagrama-cerrado.html`: linhas 172–186 (`.criteria-box`, `.criteria-item`) e linhas 265–272.
-- **Problema:** Em `EXPERIENCE.md` (linha 116), o **Assistente de 5 Critérios Objetivos** é um mecanismo interativo alternativo ao slider onde o usuário pontua `0`, `1` ou `2` pontos em 5 perguntas. No mockup `key-diagrama-cerrado.html`, cada `.criteria-item` é renderizado apenas como uma linha de texto compacta de `12px` (~`18px` de altura) sem especificar controles interativos de `48x48dp`.
-- **Correção Recomendada:** Especificar em `DESIGN.md` (#7 `cerrado-quality-card`) e em `mockups/key-diagrama-cerrado.html` que cada linha editável do Assistente de 5 Critérios possui `min-height: 48px` (ou botões segmentados `0` / `1` / `2` com área de toque `>= 48x48dp`).
+- **[high] Risco de `RenderFlex overflow` no Header Global (`_TopBar`) e na `_BottomNavBar` sob Dynamic Type `2.0x`** (`DESIGN.md` linhas 353-360, 416-420, 520-527; `EXPERIENCE.md` linhas 182-185).  
+  *Descrição:* Embora `DESIGN.md` e `EXPERIENCE.md` proíbam o corte de texto financeiro nos cartões (convertendo `Row` em `Column`), componentes de navegação persistentes possuem restrições espaciais severas. Em um smartphone de 360dp de largura:
+  1. A `_BottomNavBar` divide a largura em 4 slots (~90dp por aba). Em escala `2.0x`, uma fonte de 12px/14px atinge 24px/28px; rótulos como *"GPS de Aporte"* (13 caracteres) atingem mais de 170dp de largura horizontal, causando quebra de linha com corte vertical ou erro de overflow na altura padrão (56–64dp);
+  2. A `_TopBar` agrupa Logo + Seletor Multi-CPF + Privacy Toggle + Founder Badge + Notificações. Em linha única em tela móvel com fonte ampliada, esse conjunto fatalmente colapsará.  
+  *Impacto:* Quebra visual de interface, sobreposição de ícones ou travamento de layout em modo de acessibilidade visual ampliada.  
+  *Fix:*  
+  1. Especificar em `EXPERIENCE.md` que quando `MediaQuery.textScalerOf(context).scale(1) > 1.35x`, a `_BottomNavBar` comute para modo "ícone proeminente com rótulo sob demanda" utilizando o `LargeContentPresenter` nativo (toque longo abre balão ampliado com ícone e rótulo, padrão do iOS/Android Accessibility) ou adote layout de barra expansível verticalmente;  
+  2. No Header Mobile (`_TopBar`), estipular que em escalas `> 1.3x`, o badge Founder e atalhos secundários migrem automaticamente para dentro do menu do Avatar/Perfil, mantendo na barra apenas Logo, Seletor Multi-CPF e Privacy Toggle.
+
+- **[high] Ausência de Link de Atalho "Pular para o Conteúdo Principal" (Skip to Main Content) no Flutter Web (WCAG 2.4.1 Level A)** (`EXPERIENCE.md` linhas 77-101, 175-176, 209-216).  
+  *Descrição:* Na versão Desktop Web SPA (`> 1024dp`), o layout `MainLayout` possui uma Sidebar expandida com 18 rotas organizadas em 5 grupos. Atualmente, não há especificação de mecanismo de desvio de blocos repetitivos (*Bypass Blocks*). Ao navegar via teclado (`Tab`), o usuário com deficiência motora ou visual precisa pressionar a tecla `Tab` dezenas de vezes a cada troca de página para ultrapassar os links da barra lateral antes de atingir o formulário ou cartão de ativos da página.  
+  *Impacto:* Fadiga física severa e lentidão de navegação para usuários que operam exclusivamente via teclado, switches assistivos ou leitores de tela.  
+  *Fix:* Adicionar na especificação de `MainLayout` um widget `FocusableActionDetector` de primeiro foco (`SkipToContentLink`), oculto visualmente e exibido no topo esquerdo ao receber foco via `Tab`, permitindo saltar diretamente para a âncora do conteúdo principal (`FocusScope` da página ativa).
+
+- **[high] Falta de Contrato Semântico para Barras de Progresso e Gráficos de Canvas Customizados (`CustomPainter`) (WCAG 1.1.1, 4.1.2)** (`DESIGN.md` linhas 472-475; `EXPERIENCE.md` linhas 186-187).  
+  *Descrição:* As barras horizontais de distribuição de Macro Classes (`macro-class-distribution-card`) e as curvas de rentabilidade em `EvolutionPage` utilizam componentes desenhados sob medida via Canvas/`CustomPainter`. O documento `EXPERIENCE.md` detalha brilhantemente a semântica de valores em Modo Privacidade e sliders, mas omite a diretriz para a árvore semântica dos gráficos. Sem `Semantics` associado, leitores de tela interpretam a área do gráfico como um elemento vazio/mudo.  
+  *Impacto:* Usuários totalmente cegos utilizando VoiceOver ou TalkBack não conseguem ouvir a proporção das Macro Classes nem a distância em relação à meta.  
+  *Fix:* Definir em `EXPERIENCE.md.Accessibility Floor` que todo `CustomPainter` de distribuição ou gráfico DEVE implementar `semanticsBuilder` ou ser envolvido por um widget `Semantics` explícito:
+  ```dart
+  Semantics(
+    container: true,
+    label: 'Distribuição Macro Classe Ações BR: 36,0% alocado atualmente contra meta de 40,0%. Defasagem de 4,0% abaixo da meta ideal.',
+    child: MacroClassProgressBar(...),
+  )
+  ```
 
 ---
 
-### `[low]` F-07 — Atributos `aria-label` no Modo Privacidade (`R$ ••••••`) e `role="slider"` Parciais nos Mockups HTML
+### Medium (4)
 
-- **Localização:**
-  - `mockups/key-dashboard-patrimonial.html`: linha 513 (possui `aria-label="Valor monetário oculto pelo Modo Privacidade"`) vs. linhas 515, 529, 540, 560 e 572 (ocorrências secundárias de `R$ ••••••` sem `aria-label`).
-  - `mockups/key-diagrama-cerrado.html`: linhas 257–263 e 325–331 (`.slider-thumb` sem atributos ARIA de slider).
-- **Problema:** Em `EXPERIENCE.md` (linhas 159–160), o contrato de leitores de tela para VoiceOver/TalkBack/ARIA está exemplarmente definido. Contudo, no HTML estático de `key-dashboard-patrimonial.html`, apenas o saldo principal `.hero-balance` recebeu `aria-label`, enquanto os demais `R$ ••••••` seriam lidos literalmente por leitores de tela Web como `"R cifrão ponto preto ponto preto..."`. Em `key-diagrama-cerrado.html`, o slider visual customizado não declara `role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="9"`.
-- **Correção Recomendada:** Aplicar `aria-label="Valor monetário oculto pelo Modo Privacidade"` em todos os elementos que contêm `R$ ••••••` em `mockups/key-dashboard-patrimonial.html`, e adicionar `role="slider" aria-valuemin="1" aria-valuemax="10" aria-valuenow="9" aria-valuetext="Nota 9 de 10, Teto Máximo de Risco 10 por cento"` nos elementos `.slider-thumb` de `mockups/key-diagrama-cerrado.html`.
+- **[medium] Alvos de toque interativos em Badges e Chips menores que `48x48dp` (WCAG 2.1 AAA 2.5.5 / WCAG 2.2 AA 2.5.8)** (`DESIGN.md` linhas 304-327, 514-522; `EXPERIENCE.md` linhas 146, 318).  
+  *Descrição:* Na jornada `UJ-5` (passo 5), descreve-se que Camila "toca no selo `{components.badge-founder}` para abrir o resumo em Conta e Plano". Similarmente, chips de Subclasse em `macro-class-distribution-card` e tags em `DashboardTagFilterBar` são interativos. Os tokens de badge declaram `paddingVertical: '4px'` e `font: '12px'`, resultando em altura visual de apenas ~24-28dp. Se o widget não possuir área física invisível estendida, viola a recomendação de `48x48dp` para toque motor.  
+  *Impacto:* Dificuldade de acionamento e toques acidentais para investidores com tremores essenciais, mobilidade reduzida ou em uso em movimento (metrô/ônibus).  
+  *Fix:* Especificar formalmente que todo badge, pill ou chip com ação de clique/toque utilize `MaterialTapTargetSize.padded` ou envoltório `ConstrainedBox(constraints: BoxConstraints(minWidth: 48, minHeight: 48))` com `HitTestBehavior.translucent`, garantindo alvo de toque físico de 48dp mantendo a elegância visual do elemento.
+
+- **[medium] Ausência de Distinção Não-Cromática para Múltiplas Curvas nos Gráficos de Evolução (`/evolution`) (WCAG 1.4.1 Use of Color)** (`DESIGN.md` linha 542; `EXPERIENCE.md` linha 87).  
+  *Descrição:* Embora o Design System Kerno aplique com primor a regra de Cor + Ícone + Rótulo em badges e status, a especificação dos gráficos de evolução patrimonial (`/evolution`) menciona apenas a curva principal em `{colors.brand-primary}` (`#4F46E5`). Ao comparar a rentabilidade da carteira contra múltiplos benchmarks (CDI, Ibovespa, IPCA+), se a distinção ocorrer apenas por cores distintas (ex.: roxo, azul, verde), investidores monocromatas ou daltônicos não distinguirão a carteira dos índices.  
+  *Impacto:* Confusão analítica para usuários com deficiência de percepção de cores ao avaliar a performance do portfólio.  
+  *Fix:* Determinar que curvas comparativas em gráficos utilizem obrigatoriamente padrões de traço distintos (linha contínua grossa para Carteira, linha tracejada com traços longos para CDI, linha pontilhada para Ibovespa) além de rótulo flutuante (*direct labeling*) nos pontos de fechamento.
+
+- **[medium] Espessura da Borda de Foco de Cartões (`1.5px`) abaixo do Limiar Recomendado (WCAG 2.4.11 Focus Appearance)** (`DESIGN.md` linha 451).  
+  *Descrição:* `DESIGN.md` estabelece que quando um cartão recebe foco do teclado ou representa a prioridade nº 1 do GPS de Aporte, sua borda transita para `1.5px solid` em `{colors.brand-primary}` (`#4F46E5`). Contra o fundo claro `#F8FAFC`, uma borda de apenas 1.5px apresenta área de visibilidade marginal, ficando abaixo do limiar de 2px a 3px recomendado pela WCAG 2.2 para indicadores de foco.  
+  *Impacto:* Dificuldade de rastreamento visual do foco para usuários de navegação por teclado sem leitor de tela.  
+  *Fix:* Elevar a borda de foco para no mínimo `2px solid` ou aplicar contorno com respiro (*outline offset*): `outline: 2px solid {colors.brand-primary}; outline-offset: 2px;`.
+
+- **[medium] Falta de Padronização na Pronúncia Semântica de Valores Monetários em Modo Normal** (`EXPERIENCE.md` linhas 186-187).  
+  *Descrição:* `EXPERIENCE.md` define de forma inovadora o comportamento do sintetizador quando o Modo Privacidade está ativo. Porém, em modo normal, sintetizadores de tela lendo strings brutas como `"R$ 1.245.890,00"` ou `"142 ações × R$ 24,50"` frequentemente pronunciam pontuações de forma truncada ("erre cifrão um ponto dois...").  
+  *Impacto:* Experiência auditiva desagradável e lentidão para compreender saldos e quantidades de ativos sugeridos.  
+  *Fix:* Recomendar no contrato de componentes o uso de extensão de semântica de moeda no Flutter:
+  ```dart
+  Semantics(
+    label: 'Patrimônio total: um milhão, duzentos e quarenta e cinco mil, oitocentos e noventa reais',
+    child: Text('R$ 1.245.890,00'),
+  )
+  ```
 
 ---
 
-## 4. Checklist de Conformidade Consolidado
+### Low (3)
 
-| Dimensão Auditada | Requisito | Status |
-|---|---|---|
-| **1. Razões de Contraste (WCAG 2.1 AA / AAA)** | `>= 4.5:1` texto, `>= 3:1` UI/gráficos, `>= 7:1` saldos primários e alertas | ⚠️ **Parcial** (`17.85:1` AAA no saldo principal; ajustes `[medium]` F-01 e F-02 para bordas `3:1` e cifras/alertas semânticos `7:1`) |
-| **2. Dynamic Type & Zero-Truncation (`1.0x–2.0x`)** | Proibição de `TextOverflow.ellipsis` (`...`) em `R$`, tickers e `%`, reflow vertical `< 600dp` sem tabelas horizontais | ✅ **Conforme** (Refinamento `[low]` F-04 de `flex-wrap` no CSS dos mockups) |
-| **3. Numerais Tabulares & Ergonomia Motora** | `tabular-nums` / `FontFeature.tabularFigures()` em `R$` e `%`; alvos `>= 48x48dp` | ✅ **Conforme** (Refinamentos `[low]` F-05 e F-06 para `heading-1..3` e itens do assistente) |
-| **4. Tríade Semântica para Daltônicos & Screen Readers** | Cor + Ícone + Rótulo em Esmeralda/Âmbar/Carmesim; anúncio seguro no Modo Privacidade (`R$ ••••••`) | ✅ **Conforme** (Refinamento `[low]` F-07 de atributos ARIA nos mockups HTML) |
+- **[low] Omissão de `borderDark` no cartão `risk-ceiling-saturation-card` e nos Badges no frontmatter** (`DESIGN.md` linhas 210-216, 303, 313, 323).  
+  *Descrição:* No frontmatter, `risk-ceiling-saturation-card`, `badge-graham-bonus` e `badge-quarantine` possuem propriedades `backgroundDark` e `foregroundDark`, mas mantêm `border` apontando para o token de borda claro (ex.: `semantic-amber-border` `#FDE68A`).  
+  *Impacto:* Inconsistência cosmética menor no tema escuro, sem impacto severo de contraste.  
+  *Fix:* Incluir tokens `borderDark` com variantes escurecidas ou correspondentes no frontmatter.
+
+- **[low] Ausência de Anúncio de Conclusão de Cálculo Assíncrono via `SemanticsService.announce` (WCAG 4.1.3)** (`EXPERIENCE.md` linhas 137-140, 252).  
+  *Descrição:* Quando o investidor aciona *"Calcular Aporte"* no GPS de Aporte, o cálculo conclui em < 1.0s e atualiza os cartões dinamicamente. Um usuário cego não recebe feedback sonoro imediato de que a lista de compras foi montada.  
+  *Impacto:* Usuário precisa explorar a tela manualmente para verificar se o cálculo foi concluído.  
+  *Fix:* Disparar chamada de acessibilidade pós-cálculo:
+  ```dart
+  SemanticsService.announce(
+    'Cálculo concluído. 3 ativos priorizados para o aporte de ${formatCurrency(amount)}.',
+    TextDirection.ltr,
+  );
+  ```
+
+- **[low] Especificação de Comportamento em Orientação Paisagem (Landscape) no Mobile (WCAG 1.3.4)** (`EXPERIENCE.md` linha 20).  
+  *Descrição:* O documento não detalha o comportamento do layout mobile quando o dispositivo é girado para o modo horizontal (Landscape).  
+  *Impacto:* Se o app não adaptar a coluna vertical em landscape, diálogos e modais de Bottom Sheet podem sofrer corte vertical com o teclado virtual aberto.  
+  *Fix:* Declarar explicitamente que telas móveis suportam orientação horizontal com rolagem livre e envoltório `SafeArea` adaptado.
+
+---
+
+## Checklist WCAG 2.1 AA
+
+| Critério de Sucesso WCAG 2.1 | Nível | Status | Notas da Auditoria |
+|---|---|---|---|
+| **1.1.1 Non-text Content** | A | **Partial** | Badges e ícones possuem rótulos claros. Requer adicionar nós `Semantics` nas barras e gráficos com `CustomPainter` (Finding #5). |
+| **1.2.1 – 1.2.9 Time-based Media** | A / AA | **Compliant** | Não aplicável (a plataforma não utiliza áudio/vídeo obrigatórios). |
+| **1.3.1 Info and Relationships** | A | **Partial** | Hierarquia tipográfica excelente (`heading-1` a `heading-3`). Tabelas em desktop precisam de cabeçalhos semânticos (`FinancialDataTable`); Mobile usa cartões limpos. |
+| **1.3.2 Meaningful Sequence** | A | **Compliant** | Ordem de leitura lógica preservada em colunas empilhadas no Mobile e na navegação de abas. |
+| **1.3.3 Sensory Characteristics** | A | **Compliant** | Nenhuma instrução depende de forma geométrica, posição física isolada ou som. |
+| **1.3.4 Orientation** | AA | **Compliant** | Sem bloqueio artificial de orientação; requer registrar formalmente suporte à rolagem em Landscape (Finding #12). |
+| **1.3.5 Identify Input Purpose** | AA | **Compliant** | Campos de entrada financeira e login configurados para tipos de entrada padronizados. |
+| **1.4.1 Use of Color** | A | **Partial** | **Excelente** na Regra da Tríade de badges e quarentena. Requer inclusão de padrões de traço tracejados/pontilhados em gráficos de evolução comparativa (Finding #7). |
+| **1.4.2 Audio Control** | A | **Compliant** | Nenhum áudio reproduzido automaticamente. |
+| **1.4.3 Contrast (Minimum)** | AA | **Compliant\*** | Textos primários, secundários e atenuados atingem de `6.29:1` a `17.85:1` (AAA). \*Nota: corrigindo a omissão de tokens dark em `bottom-nav-bar` (Finding #2). |
+| **1.4.4 Resize Text** | AA | **Partial** | Cartões e valores em `R$` escalam até 200% sem reticências ou cortes. Header e barra inferior necessitam de estratégia contra overflow (Finding #3). |
+| **1.4.5 Images of Text** | AA | **Compliant** | Nenhum texto renderizado como imagem bitmap. Todos os títulos e números utilizam tipografia nativa vetorial. |
+| **1.4.10 Reflow** | AA | **Compliant** | Banimento estrito de tabelas horizontais em viewports `< 600dp`. Coluna única contínua com quebra vertical limpa. |
+| **1.4.11 Non-text Contrast** | AA | **Non-Compliant** | Token `border-strong` (`#94A3B8`) sobre `#FFFFFF` atinge apenas **`2.56:1`** contra a meta mínima de `3.0:1` (Finding #1). |
+| **1.4.12 Text Spacing** | AA | **Compliant** | Rampa tipográfica baseada em `Inter` e `Plus Jakarta Sans` com `lineHeight` e espaçamentos elásticos compatíveis. |
+| **1.4.13 Content on Hover or Focus** | AA | **Compliant** | Tooltips e acordeões expansíveis podem ser fechados sem mover o ponteiro (`Esc` e toque). |
+| **2.1.1 Keyboard** | A | **Compliant** | Sliders com setas `←`/`→`, acordeões com `Enter`/`Espaço` e modais com `Esc` totalmente operáveis por teclado. |
+| **2.1.2 No Keyboard Trap** | A | **Compliant** | Modais e Bottom Sheets de nível único com foco fechado e tecla `Esc` de liberação imediata. |
+| **2.1.4 Character Key Shortcuts** | A | **Compliant** | Não existem atalhos de tecla única não modificada que interfiram com tecnologias assistivas. |
+| **2.2.1 Timing Adjustable** | A | **Compliant** | Sem relógios regressivos ou timeouts que causem perda de dados; retorno após 2 minutos em background exige biometria sem apagar o estado do aporte. |
+| **2.2.2 Pause, Stop, Hide** | A | **Compliant** | Zero carrosséis automáticos, tickers piscantes ou elementos em movimento não controlados pelo usuário. |
+| **2.3.1 Three Flashes or Below Threshold** | A | **Compliant** | Zero flashes ou cintilações em toda a interface. |
+| **2.4.1 Bypass Blocks** | A | **Non-Compliant** | Falta mecanismo de atalho para saltar o menu lateral no Flutter Web (Finding #4). |
+| **2.4.2 Page Titled** | A | **Compliant** | Rotas do `GoRouter` declaram títulos informativos com a marca Kerno. |
+| **2.4.3 Focus Order** | A | **Compliant** | Sequência lógica de tabulação seguindo o fluxo de cima para baixo e esquerda para a direita. |
+| **2.4.4 Link Purpose (In Context)** | A | **Compliant** | Textos de ação descritivos (*"Calcular Aporte"*, *"Por que estes ativos?"*, *"Salvar Estratégia"*). |
+| **2.4.5 Multiple Ways** | AA | **Compliant** | Acesso através de BottomNav, Sidebar agrupada, Hubs de Carteira e atalhos de cabeçalho. |
+| **2.4.6 Headings and Labels** | AA | **Compliant** | Seções bem delimitadas por cabeçalhos hierárquicos e campos monetários com prefixo explícito `R$`. |
+| **2.4.7 Focus Visible** | AA | **Partial** | Indicadores de foco visíveis em todos os controles interativos; espessura de 1.5px em cartões deve ser elevada para 2px (Finding #8). |
+| **2.5.1 Pointer Gestures** | A | **Compliant** | Banimento explícito de gestos ocultos sem botão equivalente visível (ex.: sem *swipe-to-delete* sem botão explícito). |
+| **2.5.2 Pointer Cancellation** | A | **Compliant** | Disparo de eventos no evento *up* com suporte a cancelamento de arrasto. |
+| **2.5.3 Label in Name** | A | **Compliant** | O nome acessível de botões e cartões corresponde exatamente ao texto visualizado. |
+| **2.5.4 Motion Actuation** | A | **Compliant** | Nenhuma funcionalidade depende de agitar ou inclinar o dispositivo móvel. |
+| **2.5.5 / 2.5.8 Target Size** | AAA / AA | **Partial** | Piso de `48x48dp` respeitado na quase totalidade dos botões e sliders. Requer assegurar área invisível estendida em badges e tags clicáveis (Finding #6). |
+| **3.1.1 Language of Page** | A | **Compliant** | Interface declarada integralmente em `pt-BR`. |
+| **3.2.1 On Focus** | A | **Compliant** | O ato de receber foco não dispara navegações ou submissões de dados não solicitadas. |
+| **3.2.2 On Input** | A | **Compliant** | Ajuste no slider da Nota de Qualidade recalcula metas em tela localmente sem submeter formulário. |
+| **3.2.3 Consistent Navigation** | AA | **Compliant** | Posicionamento estritamente consistente de navegação no Mobile (`BottomNavBar`) e Desktop (`Sidebar`). |
+| **3.2.4 Consistent Identification** | AA | **Compliant** | Ícones de olho (Modo Privacidade), cadeado (Quarentena), estrela (Graham) mantêm mesmo significado em todo o sistema. |
+| **3.3.1 Error Identification** | A | **Compliant** | Identificação em carmesim com texto explicativo e ícone de alerta em erros de soma e falhas de importação. |
+| **3.3.2 Labels or Instructions** | A | **Compliant** | Instruções contextuais e disclaimers regulatórios CVM 19/20 permanentes. |
+| **3.3.3 Error Suggestion** | AA | **Compliant** | A interface instrui exatamente como sanar o erro (ex.: *"A soma está em 95,0%. Faltam +5,0% para fechar 100,0%"*). |
+| **3.3.4 Error Prevention (Financial/Legal)** | AA | **Compliant** | Confirmação irreversível explícita no expurgo de conta LGPD; travas que impedem compra de ativos em quarentena ou violação de tetos. |
+| **4.1.1 Parsing** | A | **Compliant** | Estrutura limpa de árvore de widgets Flutter sem conflitos de tags ou duplicação de identificadores. |
+| **4.1.2 Name, Role, Value** | A | **Partial** | Sliders e acordeões expõem valores corretamente. Necessário estender a componentes gráficos via `Semantics` (Finding #5). |
+| **4.1.3 Status Messages** | AA | **Partial** | Requer chamada a `SemanticsService.announce` ao término do cálculo do GPS de Aporte (Finding #11). |
+
+---
+
+## Recomendações Prioritárias para o Time de Engenharia e UX
+
+1. **Sprint Imediato (Correções de Tokens e Contraste):**
+   - Alterar `{colors.border-strong}` para `#64748B` (Slate 500) em `DESIGN.md`;
+   - Inserir as definições `activeForegroundDark` e `inactiveForegroundDark` em `bottom-nav-bar` e completar os pares dark de `privacy-toggle` e `multi-cpf-selector`.
+2. **Sprint de Componentes Base (Acessibilidade de Navegação):**
+   - Implementar o componente `SkipToContentLink` em `MainLayout` para a versão Web;
+   - Adicionar o comportamento de `LargeContentPresenter` na `_BottomNavBar` para telas sob `textScaler > 1.3x`.
+3. **Sprint de Refinamento Assistivo (Semântica e Leitores de Tela):**
+   - Criar wrapper reutilizável `SemanticsChartContainer` para barras de progresso e gráficos de linha com descrição verbal em português;
+   - Garantir área de toque invisível expandida (`48x48dp`) em badges e chips interativos através de `BoxConstraints(minWidth: 48, minHeight: 48)`.
