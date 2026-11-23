@@ -51,81 +51,98 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Logo ou Nome do App
-              Text(
-                'Graham Select',
-                style: theme.textTheme.displaySmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'O cérebro insubstituível do seu patrimônio familiar.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              
-              // Botão Google Login
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator())
-              else
-                ElevatedButton(
-                  onPressed: () => _signInWithGoogle(context),
-                  style: ElevatedButton.styleFrom(
-                    elevation: 2,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+        child: SingleChildScrollView(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo e Nome do App
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 56,
+                      height: 56,
+                      excludeFromSemantics: true,
                     ),
-                    side: BorderSide(color: Colors.grey.shade300),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Idealmente use um asset, mas para garantir vou usar um placeholder se falhar
-                      Flexible(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.account_circle, color: Colors.blue), // Melhor que nada se o asset sumir
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Entrar com Google',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Kerno',
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'O núcleo inteligente do seu dinheiro.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 48),
+                
+                // Botão Google Login
+                if (_isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else
+                  ElevatedButton(
+                    onPressed: () => _signInWithGoogle(context),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 2,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ],
+                      side: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Idealmente use um asset, mas para garantir vou usar um placeholder se falhar
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.account_circle, color: Colors.blue), // Melhor que nada se o asset sumir
+                              const SizedBox(width: 12),
+                              const Flexible(
+                                child: Text(
+                                  'Entrar com Google',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                
+                const SizedBox(height: 24),
+                Text(
+                  'Ao entrar, você concorda com nossos Termos de Uso e Política de Privacidade.',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.outline,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              
-              const SizedBox(height: 24),
-              Text(
-                'Ao entrar, você concorda com nossos Termos de Uso e Política de Privacidade.',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.outline,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

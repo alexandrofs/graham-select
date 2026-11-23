@@ -37,7 +37,7 @@ app:
     storage-path: ${STORAGE_PATH:./uploads}
   security:
     cors:
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5000,https://graham-select-frontend.onrender.com}
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5000,https://kerno.afsdigital.com.br}
 
 brapi:
   token: ${BRAPI_TOKEN:}
@@ -51,7 +51,7 @@ corporate-events:
     cron: ${CORPORATE_EVENTS_SYNC_CRON:0 0 21 * * MON-FRI}
 
 crawler:
-  user-agent: ${CRAWLER_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 GrahamSelectCrawler/1.0}
+  user-agent: ${CRAWLER_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 KernoCrawler/1.0}
   timeout-ms: ${CRAWLER_TIMEOUT_MS:10000}
 
 openfinance:
@@ -83,7 +83,7 @@ webpush:
   alerts:
     cron: ${WEBPUSH_ALERTS_CRON:0 15 20 * * MON-FRI}
   vapid:
-    subject: ${WEBPUSH_VAPID_SUBJECT:mailto:contato@grahamselect.com.br}
+    subject: ${WEBPUSH_VAPID_SUBJECT:mailto:kerno@afsdigital.com.br}
     public-key: ${WEBPUSH_VAPID_PUBLIC_KEY:}
     private-key: ${WEBPUSH_VAPID_PRIVATE_KEY:}
   http:

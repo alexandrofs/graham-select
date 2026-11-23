@@ -1,5 +1,5 @@
 # ==============================================================================
-# Graham Select - Default Values for Helm Chart (Oracle OKE)
+# Kerno - Default Values for Helm Chart (Oracle OKE)
 # ==============================================================================
 
 global:
@@ -25,8 +25,8 @@ api:
   env:
     SPRING_PROFILES_ACTIVE: "prod"
     SERVER_PORT: "8080"
-    FRONTEND_URL: "https://graham.afsdigital.com.br"
-    CORS_ALLOWED_ORIGINS: "https://graham.afsdigital.com.br,https://graham-select.afsdigital.com.br"
+    FRONTEND_URL: "https://kerno.afsdigital.com.br"
+    CORS_ALLOWED_ORIGINS: "https://kerno.afsdigital.com.br"
     BPL_JVM_THREAD_COUNT: "50"
     JAVA_TOOL_OPTIONS: "-Xss512k -XX:ReservedCodeCacheSize=64M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"
     STORAGE_PATH: "/data/uploads"
@@ -39,7 +39,7 @@ api:
     WHATSAPP_META_BASE_URL: "https://graph.facebook.com/v21.0"
     WEBPUSH_PROVIDER: "mock"
     WEBPUSH_ALERTS_CRON: "0 15 20 * * MON-FRI"
-    WEBPUSH_VAPID_SUBJECT: "mailto:contato@grahamselect.com.br"
+    WEBPUSH_VAPID_SUBJECT: "mailto:kerno@afsdigital.com.br"
 
   resources:
     requests:
@@ -186,7 +186,7 @@ frontend:
       failureThreshold: 3
 
 # ------------------------------------------------------------------------------
-# Ingress and TLS Configuration (graham.afsdigital.com.br)
+# Ingress and TLS Configuration (kerno.afsdigital.com.br)
 # ------------------------------------------------------------------------------
 ingress:
   enabled: true
@@ -198,7 +198,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "25m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-  host: "graham.afsdigital.com.br"
+  host: "kerno.afsdigital.com.br"
   tls:
     enabled: true
     secretName: "graham-select-tls-secret"

@@ -130,7 +130,7 @@ public class EvaluateRebalanceAndGoalAlertsUseCase {
                 String dedupKey = String.format("rebalance:%s:%s:%s:%s",
                         userId, goal.goalType(), keyUpper, cycleDate);
                 String message = String.format(
-                        "Graham-Select Rebalanceamento: %s (%s) está com alocação atual de %s%% vs. meta de %s%% (desvio de %s p.p., acima do limiar de %s%%).",
+                        "Kerno Rebalanceamento: %s (%s) está com alocação atual de %s%% vs. meta de %s%% (desvio de %s p.p., acima do limiar de %s%%).",
                         keyUpper,
                         goal.goalType(),
                         actualPct.toPlainString(),
@@ -186,7 +186,7 @@ public class EvaluateRebalanceAndGoalAlertsUseCase {
             if (progressPct.compareTo(BigDecimal.valueOf(milestone)) >= 0) {
                 String dedupKey = String.format("goal:%s:milestone:%d", goal.getId(), milestone);
                 String message = String.format(
-                        "Graham-Select Meta Financeira: Parabéns! Você atingiu o marco de %d%% da sua meta (%s) com progresso atual de %s%%.",
+                        "Kerno Meta Financeira: Parabéns! Você atingiu o marco de %d%% da sua meta (%s) com progresso atual de %s%%.",
                         milestone,
                         goal.getGoalType().name(),
                         progressPct.toPlainString()

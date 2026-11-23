@@ -65,3 +65,29 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 ## Deferred from: retrospective of Epic 5 (2026-11-20)
 
 - Debounce do formulário de metas financeiras [frontend/lib/src/features/goals/presentation/] — Defer da Story 5.1 sem dono; **Dono: Elena (Junior Dev)**. Prioridade baixa; registrado no backlog para tratamento em refator de UX.
+
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Isolar `app.upload.storage-path` em diretório temporário nos testes (`application-test.yml`) e adicionar `uploads/` ao `.gitignore`.
+  evidence: `BrokerageNoteUploadControllerTest` grava PDFs reais em `backend/api/uploads/` porque `application-test.yml` não sobrescreve `app.upload.storage-path: ${STORAGE_PATH:./uploads}` de `application.yml:37` e `.gitignore` não exclui `uploads/`.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Exibir marca e logotipo Kerno na barra superior (`_TopBar`) em viewports mobile (`< 900px`) em `frontend/lib/src/core/widgets/main_layout.dart`.
+  evidence: Quando `isMobile` é verdadeiro em `main_layout.dart:13-33`, `_Sidebar` é omitido e `_TopBar` (`L260-310`) inicia diretamente com `Spacer()`; o redesenho multi-superfície mobile está previsto na Story 2.3.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Adicionar `mipmap-anydpi-v26/ic_launcher.xml` adaptativo para Android 8+ e `badge` monocromático transparente para Web Push em `frontend/web/push-sw.js:16`.
+  evidence: `frontend/android/app/src/main/res/` não possui camada adaptativa XML (gerando quadro branco em torno de `ic_launcher.png` com cantos transparentes) e `push-sw.js:16` referencia `/icons/Icon-192.png` preenchido.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Auditar a permissão incondicional de `http://localhost:*`, `http://127.0.0.1:*` e `http://10.0.2.2:*` em `SecurityConfig.corsConfigurationSource` sob profile `prod`.
+  evidence: `SecurityConfig.java:56-60` registra padrões de origem loopback independentemente do profile ativo junto a `allowCredentials(true)`.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Espelhar `CRAWLER_USER_AGENT` no chart Helm e remover a string padrão duplicada de `@Value` em `CorporateEventsConfiguration.java:31`.
+  evidence: `application.yml:54` e `CorporateEventsConfiguration.java:31` duplicam o default `KernoCrawler/1.0`, e `CRAWLER_USER_AGENT` não está declarado em `helm/graham-select/values.yaml` nem `templates/configmap.yaml`.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Substituir o placeholder `Icons.account_circle` por `assets/icons/google_logo.png` em `login_screen.dart` e tornar o email do rodapé de `home_page.dart` selecionável ou link `mailto:`.
+  evidence: `login_screen.dart` utiliza `Icons.account_circle` no botão Google (evolução prevista para Story 1.4) e `home_page.dart:775` renderiza `kerno@afsdigital.com.br` como `Text` estático (refatoração pública na Story 1.3).
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Atualizar ou desativar o workflow legado `.github/workflows/frontend-ci.yml` (`vars.API_BASE_URL` e `RENDER_FRONTEND_DEPLOY_HOOK`).
+  evidence: `.github/workflows/frontend-ci.yml:72-121` continua referenciando build Pack e deploy hook legado no Render apesar do deploy oficial em OKE em `.github/workflows/deploy.yml`.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
+  summary: Executar `helm lint helm/graham-select` e `helm template test-graham helm/graham-select --debug` em ambiente Linux/CI com `helm` instalado.
+  evidence: Achado `maybe-false` (`medium` potencial): o CLI `helm` e o daemon Docker não estão disponíveis neste ambiente Windows; a execução em Linux/CI encerrará a verificação de sintaxe Helm/Go templates.

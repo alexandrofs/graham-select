@@ -1,5 +1,5 @@
 # ==============================================================================
-# Graham Select Frontend - Flutter Web Production Container (NGINX SPA)
+# Kerno Frontend - Flutter Web Production Container (NGINX SPA)
 # ==============================================================================
 FROM nginx:1.27-alpine
 

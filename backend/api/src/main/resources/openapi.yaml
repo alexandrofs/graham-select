@@ -1,18 +1,18 @@
 openapi: 3.0.3
 info:
-  title: Graham Select System - OpenAPI 3.0
+  title: Kerno API
   version: 1.0.0
   description: >-
-    Aplicativo para identificar as 20 empresas mais baratas usando a regra de
-    Benjamin Graham.
+    Plataforma Kerno de gestão patrimonial e avaliação quantitativa baseada na
+    metodologia de Benjamin Graham.
   contact:
-    email: afssistemas@gmail.com
-    name: Alexandro Sousa
+    email: kerno@afsdigital.com.br
+    name: Kerno
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-  - url: https://domain/api/v1
+  - url: https://kerno.afsdigital.com.br/api/v1
 tags:
   - name: Tax
     description: Relatórios fiscais e informes de Bens e Direitos para IRPF

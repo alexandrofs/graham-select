@@ -87,7 +87,7 @@ public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
             String vapidJwt = WebPushCryptoUtils.createVapidJwt(origin, this.subject, this.privateKey);
 
             Map<String, String> payloadMap = new HashMap<>();
-            payloadMap.put("title", title != null ? title : "Graham Select");
+            payloadMap.put("title", (title != null && !title.isBlank()) ? title : "Kerno");
             payloadMap.put("body", body != null ? body : "");
             payloadMap.put("url", url != null ? url : "/graham-recommendations");
             byte[] payloadJson = objectMapper.writeValueAsString(payloadMap).getBytes(StandardCharsets.UTF_8);

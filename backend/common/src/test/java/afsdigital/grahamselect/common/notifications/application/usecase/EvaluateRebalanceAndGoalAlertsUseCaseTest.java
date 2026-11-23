@@ -24,12 +24,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluateRebalanceAndGoalAlertsUseCaseTest {
@@ -88,23 +91,35 @@ class EvaluateRebalanceAndGoalAlertsUseCaseTest {
 
         useCase.execute();
 
+        ArgumentCaptor<String> rebalanceMsgCaptor = ArgumentCaptor.forClass(String.class);
         verify(sendWhatsappAlertUseCase).sendAlert(
                 eq(pref),
                 eq(WhatsappAlertType.REBALANCE_TRIGGER),
                 contains("rebalance:user-123:ASSET_CLASS:ACAO:"),
-                contains("70.00%")
+                rebalanceMsgCaptor.capture()
         );
+        assertThat(rebalanceMsgCaptor.getValue())
+                .startsWith("Kerno Rebalanceamento:")
+                .contains("70.00%")
+                .doesNotContain("Graham-Select");
+
+        ArgumentCaptor<String> goal25MsgCaptor = ArgumentCaptor.forClass(String.class);
         verify(sendWhatsappAlertUseCase).sendAlert(
                 eq(pref),
                 eq(WhatsappAlertType.GOAL_MILESTONE),
                 eq("goal:" + goalId + ":milestone:25"),
-                contains("25%")
+                goal25MsgCaptor.capture()
         );
+        assertThat(goal25MsgCaptor.getValue())
+                .startsWith("Kerno Meta Financeira:")
+                .contains("25%")
+                .doesNotContain("Graham-Select");
+
         verify(sendWhatsappAlertUseCase).sendAlert(
                 eq(pref),
                 eq(WhatsappAlertType.GOAL_MILESTONE),
                 eq("goal:" + goalId + ":milestone:50"),
-                contains("50%")
+                contains("Kerno Meta Financeira:")
         );
     }
 
@@ -171,11 +186,16 @@ class EvaluateRebalanceAndGoalAlertsUseCaseTest {
 
         verify(sendWhatsappAlertUseCase, org.mockito.Mockito.never())
                 .sendAlert(eq(pref), eq(WhatsappAlertType.REBALANCE_TRIGGER), anyString(), anyString());
+        ArgumentCaptor<String> goal100Captor = ArgumentCaptor.forClass(String.class);
         verify(sendWhatsappAlertUseCase).sendAlert(
                 eq(pref),
                 eq(WhatsappAlertType.GOAL_MILESTONE),
                 eq("goal:" + goalId + ":milestone:100"),
-                contains("100%")
+                goal100Captor.capture()
         );
+        assertThat(goal100Captor.getValue())
+                .startsWith("Kerno Meta Financeira:")
+                .contains("100%")
+                .doesNotContain("Graham-Select");
     }
 }

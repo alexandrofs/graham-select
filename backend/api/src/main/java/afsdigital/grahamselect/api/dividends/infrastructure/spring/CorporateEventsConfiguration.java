@@ -28,7 +28,7 @@ public class CorporateEventsConfiguration {
     @Value("${brapi.token:}")
     private String brapiToken;
 
-    @Value("${crawler.user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 GrahamSelectCrawler/1.0}")
+    @Value("${crawler.user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 KernoCrawler/1.0}")
     private String userAgent;
 
     @Value("${crawler.timeout-ms:10000}")

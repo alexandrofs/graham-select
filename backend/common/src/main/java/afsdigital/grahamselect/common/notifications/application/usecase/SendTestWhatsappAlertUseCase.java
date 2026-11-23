@@ -39,7 +39,7 @@ public class SendTestWhatsappAlertUseCase {
         }
 
         String maskedPhone = WhatsappMaskingUtils.maskPhoneNumber(preference.getPhoneNumber());
-        String message = "Graham-Select: Alerta de teste configurado com sucesso! Seus gatilhos de carteira estão ativos.";
+        String message = "Kerno: Alerta de teste configurado com sucesso! Seus gatilhos de carteira estão ativos.";
         log.info("Enviando alerta WhatsApp de teste para userId={}, phone={}", userId, maskedPhone);
 
         WhatsappSendResult result;
