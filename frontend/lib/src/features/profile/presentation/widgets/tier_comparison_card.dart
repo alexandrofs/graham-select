@@ -34,7 +34,7 @@ class TierComparisonCard extends StatelessWidget {
             _buildTierColumn(
               context,
               'TRIAL (30 dias)',
-              'Experimente todo o poder do Graham Select sem custo.',
+              'Experimente todo o poder do Kerno sem custo.',
               [
                 'Acesso Full ao Ranking',
                 'Atualização em tempo real (3x/dia)',
@@ -47,7 +47,7 @@ class TierComparisonCard extends StatelessWidget {
             _buildTierColumn(
               context,
               'PREMIUM',
-              'O cérebro insubstituível para sua gestão de patrimônio.',
+              'O núcleo inteligente para sua gestão de patrimônio.',
               [
                 'Tudo do Trial +',
                 'Suporte prioritário',

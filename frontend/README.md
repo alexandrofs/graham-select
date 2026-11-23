@@ -1,6 +1,6 @@
-# frontend
+# Kerno
 
-A new Flutter project.
+Frontend Flutter (Web, Android, iOS e macOS) da plataforma **Kerno — O núcleo inteligente do seu dinheiro**.
 
 ## Getting Started
 

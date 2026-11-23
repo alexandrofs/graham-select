@@ -150,21 +150,18 @@ class _LandingMenu extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  height: 36,
-                  width: 36,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: AppTheme.primaryColor.withValues(alpha: 0.2),
-                  ),
-                  child: const Icon(
-                    Icons.bar_chart_rounded,
-                    color: Colors.white,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 36,
+                    width: 36,
+                    excludeFromSemantics: true,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Graham Select',
+                  'Kerno',
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -297,7 +294,7 @@ class _HeroSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'O Graham Select coleta, filtra e classifica dados financeiros em segundos para entregar um ranking confiável de barganhas na bolsa.',
+                      'O Kerno coleta, filtra e classifica dados financeiros em segundos para entregar um ranking quantitativo e auditável da bolsa.',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppTheme.textColor.withValues(alpha: 0.8),
                         height: 1.5,
@@ -636,7 +633,7 @@ class _TestimonialsSection extends StatelessWidget {
         'João, investidor pessoa física',
       ),
       (
-        '“Uso o Graham Select para filtrar ideias antes de escrever meus relatórios.”',
+        '“Uso o Kerno para filtrar ideias antes de escrever meus relatórios.”',
         'Carla, analista CNPI',
       ),
     ];
@@ -724,7 +721,7 @@ class _FinalCtaSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Pronto para testar o Graham Select?',
+            'Pronto para testar o Kerno?',
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -767,12 +764,12 @@ class _Footer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            '© ${DateTime.now().year} Graham Select. Todos os direitos reservados.',
+            '© ${DateTime.now().year} Kerno. Todos os direitos reservados.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'contato@grahamselect.com • +55 (11) 99999-9999',
+            'kerno@afsdigital.com.br',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppTheme.textColor.withValues(alpha: 0.7),
             ),

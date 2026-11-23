@@ -127,7 +127,7 @@ class _DocsScreenState extends State<DocsScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Bem-vindo ao Graham Select. Este sistema foi desenhado para investidores e analistas que buscam utilizar a metodologia de Valor de Benjamin Graham. Aqui você poderá importar, processar e analisar dados financeiros reais.',
+            'Bem-vindo ao Kerno. Este sistema foi desenhado para investidores e analistas que buscam utilizar a metodologia de Valor de Benjamin Graham. Aqui você poderá importar, processar e analisar dados financeiros reais.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: AppTheme.textColor.withValues(alpha: 0.8),
               height: 1.5,
@@ -274,11 +274,13 @@ class _DocsScreenState extends State<DocsScreen> {
             children: [
               Icon(icon, color: AppTheme.primaryColor),
               const SizedBox(width: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

@@ -18,6 +18,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,5 +63,9 @@ class SendTestWhatsappAlertUseCaseTest {
         assertThat(result.status()).isEqualTo("SENT");
         assertThat(result.provider()).isEqualTo("MOCK");
         assertThat(result.providerMessageId()).isEqualTo("mock-123");
+        assertThat(result.messagePreview())
+                .startsWith("Kerno:")
+                .doesNotContain("Graham-Select");
+        verify(gatewayPort).sendTextMessage(eq("+5511999998888"), contains("Kerno:"));
     }
 }

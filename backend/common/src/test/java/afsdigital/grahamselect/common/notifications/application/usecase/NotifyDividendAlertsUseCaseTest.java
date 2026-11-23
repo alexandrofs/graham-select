@@ -19,7 +19,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.contains;
+import org.mockito.ArgumentCaptor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,11 +67,16 @@ class NotifyDividendAlertsUseCaseTest {
 
         useCase.notifyForNewAnnouncements(List.of(announcement));
 
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
         verify(sendWhatsappAlertUseCase).sendAlert(
                 eq(pref),
                 eq(WhatsappAlertType.DIVIDEND_ANNOUNCEMENT),
                 eq("dividend:user-1:ITUB4:2026-11-25:JCP"),
-                contains("R$ 170.00")
+                messageCaptor.capture()
         );
+        assertThat(messageCaptor.getValue())
+                .startsWith("Kerno Provento:")
+                .contains("R$ 170.00")
+                .doesNotContain("Graham-Select");
     }
 }

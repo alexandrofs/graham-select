@@ -86,7 +86,7 @@ public class NotifyDividendAlertsUseCase {
                                 ? " | Pagamento: " + announcement.getPaymentDate()
                                 : "";
                         String message = String.format(
-                                "Graham-Select Provento: %s anunciou %s. Data COM: %s%s. Valor líquido estimado para sua posição: R$ %s.",
+                                "Kerno Provento: %s anunciou %s. Data COM: %s%s. Valor líquido estimado para sua posição: R$ %s.",
                                 ticker,
                                 announcement.getType().name(),
                                 announcement.getComDate(),

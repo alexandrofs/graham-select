@@ -88,13 +88,21 @@ class _Sidebar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.bar_chart_rounded, color: AppTheme.accentColor, size: 32),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 32,
+                height: 32,
+                excludeFromSemantics: true,
+              ),
+            ),
             const SizedBox(width: 12),
             const Text(
-              'Graham\nSelect',
+              'Kerno',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 20,
                 height: 1.1,
               ),
             ),

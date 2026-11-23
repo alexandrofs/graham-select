@@ -49,17 +49,27 @@ void main() {
   // Cenário 1: Renderização inicial
   // ==========================================
 
-  testWidgets('Deve exibir o título "Graham Select"', (tester) async {
+  testWidgets('Deve exibir o título "Kerno" e o logotipo oficial', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    expect(find.text('Graham Select'), findsOneWidget);
+    expect(find.text('Kerno'), findsOneWidget);
+    expect(find.textContaining('Graham Select'), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Image &&
+            widget.image is AssetImage &&
+            (widget.image as AssetImage).assetName == 'assets/images/logo.png',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Deve exibir o subtítulo descritivo', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
     expect(
-      find.text('O cérebro insubstituível do seu patrimônio familiar.'),
+      find.text('O núcleo inteligente do seu dinheiro.'),
       findsOneWidget,
     );
   });
@@ -166,5 +176,39 @@ void main() {
     // Após login bem-sucedido, o botão deve voltar (não mais loading)
     // e nenhum SnackBar de erro deve aparecer
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets(
+      'Deve renderizar sem overflow em viewport curto (400x340) com TextScaler 2.0',
+      (tester) async {
+    tester.view.physicalSize = const Size(400, 340);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final router = GoRouter(
+      initialLocation: '/login',
+      routes: [
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(2.0),
+            ),
+            child: Provider<AuthRepository>.value(
+              value: mockAuthRepository,
+              child: const LoginScreen(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Kerno'), findsOneWidget);
+    expect(find.text('Entrar com Google'), findsOneWidget);
   });
 }

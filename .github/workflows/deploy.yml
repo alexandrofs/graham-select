@@ -1,4 +1,4 @@
-name: Build & Deploy Graham Select (Kubernetes OKE)
+name: Build & Deploy Kerno (Kubernetes OKE)
 
 on:
   push:
@@ -147,7 +147,7 @@ jobs:
         run: |
           flutter pub get
           flutter build web --release \
-            --dart-define=API_BASE_URL="https://graham.afsdigital.com.br/api/v1" \
+            --dart-define=API_BASE_URL="https://kerno.afsdigital.com.br/api/v1" \
             --dart-define=GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
             --dart-define=FIREBASE_API_KEY="${{ vars.FIREBASE_API_KEY }}" \
             --dart-define=FIREBASE_AUTH_DOMAIN="${{ vars.FIREBASE_AUTH_DOMAIN }}" \
@@ -202,7 +202,7 @@ jobs:
             --wait \
             --timeout 5m
 
-      # --- Configure Graham-Select Namespace & Registry Secret ---
+      # --- Configure Kerno Namespace & Registry Secret ---
       - name: Configure Image Pull Secret for GHCR
         run: |
           kubectl create namespace graham-select --dry-run=client -o yaml | kubectl apply -f -
@@ -218,8 +218,8 @@ jobs:
           kubectl get secret -n graham-select -l owner=helm -o jsonpath='{range .items[?(@.metadata.labels.status=="pending-upgrade")]}{.metadata.name}{"\n"}{end}' | xargs -r kubectl delete secret -n graham-select || true
           kubectl get secret -n graham-select -l owner=helm -o jsonpath='{range .items[?(@.metadata.labels.status=="pending-install")]}{.metadata.name}{"\n"}{end}' | xargs -r kubectl delete secret -n graham-select || true
 
-      # --- Deploy Graham Select via Helm Chart ---
-      - name: Deploy Graham Select via Helm Chart
+      # --- Deploy Kerno via Helm Chart ---
+      - name: Deploy Kerno via Helm Chart
         run: |
           IMAGE_TAG="${{ github.sha }}"
 

@@ -1,4 +1,4 @@
-// Web Push Service Worker for Graham-Select
+// Web Push Service Worker for Kerno
 self.addEventListener('push', (event) => {
   let data = {};
   if (event.data) {
