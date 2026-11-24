@@ -192,6 +192,45 @@ class VapidWebPushGatewayAdapterTest {
         localMockServer.verify();
     }
 
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "   "})
+    @SuppressWarnings("unchecked")
+    void shouldFallbackUrlToGrahamRecommendationsWhenUrlIsNullOrBlank(String inputUrl) throws Exception {
+        ObjectMapper spyObjectMapper = spy(new ObjectMapper());
+        VapidWebPushGatewayAdapter spyAdapter = new VapidWebPushGatewayAdapter(
+                publicKeyBase64,
+                privateKeyBase64,
+                "mailto:kerno@afsdigital.com.br",
+                5000,
+                10000,
+                spyObjectMapper
+        );
+        RestClient.Builder restClientBuilder = RestClient.builder();
+        MockRestServiceServer localMockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
+        ReflectionTestUtils.setField(spyAdapter, "restClient", restClientBuilder.build());
+
+        String endpoint = "https://fcm.googleapis.com/fcm/send/fake-token";
+        WebPushSubscription subscription = createSubscription(endpoint);
+
+        localMockServer.expect(requestTo(endpoint))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.CREATED));
+
+        WebPushSendResult result = spyAdapter.sendNotification(
+                subscription, "Alerta Kerno", "Nova oportunidade identificada!", inputUrl
+        );
+
+        assertThat(result.success()).isTrue();
+        ArgumentCaptor<Map<String, String>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(spyObjectMapper).writeValueAsString(payloadCaptor.capture());
+        assertThat(payloadCaptor.getValue())
+                .containsEntry("title", "Alerta Kerno")
+                .containsEntry("url", "/graham-recommendations");
+
+        localMockServer.verify();
+    }
+
     @Test
     void shouldBindKernoVapidSubjectFromApplicationYmlWhenProviderIsVapid() {
         new ApplicationContextRunner()

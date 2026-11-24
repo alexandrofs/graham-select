@@ -72,6 +72,26 @@ context:
 - Given um visitante acessando qualquer rota Web pública ou autenticada sob `kerno.afsdigital.com.br`, when a página é renderizada, then título HTML, favicons, meta tags OpenGraph e UI visível exibem *"Kerno — O núcleo inteligente do seu dinheiro"* e marca **Kerno**, sem menção à plataforma *"Graham Select"*.
 - Given os artefatos Android/iOS/macOS e o chart `helm/graham-select/`, when inspecionados, then rótulos/ícones nativos exibem **Kerno** enquanto diretório Helm, seletores/recursos Kubernetes, schema `grahamselect` e referências à metodologia de Benjamin Graham permanecem intactos.
 
+### Review Findings
+
+- [x] [Review][Patch] Validação de URL de fallback em notificações Web Push [`backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java:90`]
+- [x] [Review][Patch] Declaração explícita de purpose nos ícones padrão do manifest PWA e ajuste de apple-touch-icon [`frontend/web/manifest.json:11-22`, `frontend/web/index.html:47`]
+- [x] [Review][Patch] Adicionar cabeçalho de seção da Story 1.1 em deferred-work.md [`docs/bmad/implementation-artifacts/deferred-work.md:68`]
+- [x] [Review][Defer] Auditar permissão incondicional de loopback CORS em SecurityConfig sob profile prod [`backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/SecurityConfig.java:56-60`] — deferred: pre-existing, já documentado em deferred-work.md
+- [x] [Review][Defer] Espelhar parâmetro CRAWLER_USER_AGENT no chart Helm [`helm/graham-select/values.yaml`] — deferred: pre-existing, default em código funciona sem override
+- [x] [Review][Defer] Ícone full-color referenciado como badge na notificação Web Push [`frontend/web/push-sw.js:16`] — deferred: pre-existing, criação de asset monocromático fora do escopo da Story 1.1
+- [x] [Review][Defer] Configuração de ícone adaptativo Android (mipmap-anydpi-v26/ic_launcher.xml) [`frontend/android/app/src/main/res/`] — deferred: pre-existing, escopo da Story 1.1 cobriu todas as densidades de raster PNG
+- [x] [Review][Defer] Workflow legado frontend-ci.yml mantendo referências ao Render [`.github/workflows/frontend-ci.yml:114-121`] — deferred: pre-existing, fora do escopo do deploy OKE
+- [x] [Review][Defer] Reuso de assets/icons/google_logo.png no botão Google da LoginScreen [`frontend/lib/src/features/auth/presentation/login_screen.dart:1062`] — deferred: deferido explicitamente para Story 1.4
+- [x] [Review][Defer] Execução de helm lint e helm template em CI [`helm/graham-select/`] — deferred: ambiente local sem binário helm, validado via YAML e delegado ao CI
+
+#### Rejected
+- Status inconsistente entre spec (done) e sprint-status (review): rejeitado por regra de triagem BMAD (o fix editaria a própria spec sob revisão).
+- Notificação push com 'Zona de Compra Graham' em push-sw.js:12: falso-positivo (metodologia de Benjamin Graham expressamente preservada por restrição da spec).
+- Ausência de logo no _TopBar mobile em main_layout.dart: falso-positivo (redesenho multi-superfície mobile pertence expressamente à Story 2.3).
+- SecurityConfigCorsTest estendendo BaseRepositoryIT: baixa severidade (preferência de arquitetura de teste, sem defeito funcional).
+- Falta de cobertura para origens múltiplas separadas por vírgula em SecurityConfigCorsTest: baixa severidade (melhoria de teste secundária, origem oficial 100% coberta).
+
 ## Implementation Notes
 
 - **File List:**

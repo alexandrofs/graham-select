@@ -66,6 +66,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 - Debounce do formulário de metas financeiras [frontend/lib/src/features/goals/presentation/] — Defer da Story 5.1 sem dono; **Dono: Elena (Junior Dev)**. Prioridade baixa; registrado no backlog para tratamento em refator de UX.
 
+## Deferred from: code review of spec-1-1-identidade-visual-institucional-kerno (2026-11-23)
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
   summary: Isolar `app.upload.storage-path` em diretório temporário nos testes (`application-test.yml`) e adicionar `uploads/` ao `.gitignore`.
