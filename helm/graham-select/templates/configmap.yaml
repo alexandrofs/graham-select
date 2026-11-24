@@ -36,3 +36,5 @@ data:
   WEBPUSH_PROVIDER: {{ .Values.api.env.WEBPUSH_PROVIDER | default "mock" | quote }}
   WEBPUSH_ALERTS_CRON: {{ .Values.api.env.WEBPUSH_ALERTS_CRON | default "0 15 20 * * MON-FRI" | quote }}
   WEBPUSH_VAPID_SUBJECT: {{ .Values.api.env.WEBPUSH_VAPID_SUBJECT | default "mailto:kerno@afsdigital.com.br" | quote }}
+  FOUNDER_TOTAL_SLOTS: {{ .Values.api.env.FOUNDER_TOTAL_SLOTS | default "250" | quote }}
+  FOUNDER_PRO_TRIAL_DAYS: {{ .Values.api.env.FOUNDER_PRO_TRIAL_DAYS | default "90" | quote }}

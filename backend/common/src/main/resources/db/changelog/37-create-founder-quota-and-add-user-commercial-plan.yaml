@@ -1,0 +1,155 @@
+databaseChangeLog:
+  - changeSet:
+      id: 37-create-tb-founder-quota
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tb_founder_quota
+      changes:
+        - createTable:
+            tableName: tb_founder_quota
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: total_slots
+                  type: INT
+                  defaultValueNumeric: 250
+                  constraints:
+                    nullable: false
+              - column:
+                  name: founder_slots_remaining
+                  type: INT
+                  defaultValueNumeric: 250
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: tb_founder_quota
+
+  - changeSet:
+      id: 37-seed-tb-founder-quota
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM tb_founder_quota WHERE id = 1
+      changes:
+        - insert:
+            tableName: tb_founder_quota
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: total_slots
+                  valueNumeric: 250
+              - column:
+                  name: founder_slots_remaining
+                  valueNumeric: 250
+              - column:
+                  name: updated_at
+                  valueComputed: CURRENT_TIMESTAMP
+      rollback:
+        - delete:
+            tableName: tb_founder_quota
+            where: id = 1
+
+  - changeSet:
+      id: 37-add-commercial-plan-to-users
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: users
+                columnName: commercial_plan
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: commercial_plan
+                  type: VARCHAR(30)
+                  defaultValue: "PRO_TRIAL"
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropColumn:
+            tableName: users
+            columnName: commercial_plan
+
+  - changeSet:
+      id: 37-add-trial-expires-at-to-users
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: users
+                columnName: trial_expires_at
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: trial_expires_at
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropColumn:
+            tableName: users
+            columnName: trial_expires_at
+
+  - changeSet:
+      id: 37-backfill-users-commercial-plan
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: users
+            columnName: commercial_plan
+        - columnExists:
+            tableName: users
+            columnName: trial_expires_at
+      changes:
+        - sql:
+            sql: UPDATE users SET commercial_plan = 'FOUNDER_LIFETIME', trial_expires_at = NULL WHERE tier = 'PREMIUM';
+        - sql:
+            sql: UPDATE users SET commercial_plan = 'FREE', trial_expires_at = trial_ends_at WHERE tier = 'FREE';
+        - sql:
+            sql: UPDATE users SET commercial_plan = 'PRO_TRIAL', trial_expires_at = trial_ends_at WHERE tier = 'TRIAL';
+        - sql:
+            sql: |
+              UPDATE tb_founder_quota
+              SET founder_slots_remaining = CASE
+                      WHEN founder_slots_remaining - (SELECT COUNT(*) FROM users WHERE tier = 'PREMIUM') < 0 THEN 0
+                      ELSE founder_slots_remaining - (SELECT COUNT(*) FROM users WHERE tier = 'PREMIUM')
+                  END,
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE id = 1;
+      rollback:
+        - sql:
+            sql: |
+              UPDATE tb_founder_quota
+              SET founder_slots_remaining = CASE
+                      WHEN founder_slots_remaining + (SELECT COUNT(*) FROM users WHERE commercial_plan = 'FOUNDER_LIFETIME') > total_slots THEN total_slots
+                      ELSE founder_slots_remaining + (SELECT COUNT(*) FROM users WHERE commercial_plan = 'FOUNDER_LIFETIME')
+                  END,
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE id = 1;
+        - sql:
+            sql: UPDATE users SET commercial_plan = 'PRO_TRIAL', trial_expires_at = NULL;

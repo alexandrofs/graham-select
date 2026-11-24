@@ -38,6 +38,9 @@ app:
   security:
     cors:
       allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5000,https://kerno.afsdigital.com.br}
+  founders:
+    total-slots: ${FOUNDER_TOTAL_SLOTS:250}
+    trial-days: ${FOUNDER_PRO_TRIAL_DAYS:90}
 
 brapi:
   token: ${BRAPI_TOKEN:}

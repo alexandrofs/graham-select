@@ -240,6 +240,8 @@ jobs:
             --set-string secrets.whatsappMetaPhoneNumberId="${{ secrets.WHATSAPP_META_PHONE_NUMBER_ID }}" \
             --set-string secrets.webpushVapidPrivateKey="${{ secrets.WEBPUSH_VAPID_PRIVATE_KEY }}" \
             --set-string secrets.webpushVapidPublicKey="${{ secrets.WEBPUSH_VAPID_PUBLIC_KEY }}" \
+            --set-string api.env.FOUNDER_TOTAL_SLOTS="${{ vars.FOUNDER_TOTAL_SLOTS || '250' }}" \
+            --set-string api.env.FOUNDER_PRO_TRIAL_DAYS="${{ vars.FOUNDER_PRO_TRIAL_DAYS || '90' }}" \
             --wait \
             --timeout 10m
 

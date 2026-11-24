@@ -66,10 +66,16 @@ workspace {
                     webPushNotificationsService -> database "Lê e grava preferências, assinaturas e logs de Web Push"
                     webPushNotificationsService -> browserPushServices "Envia alertas cifrados via VAPID RFC 8291/8292 (ou Mock local)"
                 }
+                founderQuotaService = component "Founder Quota Service" {
+                    description "Gerencia o controle transacional atômico do lote de Membros Founders (tb_founder_quota) e concessão de planos comerciais"
+                    technology "Java Service, Spring JDBC, JPA"
+                    founderQuotaService -> database "Decrementa atomicamente tb_founder_quota e consulta vagas restantes"
+                }
                 apiController -> geradorEventosService 
                 apiController -> rankCompaniesService
                 apiController -> whatsappNotificationsService "Expõe endpoints /api/v1/notifications/whatsapp/*"
                 apiController -> webPushNotificationsService "Expõe endpoints /api/v1/notifications/web-push/*"
+                apiController -> founderQuotaService "Expõe GET /api/v1/founders/slots e aloca vagas Founders no onboarding OAuth2"
                 geradorEventosService -> producerService
                 producerService -> kafka "Publica evento de dados de empresas"
             }

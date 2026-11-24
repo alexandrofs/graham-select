@@ -92,3 +92,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
   summary: Executar `helm lint helm/graham-select` e `helm template test-graham helm/graham-select --debug` em ambiente Linux/CI com `helm` instalado.
   evidence: Achado `maybe-false` (`medium` potencial): o CLI `helm` e o daemon Docker não estão disponíveis neste ambiente Windows; a execução em Linux/CI encerrará a verificação de sintaxe Helm/Go templates.
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-2-infraestrutura-de-controle-transacional-do-lote-de-membros-founders.md`
+  summary: Configurar execução automática dos testes de integração H2 (`*IT.java`) no pipeline de CI (`.github/workflows/deploy.yml` / `maven-failsafe-plugin`).
+  evidence: Lacuna pré-existente do repositório confirmada pelo `verification-gap` (`mvn clean test` executa apenas `*Test.java` e pula os 30 `*IT.java`).

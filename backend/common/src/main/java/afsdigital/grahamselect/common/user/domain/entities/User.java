@@ -46,8 +46,15 @@ public class User {
     @Column(nullable = false)
     private SubscriptionTier tier;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "commercial_plan", nullable = false, length = 30)
+    private CommercialPlan commercialPlan;
+
     @Column(name = "trial_ends_at")
     private LocalDateTime trialEndsAt;
+
+    @Column(name = "trial_expires_at")
+    private LocalDateTime trialExpiresAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "investor_profile")
@@ -70,6 +77,33 @@ public class User {
     public void ensureDefaults() {
         if (this.role == null) {
             this.role = UserRole.USER;
+        }
+        if (this.commercialPlan == null) {
+            if (this.tier == SubscriptionTier.PREMIUM) {
+                this.commercialPlan = CommercialPlan.FOUNDER_LIFETIME;
+            } else if (this.tier == SubscriptionTier.FREE) {
+                this.commercialPlan = CommercialPlan.FREE;
+            } else {
+                this.commercialPlan = CommercialPlan.PRO_TRIAL;
+            }
+        }
+        if (this.tier == null) {
+            this.tier = switch (this.commercialPlan) {
+                case FOUNDER_LIFETIME -> SubscriptionTier.PREMIUM;
+                case PRO_TRIAL -> SubscriptionTier.TRIAL;
+                case FREE -> SubscriptionTier.FREE;
+            };
+        }
+        if (this.commercialPlan == CommercialPlan.FOUNDER_LIFETIME) {
+            this.tier = SubscriptionTier.PREMIUM;
+            this.trialEndsAt = null;
+            this.trialExpiresAt = null;
+        }
+        if (this.trialExpiresAt == null && this.trialEndsAt != null && this.commercialPlan != CommercialPlan.FOUNDER_LIFETIME) {
+            this.trialExpiresAt = this.trialEndsAt;
+        }
+        if (this.trialEndsAt == null && this.trialExpiresAt != null && this.commercialPlan != CommercialPlan.FOUNDER_LIFETIME) {
+            this.trialEndsAt = this.trialExpiresAt;
         }
     }
 }
