@@ -89,7 +89,7 @@ public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
             Map<String, String> payloadMap = new HashMap<>();
             payloadMap.put("title", (title != null && !title.isBlank()) ? title : "Kerno");
             payloadMap.put("body", body != null ? body : "");
-            payloadMap.put("url", url != null ? url : "/graham-recommendations");
+            payloadMap.put("url", (url != null && !url.isBlank()) ? url : "/graham-recommendations");
             byte[] payloadJson = objectMapper.writeValueAsString(payloadMap).getBytes(StandardCharsets.UTF_8);
 
             byte[] subscriberP256dh = WebPushCryptoUtils.decodeBase64Url(subscription.getP256dhKey());
