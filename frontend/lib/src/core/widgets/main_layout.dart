@@ -1,13 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../features/founders/presentation/widgets/commercial_plan_badge.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../theme/app_theme.dart';
 
-class MainLayout extends StatelessWidget {
+class MainLayout extends StatefulWidget {
   final Widget child;
 
   const MainLayout({super.key, required this.child});
+
+  @override
+  State<MainLayout> createState() => _MainLayoutState();
+}
+
+class _MainLayoutState extends State<MainLayout> {
+  bool _profileRequested = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_profileRequested) return;
+    final profileProvider = Provider.of<ProfileProvider?>(context, listen: false);
+    if (profileProvider != null &&
+        profileProvider.state == ProfileState.idle &&
+        profileProvider.profile == null) {
+      _profileRequested = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (profileProvider.state == ProfileState.idle &&
+            profileProvider.profile == null) {
+          profileProvider.fetchProfile();
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +49,7 @@ class MainLayout extends StatelessWidget {
             child: Column(
               children: [
                 const _TopBar(),
-                Expanded(child: child),
+                Expanded(child: widget.child),
               ],
             ),
           ),
@@ -264,7 +291,8 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider?>(context);
-    final isAdmin = profileProvider?.profile?.role == 'ADMIN';
+    final profile = profileProvider?.profile;
+    final isAdmin = profile?.role == 'ADMIN';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -276,39 +304,43 @@ class _TopBar extends StatelessWidget {
       ),
       child: SafeArea(
         bottom: false,
-        child: Row(
-          children: [
-            const Spacer(),
-            if (isAdmin) ...[
-              TextButton.icon(
-                key: const Key('admin_dashboard_nav_button'),
-                onPressed: () => context.go('/admin/dashboard'),
-                icon: const Icon(
-                  Icons.admin_panel_settings_outlined,
-                  size: 18,
-                  color: AppTheme.accentColor,
-                ),
-                label: const Text(
-                  'Painel Admin',
-                  style: TextStyle(
+        child: SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (profile != null) CommercialPlanBadge(profile: profile),
+              if (isAdmin)
+                TextButton.icon(
+                  key: const Key('admin_dashboard_nav_button'),
+                  onPressed: () => context.go('/admin/dashboard'),
+                  icon: const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    size: 18,
                     color: AppTheme.accentColor,
-                    fontWeight: FontWeight.w600,
+                  ),
+                  label: const Text(
+                    'Painel Admin',
+                    style: TextStyle(
+                      color: AppTheme.accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.notifications_outlined),
               ),
-              const SizedBox(width: 8),
+              const CircleAvatar(
+                radius: 16,
+                backgroundColor: AppTheme.primaryColor,
+                child: Icon(Icons.person, size: 20, color: Colors.white),
+              ),
             ],
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.notifications_outlined),
-            ),
-            const SizedBox(width: 8),
-            const CircleAvatar(
-              radius: 16,
-              backgroundColor: AppTheme.primaryColor,
-              child: Icon(Icons.person, size: 20, color: Colors.white),
-            ),
-          ],
+          ),
         ),
       ),
     );

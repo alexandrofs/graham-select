@@ -929,6 +929,9 @@ components:
         trialExpiresAt:
           type: string
           format: date-time
+        termsAcceptedAt:
+          type: string
+          format: date-time
         daysRemaining:
           type: integer
         role:

@@ -54,6 +54,7 @@ public class UserAutoProvisioningExtendedIT extends BaseRepositoryIT {
             assertThat(user.get().getFullName()).isEqualTo("Test User");
             assertThat(user.get().getId()).isNotNull();
             assertThat(user.get().getCreatedAt()).isNotNull();
+            assertThat(user.get().getTermsAcceptedAt()).isNotNull();
         }
 
         @Test
@@ -142,6 +143,28 @@ public class UserAutoProvisioningExtendedIT extends BaseRepositoryIT {
             // If name didn't change, updatedAt should remain the same (no unnecessary save)
             assertThat(afterSecondLogin.getFullName()).isEqualTo("Same Name");
             assertThat(userRepository.count()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("Should populate termsAcceptedAt on returning login when null without consuming founder slot")
+        void shouldPopulateTermsAcceptedAtWhenNullOnReturningLogin() {
+            User legacyUser = User.builder()
+                    .googleSub("sub-legacy-terms")
+                    .email("legacy@test.com")
+                    .fullName("Legacy User")
+                    .tier(afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier.FREE)
+                    .commercialPlan(afsdigital.grahamselect.common.user.domain.entities.CommercialPlan.FREE)
+                    .termsAcceptedAt(null)
+                    .build();
+            userRepository.saveAndFlush(legacyUser);
+
+            Jwt jwt = buildJwt("sub-legacy-terms", "legacy@test.com", "Legacy User");
+            converter.convert(jwt);
+
+            User updated = userRepository.findByGoogleSub("sub-legacy-terms").orElseThrow();
+            assertThat(updated.getTermsAcceptedAt()).isNotNull();
+            assertThat(updated.getCommercialPlan())
+                    .isEqualTo(afsdigital.grahamselect.common.user.domain.entities.CommercialPlan.FREE);
         }
     }
 

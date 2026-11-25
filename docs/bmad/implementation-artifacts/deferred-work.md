@@ -103,3 +103,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-3-landing-page-publica-alta-conversao-programa-founders.md`
   summary: Validate `frontend/nginx.conf` syntax (`nginx -t`) and live HTTP status/X-Robots-Tag headers in Docker/CI.
   evidence: Local Docker Desktop daemon was not running during Story 1.3 build (`dockerDesktopLinuxEngine` unavailable).
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-4-onboarding-google-oauth2-termos-camada-comercial.md`
+  summary: Resetar `ProfileProvider` em logout ou troca de usuário no `MultiProvider` raiz (`frontend/lib/main.dart`) para evitar exibição momentânea de perfil anterior.
+  evidence: `ProfileProvider` é criado no `MultiProvider` raiz sem listener de `authStateChanges` (ao contrário de `TagProvider` em `frontend/lib/main.dart:288-295`), condição pré-existente à Story 1.4.

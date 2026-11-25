@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.api.user;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
+import afsdigital.grahamselect.common.user.domain.entities.CommercialPlan;
 import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
@@ -49,11 +50,13 @@ public class UserProfileIT extends BaseRepositoryIT {
         String token = "mock-token";
         mockJwt(token, user);
 
-        // 1. Get profile (should be null)
+        // 1. Get profile (should be null investorProfile and expose termsAcceptedAt + commercialPlan)
         mockMvc.perform(get("/api/v1/users/me")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.investorProfile").isEmpty());
+                .andExpect(jsonPath("$.investorProfile").isEmpty())
+                .andExpect(jsonPath("$.commercialPlan").value("FREE"))
+                .andExpect(jsonPath("$.termsAcceptedAt").isNotEmpty());
 
         // 2. Update profile
         String requestBody = """
@@ -74,12 +77,56 @@ public class UserProfileIT extends BaseRepositoryIT {
         assertThat(updatedUser.getInvestorProfile().name()).isEqualTo("AGGRESSIVE");
     }
 
+    @Test
+    @DisplayName("Should expose PRO_TRIAL and FOUNDER_LIFETIME commercial plan fields via /api/v1/users/me")
+    void shouldExposeCommercialPlanFieldsInUsersMe() throws Exception {
+        java.time.LocalDateTime nowUtc = java.time.LocalDateTime.now(java.time.ZoneOffset.UTC);
+        User trialUser = userRepository.save(User.builder()
+                .googleSub("trial-sub")
+                .email("trial@example.com")
+                .fullName("Trial User")
+                .tier(SubscriptionTier.TRIAL)
+                .commercialPlan(CommercialPlan.PRO_TRIAL)
+                .trialEndsAt(nowUtc.plusDays(90))
+                .trialExpiresAt(nowUtc.plusDays(90))
+                .termsAcceptedAt(nowUtc)
+                .build());
+        mockJwt("trial-token", trialUser);
+
+        mockMvc.perform(get("/api/v1/users/me")
+                        .header("Authorization", "Bearer trial-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.commercialPlan").value("PRO_TRIAL"))
+                .andExpect(jsonPath("$.trialExpiresAt").isNotEmpty())
+                .andExpect(jsonPath("$.daysRemaining").value(org.hamcrest.Matchers.greaterThanOrEqualTo(89)))
+                .andExpect(jsonPath("$.termsAcceptedAt").isNotEmpty());
+
+        User founderUser = userRepository.save(User.builder()
+                .googleSub("founder-sub")
+                .email("founder@example.com")
+                .fullName("Founder User")
+                .tier(SubscriptionTier.PREMIUM)
+                .commercialPlan(CommercialPlan.FOUNDER_LIFETIME)
+                .termsAcceptedAt(nowUtc)
+                .build());
+        mockJwt("founder-token", founderUser);
+
+        mockMvc.perform(get("/api/v1/users/me")
+                        .header("Authorization", "Bearer founder-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.commercialPlan").value("FOUNDER_LIFETIME"))
+                .andExpect(jsonPath("$.daysRemaining").value(0))
+                .andExpect(jsonPath("$.termsAcceptedAt").isNotEmpty());
+    }
+
     private User createAndMockUser(String sub, String email) {
         User user = User.builder()
                 .googleSub(sub)
                 .email(email)
                 .fullName("Test User")
                 .tier(SubscriptionTier.FREE)
+                .commercialPlan(CommercialPlan.FREE)
+                .termsAcceptedAt(java.time.LocalDateTime.of(2026, 11, 24, 12, 0))
                 .build();
         return userRepository.save(user);
     }

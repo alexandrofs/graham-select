@@ -161,6 +161,10 @@ public class UserController implements UsersApiDelegate {
             profile.setDaysRemaining(0);
         }
 
+        if (user.getTermsAcceptedAt() != null) {
+            profile.setTermsAcceptedAt(user.getTermsAcceptedAt().atOffset(ZoneOffset.UTC));
+        }
+
         boolean isAdmin = user.getRole() == UserRole.ADMIN || hasAdminAuthority();
         profile.setRole(isAdmin ? UserProfile.RoleEnum.ADMIN : UserProfile.RoleEnum.USER);
 

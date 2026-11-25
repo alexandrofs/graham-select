@@ -77,6 +77,11 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
             existingUser.setRole(UserRole.ADMIN);
             changed = true;
         }
+        if (existingUser.getTermsAcceptedAt() == null) {
+            log.info("Backfilling termsAcceptedAt for existing userId={}", existingUser.getId());
+            existingUser.setTermsAcceptedAt(LocalDateTime.now(ZoneOffset.UTC));
+            changed = true;
+        }
         return changed ? userRepository.save(existingUser) : existingUser;
     }
 
@@ -87,6 +92,7 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
                     boolean claimedFounderSlot = founderQuotaService.tryClaimFounderSlot();
                     CommercialPlan commercialPlan;
                     SubscriptionTier tier;
+                    LocalDateTime nowUtc = LocalDateTime.now(ZoneOffset.UTC);
                     LocalDateTime trialExpiresAt = null;
 
                     if (claimedFounderSlot) {
@@ -95,7 +101,7 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
                     } else {
                         commercialPlan = CommercialPlan.PRO_TRIAL;
                         tier = SubscriptionTier.TRIAL;
-                        trialExpiresAt = founderQuotaService.calculateProTrialExpiration(LocalDateTime.now(ZoneOffset.UTC));
+                        trialExpiresAt = founderQuotaService.calculateProTrialExpiration(nowUtc);
                     }
 
                     User newUser = User.builder()
@@ -107,6 +113,7 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
                             .role(jwtHasAdmin ? UserRole.ADMIN : UserRole.USER)
                             .trialEndsAt(trialExpiresAt)
                             .trialExpiresAt(trialExpiresAt)
+                            .termsAcceptedAt(nowUtc)
                             .build();
                     log.info("Provisioning new user from OAuth2 with commercialPlan={}", commercialPlan);
                     return userRepository.saveAndFlush(newUser);
