@@ -327,9 +327,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         final isLoggedIn = firebaseUser != null && jwtToken != null;
         final isLoggingIn = state.matchedLocation == '/login';
         final isAtLanding = state.matchedLocation == '/';
+        final isDocs = state.matchedLocation == '/docs';
 
         if (!isLoggedIn) {
-          if (isLoggingIn || isAtLanding) return null;
+          if (isLoggingIn || isAtLanding || isDocs) return null;
           return '/login';
         }
 

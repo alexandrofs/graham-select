@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /terms
+Allow: /privacy
+Allow: /docs
+Disallow: /app/
+Disallow: /dashboard/
+Disallow: /api/
