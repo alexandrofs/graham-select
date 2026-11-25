@@ -77,6 +77,34 @@ context:
 
 ## Implementation Notes
 
+### File List
+- `backend/common/src/main/resources/db/changelog/38-add-user-terms-accepted-at.yaml`
+- `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/user/domain/entities/User.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java`
+- `backend/api/src/main/resources/openapi.yaml`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/user/web/UserController.java`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/auth/UserAutoProvisioningExtendedIT.java`
+- `backend/api/src/test/java/afsdigital/grahamselect/api/user/UserProfileIT.java`
+- `frontend/lib/src/features/auth/presentation/login_screen.dart`
+- `frontend/lib/src/features/profile/data/models/user_profile_model.dart`
+- `frontend/lib/src/features/founders/presentation/widgets/commercial_plan_badge.dart`
+- `frontend/lib/src/core/widgets/main_layout.dart`
+- `frontend/lib/src/features/profile/presentation/pages/profile_page.dart`
+- `frontend/lib/src/features/profile/presentation/widgets/tier_badge.dart`
+- `frontend/lib/src/features/profile/presentation/widgets/tier_comparison_card.dart`
+- `frontend/test/features/auth/presentation/login_screen_test.dart`
+- `frontend/test/features/founders/presentation/widgets/commercial_plan_badge_test.dart`
+- `frontend/test/core/widgets/main_layout_commercial_badge_test.dart`
+- `frontend/test/features/profile/data/models/user_profile_model_test.dart`
+- `frontend/test/features/profile/presentation/pages/profile_page_test.dart`
+- `frontend/test/features/admin/presentation/pages/admin_dashboard_page_test.dart`
+- `frontend/test/home_page_test.dart`
+- `frontend/test/main_router_public_docs_test.dart`
+- `docs/bmad/implementation-artifacts/spec-1-4-onboarding-google-oauth2-termos-camada-comercial.md`
+- `docs/bmad/implementation-artifacts/sprint-status.yaml`
+- `docs/bmad/implementation-artifacts/deferred-work.md`
+
 ## Spec Change Log
 
 ## Review Triage Log
