@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4F46E5">
+  <title>Kerno — O núcleo inteligente do seu dinheiro</title>
+  <meta name="description" content="Do caos das planilhas ao núcleo inteligente das suas finanças. GPS de Aporte, Diagrama do Cerrado, Margem de Segurança de Graham e Kerno AI.">
+  <link rel="canonical" href="https://kerno.afsdigital.com.br/">
+
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Kerno">
+  <meta property="og:title" content="Kerno — O núcleo inteligente do seu dinheiro">
+  <meta property="og:description" content="Do caos das planilhas ao núcleo inteligente das suas finanças. Gestão patrimonial, alocação estruturada e análise quantitativa pela metodologia de Benjamin Graham.">
+  <meta property="og:url" content="https://kerno.afsdigital.com.br/">
+  <meta property="og:image" content="https://kerno.afsdigital.com.br/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kerno — O núcleo inteligente do seu dinheiro">
+  <meta name="twitter:description" content="Do caos das planilhas ao núcleo inteligente das suas finanças. Gestão patrimonial, alocação estruturada e análise quantitativa pela metodologia de Benjamin Graham.">
+  <meta name="twitter:image" content="https://kerno.afsdigital.com.br/og-image.png">
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/icons/Icon-maskable-192.png">
+
+  <style>
+    :root {
+      --bg-canvas: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F1F5F9;
+      --ink-primary: #0F172A;
+      --ink-secondary: #334155;
+      --ink-muted: #475569;
+      --brand-indigo: #4F46E5;
+      --brand-indigo-hover: #4338CA;
+      --brand-indigo-deep: #3730A3;
+      --brand-indigo-soft: #EEF2FF;
+      --founder-bg: #FEF3C7;
+      --founder-ink: #92400E;
+      --founder-border: #F59E0B;
+      --border-subtle: #E2E8F0;
+      --success-bg: #DCFCE7;
+      --success-ink: #166534;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-pill: 9999px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -4px rgba(15, 23, 42, 0.04);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--ink-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(248, 250, 252, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--ink-primary);
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 14px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--ink-secondary);
+      border-radius: var(--radius-md);
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus-visible {
+      background-color: var(--bg-subtle);
+      color: var(--ink-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 12px 22px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 1rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+      text-align: center;
+    }
+
+    .btn:focus-visible,
+    a:focus-visible {
+      outline: 3px solid var(--brand-indigo);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-indigo);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--brand-indigo-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      color: var(--ink-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-subtle);
+    }
+
+    .btn-founder {
+      background-color: var(--brand-indigo);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-founder:hover {
+      background-color: var(--brand-indigo-deep);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 56px 0 40px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    @media (min-width: 900px) {
+      .hero {
+        padding: 72px 0 56px;
+      }
+      .hero-grid {
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 48px;
+      }
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background-color: var(--brand-indigo-soft);
+      color: var(--brand-indigo-deep);
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(2rem, 4.2vw, 3.15rem);
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+      color: var(--ink-primary);
+    }
+
+    .hero-subtitle {
+      margin: 0 0 28px;
+      font-size: 1.125rem;
+      color: var(--ink-secondary);
+      max-width: 60ch;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .hero-note {
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      margin: 0;
+    }
+
+    /* Founders Banner Card */
+    .founders-card {
+      background-color: var(--bg-surface);
+      border: 2px solid var(--founder-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .founders-card.is-trial {
+      border-color: var(--brand-indigo);
+    }
+
+    .founder-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background-color: var(--founder-bg);
+      color: var(--founder-ink);
+      border: 1px solid var(--founder-border);
+      font-size: 0.875rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .founders-card.is-trial .founder-pill {
+      background-color: var(--brand-indigo-soft);
+      color: var(--brand-indigo-deep);
+      border-color: var(--brand-indigo);
+    }
+
+    .founders-title {
+      margin: 0 0 10px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.3;
+      color: var(--ink-primary);
+    }
+
+    .founders-desc {
+      margin: 0 0 18px;
+      font-size: 0.975rem;
+      color: var(--ink-secondary);
+    }
+
+    .slots-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background-color: var(--founder-bg);
+      color: var(--founder-ink);
+      border: 1px solid var(--founder-border);
+      margin-bottom: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .founders-card.is-trial .slots-box {
+      background-color: var(--bg-subtle);
+      color: var(--ink-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .slots-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .slots-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .founders-card .btn {
+      width: 100%;
+    }
+
+    /* Section */
+    .section {
+      padding: 48px 0;
+    }
+
+    .section-header {
+      max-width: 680px;
+      margin-bottom: 32px;
+    }
+
+    .section-header h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink-primary);
+    }
+
+    .section-header p {
+      margin: 0;
+      color: var(--ink-secondary);
+      font-size: 1.05rem;
+    }
+
+    /* Previews Grid */
+    .previews-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 860px) {
+      .previews-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .preview-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-subtle);
+      color: var(--ink-secondary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .preview-card h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--ink-primary);
+    }
+
+    .preview-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--ink-secondary);
+    }
+
+    .mock-panel {
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-variant-numeric: tabular-nums;
+      margin-top: auto;
+    }
+
+    .mock-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.9rem;
+    }
+
+    .mock-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .mock-row:first-child {
+      padding-top: 0;
+    }
+
+    .mock-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+      background-color: var(--success-bg);
+      color: var(--success-ink);
+    }
+
+    .mock-tag-indigo {
+      background-color: var(--brand-indigo-soft);
+      color: var(--brand-indigo-deep);
+    }
+
+    .bar-track {
+      height: 8px;
+      background-color: var(--border-subtle);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background-color: var(--brand-indigo);
+      border-radius: var(--radius-pill);
+    }
+
+    /* Inline CVM Notice near demos */
+    .cvm-banner {
+      margin-top: 24px;
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-subtle);
+      border-left: 4px solid var(--brand-indigo);
+      font-size: 0.9rem;
+      color: var(--ink-secondary);
+    }
+
+    .cvm-banner strong {
+      color: var(--ink-primary);
+    }
+
+    /* Footer */
+    .site-footer {
+      margin-top: 40px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 40px 0;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1.4fr 1fr;
+        align-items: start;
+      }
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: flex-start;
+    }
+
+    @media (min-width: 768px) {
+      .footer-links {
+        justify-content: flex-end;
+      }
+    }
+
+    .footer-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--brand-indigo-deep);
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-disclaimer {
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      margin: 12px 0 0;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand" aria-label="Kerno — Página inicial">
+        <svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" aria-hidden="true">
+          <rect width="512" height="512" rx="112" fill="#4F46E5"/>
+          <path d="M 357.71 368.96 A 152 152 0 1 1 357.71 143.04" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round"/>
+          <line x1="202" y1="180" x2="202" y2="332" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round"/>
+          <circle cx="202" cy="256" r="28" fill="#FFFFFF"/>
+          <line x1="212" y1="256" x2="306" y2="180" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round"/>
+          <line x1="212" y1="256" x2="306" y2="332" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round"/>
+        </svg>
+        <span>Kerno</span>
+      </a>
+      <nav class="nav-actions" aria-label="Navegação principal">
+        <a href="/docs" class="nav-link">Documentação</a>
+        <a href="/login" class="btn btn-primary">Entrar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Kerno • O núcleo inteligente do seu dinheiro</span>
+          <h1>Do caos das planilhas ao núcleo inteligente das suas finanças</h1>
+          <p class="hero-subtitle">
+            Consolide sua carteira, calcule desvios de alocação em segundos com o <strong>GPS de Aporte</strong>, avalie fundamentos pelo <strong>Diagrama do Cerrado</strong> e aplique a <strong>Margem de Segurança de Benjamin Graham</strong> com apoio da <strong>Kerno AI</strong>.
+          </p>
+          <div class="hero-ctas">
+            <a href="/login" class="btn btn-primary" id="hero-primary-cta">Garantir Minha Vaga de Founder Gratuitamente</a>
+            <a href="/docs" class="btn btn-secondary">Explorar Metodologia</a>
+          </div>
+          <p class="hero-note">Ferramenta matemática parametrizada sob CVM 19/20 • Sem cartão de crédito.</p>
+        </div>
+
+        <aside class="founders-card" id="founders-card">
+          <div class="founder-pill" id="founders-badge">Seja um Membro Founder — Acesso Pro Vitalício Gratuito</div>
+          <h2 class="founders-title" id="founders-title">Lote Inicial do Programa Founders</h2>
+          <p class="founders-desc" id="founders-desc">
+            Os primeiros 250 investidores que criarem conta recebem o selo exclusivo de Membro Founder e acesso Pro vitalício gratuito, sem necessidade de cartão de crédito.
+          </p>
+          <div class="slots-box" id="founders-slots-box">
+            <span class="slots-label" id="founders-slots-label">Vagas Founders restantes</span>
+            <span class="slots-value" id="founders-slots-value" aria-live="polite">250/250</span>
+          </div>
+          <a href="/login" class="btn btn-founder" id="founders-cta">Garantir Minha Vaga de Founder Gratuitamente</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="demos-heading">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="demos-heading">Arquitetura quantitativa para decisões disciplinadas</h2>
+          <p>
+            Visualizações matemáticas transparentes para acompanhar desvios patrimoniais, fundamentos de longo prazo e sínteses quantitativas sem ruído.
+          </p>
+        </div>
+
+        <div class="previews-grid">
+          <!-- GPS de Aporte -->
+          <article class="preview-card">
+            <span class="preview-badge">Simulação em 25s</span>
+            <h3>GPS de Aporte</h3>
+            <p>
+              Distribuição matemática do aporte mensal conforme suas metas percentuais, distância do alvo e Margem de Graham com bônus quantitativo de <strong>1.30x</strong>.
+            </p>
+            <div class="mock-panel" aria-label="Exemplo ilustrativo do GPS de Aporte">
+              <div class="mock-row">
+                <span><strong>B3 • Classe Ações</strong></span>
+                <span class="mock-tag">Bônus 1.30x</span>
+              </div>
+              <div class="mock-row">
+                <span>Margem de Graham</span>
+                <span><strong>+28,4%</strong></span>
+              </div>
+              <div class="mock-row">
+                <span>Desvio vs. Meta</span>
+                <span><strong>-4,2 p.p.</strong></span>
+              </div>
+              <div class="mock-row">
+                <span>Proporção calculada</span>
+                <span><strong>R$ 1.450,00</strong></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Diagrama do Cerrado -->
+          <article class="preview-card">
+            <span class="preview-badge">Critérios Fundamentais</span>
+            <h3>Diagrama do Cerrado</h3>
+            <p>
+              Pontuação objetiva e auditável baseada em pilares de perenidade, governança, endividamento controlado, rentabilidade e consistência histórica.
+            </p>
+            <div class="mock-panel" aria-label="Exemplo ilustrativo do Diagrama do Cerrado">
+              <div class="mock-row">
+                <span>Perenidade &amp; Caixa</span>
+                <span><strong>9 / 10</strong></span>
+              </div>
+              <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width: 90%;"></div></div>
+              <div class="mock-row" style="margin-top: 10px;">
+                <span>Eficiência &amp; ROE</span>
+                <span><strong>8 / 10</strong></span>
+              </div>
+              <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width: 80%;"></div></div>
+              <div class="mock-row" style="margin-top: 10px;">
+                <span>Índice Consolidado</span>
+                <span class="mock-tag mock-tag-indigo">17 / 20 pts</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Kerno AI -->
+          <article class="preview-card">
+            <span class="preview-badge">Síntese Auditável</span>
+            <h3>Kerno AI</h3>
+            <p>
+              Leitura automatizada de indicadores públicos e demonstrativos financeiros com <strong>0 bytes de PII</strong> enviados ao modelo de linguagem.
+            </p>
+            <div class="mock-panel" aria-label="Exemplo ilustrativo da Kerno AI">
+              <div class="mock-row">
+                <span>Escopo de dados</span>
+                <span class="mock-tag mock-tag-indigo">0 bytes PII</span>
+              </div>
+              <div class="mock-row">
+                <span>Base analítica</span>
+                <span><strong>CVM / B3 Público</strong></span>
+              </div>
+              <div class="mock-row">
+                <span>Saída</span>
+                <span><strong>Resumo Matemático</strong></span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="cvm-banner" role="note" aria-label="Aviso Regulatório CVM 19/20">
+          <strong>Aviso Regulatório (CVM 19/20):</strong> As simulações do GPS de Aporte, do Diagrama do Cerrado, da Margem de Segurança de Benjamin Graham e da Kerno AI têm caráter estritamente matemático, informativo e educacional, parametrizado pelo próprio usuário. Não constituem recomendação, oferta, solicitação ou consultoria de investimento nos termos das Resoluções CVM nº 19 e nº 20.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <strong>Kerno — O núcleo inteligente do seu dinheiro</strong>
+          <p class="footer-disclaimer">
+            <strong>Disclaimer CVM 19/20:</strong> O Kerno é uma ferramenta de cálculo financeiro e organização patrimonial parametrizada pelo usuário. Os indicadores matemáticos exibidos não configuram recomendação de compra ou venda de ativos, nem garantia de rentabilidade futura. Decisões de alocação são de responsabilidade exclusiva do investidor.
+          </p>
+        </div>
+        <nav class="footer-links" aria-label="Links institucionais">
+          <a href="/terms">Termos de Uso</a>
+          <a href="/privacy">Política de Privacidade</a>
+          <a href="/docs">Documentação</a>
+          <a href="/login">Entrar</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var badgeEl = document.getElementById('founders-badge');
+      var titleEl = document.getElementById('founders-title');
+      var descEl = document.getElementById('founders-desc');
+      var slotsLabelEl = document.getElementById('founders-slots-label');
+      var slotsValueEl = document.getElementById('founders-slots-value');
+      var ctaEl = document.getElementById('founders-cta');
+      var heroCtaEl = document.getElementById('hero-primary-cta');
+      var cardEl = document.getElementById('founders-card');
+
+      function applyTrialFallback() {
+        cardEl.classList.add('is-trial');
+        badgeEl.textContent = 'Trial Pro de 90 dias gratuitos';
+        titleEl.textContent = 'Experimente o Kerno Pro por 90 dias';
+        descEl.textContent = 'O lote inicial de Membros Founders foi encerrado. Novos cadastros recebem automaticamente Trial Pro de 90 dias gratuitos, sem cartão de crédito e com transição não-destrutiva.';
+        slotsLabelEl.textContent = 'Oferta disponível';
+        slotsValueEl.textContent = '90 dias Pro grátis';
+        ctaEl.textContent = 'Começar Trial Pro de 90 dias gratuitamente';
+        heroCtaEl.textContent = 'Começar Trial Pro de 90 dias gratuitamente';
+      }
+
+      function applyActiveFounders(remaining, total) {
+        cardEl.classList.remove('is-trial');
+        badgeEl.textContent = 'Seja um Membro Founder — Acesso Pro Vitalício Gratuito';
+        titleEl.textContent = 'Lote Inicial do Programa Founders';
+        descEl.textContent = 'Garanta uma das ' + total + ' vagas vitalícias de Membro Founder com acesso Pro gratuito permanente, sem necessidade de cartão de crédito.';
+        slotsLabelEl.textContent = 'Vagas Founders restantes';
+        slotsValueEl.textContent = remaining + '/' + total;
+        ctaEl.textContent = 'Garantir Minha Vaga de Founder Gratuitamente';
+        heroCtaEl.textContent = 'Garantir Minha Vaga de Founder Gratuitamente';
+      }
+
+      function applyErrorFallback() {
+        slotsLabelEl.textContent = 'Status do lote';
+        slotsValueEl.textContent = 'Disponibilidade no login';
+      }
+
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
+
+      fetch('/api/v1/founders/slots', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: controller ? controller.signal : undefined
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          if (!data || !Number.isFinite(data.remainingSlots)) {
+            applyErrorFallback();
+            return;
+          }
+          var total = Number.isFinite(data.totalSlots) && data.totalSlots > 0 ? Math.floor(data.totalSlots) : 250;
+          var remaining = Math.min(total, Math.max(0, Math.floor(data.remainingSlots)));
+          if (remaining > 0 && data.isLoteActive !== false) {
+            applyActiveFounders(remaining, total);
+          } else {
+            applyTrialFallback();
+          }
+        })
+        .catch(function () {
+          applyErrorFallback();
+        })
+        .finally(function () {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+        });
+    })();
+  </script>
+</body>
+</html>

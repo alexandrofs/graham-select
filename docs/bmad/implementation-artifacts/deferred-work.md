@@ -96,3 +96,10 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-2-infraestrutura-de-controle-transacional-do-lote-de-membros-founders.md`
   summary: Configurar execução automática dos testes de integração H2 (`*IT.java`) no pipeline de CI (`.github/workflows/deploy.yml` / `maven-failsafe-plugin`).
   evidence: Lacuna pré-existente do repositório confirmada pelo `verification-gap` (`mvn clean test` executa apenas `*Test.java` e pula os 30 `*IT.java`).
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-3-landing-page-publica-alta-conversao-programa-founders.md`
+  summary: Add automated DOM/browser test for `landing.html` `/api/v1/founders/slots` state transitions and error fallback.
+  evidence: `frontend/test/kerno_landing_seo_test.dart` only asserts static HTML/JS substrings; live DOM execution requires Playwright or Node DOM harness in CI.
+- source_spec: `docs/bmad/implementation-artifacts/spec-1-3-landing-page-publica-alta-conversao-programa-founders.md`
+  summary: Validate `frontend/nginx.conf` syntax (`nginx -t`) and live HTTP status/X-Robots-Tag headers in Docker/CI.
+  evidence: Local Docker Desktop daemon was not running during Story 1.3 build (`dockerDesktopLinuxEngine` unavailable).
