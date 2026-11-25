@@ -40,6 +40,8 @@ api:
     WEBPUSH_PROVIDER: "mock"
     WEBPUSH_ALERTS_CRON: "0 15 20 * * MON-FRI"
     WEBPUSH_VAPID_SUBJECT: "mailto:kerno@afsdigital.com.br"
+    FOUNDER_TOTAL_SLOTS: "250"
+    FOUNDER_PRO_TRIAL_DAYS: "90"
 
   resources:
     requests:

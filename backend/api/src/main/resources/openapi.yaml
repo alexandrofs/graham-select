@@ -875,9 +875,38 @@ paths:
           description: Acesso a perfis familiares requer assinatura Premium
         '404':
           description: Perfil familiar não encontrado
+  /api/v1/founders/slots:
+    get:
+      summary: Consulta pública de vagas remanescentes do Programa Founders
+      description: Retorna o teto configurado, vagas restantes e se o lote Founder está ativo.
+      tags:
+        - Founders
+      security: []
+      responses:
+        '200':
+          description: Estado atual do lote de Membros Founders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FounderSlotsResponse'
 
 components:
   schemas:
+    FounderSlotsResponse:
+      type: object
+      properties:
+        totalSlots:
+          type: integer
+          example: 250
+        remainingSlots:
+          type: integer
+          example: 250
+        isLoteActive:
+          type: boolean
+          example: true
+    CommercialPlan:
+      type: string
+      enum: [FOUNDER_LIFETIME, PRO_TRIAL, FREE]
     UserProfile:
       type: object
       properties:
@@ -890,9 +919,14 @@ components:
           type: string
         tier:
           $ref: '#/components/schemas/SubscriptionTier'
+        commercialPlan:
+          $ref: '#/components/schemas/CommercialPlan'
         investorProfile:
           $ref: '#/components/schemas/InvestorProfile'
         trialEndsAt:
+          type: string
+          format: date-time
+        trialExpiresAt:
           type: string
           format: date-time
         daysRemaining:

@@ -141,11 +141,24 @@ public class UserController implements UsersApiDelegate {
         var domainTier = subscriptionTierService.resolveEffectiveTier(user, true);
 
         profile.setTier(SubscriptionTier.fromValue(domainTier.name()));
+        if (user.getCommercialPlan() != null) {
+            profile.setCommercialPlan(
+                    afsdigital.grahamselect.model.CommercialPlan.fromValue(user.getCommercialPlan().name()));
+        }
 
-        if (user.getTrialEndsAt() != null) {
-            profile.setTrialEndsAt(user.getTrialEndsAt().atOffset(ZoneOffset.UTC));
-            long daysRemaining = Duration.between(LocalDateTime.now(ZoneOffset.UTC), user.getTrialEndsAt()).toDays();
+        boolean isFounderLifetime = user.getCommercialPlan() == afsdigital.grahamselect.common.user.domain.entities.CommercialPlan.FOUNDER_LIFETIME
+                || domainTier == afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier.PREMIUM;
+        LocalDateTime effectiveExpiration = isFounderLifetime
+                ? null
+                : (user.getTrialExpiresAt() != null ? user.getTrialExpiresAt() : user.getTrialEndsAt());
+        if (effectiveExpiration != null) {
+            var utcExpiration = effectiveExpiration.atOffset(ZoneOffset.UTC);
+            profile.setTrialEndsAt(utcExpiration);
+            profile.setTrialExpiresAt(utcExpiration);
+            long daysRemaining = Duration.between(LocalDateTime.now(ZoneOffset.UTC), effectiveExpiration).toDays();
             profile.setDaysRemaining((int) Math.max(0, daysRemaining));
+        } else {
+            profile.setDaysRemaining(0);
         }
 
         boolean isAdmin = user.getRole() == UserRole.ADMIN || hasAdminAuthority();

@@ -4,6 +4,7 @@ import afsdigital.grahamselect.api.auth.infrastructure.security.OAuth2UserProvis
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
 import afsdigital.grahamselect.common.user.domain.entities.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,11 @@ public class UserAutoProvisioningIT extends BaseRepositoryIT {
 
     @Autowired
     private OAuth2UserProvisioningConverter converter;
+
+    @BeforeEach
+    void cleanUp() {
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("Should create user on first login with Google OAuth2 JWT")

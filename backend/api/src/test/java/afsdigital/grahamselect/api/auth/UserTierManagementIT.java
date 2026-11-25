@@ -1,7 +1,11 @@
 package afsdigital.grahamselect.api.auth;
 
 import afsdigital.grahamselect.api.auth.infrastructure.security.OAuth2UserProvisioningConverter;
+import afsdigital.grahamselect.api.founders.infrastructure.persistence.JdbcFounderQuotaRepositoryAdapter;
+import afsdigital.grahamselect.api.founders.infrastructure.persistence.jpa.entities.FounderQuotaEntity;
+import afsdigital.grahamselect.api.founders.infrastructure.persistence.jpa.repository.FounderQuotaJpaRepository;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
+import afsdigital.grahamselect.common.user.domain.entities.CommercialPlan;
 import afsdigital.grahamselect.common.user.domain.entities.SubscriptionTier;
 import afsdigital.grahamselect.common.user.domain.entities.User;
 import afsdigital.grahamselect.common.user.infrastructure.persistence.UserRepository;
@@ -18,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +41,9 @@ public class UserTierManagementIT extends BaseRepositoryIT {
         private OAuth2UserProvisioningConverter converter;
 
         @Autowired
+        private FounderQuotaJpaRepository founderQuotaJpaRepository;
+
+        @Autowired
         private MockMvc mockMvc;
 
         @MockBean
@@ -44,11 +52,41 @@ public class UserTierManagementIT extends BaseRepositoryIT {
         @BeforeEach
         void cleanUp() {
                 userRepository.deleteAll();
+                FounderQuotaEntity quota = founderQuotaJpaRepository
+                                .findById(JdbcFounderQuotaRepositoryAdapter.SINGLETON_QUOTA_ID)
+                                .orElse(FounderQuotaEntity.builder()
+                                                .id(JdbcFounderQuotaRepositoryAdapter.SINGLETON_QUOTA_ID)
+                                                .build());
+                quota.setTotalSlots(250);
+                quota.setFounderSlotsRemaining(250);
+                quota.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+                founderQuotaJpaRepository.saveAndFlush(quota);
         }
 
         @Test
-        @DisplayName("Should provision user with TRIAL tier and 30 days expiration")
-        void shouldProvisionUserWithTrial() {
+        @DisplayName("Should provision user with FOUNDER_LIFETIME when founder slots are available and PRO_TRIAL 90d when exhausted")
+        void shouldProvisionUserWithFounderOrProTrial() {
+                Jwt founderJwt = Jwt.withTokenValue("mock-token-founder")
+                                .header("alg", "none")
+                                .subject("founder-user-123")
+                                .claim("email", "founder@example.com")
+                                .claim("name", "Founder User")
+                                .build();
+
+                converter.convert(founderJwt);
+
+                User founder = userRepository.findByGoogleSub("founder-user-123").orElseThrow();
+                assertThat(founder.getCommercialPlan()).isEqualTo(CommercialPlan.FOUNDER_LIFETIME);
+                assertThat(founder.getTier()).isEqualTo(SubscriptionTier.PREMIUM);
+                assertThat(founder.getTrialExpiresAt()).isNull();
+
+                FounderQuotaEntity exhaustedQuota = founderQuotaJpaRepository
+                                .findById(JdbcFounderQuotaRepositoryAdapter.SINGLETON_QUOTA_ID)
+                                .orElseThrow();
+                exhaustedQuota.setFounderSlotsRemaining(0);
+                exhaustedQuota.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+                founderQuotaJpaRepository.saveAndFlush(exhaustedQuota);
+
                 String googleId = "trial-user-123";
                 String email = "trial@example.com";
 
@@ -66,8 +104,10 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                 Optional<User> userOpt = userRepository.findByGoogleSub(googleId);
                 assertThat(userOpt).isPresent();
                 User user = userOpt.get();
+                assertThat(user.getCommercialPlan()).isEqualTo(CommercialPlan.PRO_TRIAL);
                 assertThat(user.getTier()).isEqualTo(SubscriptionTier.TRIAL);
-                assertThat(user.getTrialEndsAt()).isAfter(LocalDateTime.now().plusDays(29));
+                assertThat(user.getTrialExpiresAt()).isAfter(LocalDateTime.now(ZoneOffset.UTC).plusDays(89));
+                assertThat(user.getTrialEndsAt()).isAfter(LocalDateTime.now(ZoneOffset.UTC).plusDays(89));
         }
 
         @Test
@@ -79,7 +119,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .email("existing@example.com")
                                 .fullName("Existing User")
                                 .tier(SubscriptionTier.TRIAL)
-                                .trialEndsAt(LocalDateTime.now().plusDays(10).plusHours(1))
+                                .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).plusDays(10).plusHours(1))
                                 .build();
                 user = userRepository.save(user);
 
@@ -102,6 +142,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.email").value("existing@example.com"))
                                 .andExpect(jsonPath("$.tier").value("TRIAL"))
+                                .andExpect(jsonPath("$.commercialPlan").value("PRO_TRIAL"))
                                 .andExpect(jsonPath("$.daysRemaining").value(10));
         }
 
@@ -114,7 +155,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .email("expired@example.com")
                                 .fullName("Expired User")
                                 .tier(SubscriptionTier.TRIAL)
-                                .trialEndsAt(LocalDateTime.now().minusDays(1))
+                                .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).minusDays(1))
                                 .build();
                 user = userRepository.save(user);
 
@@ -134,6 +175,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .header("Authorization", "Bearer " + token))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.tier").value("FREE"))
+                                .andExpect(jsonPath("$.commercialPlan").value("FREE"))
                                 .andExpect(jsonPath("$.daysRemaining").value(0));
         }
 
@@ -147,7 +189,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .email("premium@example.com")
                                 .fullName("Premium User")
                                 .tier(SubscriptionTier.PREMIUM)
-                                .trialEndsAt(LocalDateTime.now().minusDays(10))
+                                .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).minusDays(10))
                                 .build();
                 user = userRepository.save(user);
 
@@ -167,6 +209,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .header("Authorization", "Bearer " + token))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.tier").value("PREMIUM"))
+                                .andExpect(jsonPath("$.commercialPlan").value("FOUNDER_LIFETIME"))
                                 .andExpect(jsonPath("$.daysRemaining").value(0));
         }
 }

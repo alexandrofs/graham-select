@@ -67,6 +67,9 @@
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/DividendsApi.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/DividendsApiController.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/DividendsApiDelegate.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/FoundersApi.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/FoundersApiController.java" />
+                                <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/FoundersApiDelegate.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/OpenFinanceApi.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/OpenFinanceApiController.java" />
                                 <delete file="${project.build.directory}/generated-sources/openapi/src/main/java/afsdigital/grahamselect/api/OpenFinanceApiDelegate.java" />

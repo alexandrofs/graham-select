@@ -69,5 +69,7 @@ databaseChangeLog:
       file: db/changelog/35-create-whatsapp-notifications-tables.yaml
   - include:
       file: db/changelog/36-create-web-push-notifications-tables.yaml
+  - include:
+      file: db/changelog/37-create-founder-quota-and-add-user-commercial-plan.yaml
 
 
