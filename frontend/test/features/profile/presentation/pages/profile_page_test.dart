@@ -96,5 +96,59 @@ void main() {
       expect(find.text('Ocorreu um erro ao carregar seu perfil'), findsOneWidget);
       expect(find.textContaining('Network error'), findsOneWidget);
     });
+
+    testWidgets('should display FOUNDER badge for FOUNDER_LIFETIME', (tester) async {
+      final profile = UserProfile(
+        id: 2,
+        email: 'founder@example.com',
+        fullName: 'Founder User',
+        tier: 'PREMIUM',
+        commercialPlan: 'FOUNDER_LIFETIME',
+      );
+      when(mockRepository.getProfile()).thenAnswer((_) async => profile);
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('FOUNDER'), findsOneWidget);
+    });
+
+    testWidgets('should display TRIAL PRO badge and trial banner for PRO_TRIAL', (tester) async {
+      final profile = UserProfile(
+        id: 3,
+        email: 'trial@example.com',
+        fullName: 'Trial Pro User',
+        tier: 'TRIAL',
+        commercialPlan: 'PRO_TRIAL',
+        daysRemaining: 90,
+      );
+      when(mockRepository.getProfile()).thenAnswer((_) async => profile);
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('TRIAL PRO'), findsOneWidget);
+      expect(find.text('Trial Expira em 90 dias'), findsOneWidget);
+    });
+
+    testWidgets('should fallback to tier when commercialPlan is empty', (tester) async {
+      final profile = UserProfile(
+        id: 4,
+        email: 'fallback@example.com',
+        fullName: 'Fallback User',
+        tier: 'TRIAL',
+        commercialPlan: '',
+        daysRemaining: 10,
+      );
+      when(mockRepository.getProfile()).thenAnswer((_) async => profile);
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('TRIAL'), findsOneWidget);
+    });
   });
 }

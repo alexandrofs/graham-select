@@ -33,7 +33,7 @@ class TierComparisonCard extends StatelessWidget {
             const Divider(height: 48),
             _buildTierColumn(
               context,
-              'TRIAL (30 dias)',
+              'TRIAL PRO (90 dias)',
               'Experimente todo o poder do Kerno sem custo.',
               [
                 'Acesso Full ao Ranking',
@@ -46,7 +46,7 @@ class TierComparisonCard extends StatelessWidget {
             const Divider(height: 48),
             _buildTierColumn(
               context,
-              'PREMIUM',
+              'FOUNDER (Vitalício)',
               'O núcleo inteligente para sua gestão de patrimônio.',
               [
                 'Tudo do Trial +',

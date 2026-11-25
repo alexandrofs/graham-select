@@ -20,6 +20,12 @@ class _StubProfileProvider extends ChangeNotifier implements ProfileProvider {
   _StubProfileProvider(this.profile);
 
   @override
+  ProfileState get state => ProfileState.success;
+
+  @override
+  Future<void> fetchProfile() async {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

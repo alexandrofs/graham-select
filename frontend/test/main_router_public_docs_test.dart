@@ -51,11 +51,11 @@ void main() {
     // Tapping back with an empty navigation stack should redirect safely to /login
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
-    expect(find.text('Entrar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
 
     // Rotas autenticadas continuam exigindo login
     router.go('/dashboard');
     await tester.pumpAndSettle();
-    expect(find.text('Entrar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
   });
 }

@@ -1,13 +1,13 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/features/auth/data/auth_repository.dart';
+import 'package:frontend/src/features/auth/presentation/login_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:frontend/src/features/auth/data/auth_repository.dart';
-import 'package:frontend/src/features/auth/presentation/login_screen.dart';
 
 @GenerateNiceMocks([
   MockSpec<AuthRepository>(),
@@ -22,7 +22,9 @@ void main() {
     mockAuthRepository = MockAuthRepository();
   });
 
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest({
+    Future<bool> Function(Uri uri)? onLaunchUrl,
+  }) {
     final router = GoRouter(
       initialLocation: '/login',
       routes: [
@@ -30,12 +32,12 @@ void main() {
           path: '/login',
           builder: (context, state) => Provider<AuthRepository>.value(
             value: mockAuthRepository,
-            child: const LoginScreen(),
+            child: LoginScreen(onLaunchUrl: onLaunchUrl),
           ),
         ),
         GoRoute(
-          path: '/',
-          builder: (context, state) => const Scaffold(body: Text('Home')),
+          path: '/dashboard',
+          builder: (context, state) => const Scaffold(body: Text('Dashboard')),
         ),
       ],
     );
@@ -44,10 +46,6 @@ void main() {
       routerConfig: router,
     );
   }
-
-  // ==========================================
-  // Cenário 1: Renderização inicial
-  // ==========================================
 
   testWidgets('Deve exibir o título "Kerno" e o logotipo oficial', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
@@ -74,108 +72,112 @@ void main() {
     );
   });
 
-  // ==========================================
-  // Cenário 2: Botão CTA presente
-  // ==========================================
-
-  testWidgets('Deve exibir botão "Entrar com Google"', (tester) async {
+  testWidgets('Deve exibir botão "Continuar com Google"', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    expect(find.text('Entrar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);
   });
 
-  // ==========================================
-  // Cenário 3: Texto de termos
-  // ==========================================
-
-  testWidgets('Deve exibir texto de termos de uso', (tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
-
-    expect(
-      find.textContaining('Termos de Uso'),
-      findsOneWidget,
+  testWidgets('Deve exibir links clicáveis para Termos de Uso e Política de Privacidade',
+      (tester) async {
+    final launchedUris = <Uri>[];
+    await tester.pumpWidget(
+      createWidgetUnderTest(
+        onLaunchUrl: (uri) async {
+          launchedUris.add(uri);
+          return true;
+        },
+      ),
     );
+
+    expect(find.byKey(const Key('login_terms_link')), findsOneWidget);
+    expect(find.byKey(const Key('login_privacy_link')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('login_terms_link')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('login_privacy_link')));
+    await tester.pumpAndSettle();
+
+    expect(launchedUris.map((u) => u.path), ['/terms', '/privacy']);
+    expect(find.byType(SnackBar), findsNothing);
   });
 
-  // ==========================================
-  // Cenário 4: Tap no botão chama signInWithGoogle
-  // ==========================================
+  testWidgets('Deve exibir SnackBar informativo quando launchUrl falhar sem bloquear login',
+      (tester) async {
+    await tester.pumpWidget(
+      createWidgetUnderTest(
+        onLaunchUrl: (_) async => false,
+      ),
+    );
 
-  testWidgets('Tap no botão deve chamar signInWithGoogle()', (tester) async {
+    await tester.tap(find.byKey(const Key('login_terms_link')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
+  });
+
+  testWidgets('Deve exibir SnackBar informativo quando onLaunchUrl lançar exceção',
+      (tester) async {
+    await tester.pumpWidget(
+      createWidgetUnderTest(
+        onLaunchUrl: (_) async => throw Exception('Erro ao abrir URL'),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('login_privacy_link')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
+  });
+
+  testWidgets('Tap no botão deve chamar signInWithGoogle() e navegar para /dashboard',
+      (tester) async {
     final mockCredential = MockUserCredential();
     when(mockAuthRepository.signInWithGoogle())
         .thenAnswer((_) async => mockCredential);
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.tap(find.text('Entrar com Google'));
+    await tester.tap(find.text('Continuar com Google'));
     await tester.pumpAndSettle();
 
     verify(mockAuthRepository.signInWithGoogle()).called(1);
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
   });
 
-  // ==========================================
-  // Cenário 5: Loading spinner durante autenticação
-  // ==========================================
-
   testWidgets('Deve mostrar CircularProgressIndicator durante loading', (tester) async {
-    // Simula um signIn que nunca completa (usando Completer)
     final completer = Completer<UserCredential>();
     when(mockAuthRepository.signInWithGoogle())
         .thenAnswer((_) => completer.future);
 
     await tester.pumpWidget(createWidgetUnderTest());
 
-    // Verificar que não está em loading inicialmente
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.text('Entrar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
 
-    // Toca no botão
-    await tester.tap(find.text('Entrar com Google'));
-    // pump sem settle para capturar o estado intermediário
+    await tester.tap(find.text('Continuar com Google'));
     await tester.pump();
 
-    // Agora deve estar em loading
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('Entrar com Google'), findsNothing);
-    
-    // Completa o futuro para não deixar lixo
-    completer.complete(MockUserCredential());
-  });
+    expect(find.text('Continuar com Google'), findsNothing);
 
-  // ==========================================
-  // Cenário 6: SnackBar de erro quando login falha
-  // ==========================================
+    completer.complete(MockUserCredential());
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('Deve mostrar SnackBar de erro quando login falha', (tester) async {
     when(mockAuthRepository.signInWithGoogle())
         .thenThrow(Exception('Erro de rede'));
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.tap(find.text('Entrar com Google'));
+    await tester.tap(find.text('Continuar com Google'));
     await tester.pumpAndSettle();
 
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.textContaining('Falha ao entrar com Google'), findsOneWidget);
-  });
-
-  // ==========================================
-  // Cenário 7: Login com sucesso (retorna UserCredential não-nulo)
-  // ==========================================
-
-  testWidgets('Login com sucesso deve chamar signInWithGoogle sem erro', (tester) async {
-    final mockCredential = MockUserCredential();
-    when(mockAuthRepository.signInWithGoogle())
-        .thenAnswer((_) async => mockCredential);
-
-    await tester.pumpWidget(createWidgetUnderTest());
-    await tester.tap(find.text('Entrar com Google'));
-    await tester.pumpAndSettle();
-
-    verify(mockAuthRepository.signInWithGoogle()).called(1);
-    // Após login bem-sucedido, o botão deve voltar (não mais loading)
-    // e nenhum SnackBar de erro deve aparecer
-    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets(
@@ -209,6 +211,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Kerno'), findsOneWidget);
-    expect(find.text('Entrar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
+    expect(find.text('Termos de Uso'), findsOneWidget);
+    expect(find.text('Política de Privacidade'), findsOneWidget);
   });
 }

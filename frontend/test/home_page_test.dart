@@ -117,6 +117,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify navigation occurred (login page should be visible because we are logged out)
-    expect(find.text('Entrar com Google'), findsOneWidget);
+    expect(find.text('Continuar com Google'), findsOneWidget);
   });
 }

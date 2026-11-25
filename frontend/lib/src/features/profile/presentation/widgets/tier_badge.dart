@@ -12,9 +12,18 @@ class TierBadge extends StatelessWidget {
     String label = tier;
 
     switch (tier.toUpperCase()) {
+      case 'FOUNDER_LIFETIME':
+        backgroundColor = const Color(0xFFFEF3C7);
+        textColor = const Color(0xFF92400E);
+        label = 'FOUNDER';
+        break;
       case 'PREMIUM':
         backgroundColor = const Color(0xFF10B981); // Emerald
         label = 'PREMIUM';
+        break;
+      case 'PRO_TRIAL':
+        backgroundColor = const Color(0xFFD97706); // Amber Gold
+        label = 'TRIAL PRO';
         break;
       case 'TRIAL':
         backgroundColor = const Color(0xFFD97706); // Amber Gold

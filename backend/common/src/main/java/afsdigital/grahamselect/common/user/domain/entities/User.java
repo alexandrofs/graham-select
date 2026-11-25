@@ -56,6 +56,9 @@ public class User {
     @Column(name = "trial_expires_at")
     private LocalDateTime trialExpiresAt;
 
+    @Column(name = "terms_accepted_at")
+    private LocalDateTime termsAcceptedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "investor_profile")
     private InvestorProfile investorProfile;

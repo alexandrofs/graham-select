@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../data/auth_repository.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final Future<bool> Function(Uri uri)? onLaunchUrl;
+
+  const LoginScreen({super.key, this.onLaunchUrl});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -12,6 +15,34 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
+
+  Uri _resolveLegalUri(String path) {
+    final base = Uri.base;
+    if (base.scheme == 'http' || base.scheme == 'https') {
+      return base.resolve(path);
+    }
+    return Uri.https('kerno.afsdigital.com.br', path);
+  }
+
+  Future<void> _openLegalDocument(BuildContext context, String path) async {
+    final uri = _resolveLegalUri(path);
+    final launcher =
+        widget.onLaunchUrl ??
+        (u) => launchUrl(u, mode: LaunchMode.externalApplication);
+    var launched = false;
+    try {
+      launched = await launcher(uri);
+    } catch (_) {
+      launched = false;
+    }
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Não foi possível abrir $path no navegador.'),
+        ),
+      );
+    }
+  }
 
   Future<void> _signInWithGoogle(BuildContext context) async {
     setState(() {
@@ -21,10 +52,9 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authRepository = context.read<AuthRepository>();
       final userCredential = await authRepository.signInWithGoogle();
-      
+
       if (userCredential != null && context.mounted) {
-        // Força navegação explícita caso o listenable demore pra refletir
-        context.go('/');
+        context.go('/dashboard');
       }
     } catch (e) {
       if (context.mounted) {
@@ -48,6 +78,15 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final bodyStyle = theme.textTheme.bodySmall?.copyWith(
+      color: const Color(0xFFCBD5E1),
+    );
+    final linkStyle = theme.textTheme.bodySmall?.copyWith(
+      color: const Color(0xFFA5B4FC),
+      fontWeight: FontWeight.w600,
+      decoration: TextDecoration.underline,
+      decorationColor: const Color(0xFFA5B4FC),
+    );
 
     return Scaffold(
       body: Center(
@@ -59,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo e Nome do App
                 Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
@@ -89,8 +127,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
-                
-                // Botão Google Login
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator())
                 else
@@ -98,7 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () => _signInWithGoogle(context),
                     style: ElevatedButton.styleFrom(
                       elevation: 2,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black87,
                       shape: RoundedRectangleBorder(
@@ -106,40 +146,73 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       side: BorderSide(color: Colors.grey.shade300),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Idealmente use um asset, mas para garantir vou usar um placeholder se falhar
+                        Icon(Icons.account_circle, color: Colors.blue),
+                        SizedBox(width: 12),
                         Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.account_circle, color: Colors.blue), // Melhor que nada se o asset sumir
-                              const SizedBox(width: 12),
-                              const Flexible(
-                                child: Text(
-                                  'Entrar com Google',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            'Continuar com Google',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                
                 const SizedBox(height: 24),
-                Text(
-                  'Ao entrar, você concorda com nossos Termos de Uso e Política de Privacidade.',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.outline,
-                  ),
-                  textAlign: TextAlign.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      'Ao continuar, você concorda com nossos ',
+                      style: bodyStyle,
+                      textAlign: TextAlign.center,
+                    ),
+                    Semantics(
+                      link: true,
+                      child: TextButton(
+                        key: const Key('login_terms_link'),
+                        onPressed: () => _openLegalDocument(context, '/terms'),
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          tapTargetSize: MaterialTapTargetSize.padded,
+                        ),
+                        child: Text('Termos de Uso', style: linkStyle),
+                      ),
+                    ),
+                    Text(' e ', style: bodyStyle),
+                    Semantics(
+                      link: true,
+                      child: TextButton(
+                        key: const Key('login_privacy_link'),
+                        onPressed: () =>
+                            _openLegalDocument(context, '/privacy'),
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          tapTargetSize: MaterialTapTargetSize.padded,
+                        ),
+                        child: Text(
+                          'Política de Privacidade',
+                          style: linkStyle,
+                        ),
+                      ),
+                    ),
+                    Text('.', style: bodyStyle),
+                  ],
                 ),
               ],
             ),

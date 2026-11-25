@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 38-add-terms-accepted-at-to-users
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: users
+                columnName: terms_accepted_at
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: terms_accepted_at
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropColumn:
+            tableName: users
+            columnName: terms_accepted_at

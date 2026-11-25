@@ -109,7 +109,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildContent(BuildContext context, ProfileProvider provider) {
     final profile = provider.profile!;
-    final isTrial = profile.tier.toUpperCase() == 'TRIAL';
+    final isTrial =
+        profile.tier.toUpperCase() == 'TRIAL' ||
+        profile.commercialPlan?.toUpperCase() == 'PRO_TRIAL';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -166,7 +168,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         'Nível de Assinatura',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
-                      TierBadge(tier: profile.tier),
+                      TierBadge(
+                        tier: (profile.commercialPlan?.isNotEmpty ?? false)
+                            ? profile.commercialPlan!
+                            : profile.tier,
+                      ),
                     ],
                   ),
                   if (isTrial) ...[
