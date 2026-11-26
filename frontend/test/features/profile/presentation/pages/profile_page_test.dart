@@ -150,5 +150,25 @@ void main() {
 
       expect(find.text('TRIAL'), findsOneWidget);
     });
+
+    test('ProfileProvider.reset clears profile, error and returns to idle', () async {
+      final profile = UserProfile(
+        id: 5,
+        email: 'reset@example.com',
+        fullName: 'Reset User',
+        tier: 'PREMIUM',
+        commercialPlan: 'FOUNDER_LIFETIME',
+      );
+      when(mockRepository.getProfile()).thenAnswer((_) async => profile);
+
+      await profileProvider.fetchProfile();
+      expect(profileProvider.state, ProfileState.success);
+      expect(profileProvider.profile, isNotNull);
+
+      profileProvider.reset();
+      expect(profileProvider.state, ProfileState.idle);
+      expect(profileProvider.profile, isNull);
+      expect(profileProvider.errorMessage, isNull);
+    });
   });
 }

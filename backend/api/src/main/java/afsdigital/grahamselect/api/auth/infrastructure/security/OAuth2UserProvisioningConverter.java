@@ -9,6 +9,7 @@ import afsdigital.grahamselect.common.user.infrastructure.persistence.UserReposi
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +38,7 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
+        log.info("Processing OAuth2 JWT authentication");
         String sub = jwt.getSubject();
         String email = jwt.getClaimAsString("email");
         String name = jwt.getClaimAsString("name");
@@ -57,12 +59,15 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
             TransactionTemplate requiresNewTx = new TransactionTemplate(transactionManager);
             requiresNewTx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             User created = requiresNewTx.execute(status -> provisionNewUser(sub, email, name, jwtHasAdmin));
+            if (created == null) {
+                throw new IllegalStateException("User provisioning transaction returned null");
+            }
             return buildAuthToken(jwt, created, jwtHasAdmin);
-        } catch (Exception e) {
-            log.error("Error during user provisioning for sub: {}. Retrying lookup.", sub, e);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Concurrent user provisioning conflict for sub: {}. Retrying lookup.", sub, e);
             // Fallback: search again in case of race condition (another thread saved it)
             User user = userRepository.findByGoogleSub(sub)
-                    .orElseThrow(() -> new RuntimeException("User provisioning failed and record not found", e));
+                    .orElseThrow(() -> new IllegalStateException("User provisioning failed after conflict", e));
             return buildAuthToken(jwt, user, jwtHasAdmin);
         }
     }
