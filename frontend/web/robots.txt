@@ -3,6 +3,8 @@ Allow: /
 Allow: /terms
 Allow: /privacy
 Allow: /docs
+Disallow: /app
 Disallow: /app/
+Disallow: /dashboard
 Disallow: /dashboard/
 Disallow: /api/

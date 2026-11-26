@@ -29,18 +29,18 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: '2026-06-13'
-last_updated: 11-25-2026 11:11
+last_updated: 11-25-2026 21:11
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
 story_location: docs/bmad/implementation-artifacts
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-identidade-visual-institucional-kerno-e-migração-de-metadado: done
   1-2-infraestrutura-de-controle-transacional-do-lote-de-membros-f: done
   1-3-landing-page-pública-de-alta-conversão-com-destaque-do-progr: done
   1-4-onboarding-com-google-oauth2-aceite-de-termos-e-concessão-de: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   epic-2: backlog
   2-1-fundação-do-design-system-intergeracional-tokens-tipografia: backlog
@@ -102,3 +102,38 @@ action_items:
     owner: "Amelia (Senior Software Engineer)"
     status: done
     ref: "docs/bmad/implementation-artifacts/epic-11-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-5-corrigir-calculo-off-by-one-de-daysremai"
+    epic: 1
+    action: "Corrigir calculo off-by-one de daysRemaining (90->89) no PRO_TRIAL em
+      UserController.java:158 e cobrir boundary em UserProfileIT"
+    owner: "Amelia (Senior Software Engineer)"
+    status: done
+    ref: "docs/bmad/implementation-artifacts/epic-1-retro-2026-11-25.md"
+  - id: "epic-1-retro-item-6-resetar-profileprovider-em-authstatechan"
+    epic: 1
+    action: "Resetar ProfileProvider em authStateChanges no MultiProvider raiz (main.dart)
+      e corrigir retry em MainLayout (_profileRequested)"
+    owner: "Amelia (Senior Software Engineer)"
+    status: done
+    ref: "docs/bmad/implementation-artifacts/epic-1-retro-2026-11-25.md"
+  - id: "epic-1-retro-item-7-ajustar-robots-txt-dashboard-e-app-exclu"
+    epic: 1
+    action: "Ajustar robots.txt (/dashboard e /app), excluir push-sw.js/og-image.png/favicon.png
+      do cache immutable em nginx.conf e espelhar CRAWLER_USER_AGENT no Helm"
+    owner: "Amelia (Senior Software Engineer)"
+    status: done
+    ref: "docs/bmad/implementation-artifacts/epic-1-retro-2026-11-25.md"
+  - id: "epic-1-retro-item-8-restringir-catch-e-adicionar-log-info-em"
+    epic: 1
+    action: "Restringir catch e adicionar log INFO em OAuth2UserProvisioningConverter.convert(),
+      e incluir *IT.java (H2) no CI"
+    owner: "Amelia (Senior Software Engineer)"
+    status: done
+    ref: "docs/bmad/implementation-artifacts/epic-1-retro-2026-11-25.md"
+  - id: "epic-1-retro-item-9-decidir-implementacao-ou-reconciliacao-d"
+    epic: 1
+    action: "Decidir implementacao ou reconciliacao de spec para X-Correlation-ID
+      (epic-1-context.md:23)"
+    owner: "Winston (System Architect)"
+    status: done
+    ref: "docs/bmad/implementation-artifacts/epic-1-retro-2026-11-25.md"

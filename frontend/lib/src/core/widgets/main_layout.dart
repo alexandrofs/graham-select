@@ -15,18 +15,19 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  bool _profileRequested = false;
+  bool _profileRequestScheduled = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_profileRequested) return;
+    if (_profileRequestScheduled) return;
     final profileProvider = Provider.of<ProfileProvider?>(context, listen: false);
     if (profileProvider != null &&
         profileProvider.state == ProfileState.idle &&
         profileProvider.profile == null) {
-      _profileRequested = true;
+      _profileRequestScheduled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        _profileRequestScheduled = false;
         if (!mounted) return;
         if (profileProvider.state == ProfileState.idle &&
             profileProvider.profile == null) {

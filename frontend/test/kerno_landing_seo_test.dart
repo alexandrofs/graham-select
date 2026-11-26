@@ -104,15 +104,20 @@ void main() {
 
   test('robots.txt e nginx.conf isolam rotas privadas e preservam healthz/SPA', () {
     final robots = File('${root.path}/web/robots.txt').readAsStringSync();
-    expect(robots, contains('Allow: /'));
-    expect(robots, contains('Allow: /terms'));
-    expect(robots, contains('Allow: /privacy'));
-    expect(robots, contains('Allow: /docs'));
-    expect(robots, contains('Disallow: /app/'));
-    expect(robots, contains('Disallow: /dashboard/'));
-    expect(robots, contains('Disallow: /api/'));
+    final robotsLines = robots.split(RegExp(r'\r?\n'));
+    expect(robotsLines, contains('Allow: /'));
+    expect(robotsLines, contains('Allow: /terms'));
+    expect(robotsLines, contains('Allow: /privacy'));
+    expect(robotsLines, contains('Allow: /docs'));
+    expect(robotsLines, contains('Disallow: /app'));
+    expect(robotsLines, contains('Disallow: /app/'));
+    expect(robotsLines, contains('Disallow: /dashboard'));
+    expect(robotsLines, contains('Disallow: /dashboard/'));
+    expect(robotsLines, contains('Disallow: /api/'));
 
     final nginx = File('${root.path}/nginx.conf').readAsStringSync();
+    expect(nginx, contains('location ~* ^/(push-sw\\.js|og-image\\.png|favicon\\.png)\$'));
+    expect(nginx, contains('add_header Cache-Control "no-cache, must-revalidate" always;'));
     expect(nginx, contains('listen 8080 default_server;'));
     expect(nginx, contains('location = /healthz'));
     expect(nginx, contains('location = / {'));

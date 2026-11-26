@@ -155,8 +155,9 @@ public class UserController implements UsersApiDelegate {
             var utcExpiration = effectiveExpiration.atOffset(ZoneOffset.UTC);
             profile.setTrialEndsAt(utcExpiration);
             profile.setTrialExpiresAt(utcExpiration);
-            long daysRemaining = Duration.between(LocalDateTime.now(ZoneOffset.UTC), effectiveExpiration).toDays();
-            profile.setDaysRemaining((int) Math.max(0, daysRemaining));
+            long millisRemaining = Duration.between(LocalDateTime.now(ZoneOffset.UTC), effectiveExpiration).toMillis();
+            int daysRemaining = millisRemaining <= 0 ? 0 : (int) ((millisRemaining + 86_399_999L) / 86_400_000L);
+            profile.setDaysRemaining(daysRemaining);
         } else {
             profile.setDaysRemaining(0);
         }

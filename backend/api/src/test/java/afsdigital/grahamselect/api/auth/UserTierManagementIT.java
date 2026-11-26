@@ -119,7 +119,7 @@ public class UserTierManagementIT extends BaseRepositoryIT {
                                 .email("existing@example.com")
                                 .fullName("Existing User")
                                 .tier(SubscriptionTier.TRIAL)
-                                .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).plusDays(10).plusHours(1))
+                                .trialEndsAt(LocalDateTime.now(ZoneOffset.UTC).plusDays(10))
                                 .build();
                 user = userRepository.save(user);
 

@@ -177,6 +177,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final GrahamRecommendationRepositoryImpl grahamRecommendationRepository;
 
   late final ProfileRepository profileRepository;
+  late final ProfileProvider profileProvider;
+  StreamSubscription<dynamic>? _profileAuthSubscription;
+  String? _activeProfileUserId;
 
   late final PortfolioRemoteDataSource portfolioRemoteDataSource;
   late final PortfolioRepositoryImpl portfolioRepository;
@@ -259,6 +262,16 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
     // Profile Feature DI
     profileRepository = ProfileRepository(effectiveApiClient);
+    profileProvider = ProfileProvider(profileRepository);
+    _activeProfileUserId = effectiveAuthRepository.currentUser?.uid;
+    _profileAuthSubscription = effectiveAuthRepository.authStateChanges.listen((user) {
+      final nextUserId = user?.uid;
+      if (nextUserId == null ||
+          (_activeProfileUserId != null && _activeProfileUserId != nextUserId)) {
+        profileProvider.reset();
+      }
+      _activeProfileUserId = nextUserId;
+    });
 
     // Portfolio Feature DI
     portfolioRemoteDataSource = PortfolioRemoteDataSource(client: httpClient, baseUrl: datasourceBaseUrl);
@@ -373,6 +386,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
   @override
   void dispose() {
+    _profileAuthSubscription?.cancel();
+    profileProvider.dispose();
     _tagAuthSubscription?.cancel();
     tagProvider.dispose();
     authListenable.dispose();
@@ -404,7 +419,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             notificationService: context.read<NotificationService>(),
           ),
         ),
-        ChangeNotifierProvider(create: (_) => ProfileProvider(profileRepository)),
+        ChangeNotifierProvider<ProfileProvider>.value(value: profileProvider),
         ChangeNotifierProvider(create: (_) => FamilyProfileProvider(repository: familyProfileRepository)),
         ChangeNotifierProvider<TagProvider>.value(value: tagProvider),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),

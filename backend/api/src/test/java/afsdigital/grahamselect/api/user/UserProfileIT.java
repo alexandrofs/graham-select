@@ -98,7 +98,7 @@ public class UserProfileIT extends BaseRepositoryIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.commercialPlan").value("PRO_TRIAL"))
                 .andExpect(jsonPath("$.trialExpiresAt").isNotEmpty())
-                .andExpect(jsonPath("$.daysRemaining").value(org.hamcrest.Matchers.greaterThanOrEqualTo(89)))
+                .andExpect(jsonPath("$.daysRemaining").value(90))
                 .andExpect(jsonPath("$.termsAcceptedAt").isNotEmpty());
 
         User founderUser = userRepository.save(User.builder()

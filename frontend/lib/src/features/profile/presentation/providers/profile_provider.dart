@@ -18,6 +18,13 @@ class ProfileProvider extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  void reset() {
+    _state = ProfileState.idle;
+    _profile = null;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> fetchProfile() async {
     _state = ProfileState.loading;
     _errorMessage = null;
