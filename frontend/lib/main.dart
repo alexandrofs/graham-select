@@ -451,7 +451,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       child: MaterialApp.router(
         title: 'Kerno — O núcleo inteligente do seu dinheiro',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         routerConfig: router,
       ),
     );

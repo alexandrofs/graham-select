@@ -107,3 +107,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-4-onboarding-google-oauth2-termos-camada-comercial.md`
   summary: Resetar `ProfileProvider` em logout ou troca de usuário no `MultiProvider` raiz (`frontend/lib/main.dart`) para evitar exibição momentânea de perfil anterior.
   evidence: `ProfileProvider` é criado no `MultiProvider` raiz sem listener de `authStateChanges` (ao contrário de `TagProvider` em `frontend/lib/main.dart:288-295`), condição pré-existente à Story 1.4.
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-2-1-fundacao-design-system-intergeracional.md`
+  summary: Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
+  evidence: verification-gap identificou que KernoThemeData.lerp (kerno_tokens.dart:434-468) não possui chamada direta em frontend/test/.
