@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'src/core/theme/app_theme.dart';
+import 'src/core/config/feature_flags.dart';
 import 'src/core/api/api_client.dart';
 import 'src/core/security/biometric_auth_service.dart';
 import 'src/core/security/biometric_lock_gate.dart';
@@ -117,6 +118,10 @@ import 'src/features/notifications/data/repositories/web_push_notifications_repo
 import 'src/features/notifications/data/services/web_push_browser_client.dart';
 import 'src/features/notifications/presentation/providers/web_push_notifications_provider.dart';
 import 'src/features/notifications/presentation/pages/web_push_notifications_page.dart';
+
+// Kerno AI & Expenses Modular Stubs
+import 'src/features/ai_analysis/presentation/pages/kerno_ai_page.dart';
+import 'src/features/expenses/presentation/pages/expenses_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -347,67 +352,12 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
     authListenable = AuthStateListenable(effectiveAuthRepository);
 
-    router = GoRouter(
-      initialLocation: '/',
-      refreshListenable: authListenable,
-      redirect: (context, state) async {
-        final firebaseUser = effectiveAuthRepository.currentUser;
-        final jwtToken = await effectiveAuthRepository.getPersistedToken();
-        
-        final isLoggedIn = firebaseUser != null && jwtToken != null;
-        final isLoggingIn = state.matchedLocation == '/login';
-        final isAtLanding = state.matchedLocation == '/';
-        final isDocs = state.matchedLocation == '/docs';
-
-        if (!isLoggedIn) {
-          if (isLoggingIn || isAtLanding || isDocs) return null;
-          return '/login';
-        }
-
-        if (isLoggingIn || (isAtLanding && isLoggedIn)) {
-          return '/dashboard';
-        }
-
-        return null;
-      },
-      routes: [
-        GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-        GoRoute(path: '/', builder: (context, state) => const HomePage()),
-        GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
-        ShellRoute(
-          builder: (context, state, child) => BiometricLockGate(
-            biometricAuthService: effectiveBiometricAuthService,
-            onSignOut: () async {
-              final portfolioProvider = Provider.of<PortfolioProvider?>(context, listen: false);
-              await effectiveAuthRepository.signOut();
-              portfolioProvider?.reset();
-              profileProvider.reset();
-              tagProvider.reset();
-            },
-            child: MainLayout(child: child),
-          ),
-          routes: [
-            GoRoute(path: '/dashboard', builder: (context, state) => const DashboardPage()),
-            GoRoute(path: '/evolution', builder: (context, state) => const EvolutionPage()),
-            GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
-            GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
-            GoRoute(path: '/graham-recommendations', builder: (context, state) => const GrahamRecommendationsPage()),
-            GoRoute(path: '/allocation-strategy', builder: (context, state) => const AllocationStrategyPage()),
-            GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
-            GoRoute(path: '/notifications/whatsapp', builder: (context, state) => const WhatsappNotificationsPage()),
-            GoRoute(path: '/notifications/web-push', builder: (context, state) => const WebPushNotificationsPage()),
-            GoRoute(path: '/family-profiles', builder: (context, state) => const FamilyProfilesPage()),
-            GoRoute(path: '/tags', builder: (context, state) => const TagManagementPage()),
-            GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
-            GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
-            GoRoute(path: '/dividends', builder: (context, state) => const DividendsPage()),
-            GoRoute(path: '/tax', builder: (context, state) => const TaxDeclarationPage()),
-            GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
-            GoRoute(path: '/admin/dlq', builder: (context, state) => const AdminDlqPage()),
-            GoRoute(path: '/admin/tickers', builder: (context, state) => const AdminTickersPage()),
-          ],
-        ),
-      ],
+    router = createAppRouter(
+      authRepository: effectiveAuthRepository,
+      authListenable: authListenable,
+      biometricAuthService: effectiveBiometricAuthService,
+      profileProvider: profileProvider,
+      tagProvider: tagProvider,
     );
   }
 
@@ -502,4 +452,128 @@ class AuthStateListenable extends ChangeNotifier {
     _subscription.cancel();
     super.dispose();
   }
+}
+
+/// Constrói o [GoRouter] de produção com [StatefulShellRoute.indexedStack].
+GoRouter createAppRouter({
+  required AuthRepository authRepository,
+  required Listenable authListenable,
+  required BiometricAuthService biometricAuthService,
+  required ProfileProvider profileProvider,
+  required TagProvider tagProvider,
+  WidgetBuilder? dashboardBuilder,
+  WidgetBuilder? gpsAporteBuilder,
+  WidgetBuilder? allocationStrategyBuilder,
+}) {
+  return GoRouter(
+    initialLocation: '/',
+    refreshListenable: authListenable,
+    redirect: (context, state) async {
+      final firebaseUser = authRepository.currentUser;
+      final jwtToken = await authRepository.getPersistedToken();
+
+      final isLoggedIn = firebaseUser != null && jwtToken != null;
+      final isLoggingIn = state.matchedLocation == '/login';
+      final isAtLanding = state.matchedLocation == '/';
+      final isDocs = state.matchedLocation == '/docs';
+
+      if (!isLoggedIn) {
+        if (isLoggingIn || isAtLanding || isDocs) return null;
+        return '/login';
+      }
+
+      if (isLoggingIn || (isAtLanding && isLoggedIn)) {
+        return '/dashboard';
+      }
+
+      if (!FeatureFlags.enableExpensesModule &&
+          state.uri.path.startsWith('/expenses')) {
+        return '/dashboard';
+      }
+
+      return null;
+    },
+    routes: [
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/', builder: (context, state) => const HomePage()),
+      GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
+      if (!FeatureFlags.enableExpensesModule)
+        GoRoute(
+          path: '/expenses',
+          redirect: (context, state) => '/dashboard',
+        ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => BiometricLockGate(
+          biometricAuthService: biometricAuthService,
+          onSignOut: () async {
+            final portfolioProvider = Provider.of<PortfolioProvider?>(context, listen: false);
+            await authRepository.signOut();
+            portfolioProvider?.reset();
+            profileProvider.reset();
+            tagProvider.reset();
+          },
+          child: MainLayout(navigationShell: navigationShell),
+        ),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                builder: (context, state) =>
+                    dashboardBuilder?.call(context) ?? const DashboardPage(),
+              ),
+              GoRoute(path: '/evolution', builder: (context, state) => const EvolutionPage()),
+              GoRoute(path: '/upload', builder: (context, state) => const UploadPage()),
+              GoRoute(path: '/ranking', builder: (context, state) => const RankingPage()),
+              GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
+              GoRoute(path: '/notifications/whatsapp', builder: (context, state) => const WhatsappNotificationsPage()),
+              GoRoute(path: '/notifications/web-push', builder: (context, state) => const WebPushNotificationsPage()),
+              GoRoute(path: '/family-profiles', builder: (context, state) => const FamilyProfilesPage()),
+              GoRoute(path: '/tags', builder: (context, state) => const TagManagementPage()),
+              GoRoute(path: '/suitability', builder: (context, state) => const InvestorProfilePage()),
+              GoRoute(path: '/metas', builder: (context, state) => const GoalsPage()),
+              GoRoute(path: '/dividends', builder: (context, state) => const DividendsPage()),
+              GoRoute(path: '/tax', builder: (context, state) => const TaxDeclarationPage()),
+              GoRoute(path: '/admin/dashboard', builder: (context, state) => const AdminDashboardPage()),
+              GoRoute(path: '/admin/dlq', builder: (context, state) => const AdminDlqPage()),
+              GoRoute(path: '/admin/tickers', builder: (context, state) => const AdminTickersPage()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/gps-aporte',
+                builder: (context, state) =>
+                    gpsAporteBuilder?.call(context) ?? const GrahamRecommendationsPage(),
+              ),
+              GoRoute(
+                path: '/graham-recommendations',
+                redirect: (context, state) => '/gps-aporte',
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/kerno-ai', builder: (context, state) => const KernoAiPage()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/allocation-strategy',
+                builder: (context, state) =>
+                    allocationStrategyBuilder?.call(context) ?? const AllocationStrategyPage(),
+              ),
+            ],
+          ),
+          if (FeatureFlags.enableExpensesModule)
+            StatefulShellBranch(
+              routes: [
+                GoRoute(path: '/expenses', builder: (context, state) => const ExpensesPage()),
+              ],
+            ),
+        ],
+      ),
+    ],
+  );
 }
