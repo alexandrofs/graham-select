@@ -13,6 +13,8 @@ import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
 import '../../../portfolio/presentation/widgets/financial_data_table.dart';
 import '../../../portfolio/presentation/widgets/asset_allocation_donut_chart.dart';
+import '../../../portfolio/presentation/widgets/wealth_hero_card.dart';
+import '../../../portfolio/presentation/widgets/macro_class_distribution_card.dart';
 import '../../../tags/presentation/providers/tag_provider.dart';
 import '../../../tags/presentation/widgets/analytical_lens_tabs.dart';
 import '../../../tags/presentation/widgets/dashboard_tag_filter_bar.dart';
@@ -173,10 +175,29 @@ class _DashboardPageState extends State<DashboardPage>
                   ],
                 ],
                 const SizedBox(height: 24),
+                if (provider.status != PortfolioStatus.error) ...[
+                  WealthHeroCard(
+                    summary: provider.summary,
+                    isLoading: provider.status == PortfolioStatus.loading,
+                    priceUpdatedAt: provider.custodyMetaPriceUpdatedAt,
+                    hasCachePrice: provider.rawCustodyPositions
+                        .any((pos) => pos.priceSource == 'CACHE'),
+                    isOfflineCache: provider.isOfflineCache,
+                    profile: Provider.of<ProfileProvider?>(context)?.profile,
+                    activeTagName: activeTag?.name,
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: _buildKpiSection(context, provider, tagProvider),
                 ),
+                if (provider.rawCustodyPositions.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  MacroClassDistributionCard(
+                    positions: provider.rawCustodyPositions,
+                  ),
+                ],
                 if (goalsProvider != null) ...[
                   const SizedBox(height: 32),
                   MotivationalClockCard(

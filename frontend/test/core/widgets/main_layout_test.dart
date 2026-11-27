@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/src/core/config/feature_flags.dart';
+import 'package:frontend/src/core/security/privacy_provider.dart';
 import 'package:frontend/src/core/theme/app_theme.dart';
 import 'package:frontend/src/core/widgets/main_layout.dart';
 import 'package:frontend/src/core/widgets/skip_to_content_link.dart';
@@ -269,5 +270,54 @@ void main() {
     await tester.longPress(find.byIcon(Icons.explore_outlined));
     await tester.pumpAndSettle();
     expect(find.text('GPS de Aporte'), findsWidgets);
+    // PrivacyToggleButton permanece visível mesmo com simplifyTopBar ativo
+    expect(find.byKey(const Key('privacy_toggle_button')), findsOneWidget);
+  });
+
+  testWidgets('PrivacyToggleButton possui alvo >= 48x48dp e alterna PrivacyProvider', (
+    tester,
+  ) async {
+    final privacyProvider = PrivacyProvider();
+    final router = GoRouter(
+      initialLocation: '/dashboard',
+      routes: [
+        ShellRoute(
+          builder: (context, state, child) => MainLayout(child: child),
+          routes: [
+            GoRoute(path: '/dashboard', builder: (_, _) => const SizedBox()),
+            GoRoute(path: '/gps-aporte', builder: (_, _) => const SizedBox()),
+            GoRoute(path: '/kerno-ai', builder: (_, _) => const SizedBox()),
+            GoRoute(path: '/allocation-strategy', builder: (_, _) => const SizedBox()),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ProfileProvider>(
+            create: (_) => ProfileProvider(_StubProfileRepository()),
+          ),
+          ChangeNotifierProvider<PrivacyProvider>.value(value: privacyProvider),
+        ],
+        child: MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final toggleFinder = find.byKey(const Key('privacy_toggle_button'));
+    expect(toggleFinder, findsOneWidget);
+    final size = tester.getSize(toggleFinder);
+    expect(size.width, greaterThanOrEqualTo(48.0));
+    expect(size.height, greaterThanOrEqualTo(48.0));
+    expect(privacyProvider.isPrivacyMode, isFalse);
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+    expect(privacyProvider.isPrivacyMode, isTrue);
   });
 }

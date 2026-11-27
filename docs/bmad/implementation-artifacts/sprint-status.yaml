@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: '2026-06-13'
-last_updated: 11-27-2026 19:52
+last_updated: 11-27-2026 20:43
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -46,7 +46,7 @@ development_status:
   2-1-fundação-do-design-system-intergeracional-tokens-tipografia: done
   2-2-autenticação-mobile-segura-biometria-nativa-e-cache-offline: done
   2-3-shell-de-navegação-multi-superfície-e-fundação-modular-com-f: done
-  2-4-dashboard-patrimonial-com-modo-privacidade-e-proteção-de-sna: backlog
+  2-4-dashboard-patrimonial-com-modo-privacidade-e-proteção-de-sna: review
   2-5-adaptação-visual-da-ingestão-b3-crud-manual-multi-classe-e-h: backlog
   epic-2-retrospective: optional
 

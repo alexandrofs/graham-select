@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../features/founders/presentation/widgets/commercial_plan_badge.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../config/feature_flags.dart';
+import '../security/privacy_provider.dart';
 import '../theme/kerno_tokens.dart';
 import 'skip_to_content_link.dart';
 
@@ -782,6 +783,7 @@ class _TopBar extends StatelessWidget {
             runSpacing: KernoSpacing.s2,
             children: <Widget>[
               if (profile != null) CommercialPlanBadge(profile: profile),
+              const PrivacyToggleButton(),
               if (isAdmin)
                 TextButton.icon(
                   key: const Key('admin_dashboard_nav_button'),
@@ -823,6 +825,43 @@ class _TopBar extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botão global do `_TopBar` para alternar o Modo Privacidade (`R$ ••••••`),
+/// garantindo alvo de toque mínimo de 48x48dp e visibilidade mesmo em modo compacto.
+class PrivacyToggleButton extends StatelessWidget {
+  const PrivacyToggleButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = KernoThemeData.of(context);
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isPrivacyMode = privacyProvider?.isPrivacyMode ?? false;
+    final tooltipText = isPrivacyMode
+        ? 'Mostrar valores em reais'
+        : 'Ocultar valores em reais';
+
+    return Semantics(
+      button: true,
+      toggled: isPrivacyMode,
+      label: tooltipText,
+      child: IconButton(
+        key: const Key('privacy_toggle_button'),
+        onPressed: privacyProvider == null ? null : () => privacyProvider.toggle(),
+        tooltip: tooltipText,
+        constraints: const BoxConstraints(
+          minWidth: KernoSpacing.touchTargetMin,
+          minHeight: KernoSpacing.touchTargetMin,
+        ),
+        icon: Icon(
+          isPrivacyMode
+              ? Icons.visibility_off_outlined
+              : Icons.visibility_outlined,
+          color: isPrivacyMode ? tokens.brandPrimary : tokens.textPrimary,
         ),
       ),
     );

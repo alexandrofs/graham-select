@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../domain/entities/financial_goal.dart';
 import '../../domain/entities/goal_projection.dart';
 import '../../domain/services/time_to_goal_calculator.dart';
@@ -102,12 +104,20 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
           monthlyContribution: widget.goal!.monthlyContribution,
           annualYieldPercentage: 0.0,
         );
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isPrivacyMode = privacyProvider?.isPrivacyMode ?? false;
     final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final percentFormat = NumberFormat.decimalPattern('pt_BR');
 
-    final String pvFormatted = currencyFormat.format(projection.currentEquity);
-    final String fvFormatted = currencyFormat.format(projection.targetValue);
-    final String pmtFormatted = currencyFormat.format(projection.monthlyContribution);
+    final String pvFormatted = isPrivacyMode
+        ? PrivacyProvider.maskedCurrencyValue
+        : currencyFormat.format(projection.currentEquity);
+    final String fvFormatted = isPrivacyMode
+        ? PrivacyProvider.maskedCurrencyValue
+        : currencyFormat.format(projection.targetValue);
+    final String pmtFormatted = isPrivacyMode
+        ? PrivacyProvider.maskedCurrencyValue
+        : currencyFormat.format(projection.monthlyContribution);
     final String yieldFormatted = percentFormat.format(projection.annualYieldPercentage);
     final String progressFormatted = projection.progressPercentage.toStringAsFixed(1).replaceAll('.', ',');
 
@@ -135,6 +145,7 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
               progressFormatted: progressFormatted,
               pvFormatted: pvFormatted,
               fvFormatted: fvFormatted,
+              isPrivacyMode: isPrivacyMode,
             ),
             const SizedBox(height: 16),
             const Divider(),
@@ -144,6 +155,7 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
               projection: projection,
               pmtFormatted: pmtFormatted,
               yieldFormatted: yieldFormatted,
+              isPrivacyMode: isPrivacyMode,
             ),
           ],
         ),
@@ -360,6 +372,7 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
     required String progressFormatted,
     required String pvFormatted,
     required String fvFormatted,
+    required bool isPrivacyMode,
   }) {
     final double clampedFraction = (projection.progressPercentage / 100.0).clamp(0.0, 1.0);
 
@@ -377,14 +390,21 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
                   ),
             ),
             Flexible(
-              child: Text(
-                '$pvFormatted de $fvFormatted',
-                textAlign: TextAlign.end,
-                style: GoogleFonts.jetBrainsMono(
-                  textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: kNavyBlue.withAlpha((0.8 * 255).round()),
-                        fontWeight: FontWeight.w600,
-                      ),
+              child: Semantics(
+                container: true,
+                label: isPrivacyMode
+                    ? PrivacyProvider.maskedSemanticsLabel
+                    : '$pvFormatted de $fvFormatted',
+                excludeSemantics: isPrivacyMode,
+                child: Text(
+                  '$pvFormatted de $fvFormatted',
+                  textAlign: TextAlign.end,
+                  style: GoogleFonts.jetBrainsMono(
+                    textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: kNavyBlue.withAlpha((0.8 * 255).round()),
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
                 ),
               ),
             ),
@@ -419,6 +439,7 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
     required GoalProjection projection,
     required String pmtFormatted,
     required String yieldFormatted,
+    required bool isPrivacyMode,
   }) {
     String forecastLabel;
     if (projection.isAchieved) {
@@ -461,7 +482,11 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildContextChip(context, 'Aporte: $pmtFormatted/mês'),
+            _buildContextChip(
+              context,
+              'Aporte: $pmtFormatted/mês',
+              isMasked: isPrivacyMode,
+            ),
             _buildContextChip(context, 'Yield: $yieldFormatted% a.a.'),
           ],
         ),
@@ -469,20 +494,29 @@ class _MotivationalClockCardState extends State<MotivationalClockCard>
     );
   }
 
-  Widget _buildContextChip(BuildContext context, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: kNavyBlue.withAlpha((0.06 * 255).round()),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.jetBrainsMono(
-          textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: kNavyBlue,
-                fontWeight: FontWeight.w600,
-              ),
+  Widget _buildContextChip(
+    BuildContext context,
+    String text, {
+    bool isMasked = false,
+  }) {
+    return Semantics(
+      container: true,
+      label: isMasked ? PrivacyProvider.maskedSemanticsLabel : text,
+      excludeSemantics: isMasked,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: kNavyBlue.withAlpha((0.06 * 255).round()),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.jetBrainsMono(
+            textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: kNavyBlue,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
         ),
       ),
     );

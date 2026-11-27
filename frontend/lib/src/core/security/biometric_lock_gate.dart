@@ -1,16 +1,21 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
+import '../theme/kerno_tokens.dart';
 import 'biometric_auth_service.dart';
+import 'snapshot_protection_service.dart';
 
 /// Gate biométrico nativo que protege rotas autenticadas em dispositivos móveis,
 /// exigindo desbloqueio na abertura e após retorno de background (> 2 minutos).
-/// Não renderiza [child] enquanto estiver bloqueado.
+/// Também exibe imediatamente uma máscara opaca em `inactive`/`paused`/`hidden`
+/// e aciona `FLAG_SECURE` / snapshot mask nativa antes da captura do *App Switcher*.
 class BiometricLockGate extends StatefulWidget {
   final Widget child;
   final BiometricAuthService biometricAuthService;
+  final SnapshotProtectionService? snapshotProtectionService;
   final Future<void> Function() onSignOut;
   final bool isAuthenticated;
   final bool? isWebOverride;
@@ -21,6 +26,7 @@ class BiometricLockGate extends StatefulWidget {
     required this.child,
     required this.biometricAuthService,
     required this.onSignOut,
+    this.snapshotProtectionService,
     this.isAuthenticated = true,
     this.isWebOverride,
     this.autoTriggerOnInit = true,
@@ -33,9 +39,11 @@ class BiometricLockGate extends StatefulWidget {
 class _BiometricLockGateState extends State<BiometricLockGate>
     with WidgetsBindingObserver {
   late bool _isLocked;
+  late final SnapshotProtectionService _snapshotProtectionService;
   bool _isAuthenticating = false;
   bool _isSigningOut = false;
   bool _authFailed = false;
+  bool _isInBackgroundPrivacyMask = false;
 
   bool get _shouldEnforceLock {
     if (widget.isWebOverride != null) {
@@ -50,9 +58,12 @@ class _BiometricLockGateState extends State<BiometricLockGate>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _snapshotProtectionService = widget.snapshotProtectionService ??
+        SnapshotProtectionService(isWebOverride: widget.isWebOverride);
     final skipInitial =
         widget.biometricAuthService.consumeSkipNextInitialLock();
     _isLocked = _shouldEnforceLock && widget.isAuthenticated && !skipInitial;
+    _syncNativeSnapshotProtection();
     if (_isLocked && widget.autoTriggerOnInit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _triggerUnlock();
@@ -63,11 +74,16 @@ class _BiometricLockGateState extends State<BiometricLockGate>
   @override
   void didUpdateWidget(covariant BiometricLockGate oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.isAuthenticated != widget.isAuthenticated ||
+        oldWidget.isWebOverride != widget.isWebOverride) {
+      _syncNativeSnapshotProtection();
+    }
     if (!widget.isAuthenticated || !_shouldEnforceLock) {
-      if (_isLocked || _authFailed) {
+      if (_isLocked || _authFailed || _isInBackgroundPrivacyMask) {
         setState(() {
           _isLocked = false;
           _authFailed = false;
+          _isInBackgroundPrivacyMask = false;
         });
       }
       return;
@@ -93,20 +109,44 @@ class _BiometricLockGateState extends State<BiometricLockGate>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    unawaited(_snapshotProtectionService.disableProtection());
     super.dispose();
+  }
+
+  void _syncNativeSnapshotProtection() {
+    if (_shouldEnforceLock && widget.isAuthenticated) {
+      unawaited(_snapshotProtectionService.enableProtection());
+    } else {
+      unawaited(_snapshotProtectionService.disableProtection());
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!_shouldEnforceLock || !widget.isAuthenticated) return;
 
-    if (state == AppLifecycleState.paused ||
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
-      widget.biometricAuthService.markBackgrounded();
+      if (!_isInBackgroundPrivacyMask && mounted) {
+        setState(() {
+          _isInBackgroundPrivacyMask = true;
+        });
+      }
+      unawaited(_snapshotProtectionService.enableProtection());
+      if (state == AppLifecycleState.paused ||
+          state == AppLifecycleState.hidden) {
+        widget.biometricAuthService.markBackgrounded();
+      }
       return;
     }
 
     if (state == AppLifecycleState.resumed) {
+      if (_isInBackgroundPrivacyMask && mounted) {
+        setState(() {
+          _isInBackgroundPrivacyMask = false;
+        });
+      }
       if (_isLocked) return;
       if (widget.biometricAuthService.shouldRequireReauth()) {
         setState(() {
@@ -159,7 +199,17 @@ class _BiometricLockGateState extends State<BiometricLockGate>
   @override
   Widget build(BuildContext context) {
     if (!_isLocked) {
-      return widget.child;
+      if (!_isInBackgroundPrivacyMask) {
+        return widget.child;
+      }
+      return Stack(
+        children: <Widget>[
+          widget.child,
+          const Positioned.fill(
+            child: _SnapshotPrivacyOverlay(),
+          ),
+        ],
+      );
     }
 
     return Scaffold(
@@ -245,6 +295,54 @@ class _BiometricLockGateState extends State<BiometricLockGate>
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SnapshotPrivacyOverlay extends StatelessWidget {
+  const _SnapshotPrivacyOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return AbsorbPointer(
+      child: BlockSemantics(
+        child: Container(
+          key: const Key('snapshot_privacy_overlay'),
+          color: KernoColors.surfaceOverlay,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(KernoSpacing.s5),
+                decoration: BoxDecoration(
+                  color: KernoColors.brandPrimary.withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.shield_outlined,
+                  size: 48,
+                  color: KernoColors.brandPrimaryDark,
+                ),
+              ),
+              const SizedBox(height: KernoSpacing.s4),
+              Text(
+                'Kerno',
+                style: KernoTypography.heading2(
+                  color: KernoColors.textPrimaryDark,
+                ),
+              ),
+              const SizedBox(height: KernoSpacing.s2),
+              Text(
+                'Patrimônio protegido',
+                style: KernoTypography.bodySm(
+                  color: KernoColors.textSecondaryDark,
+                ),
+              ),
+            ],
           ),
         ),
       ),

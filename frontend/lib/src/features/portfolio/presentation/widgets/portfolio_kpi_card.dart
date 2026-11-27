@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 
 class PortfolioKpiCard extends StatelessWidget {
   final String title;
@@ -21,13 +23,18 @@ class PortfolioKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isPrivacyMode = privacyProvider?.isPrivacyMode ?? false;
     final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final percentFormat = NumberFormat.decimalPattern('pt_BR');
 
+    final bool shouldMask = isCurrency && !isPercentage && isPrivacyMode;
     String formattedValue;
     if (isPercentage) {
       // De acordo com o code review, usar percentPattern seria melhor, mas o valor vem como 21.67 e não 0.2167
       formattedValue = '${percentFormat.format(value)}%';
+    } else if (shouldMask) {
+      formattedValue = PrivacyProvider.maskedCurrencyValue;
     } else if (isCurrency) {
       formattedValue = currencyFormat.format(value);
     } else {
@@ -50,13 +57,19 @@ class PortfolioKpiCard extends StatelessWidget {
             if (isLoading)
               _buildLoadingIndicator()
             else
-              Text(
-                formattedValue,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: valueColor ?? Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'JetBrains Mono',
-                    ),
+              Semantics(
+                label: shouldMask
+                    ? PrivacyProvider.maskedSemanticsLabel
+                    : '$title $formattedValue',
+                excludeSemantics: shouldMask,
+                child: Text(
+                  formattedValue,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: valueColor ?? Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'JetBrains Mono',
+                      ),
+                ),
               ),
           ],
         ),
