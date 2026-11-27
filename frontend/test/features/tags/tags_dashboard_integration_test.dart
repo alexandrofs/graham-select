@@ -419,6 +419,8 @@ void main() {
         expect(find.text('Tags de PETR4 atualizadas com sucesso.'), findsOneWidget);
 
         // Filtra pela tag "Dividendos": backend recalcula KPIs (3.500,00) + exibe badge e aviso de ativo sem tag
+        await tester.ensureVisible(find.byKey(const Key('tag_filter_tag-div')));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('tag_filter_tag-div')));
         await tester.pumpAndSettle();
 

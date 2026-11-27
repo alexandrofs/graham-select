@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:frontend/src/core/security/privacy_provider.dart';
 import 'package:frontend/src/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart';
 import 'package:frontend/src/features/goals/domain/entities/financial_goal.dart';
 import 'package:frontend/src/features/goals/domain/entities/goal_projection.dart';
 import 'package:frontend/src/features/goals/domain/repositories/goals_repository.dart';
@@ -130,8 +132,9 @@ void main() {
 
     await tester.pumpWidget(createWidgetUnderTest());
 
+    expect(find.byKey(const Key('wealth_hero_card')), findsOneWidget);
     expect(find.text('Patrimônio Total'), findsOneWidget);
-    expect(find.textContaining('50.000,00'), findsOneWidget);
+    expect(find.textContaining('50.000,00'), findsNWidgets(2));
     expect(find.text('Rendimento Bruto'), findsOneWidget);
     expect(find.text('12,5%'), findsOneWidget);
     expect(find.text('Dividendos Acumulados'), findsOneWidget);
@@ -272,7 +275,7 @@ void main() {
 
     expect(find.text('Visualizando: Dividendos'), findsOneWidget);
     expect(find.text('2 ativos sem tag não estão sendo exibidos'), findsOneWidget);
-    expect(find.textContaining('25.000,00'), findsOneWidget);
+    expect(find.textContaining('25.000,00'), findsNWidgets(2));
 
     final checklist = tester.widget<GoalHealthChecklistCard>(
       find.byType(GoalHealthChecklistCard),
@@ -310,5 +313,59 @@ void main() {
 
     expect(find.byKey(const Key('offline_cache_banner')), findsOneWidget);
     expect(find.textContaining('Modo offline · Última sincronização em'), findsOneWidget);
+  });
+
+  testWidgets('Modo Privacidade mascara valores em R\$ no DashboardPage mantendo percentuais', (
+    tester,
+  ) async {
+    final privacyProvider = PrivacyProvider(initialPrivacyMode: true);
+    final summary = PortfolioSummaryModel(
+      totalEquity: 75000.0,
+      grossYieldPercentage: 15.0,
+      accumulatedDividends: 2000.0,
+      monthlyProjection: 500.0,
+    );
+
+    when(mockPortfolioProvider.status).thenReturn(PortfolioStatus.success);
+    when(mockPortfolioProvider.summary).thenReturn(summary);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PortfolioProvider>.value(value: mockPortfolioProvider),
+          ChangeNotifierProvider<ProfileProvider>.value(value: mockProfileProvider),
+          ChangeNotifierProvider<PrivacyProvider>.value(value: privacyProvider),
+        ],
+        child: const MaterialApp(home: DashboardPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('75.000,00'), findsNothing);
+    expect(find.text(PrivacyProvider.maskedCurrencyValue), findsWidgets);
+    expect(find.textContaining('15,00%'), findsOneWidget);
+  });
+
+  testWidgets('renderiza MacroClassDistributionCard quando rawCustodyPositions não está vazia', (
+    tester,
+  ) async {
+    when(mockPortfolioProvider.rawCustodyPositions).thenReturn(const [
+      CustodyPosition(
+        ticker: 'ITUB4',
+        quantity: 100,
+        averagePrice: 30,
+        currentPrice: 35,
+        marketValue: 3500,
+        gainLossPercentage: 10,
+        priceSource: 'LIVE',
+        assetClass: 'Ações',
+      ),
+    ]);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('macro_class_distribution_card')), findsOneWidget);
+    expect(find.text('Ações BR'), findsOneWidget);
   });
 }

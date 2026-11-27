@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../providers/portfolio_provider.dart';
 import '../../domain/entities/custody_position.dart';
 import '../../../tags/presentation/providers/tag_provider.dart';
@@ -69,6 +70,8 @@ class FinancialDataTable extends StatelessWidget {
     List<CustodyPosition> filteredPositions,
     TagProvider? tagProvider,
   ) {
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isPrivacyMode = privacyProvider?.isPrivacyMode ?? false;
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final percentFormatter = NumberFormat('+##0.00%;-##0.00%', 'pt_BR');
     final quantityFormatter = NumberFormat('#,##0', 'pt_BR');
@@ -213,21 +216,31 @@ class FinancialDataTable extends StatelessWidget {
                         ),
                         DataCell(
                           Semantics(
-                            label: 'Preço Médio ${currencyFormatter.format(pos.averagePrice)}',
+                            label: isPrivacyMode
+                                ? PrivacyProvider.maskedSemanticsLabel
+                                : 'Preço Médio ${currencyFormatter.format(pos.averagePrice)}',
+                            excludeSemantics: isPrivacyMode,
                             child: Text(
-                              currencyFormatter.format(pos.averagePrice),
+                              isPrivacyMode
+                                  ? PrivacyProvider.maskedCurrencyValue
+                                  : currencyFormatter.format(pos.averagePrice),
                               style: const TextStyle(fontFamily: 'JetBrains Mono'),
                             ),
                           ),
                         ),
                         DataCell(
                           Semantics(
-                            label: 'Cotação Atual ${currencyFormatter.format(pos.currentPrice)}',
+                            label: isPrivacyMode
+                                ? PrivacyProvider.maskedSemanticsLabel
+                                : 'Cotação Atual ${currencyFormatter.format(pos.currentPrice)}',
+                            excludeSemantics: isPrivacyMode,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  currencyFormatter.format(pos.currentPrice),
+                                  isPrivacyMode
+                                      ? PrivacyProvider.maskedCurrencyValue
+                                      : currencyFormatter.format(pos.currentPrice),
                                   style: const TextStyle(fontFamily: 'JetBrains Mono'),
                                 ),
                                 if (pos.priceSource == 'CACHE') ...[
@@ -244,9 +257,14 @@ class FinancialDataTable extends StatelessWidget {
                         ),
                         DataCell(
                           Semantics(
-                            label: 'Valor de Mercado ${currencyFormatter.format(pos.marketValue)}',
+                            label: isPrivacyMode
+                                ? PrivacyProvider.maskedSemanticsLabel
+                                : 'Valor de Mercado ${currencyFormatter.format(pos.marketValue)}',
+                            excludeSemantics: isPrivacyMode,
                             child: Text(
-                              currencyFormatter.format(pos.marketValue),
+                              isPrivacyMode
+                                  ? PrivacyProvider.maskedCurrencyValue
+                                  : currencyFormatter.format(pos.marketValue),
                               style: const TextStyle(
                                 fontFamily: 'JetBrains Mono',
                                 fontWeight: FontWeight.w600,

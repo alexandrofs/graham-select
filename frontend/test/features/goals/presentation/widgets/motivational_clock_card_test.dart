@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:frontend/src/core/security/privacy_provider.dart';
 import 'package:frontend/src/features/goals/domain/entities/financial_goal.dart';
 import 'package:frontend/src/features/goals/domain/entities/goal_projection.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/motivational_clock_card.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   setUpAll(() async {
@@ -155,6 +157,53 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(ctaClicked, isTrue);
+    });
+
+    testWidgets('Modo Privacidade mascara valores em R\$ e oculta Semantics mantendo % visível', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        final privacyProvider = PrivacyProvider(initialPrivacyMode: true);
+        final projection = GoalProjection(
+          targetValue: 1000000.0,
+          currentEquity: 150000.0,
+          monthlyContribution: 2000.0,
+          annualYieldPercentage: 10.5,
+          totalMonths: 142,
+          years: 11,
+          months: 10,
+          targetDate: DateTime.utc(2038, 10, 15),
+          progressPercentage: 15.0,
+          isAchieved: false,
+          isUnreachable: false,
+        );
+
+        await tester.pumpWidget(
+          ChangeNotifierProvider<PrivacyProvider>.value(
+            value: privacyProvider,
+            child: wrapWidget(
+              MotivationalClockCard(
+                goal: sampleGoal,
+                projection: projection,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('150.000,00'), findsNothing);
+        expect(find.textContaining('1.000.000,00'), findsNothing);
+        expect(find.textContaining('2.000,00'), findsNothing);
+        expect(find.textContaining(PrivacyProvider.maskedCurrencyValue), findsNWidgets(2));
+        expect(find.text('15,0% alcançado'), findsOneWidget);
+        expect(
+          find.bySemanticsLabel(PrivacyProvider.maskedSemanticsLabel),
+          findsNWidgets(2),
+        );
+      } finally {
+        semantics.dispose();
+      }
     });
   });
 }

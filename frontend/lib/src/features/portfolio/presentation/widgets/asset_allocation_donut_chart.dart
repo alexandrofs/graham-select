@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../domain/entities/custody_position.dart';
 import '../providers/portfolio_provider.dart';
 
@@ -51,6 +52,8 @@ class _AssetAllocationDonutChartState extends State<AssetAllocationDonutChart> w
 
   @override
   Widget build(BuildContext context) {
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isPrivacyMode = privacyProvider?.isPrivacyMode ?? false;
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final percentFormatter = NumberFormat.decimalPercentPattern(locale: 'pt_BR', decimalDigits: 1);
 
@@ -229,16 +232,29 @@ class _AssetAllocationDonutChartState extends State<AssetAllocationDonutChart> w
                                         fit: BoxFit.scaleDown,
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Text(
-                                            currencyFormatter.format(
-                                              provider.selectedAssetClassFilter != null
-                                                  ? (allocationMap[provider.selectedAssetClassFilter] ?? 0.0)
-                                                  : totalMarketValue,
-                                            ),
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                          child: Semantics(
+                                            container: true,
+                                            label: isPrivacyMode
+                                                ? PrivacyProvider.maskedSemanticsLabel
+                                                : currencyFormatter.format(
+                                                    provider.selectedAssetClassFilter != null
+                                                        ? (allocationMap[provider.selectedAssetClassFilter] ?? 0.0)
+                                                        : totalMarketValue,
+                                                  ),
+                                            excludeSemantics: isPrivacyMode,
+                                            child: Text(
+                                              isPrivacyMode
+                                                  ? PrivacyProvider.maskedCurrencyValue
+                                                  : currencyFormatter.format(
+                                                      provider.selectedAssetClassFilter != null
+                                                          ? (allocationMap[provider.selectedAssetClassFilter] ?? 0.0)
+                                                          : totalMarketValue,
+                                                    ),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -321,13 +337,22 @@ class _AssetAllocationDonutChartState extends State<AssetAllocationDonutChart> w
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          Text(
-                                            currencyFormatter.format(slice.value),
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              color: activeFilter && !isSelected
-                                                  ? Colors.white.withValues(alpha: 0.4)
-                                                  : Colors.white,
+                                          Semantics(
+                                            container: true,
+                                            label: isPrivacyMode
+                                                ? PrivacyProvider.maskedSemanticsLabel
+                                                : currencyFormatter.format(slice.value),
+                                            excludeSemantics: isPrivacyMode,
+                                            child: Text(
+                                              isPrivacyMode
+                                                  ? PrivacyProvider.maskedCurrencyValue
+                                                  : currencyFormatter.format(slice.value),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                color: activeFilter && !isSelected
+                                                    ? Colors.white.withValues(alpha: 0.4)
+                                                    : Colors.white,
+                                              ),
                                             ),
                                           ),
                                           Text(
