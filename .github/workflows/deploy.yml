@@ -156,7 +156,8 @@ jobs:
             --dart-define=FIREBASE_STORAGE_BUCKET="${{ vars.FIREBASE_STORAGE_BUCKET }}" \
             --dart-define=FIREBASE_MESSAGING_SENDER_ID="${{ vars.FIREBASE_MESSAGING_SENDER_ID }}" \
             --dart-define=FIREBASE_APP_ID="${{ vars.FIREBASE_APP_ID }}" \
-            --dart-define=FIREBASE_MEASUREMENT_ID="${{ vars.FIREBASE_MEASUREMENT_ID }}"
+            --dart-define=FIREBASE_MEASUREMENT_ID="${{ vars.FIREBASE_MEASUREMENT_ID }}" \
+            --dart-define=ENABLE_EXPENSES_MODULE="${{ vars.ENABLE_EXPENSES_MODULE || 'false' }}"
 
       - name: Build & Publish Frontend Image (Multi-Arch ARM64 NGINX)
         working-directory: ./frontend

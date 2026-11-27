@@ -95,7 +95,8 @@ cd frontend && flutter run -d chrome --web-port 3000 \
   --dart-define=FIREBASE_STORAGE_BUCKET="${FIREBASE_STORAGE_BUCKET:-'dummy-storage-bucket'}" \
   --dart-define=FIREBASE_MESSAGING_SENDER_ID="${FIREBASE_MESSAGING_SENDER_ID:-'dummy-sender-id'}" \
   --dart-define=FIREBASE_APP_ID="${FIREBASE_APP_ID:-'dummy-app-id'}" \
-  --dart-define=FIREBASE_MEASUREMENT_ID="${FIREBASE_MEASUREMENT_ID:-'dummy-measurement-id'}" > ../frontend.log 2>&1 &
+  --dart-define=FIREBASE_MEASUREMENT_ID="${FIREBASE_MEASUREMENT_ID:-'dummy-measurement-id'}" \
+  --dart-define=ENABLE_EXPENSES_MODULE="${ENABLE_EXPENSES_MODULE:-false}" > ../frontend.log 2>&1 &
 FRONT_PID=$!
 
 

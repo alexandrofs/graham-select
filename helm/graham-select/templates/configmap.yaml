@@ -38,4 +38,5 @@ data:
   WEBPUSH_VAPID_SUBJECT: {{ .Values.api.env.WEBPUSH_VAPID_SUBJECT | default "mailto:kerno@afsdigital.com.br" | quote }}
   FOUNDER_TOTAL_SLOTS: {{ .Values.api.env.FOUNDER_TOTAL_SLOTS | default "250" | quote }}
   FOUNDER_PRO_TRIAL_DAYS: {{ .Values.api.env.FOUNDER_PRO_TRIAL_DAYS | default "90" | quote }}
+  ENABLE_EXPENSES_MODULE: {{ .Values.api.env.ENABLE_EXPENSES_MODULE | default "false" | quote }}
   CRAWLER_USER_AGENT: {{ .Values.api.env.CRAWLER_USER_AGENT | default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 KernoCrawler/1.0" | quote }}

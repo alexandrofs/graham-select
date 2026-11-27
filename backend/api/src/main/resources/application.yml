@@ -41,6 +41,8 @@ app:
   founders:
     total-slots: ${FOUNDER_TOTAL_SLOTS:250}
     trial-days: ${FOUNDER_PRO_TRIAL_DAYS:90}
+  features:
+    enable-expenses-module: ${ENABLE_EXPENSES_MODULE:false}
 
 brapi:
   token: ${BRAPI_TOKEN:}
