@@ -16,4 +16,13 @@ class PortfolioSummaryModel extends PortfolioSummary {
       monthlyProjection: (json['monthlyProjection'] as num).toDouble(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'totalEquity': totalEquity,
+      'grossYieldPercentage': grossYieldPercentage,
+      'accumulatedDividends': accumulatedDividends,
+      'monthlyProjection': monthlyProjection,
+    };
+  }
 }

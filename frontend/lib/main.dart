@@ -8,6 +8,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/api/api_client.dart';
+import 'src/core/security/biometric_auth_service.dart';
+import 'src/core/security/biometric_lock_gate.dart';
+import 'src/core/security/encrypted_portfolio_cache.dart';
 import 'src/features/home/presentation/pages/home_page.dart';
 import 'src/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'src/core/widgets/main_layout.dart';
@@ -146,12 +149,16 @@ class GrahamSelectApp extends StatefulWidget {
   final AuthRepository? authRepository;
   final ApiClient? apiClient;
   final FlutterSecureStorage? storage;
+  final BiometricAuthService? biometricAuthService;
+  final EncryptedPortfolioCache? portfolioCache;
 
   const GrahamSelectApp({
     super.key,
     this.authRepository,
     this.apiClient,
     this.storage,
+    this.biometricAuthService,
+    this.portfolioCache,
   });
 
   @override
@@ -162,6 +169,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final http.Client httpClient;
   late final FlutterSecureStorage effectiveStorage;
   late final ApiClient effectiveApiClient;
+  late final BiometricAuthService effectiveBiometricAuthService;
+  late final EncryptedPortfolioCache effectivePortfolioCache;
   late final AuthRepository effectiveAuthRepository;
 
   late final UploadRemoteDataSource uploadRemoteDataSource;
@@ -233,12 +242,20 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     );
     // baseUrl para ApiClient (Dio) - sem /api/v1 pois os repos já incluem o prefixo nos paths
     final apiClientBaseUrl = datasourceBaseUrl.replaceFirst('/api/v1', '');
-    effectiveStorage = widget.storage ?? const FlutterSecureStorage();
+    effectiveStorage = widget.storage ?? EncryptedPortfolioCache.defaultSecureStorage;
+    effectiveBiometricAuthService = widget.biometricAuthService ?? BiometricAuthService();
+    effectivePortfolioCache = widget.portfolioCache ?? EncryptedPortfolioCache(storage: effectiveStorage);
     effectiveApiClient = widget.apiClient ?? ApiClient(baseUrl: apiClientBaseUrl, storage: effectiveStorage);
 
     // Auth Feature DI
     effectiveAuthRepository = widget.authRepository ?? 
-        AuthRepository(apiClient: effectiveApiClient, storage: effectiveStorage);
+        AuthRepository(
+          apiClient: effectiveApiClient,
+          storage: effectiveStorage,
+          portfolioCache: effectivePortfolioCache,
+          biometricAuthService: effectiveBiometricAuthService,
+          onClearCache: () async => effectiveBiometricAuthService.clearBackgroundTimestamp(),
+        );
 
     // Conecta o AuthRepository ao ApiClient para auto-refresh de token
     effectiveApiClient.setTokenProvider(effectiveAuthRepository);
@@ -358,7 +375,17 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
         GoRoute(path: '/docs', builder: (context, state) => const DocsScreen()),
         ShellRoute(
-          builder: (context, state, child) => MainLayout(child: child),
+          builder: (context, state, child) => BiometricLockGate(
+            biometricAuthService: effectiveBiometricAuthService,
+            onSignOut: () async {
+              final portfolioProvider = Provider.of<PortfolioProvider?>(context, listen: false);
+              await effectiveAuthRepository.signOut();
+              portfolioProvider?.reset();
+              profileProvider.reset();
+              tagProvider.reset();
+            },
+            child: MainLayout(child: child),
+          ),
           routes: [
             GoRoute(path: '/dashboard', builder: (context, state) => const DashboardPage()),
             GoRoute(path: '/evolution', builder: (context, state) => const EvolutionPage()),
@@ -442,6 +469,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
             final provider = PortfolioProvider(
               portfolioRepository, 
               context.read<NotificationService>(),
+              effectivePortfolioCache,
+              () => effectiveAuthRepository.currentUser?.uid,
             );
             provider.startListeningForUpdates();
             return provider;

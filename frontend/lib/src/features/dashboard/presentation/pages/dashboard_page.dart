@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../goals/domain/entities/goal_projection.dart';
@@ -137,6 +138,10 @@ class _DashboardPageState extends State<DashboardPage>
                       ),
                   ],
                 ),
+                if (provider.isOfflineCache && provider.lastSyncedAt != null) ...[
+                  const SizedBox(height: 12),
+                  _OfflineCacheBanner(lastSyncedAt: provider.lastSyncedAt!),
+                ],
                 if (tagProvider != null) ...[
                   const SizedBox(height: 20),
                   const DashboardTagFilterBar(),
@@ -421,6 +426,42 @@ class _LiveUpdatesBadgeState extends State<LiveUpdatesBadge> with SingleTickerPr
               color: Color(0xFF10B981),
               fontSize: 12,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OfflineCacheBanner extends StatelessWidget {
+  final DateTime lastSyncedAt;
+
+  const _OfflineCacheBanner({required this.lastSyncedAt});
+
+  @override
+  Widget build(BuildContext context) {
+    final formatted = DateFormat('dd/MM/yyyy HH:mm').format(lastSyncedAt.toLocal());
+    return Container(
+      key: const Key('offline_cache_banner'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.amber.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.cloud_off_rounded, size: 16, color: Colors.amber),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              'Modo offline · Última sincronização em $formatted',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.amber.shade200,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
         ],

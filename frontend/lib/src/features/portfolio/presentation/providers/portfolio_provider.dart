@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../../../../core/security/encrypted_portfolio_cache.dart';
 import '../../data/datasources/notification_service.dart';
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/entities/custody_position.dart';
@@ -12,8 +13,15 @@ enum TradeStatus { initial, loading, success, error }
 class PortfolioProvider extends ChangeNotifier {
   final PortfolioRepository repository;
   final NotificationService? notificationService;
+  final EncryptedPortfolioCache? cache;
+  final String? Function()? userIdProvider;
 
-  PortfolioProvider(this.repository, [this.notificationService]);
+  PortfolioProvider(
+    this.repository, [
+    this.notificationService,
+    this.cache,
+    this.userIdProvider,
+  ]);
 
   PortfolioStatus _status = PortfolioStatus.initial;
   PortfolioStatus get status => _status;
@@ -36,6 +44,12 @@ class PortfolioProvider extends ChangeNotifier {
 
   String? _activeTagId;
   String? get activeTagId => _activeTagId;
+
+  bool _isOfflineCache = false;
+  bool get isOfflineCache => _isOfflineCache;
+
+  DateTime? _lastSyncedAt;
+  DateTime? get lastSyncedAt => _lastSyncedAt;
 
   int _summaryGeneration = 0;
   int _custodyGeneration = 0;
@@ -63,10 +77,38 @@ class PortfolioProvider extends ChangeNotifier {
         _globalSummary = result;
       }
       _status = PortfolioStatus.success;
+      _isOfflineCache = false;
+      _lastSyncedAt = DateTime.now().toUtc();
+      try {
+        await cache?.saveSummary(
+          summary: result,
+          userId: userIdProvider?.call(),
+          tagId: normalizedTagId,
+        );
+      } catch (_) {
+        // Erro no cache local não deve impedir exibição dos dados online
+      }
     } catch (e) {
       if (gen != _summaryGeneration) return;
-      _status = PortfolioStatus.error;
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      final snapshot = await cache?.loadSnapshot(
+        userId: userIdProvider?.call(),
+        tagId: normalizedTagId,
+      );
+      if (gen != _summaryGeneration) return;
+      if (snapshot?.summary != null) {
+        _summary = snapshot!.summary;
+        if (normalizedTagId == null) {
+          _globalSummary = snapshot.summary;
+        }
+        _status = PortfolioStatus.success;
+        _errorMessage = null;
+        _isOfflineCache = true;
+        _lastSyncedAt = snapshot.lastSyncedAt;
+      } else {
+        _status = PortfolioStatus.error;
+        _isOfflineCache = false;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      }
     }
     notifyListeners();
   }
@@ -207,10 +249,45 @@ class PortfolioProvider extends ChangeNotifier {
         _selectedAssetClassFilter = null;
       }
       _custodyStatus = PortfolioStatus.success;
+      _isOfflineCache = false;
+      _lastSyncedAt = DateTime.now().toUtc();
+      try {
+        await cache?.saveCustody(
+          positions: result.positions,
+          metaPriceUpdatedAt: result.metaPriceUpdatedAt,
+          untaggedAssetsCount: result.untaggedAssetsCount,
+          untaggedTickers: result.untaggedTickers,
+          userId: userIdProvider?.call(),
+          tagId: normalizedTagId,
+        );
+      } catch (_) {
+        // Silencioso para não bloquear UI online
+      }
     } catch (e) {
       if (gen != _custodyGeneration) return;
-      _custodyStatus = PortfolioStatus.error;
-      _custodyError = e.toString().replaceFirst('Exception: ', '');
+      final snapshot = await cache?.loadSnapshot(
+        userId: userIdProvider?.call(),
+        tagId: normalizedTagId,
+      );
+      if (gen != _custodyGeneration) return;
+      if (snapshot?.positions != null) {
+        _custodyPositions = snapshot!.positions!;
+        _custodyMetaPriceUpdatedAt = snapshot.metaPriceUpdatedAt;
+        _untaggedAssetsCount = snapshot.untaggedAssetsCount;
+        _untaggedTickers = snapshot.untaggedTickers;
+        if (_selectedAssetClassFilter != null &&
+            !_custodyPositions.any((p) => p.assetClass == _selectedAssetClassFilter)) {
+          _selectedAssetClassFilter = null;
+        }
+        _custodyStatus = PortfolioStatus.success;
+        _custodyError = null;
+        _isOfflineCache = true;
+        _lastSyncedAt = snapshot.lastSyncedAt;
+      } else {
+        _custodyStatus = PortfolioStatus.error;
+        _isOfflineCache = false;
+        _custodyError = e.toString().replaceFirst('Exception: ', '');
+      }
     }
     notifyListeners();
   }
@@ -307,6 +384,36 @@ class PortfolioProvider extends ChangeNotifier {
     _notificationSubscription?.cancel();
     _notificationSubscription = null;
     notificationService?.dispose();
+    _isReceivingLiveUpdates = false;
+    notifyListeners();
+  }
+
+  /// Limpa todo o estado em memória do provider (ex.: no logout ou troca de conta).
+  void reset() {
+    _summaryGeneration++;
+    _custodyGeneration++;
+    _evolutionGeneration++;
+    _summary = null;
+    _globalSummary = null;
+    _custodyPositions = [];
+    _custodyMetaPriceUpdatedAt = null;
+    _untaggedAssetsCount = 0;
+    _untaggedTickers = const [];
+    _evolutionData = null;
+    _status = PortfolioStatus.initial;
+    _custodyStatus = PortfolioStatus.initial;
+    _evolutionStatus = PortfolioStatus.initial;
+    _tradeStatus = TradeStatus.initial;
+    _errorMessage = null;
+    _custodyError = null;
+    _evolutionError = null;
+    _tradeError = null;
+    _isOfflineCache = false;
+    _lastSyncedAt = null;
+    _activeTagId = null;
+    _selectedAssetClassFilter = null;
+    _notificationSubscription?.cancel();
+    _notificationSubscription = null;
     _isReceivingLiveUpdates = false;
     notifyListeners();
   }

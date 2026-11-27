@@ -282,4 +282,33 @@ void main() {
     verify(mockPortfolioProvider.loadSummary(tagId: 'tag-1')).called(1);
     verify(mockPortfolioProvider.loadCustodyPositions(tagId: 'tag-1')).called(1);
   });
+
+  testWidgets('exibe offline_cache_banner com timestamp local quando isOfflineCache é true', (tester) async {
+    final syncedAtUtc = DateTime.utc(2026, 11, 27, 15, 30);
+    final summary = PortfolioSummaryModel(
+      totalEquity: 50000.0,
+      grossYieldPercentage: 11.0,
+      accumulatedDividends: 1500.0,
+      monthlyProjection: 300.0,
+    );
+
+    when(mockPortfolioProvider.status).thenReturn(PortfolioStatus.success);
+    when(mockPortfolioProvider.summary).thenReturn(summary);
+    when(mockPortfolioProvider.isOfflineCache).thenReturn(true);
+    when(mockPortfolioProvider.lastSyncedAt).thenReturn(syncedAtUtc);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PortfolioProvider>.value(value: mockPortfolioProvider),
+          ChangeNotifierProvider<ProfileProvider>.value(value: mockProfileProvider),
+        ],
+        child: const MaterialApp(home: DashboardPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('offline_cache_banner')), findsOneWidget);
+    expect(find.textContaining('Modo offline · Última sincronização em'), findsOneWidget);
+  });
 }

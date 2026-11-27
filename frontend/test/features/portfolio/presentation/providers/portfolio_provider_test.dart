@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/core/security/encrypted_portfolio_cache.dart';
 import 'package:frontend/src/features/portfolio/data/datasources/notification_service.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart';
@@ -511,5 +513,140 @@ void main() {
         expect(mockRepository.evolutionTagCalls, equals(['tag-sse']));
       });
     });
+
+    group('Cache offline criptografado e reset', () {
+      late _InMemoryStorage storage;
+      late EncryptedPortfolioCache cache;
+      late PortfolioProvider cachedProvider;
+      final fixedNow = DateTime.utc(2026, 11, 27, 14, 0, 0);
+
+      setUp(() {
+        storage = _InMemoryStorage();
+        cache = EncryptedPortfolioCache(storage: storage, now: () => fixedNow);
+        cachedProvider = PortfolioProvider(
+          mockRepository,
+          null,
+          cache,
+          () => 'user-1',
+        );
+      });
+
+      test('salva snapshot no sucesso e carrega fallback offline em falha de rede', () async {
+        mockRepository.positionsToReturn = const [
+          CustodyPosition(
+            ticker: 'ITUB4',
+            quantity: 20,
+            averagePrice: 30,
+            currentPrice: 34,
+            marketValue: 680,
+            gainLossPercentage: 13.33,
+            priceSource: 'LIVE',
+            assetClass: 'Ações',
+          ),
+        ];
+
+        await cachedProvider.loadSummary(tagId: 'tag-a');
+        await cachedProvider.loadCustodyPositions(tagId: 'tag-a');
+        expect(cachedProvider.isOfflineCache, isFalse);
+
+        // Simula queda de rede
+        mockRepository.shouldThrow = true;
+        final offlineProvider = PortfolioProvider(
+          mockRepository,
+          null,
+          cache,
+          () => 'user-1',
+        );
+
+        await offlineProvider.loadSummary(tagId: 'tag-a');
+        await offlineProvider.loadCustodyPositions(tagId: 'tag-a');
+
+        expect(offlineProvider.status, equals(PortfolioStatus.success));
+        expect(offlineProvider.custodyStatus, equals(PortfolioStatus.success));
+        expect(offlineProvider.isOfflineCache, isTrue);
+        expect(offlineProvider.lastSyncedAt, equals(fixedNow));
+        expect(offlineProvider.summary?.totalEquity, equals(10000.0));
+        expect(offlineProvider.custodyPositions.length, equals(1));
+        expect(offlineProvider.custodyPositions.first.ticker, equals('ITUB4'));
+      });
+
+      test('mantém estado de erro quando falha rede e não há snapshot em cache', () async {
+        mockRepository.shouldThrow = true;
+        await cachedProvider.loadSummary(tagId: 'tag-empty');
+
+        expect(cachedProvider.status, equals(PortfolioStatus.error));
+        expect(cachedProvider.isOfflineCache, isFalse);
+      });
+
+      test('reset limpa todo o estado em memória incluindo isOfflineCache', () async {
+        await cachedProvider.loadSummary();
+        cachedProvider.reset();
+
+        expect(cachedProvider.status, equals(PortfolioStatus.initial));
+        expect(cachedProvider.summary, isNull);
+        expect(cachedProvider.globalSummary, isNull);
+        expect(cachedProvider.custodyPositions, isEmpty);
+        expect(cachedProvider.isOfflineCache, isFalse);
+        expect(cachedProvider.lastSyncedAt, isNull);
+      });
+    });
   });
+}
+
+class _InMemoryStorage extends Fake implements FlutterSecureStorage {
+  final Map<String, String> _data = {};
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    if (value == null) {
+      _data.remove(key);
+    } else {
+      _data[key] = value;
+    }
+  }
+
+  @override
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async =>
+      _data[key];
+
+  @override
+  Future<void> delete({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    _data.remove(key);
+  }
+
+  @override
+  Future<Map<String, String>> readAll({
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async =>
+      Map<String, String>.from(_data);
 }

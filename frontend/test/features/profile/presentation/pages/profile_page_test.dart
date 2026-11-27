@@ -5,6 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/src/features/auth/data/auth_repository.dart';
 import 'package:frontend/src/features/profile/presentation/pages/profile_page.dart';
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart';
 import 'package:frontend/src/features/profile/data/repositories/profile_repository.dart';
@@ -170,5 +171,60 @@ void main() {
       expect(profileProvider.profile, isNull);
       expect(profileProvider.errorMessage, isNull);
     });
+
+    testWidgets('tapping profile_logout_button signs out, resets providers and navigates to /login', (tester) async {
+      final fakeAuthRepo = _FakeAuthRepository();
+      final profile = UserProfile(
+        id: 6,
+        email: 'logout@example.com',
+        fullName: 'Logout User',
+        tier: 'FREE',
+      );
+      when(mockRepository.getProfile()).thenAnswer((_) async => profile);
+
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/login',
+            builder: (context, state) => const Scaffold(body: Text('LOGIN_SCREEN')),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<AuthRepository>.value(value: fakeAuthRepo),
+            ChangeNotifierProvider<ProfileProvider>.value(value: profileProvider),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final logoutFinder = find.byKey(const Key('profile_logout_button'));
+      await tester.ensureVisible(logoutFinder);
+      await tester.tap(logoutFinder);
+      await tester.pumpAndSettle();
+
+      expect(fakeAuthRepo.signOutCalled, isTrue);
+      expect(profileProvider.state, ProfileState.idle);
+      expect(profileProvider.profile, isNull);
+      expect(find.text('LOGIN_SCREEN'), findsOneWidget);
+    });
   });
+}
+
+class _FakeAuthRepository extends Fake implements AuthRepository {
+  bool signOutCalled = false;
+
+  @override
+  Future<void> signOut() async {
+    signOutCalled = true;
+  }
 }
