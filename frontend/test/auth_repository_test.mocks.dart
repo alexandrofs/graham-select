@@ -13,6 +13,13 @@ import 'package:firebase_core/firebase_core.dart' as _i4;
 import 'package:flutter/foundation.dart' as _i10;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i3;
 import 'package:frontend/src/core/api/api_client.dart' as _i8;
+import 'package:frontend/src/core/security/biometric_auth_service.dart' as _i16;
+import 'package:frontend/src/core/security/encrypted_portfolio_cache.dart'
+    as _i13;
+import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart'
+    as _i15;
+import 'package:frontend/src/features/portfolio/domain/entities/portfolio_summary.dart'
+    as _i14;
 import 'package:google_sign_in/google_sign_in.dart' as _i7;
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart'
     as _i12;
@@ -122,6 +129,11 @@ class _FakeIdTokenResult_15 extends _i1.SmartFake implements _i5.IdTokenResult {
 
 class _FakeUser_16 extends _i1.SmartFake implements _i6.User {
   _FakeUser_16(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDuration_17 extends _i1.SmartFake implements Duration {
+  _FakeDuration_17(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -1691,4 +1703,154 @@ class MockUser extends _i1.Mock implements _i6.User {
             returnValueForMissingStub: _i9.Future<void>.value(),
           )
           as _i9.Future<void>);
+}
+
+/// A class which mocks [EncryptedPortfolioCache].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockEncryptedPortfolioCache extends _i1.Mock
+    implements _i13.EncryptedPortfolioCache {
+  @override
+  _i9.Future<void> saveSummary({
+    required _i14.PortfolioSummary? summary,
+    String? userId,
+    String? tagId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveSummary, [], {
+              #summary: summary,
+              #userId: userId,
+              #tagId: tagId,
+            }),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> saveCustody({
+    required List<_i15.CustodyPosition>? positions,
+    DateTime? metaPriceUpdatedAt,
+    int? untaggedAssetsCount = 0,
+    List<String>? untaggedTickers = const [],
+    String? userId,
+    String? tagId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveCustody, [], {
+              #positions: positions,
+              #metaPriceUpdatedAt: metaPriceUpdatedAt,
+              #untaggedAssetsCount: untaggedAssetsCount,
+              #untaggedTickers: untaggedTickers,
+              #userId: userId,
+              #tagId: tagId,
+            }),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
+  _i9.Future<_i13.PortfolioSnapshot?> loadSnapshot({
+    String? userId,
+    String? tagId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#loadSnapshot, [], {
+              #userId: userId,
+              #tagId: tagId,
+            }),
+            returnValue: _i9.Future<_i13.PortfolioSnapshot?>.value(),
+            returnValueForMissingStub:
+                _i9.Future<_i13.PortfolioSnapshot?>.value(),
+          )
+          as _i9.Future<_i13.PortfolioSnapshot?>);
+
+  @override
+  _i9.Future<void> clearAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearAll, []),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+}
+
+/// A class which mocks [BiometricAuthService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockBiometricAuthService extends _i1.Mock
+    implements _i16.BiometricAuthService {
+  @override
+  Duration get inactivityTimeout =>
+      (super.noSuchMethod(
+            Invocation.getter(#inactivityTimeout),
+            returnValue: _FakeDuration_17(
+              this,
+              Invocation.getter(#inactivityTimeout),
+            ),
+            returnValueForMissingStub: _FakeDuration_17(
+              this,
+              Invocation.getter(#inactivityTimeout),
+            ),
+          )
+          as Duration);
+
+  @override
+  void markBackgrounded() => super.noSuchMethod(
+    Invocation.method(#markBackgrounded, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void markInteractiveLoginSuccess() => super.noSuchMethod(
+    Invocation.method(#markInteractiveLoginSuccess, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  bool consumeSkipNextInitialLock() =>
+      (super.noSuchMethod(
+            Invocation.method(#consumeSkipNextInitialLock, []),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  void clearBackgroundTimestamp() => super.noSuchMethod(
+    Invocation.method(#clearBackgroundTimestamp, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  bool shouldRequireReauth() =>
+      (super.noSuchMethod(
+            Invocation.method(#shouldRequireReauth, []),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i9.Future<bool> isBiometricOrDeviceAuthSupported() =>
+      (super.noSuchMethod(
+            Invocation.method(#isBiometricOrDeviceAuthSupported, []),
+            returnValue: _i9.Future<bool>.value(false),
+            returnValueForMissingStub: _i9.Future<bool>.value(false),
+          )
+          as _i9.Future<bool>);
+
+  @override
+  _i9.Future<bool> authenticate({
+    String? localizedReason = 'Desbloqueie o Kerno para acessar seu patrimônio',
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#authenticate, [], {
+              #localizedReason: localizedReason,
+            }),
+            returnValue: _i9.Future<bool>.value(false),
+            returnValueForMissingStub: _i9.Future<bool>.value(false),
+          )
+          as _i9.Future<bool>);
 }

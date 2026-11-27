@@ -76,6 +76,15 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i3.TradeStatus);
 
   @override
+  bool get isOfflineCache =>
+      (super.noSuchMethod(
+            Invocation.getter(#isOfflineCache),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
   List<_i4.CustodyPosition> get rawCustodyPositions =>
       (super.noSuchMethod(
             Invocation.getter(#rawCustodyPositions),
@@ -267,6 +276,12 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
   );
 
   @override
+  void reset() => super.noSuchMethod(
+    Invocation.method(#reset, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void dispose() => super.noSuchMethod(
     Invocation.method(#dispose, []),
     returnValueForMissingStub: null,
@@ -312,6 +327,12 @@ class MockProfileProvider extends _i1.Mock implements _i8.ProfileProvider {
             returnValueForMissingStub: false,
           )
           as bool);
+
+  @override
+  void reset() => super.noSuchMethod(
+    Invocation.method(#reset, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   _i6.Future<void> fetchProfile() =>

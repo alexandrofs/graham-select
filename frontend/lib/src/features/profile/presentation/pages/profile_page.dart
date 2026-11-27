@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/src/core/theme/app_theme.dart';
+import 'package:frontend/src/features/auth/data/auth_repository.dart';
+import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/profile/presentation/providers/profile_provider.dart';
+import 'package:frontend/src/features/tags/presentation/providers/tag_provider.dart';
 import 'package:frontend/src/features/profile/presentation/widgets/tier_badge.dart';
 import 'package:frontend/src/features/profile/presentation/widgets/tier_comparison_card.dart';
 
@@ -329,12 +332,24 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
 
           const SizedBox(height: 40),
-          // Botão de Sair (Opcional, mas útil no perfil)
+          // Botão de Sair
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: Implement logout logic if needed here or use existing
+              key: const Key('profile_logout_button'),
+              onPressed: () async {
+                final authRepository = Provider.of<AuthRepository?>(context, listen: false);
+                final portfolioProvider = Provider.of<PortfolioProvider?>(context, listen: false);
+                final profileProvider = Provider.of<ProfileProvider?>(context, listen: false);
+                final tagProvider = Provider.of<TagProvider?>(context, listen: false);
+
+                await authRepository?.signOut();
+                portfolioProvider?.reset();
+                profileProvider?.reset();
+                tagProvider?.reset();
+
+                if (!context.mounted) return;
+                context.go('/login');
               },
               icon: const Icon(Icons.logout, color: Colors.redAccent),
               label: const Text('Sair da Conta', style: TextStyle(color: Colors.redAccent)),

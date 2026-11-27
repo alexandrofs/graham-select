@@ -30,6 +30,15 @@ class MockAuthRepository implements AuthRepository {
   Future<UserCredential?> signInWithGoogle() async => null;
 
   @override
+  Future<String?> getAccessToken() async => null;
+
+  @override
+  Future<String?> getRefreshToken() async => null;
+
+  @override
+  Future<void> clearSessionData() async {}
+
+  @override
   Future<void> signOut() async {}
 }
 

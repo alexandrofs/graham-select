@@ -56,6 +56,33 @@ class MockAuthRepository extends _i1.Mock implements _i2.AuthRepository {
           as _i3.Future<String?>);
 
   @override
+  _i3.Future<String?> getAccessToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAccessToken, []),
+            returnValue: _i3.Future<String?>.value(),
+            returnValueForMissingStub: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<String?> getRefreshToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#getRefreshToken, []),
+            returnValue: _i3.Future<String?>.value(),
+            returnValueForMissingStub: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> clearSessionData() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearSessionData, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   _i3.Future<void> signOut() =>
       (super.noSuchMethod(
             Invocation.method(#signOut, []),
