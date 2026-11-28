@@ -4,9 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/src/core/config/feature_flags.dart';
 import 'package:frontend/src/core/security/biometric_auth_service.dart';
+import 'package:frontend/src/core/security/biometric_lock_gate.dart';
 import 'package:frontend/src/core/theme/app_theme.dart';
 import 'package:frontend/src/features/ai_analysis/presentation/pages/kerno_ai_page.dart';
 import 'package:frontend/src/features/auth/data/auth_repository.dart';
+import 'package:frontend/src/features/cerrado_diagram/domain/entities/cerrado_macro_class.dart';
+import 'package:frontend/src/features/cerrado_diagram/domain/entities/cerrado_preferences.dart';
+import 'package:frontend/src/features/cerrado_diagram/domain/entities/cerrado_template.dart';
+import 'package:frontend/src/features/cerrado_diagram/domain/repositories/cerrado_diagram_repository.dart';
+import 'package:frontend/src/features/cerrado_diagram/presentation/pages/cerrado_diagram_page.dart';
+import 'package:frontend/src/features/cerrado_diagram/presentation/providers/cerrado_diagram_provider.dart';
 import 'package:frontend/src/features/expenses/presentation/pages/expenses_page.dart';
 import 'package:frontend/src/features/profile/data/models/user_profile_model.dart';
 import 'package:frontend/src/features/profile/data/repositories/profile_repository.dart';
@@ -31,6 +38,9 @@ class _AuthenticatedFakeAuthRepository extends Fake implements AuthRepository {
 
   @override
   Future<String?> getPersistedToken() async => 'fake-jwt-token';
+
+  @override
+  Future<void> signOut() async {}
 }
 
 class _StubProfileRepository implements ProfileRepository {
@@ -48,6 +58,39 @@ class _StubProfileRepository implements ProfileRepository {
 }
 
 class _StubTagRepository extends Fake implements TagRepository {}
+
+class _StubCerradoDiagramRepository implements CerradoDiagramRepository {
+  @override
+  Future<CerradoTemplatesCatalog> getTemplates() async =>
+      const CerradoTemplatesCatalog(
+        defaultNeutralGrade: 6,
+        cvmDisclaimer: 'Aviso CVM.',
+        templates: <CerradoTemplate>[
+          CerradoTemplate(
+            code: 'EQUILIBRADO_CERRADO',
+            name: 'Modelo Equilibrado Cerrado',
+            description: 'Balanceado',
+            targetAcoesBrBps: 3000,
+            targetFiisBps: 2500,
+            targetRendaFixaBps: 2400,
+            targetInternacionalBps: 2000,
+            targetCriptoBps: 100,
+          ),
+        ],
+      );
+
+  @override
+  Future<CerradoPreferences?> getPreferences() async => null;
+
+  @override
+  Future<CerradoPreferences> savePreferences({
+    required Map<CerradoMacroClass, int> targetsBps,
+    double? grahamMultiplier,
+    bool? grahamFilterEnabled,
+  }) {
+    throw UnimplementedError();
+  }
+}
 
 void main() {
   tearDown(FeatureFlags.resetForTest);
@@ -170,5 +213,63 @@ void main() {
     await tester.tap(find.text('Gastos'));
     await tester.pumpAndSettle();
     expect(find.byType(ExpensesPage), findsOneWidget);
+  });
+
+  testWidgets(
+      'Rota /allocation-strategy renderiza CerradoDiagramPage por padrão e onSignOut reseta CerradoDiagramProvider',
+      (tester) async {
+    FeatureFlags.setEnableExpensesModuleForTest(false);
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final authRepo = _AuthenticatedFakeAuthRepository();
+    final authListenable = AuthStateListenable(authRepo);
+    final profileProvider = ProfileProvider(_StubProfileRepository());
+    final tagProvider = TagProvider(repository: _StubTagRepository());
+    final cerradoProvider = CerradoDiagramProvider(
+      repository: _StubCerradoDiagramRepository(),
+    );
+    addTearDown(authListenable.dispose);
+    addTearDown(profileProvider.dispose);
+    addTearDown(tagProvider.dispose);
+    addTearDown(cerradoProvider.dispose);
+
+    final router = createAppRouter(
+      authRepository: authRepo,
+      authListenable: authListenable,
+      biometricAuthService: BiometricAuthService()..markInteractiveLoginSuccess(),
+      profileProvider: profileProvider,
+      tagProvider: tagProvider,
+      cerradoDiagramProvider: cerradoProvider,
+      dashboardBuilder: (_) => const SizedBox(),
+      gpsAporteBuilder: (_) => const SizedBox(),
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ProfileProvider>.value(value: profileProvider),
+          ChangeNotifierProvider<CerradoDiagramProvider>.value(
+            value: cerradoProvider,
+          ),
+        ],
+        child: MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Diagrama'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CerradoDiagramPage), findsOneWidget);
+    expect(cerradoProvider.status, CerradoDiagramStatus.loaded);
+
+    final gate = tester.widget<BiometricLockGate>(find.byType(BiometricLockGate));
+    await gate.onSignOut();
+    expect(cerradoProvider.status, CerradoDiagramStatus.initial);
   });
 }

@@ -60,7 +60,12 @@ import 'src/features/portfolio/presentation/pages/evolution_page.dart';
 import 'src/features/allocation/data/datasources/allocation_remote_data_source.dart';
 import 'src/features/allocation/data/repositories/allocation_repository_impl.dart';
 import 'src/features/allocation/presentation/providers/allocation_provider.dart';
-import 'src/features/allocation/presentation/pages/allocation_strategy_page.dart';
+
+// Cerrado Diagram Feature Imports
+import 'src/features/cerrado_diagram/data/datasources/cerrado_diagram_remote_data_source.dart';
+import 'src/features/cerrado_diagram/data/repositories/cerrado_diagram_repository_impl.dart';
+import 'src/features/cerrado_diagram/presentation/pages/cerrado_diagram_page.dart';
+import 'src/features/cerrado_diagram/presentation/providers/cerrado_diagram_provider.dart';
 
 // Goals Feature Imports
 import 'src/features/goals/data/datasources/goals_remote_datasource.dart';
@@ -205,6 +210,12 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final AllocationRemoteDataSource allocationRemoteDataSource;
   late final AllocationRepositoryImpl allocationRepository;
 
+  late final CerradoDiagramRemoteDataSource cerradoDiagramRemoteDataSource;
+  late final CerradoDiagramRepositoryImpl cerradoDiagramRepository;
+  late final CerradoDiagramProvider cerradoDiagramProvider;
+  StreamSubscription<dynamic>? _cerradoAuthSubscription;
+  String? _activeCerradoUserId;
+
   late final GoalsRemoteDatasource goalsRemoteDatasource;
   late final GoalsRepositoryImpl goalsRepository;
 
@@ -311,6 +322,20 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     allocationRemoteDataSource = AllocationRemoteDataSource(apiClient: effectiveApiClient);
     allocationRepository = AllocationRepositoryImpl(allocationRemoteDataSource, effectiveAuthRepository);
 
+    // Cerrado Diagram Feature DI
+    cerradoDiagramRemoteDataSource = CerradoDiagramRemoteDataSource(apiClient: effectiveApiClient);
+    cerradoDiagramRepository = CerradoDiagramRepositoryImpl(remoteDataSource: cerradoDiagramRemoteDataSource);
+    cerradoDiagramProvider = CerradoDiagramProvider(repository: cerradoDiagramRepository);
+    _activeCerradoUserId = effectiveAuthRepository.currentUser?.uid;
+    _cerradoAuthSubscription = effectiveAuthRepository.authStateChanges.listen((user) {
+      final nextUserId = user?.uid;
+      if (nextUserId == null ||
+          (_activeCerradoUserId != null && _activeCerradoUserId != nextUserId)) {
+        cerradoDiagramProvider.reset();
+      }
+      _activeCerradoUserId = nextUserId;
+    });
+
     // Goals Feature DI
     goalsRemoteDatasource = GoalsRemoteDatasource(apiClient: effectiveApiClient);
     goalsRepository = GoalsRepositoryImpl(remoteDatasource: goalsRemoteDatasource);
@@ -366,6 +391,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       biometricAuthService: effectiveBiometricAuthService,
       profileProvider: profileProvider,
       tagProvider: tagProvider,
+      cerradoDiagramProvider: cerradoDiagramProvider,
     );
   }
 
@@ -378,6 +404,8 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     profileProvider.dispose();
     _tagAuthSubscription?.cancel();
     tagProvider.dispose();
+    _cerradoAuthSubscription?.cancel();
+    cerradoDiagramProvider.dispose();
     authListenable.dispose();
     router.dispose();
     super.dispose();
@@ -412,6 +440,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
         ChangeNotifierProvider(create: (_) => FamilyProfileProvider(repository: familyProfileRepository)),
         ChangeNotifierProvider<TagProvider>.value(value: tagProvider),
         ChangeNotifierProvider(create: (_) => AllocationProvider(allocationRepository)),
+        ChangeNotifierProvider<CerradoDiagramProvider>.value(value: cerradoDiagramProvider),
         ChangeNotifierProvider(create: (_) => GoalsProvider(repository: goalsRepository)),
         ChangeNotifierProvider(create: (_) => DividendProvider(repository: dividendRepository)),
         ChangeNotifierProvider(create: (_) => OpenFinanceProvider(repository: openFinanceRepository)),
@@ -473,6 +502,7 @@ GoRouter createAppRouter({
   required BiometricAuthService biometricAuthService,
   required ProfileProvider profileProvider,
   required TagProvider tagProvider,
+  CerradoDiagramProvider? cerradoDiagramProvider,
   WidgetBuilder? dashboardBuilder,
   WidgetBuilder? gpsAporteBuilder,
   WidgetBuilder? allocationStrategyBuilder,
@@ -523,6 +553,7 @@ GoRouter createAppRouter({
             portfolioProvider?.reset();
             profileProvider.reset();
             tagProvider.reset();
+            cerradoDiagramProvider?.reset();
           },
           child: MainLayout(navigationShell: navigationShell),
         ),
@@ -574,7 +605,7 @@ GoRouter createAppRouter({
               GoRoute(
                 path: '/allocation-strategy',
                 builder: (context, state) =>
-                    allocationStrategyBuilder?.call(context) ?? const AllocationStrategyPage(),
+                    allocationStrategyBuilder?.call(context) ?? const CerradoDiagramPage(),
               ),
             ],
           ),
