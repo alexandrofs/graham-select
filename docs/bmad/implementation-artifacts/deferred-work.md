@@ -129,3 +129,16 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
   summary: [RESOLVIDO em 2026-11-27] Substituir `@SneakyThrows` e publicação de `ValuationRequestedEvent` dentro de `@Transactional` por logging `ERROR` explícito e outbox/after-commit nos use cases de trade manual.
   evidence: Extraído `ManualTradeUseCaseSupport` com logging `ERROR` explícito em falha de serialização e `TransactionSynchronization.afterCommit()` nos use cases `CreateManualTradeUseCase`, `UpdateManualTradeUseCase` e `DeleteManualTradeUseCase`.
+
+- source_spec: none
+  summary: Adicionar interceptor X-Correlation-ID no ApiClient (`frontend/lib/src/core/api/api_client.dart`) com teste unitário e alinhar `PortfolioRemoteDataSource` ao `ApiClient`.
+  evidence: Fatiado da execução dos itens de ação do Épico 2 (`epic-2-retro-item-11`) para entregar a correção do backend (`KafkaB3WorkerIT`) primeiro.
+- source_spec: none
+  summary: Criar história dedicada para os itens Multi-CPF fatiados da Story 2.5 (`MultiCpfSelector`, badge Free/Pro, LGPD Art. 14 e `AccountDeletionIT`).
+  evidence: Fatiado da execução dos itens de ação do Épico 2 (`epic-2-retro-item-12`) por ser tarefa de planejamento independente da correção do backend.
+- source_spec: none
+  summary: Executar smoke test em build Android e iOS validando `local_auth`, `FLAG_SECURE`, overlay de `SceneDelegate` e latência P95.
+  evidence: Fatiado da execução dos itens de ação do Épico 2 (`epic-2-retro-item-13`) por exigir validação em hardware/emuladores Android e iOS fora do ambiente Windows atual.
+- source_spec: `docs/bmad/implementation-artifacts/spec-epic-2-retro-item-10-kafkab3workerit-dlq.md`
+  summary: Tratar `broker == null` no `KafkaTradeExtractedConsumer` (ou tornar `trades.broker` nullable/com default) para evitar `SQL Error 23502` capturado como duplicata (`addDuplicate`).
+  evidence: Observado na execução de `KafkaB3WorkerIT.shouldProcessFileAndPublishTradeExtractedEvents` antes de adicionar a coluna `corretora` na planilha de teste (`FastExcelB3TradeRowParser` permite `corretora` opcional, mas `13-create-trades-table.yaml` define `broker` como `nullable: false`, disparando `DataIntegrityViolationException` e incrementando `processedRows` de 2 para 4).

@@ -84,16 +84,19 @@ public class KafkaB3WorkerIT {
             ws.value(0, 1, "data");
             ws.value(0, 2, "quantidade");
             ws.value(0, 3, "preco");
+            ws.value(0, 4, "corretora");
 
             ws.value(1, 0, "PETR4");
             ws.value(1, 1, LocalDate.of(2026, 5, 10));
             ws.value(1, 2, new BigDecimal("100"));
             ws.value(1, 3, new BigDecimal("35.50"));
+            ws.value(1, 4, "XP");
 
             ws.value(2, 0, "VALE3");
             ws.value(2, 1, LocalDate.of(2026, 5, 11));
             ws.value(2, 2, new BigDecimal("200"));
             ws.value(2, 3, new BigDecimal("80.00"));
+            ws.value(2, 4, "XP");
         }
         Files.write(filePath, os.toByteArray());
 
@@ -173,8 +176,9 @@ public class KafkaB3WorkerIT {
         // 1. Verify message in DLQ
         ConsumerRecord<String, String> record = KafkaTestUtils.getSingleRecord(consumer, TopicConstants.TRADE_EXTRACTED_DLQ_TOPIC, Duration.ofMillis(20000));
         assertThat(record).isNotNull();
+        assertThat(record.value()).contains(correlationId);
         assertThat(record.value()).contains("PETR4");
-        assertThat(record.value()).contains("Wrong cell type");
+        assertThat(record.value()).contains("Text 'invalid-date' could not be parsed");
 
         // 2. Verify status in DB
         await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
