@@ -81,6 +81,16 @@ public class AiDiagnosticCacheService {
         return cachePort.save(entry);
     }
 
+    /**
+     * Invalidates all cached AI diagnostics for the given user.
+     */
+    public void invalidateByUserId(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        cachePort.deleteByUserId(userId);
+    }
+
     private static boolean isBlank(String value) {
         return value == null || value.isBlank();
     }

@@ -1,7 +1,9 @@
 package afsdigital.grahamselect.api.cerrado;
 
 import afsdigital.grahamselect.api.cerrado.infrastructure.persistence.jpa.entities.CerradoAssetGradeEntity;
+import afsdigital.grahamselect.api.cerrado.infrastructure.persistence.jpa.entities.CerradoPreferencesEntity;
 import afsdigital.grahamselect.api.cerrado.infrastructure.persistence.jpa.repository.CerradoAssetGradeJpaRepository;
+import afsdigital.grahamselect.api.cerrado.infrastructure.persistence.jpa.repository.CerradoPreferencesJpaRepository;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.BaseRepositoryIT;
 import afsdigital.grahamselect.common.cerrado.application.repository.CerradoAssetGradePort;
 import afsdigital.grahamselect.common.cerrado.application.repository.CerradoPreferencesPort;
@@ -31,6 +33,9 @@ public class CerradoPersistenceIT extends BaseRepositoryIT {
 
     @Autowired
     private CerradoPreferencesPort preferencesPort;
+
+    @Autowired
+    private CerradoPreferencesJpaRepository preferencesJpaRepository;
 
     @Autowired
     private CerradoAssetGradePort assetGradePort;
@@ -96,7 +101,7 @@ public class CerradoPersistenceIT extends BaseRepositoryIT {
                 .build();
         preferencesPort.save(first);
 
-        CerradoPreferences duplicate = CerradoPreferences.builder()
+        CerradoPreferencesEntity duplicate = CerradoPreferencesEntity.builder()
                 .userId(user.getId())
                 .targetAcoesBr(new BigDecimal("50.00"))
                 .targetFiis(new BigDecimal("20.00"))
@@ -105,8 +110,44 @@ public class CerradoPersistenceIT extends BaseRepositoryIT {
                 .targetCripto(new BigDecimal("0.00"))
                 .build();
 
-        assertThatThrownBy(() -> preferencesPort.save(duplicate))
+        assertThatThrownBy(() -> preferencesJpaRepository.saveAndFlush(duplicate))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("Should upsert existing CerradoPreferences by userId when domain id is null")
+    void shouldUpsertPreferencesByUserIdWhenIdIsNull() {
+        User user = createUser("cerrado-pref-upsert", "prefupsert@example.com");
+
+        CerradoPreferences initial = preferencesPort.save(CerradoPreferences.builder()
+                .userId(user.getId())
+                .targetAcoesBr(new BigDecimal("39.00"))
+                .targetFiis(new BigDecimal("30.00"))
+                .targetRendaFixa(new BigDecimal("20.00"))
+                .targetInternacional(new BigDecimal("10.00"))
+                .targetCripto(new BigDecimal("1.00"))
+                .grahamMultiplier(new BigDecimal("1.30"))
+                .grahamFilterEnabled(true)
+                .build());
+
+        CerradoPreferences updated = preferencesPort.save(CerradoPreferences.builder()
+                .userId(user.getId())
+                .targetAcoesBr(new BigDecimal("45.00"))
+                .targetFiis(new BigDecimal("25.00"))
+                .targetRendaFixa(new BigDecimal("10.00"))
+                .targetInternacional(new BigDecimal("15.00"))
+                .targetCripto(new BigDecimal("5.00"))
+                .grahamMultiplier(new BigDecimal("1.60"))
+                .grahamFilterEnabled(false)
+                .build());
+
+        assertThat(updated.getId()).isEqualTo(initial.getId());
+        assertThat(updated.getTargetAcoesBr()).isEqualByComparingTo("45.00");
+        assertThat(updated.getGrahamMultiplier()).isEqualByComparingTo("1.60");
+        assertThat(updated.isGrahamFilterEnabled()).isFalse();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM tb_cerrado_preferences WHERE user_id = ?", Integer.class, user.getId()))
+                .isEqualTo(1);
     }
 
     @Test

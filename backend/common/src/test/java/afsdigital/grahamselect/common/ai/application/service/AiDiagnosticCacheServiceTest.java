@@ -18,6 +18,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,5 +95,16 @@ class AiDiagnosticCacheServiceTest {
         assertThat(captured.expiresAt()).isEqualTo(nowUtc.plusHours(24));
         assertThat(saved.expiresAt()).isEqualTo(nowUtc.plusHours(24));
         verify(cachePort).save(eq(captured));
+    }
+
+    @Test
+    void shouldInvalidateCacheByUserIdAndIgnoreNull() {
+        AiDiagnosticCacheService service = createService();
+
+        service.invalidateByUserId(10L);
+        verify(cachePort).deleteByUserId(10L);
+
+        service.invalidateByUserId(null);
+        verify(cachePort, never()).deleteByUserId(null);
     }
 }
