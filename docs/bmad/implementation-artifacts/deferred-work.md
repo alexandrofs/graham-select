@@ -120,3 +120,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-4-dashboard-patrimonial-com-modo-privacidade-e-protecao-de-snapshot.md`
   summary: Adicionar teste E2E/integrado validando wiring raiz de PrivacyProvider.load() em GrahamSelectApp autenticado e preload antes do primeiro frame.
   evidence: Testes atuais injetam PrivacyProvider diretamente nos widgets; GrahamSelectApp exige harness completo autenticado.
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
+  summary: Implementar filtro global Multi-CPF (`MultiCpfSelector` na `_TopBar`, `profileId` nos endpoints `/api/v1/portfolios/*`), badge `"Pausado no Free — Upgrade Pro"` e consentimento de representação legal para dependentes menores (LGPD Art. 14) em `FamilyProfilesPage` e `FamilyProfileController`, além de validação de expurgo Multi-CPF em `AccountDeletionIT`.
+  evidence: Fatiado da Story 2.5 no gate de tokens para manter a spec principal focada em Ingestão B3 (com descarte de PII) e CRUD Manual Multi-Classe dentro do limite de 1600 tokens.
