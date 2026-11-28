@@ -51,7 +51,7 @@ development_status:
   epic-2-retrospective: optional
 
   epic-3: backlog
-  3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: backlog
+  3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: ready-for-dev
   3-2-motor-de-domínio-da-hierarquia-do-cerrado-aritmética-de-meta: backlog
   3-3-api-rest-para-gestão-de-metas-de-macro-classes-e-templates-d: backlog
   3-4-interface-do-diagrama-do-cerrado-seletor-de-templates-e-trav: backlog
