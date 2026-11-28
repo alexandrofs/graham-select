@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: '2026-06-13'
-last_updated: 11-28-2026 09:54
+last_updated: 11-28-2026 10:38
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -54,7 +54,7 @@ development_status:
   3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: done
   3-2-motor-de-domínio-da-hierarquia-do-cerrado-aritmética-de-meta: done
   3-3-api-rest-para-gestão-de-metas-de-macro-classes-e-templates-d: done
-  3-4-interface-do-diagrama-do-cerrado-seletor-de-templates-e-trav: review
+  3-4-interface-do-diagrama-do-cerrado-seletor-de-templates-e-trav: done
   3-5-gestão-visual-de-notas-de-qualidade-slider-48dp-assistente-d: backlog
   epic-3-retrospective: optional
 
