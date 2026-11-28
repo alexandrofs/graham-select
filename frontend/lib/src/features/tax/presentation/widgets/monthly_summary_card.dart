@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/annual_tax_summary.dart';
 
@@ -10,7 +12,10 @@ class MonthlySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMasked = Provider.of<PrivacyProvider?>(context)?.isPrivacyMode ?? false;
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    String formatMoney(double value) =>
+        isMasked ? PrivacyProvider.maskedCurrencyValue : currencyFormatter.format(value);
 
     return Card(
       child: Padding(
@@ -40,42 +45,42 @@ class MonthlySummaryCard extends StatelessWidget {
                       _buildMetric(
                         context,
                         'Total Imposto Devido',
-                        currencyFormatter.format(summary.totalTaxDueYear),
+                        formatMoney(summary.totalTaxDueYear),
                         summary.totalTaxDueYear > 0 ? Colors.amberAccent : AppTheme.accentColor,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Volume Total Alienado',
-                        currencyFormatter.format(summary.totalSalesYear),
+                        formatMoney(summary.totalSalesYear),
                         AppTheme.textColor,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Lucro Isento de Ações',
-                        currencyFormatter.format(summary.totalExemptProfitYear),
+                        formatMoney(summary.totalExemptProfitYear),
                         AppTheme.accentColor,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Lucro Tributável Consolidado',
-                        currencyFormatter.format(summary.totalTaxableProfitYear),
+                        formatMoney(summary.totalTaxableProfitYear),
                         summary.totalTaxableProfitYear > 0 ? Colors.orangeAccent : AppTheme.textColor,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Prejuízo a Compensar (Comum)',
-                        currencyFormatter.format(summary.finalCommonLossCarryforward),
+                        formatMoney(summary.finalCommonLossCarryforward),
                         summary.finalCommonLossCarryforward > 0 ? Colors.redAccent : Colors.white70,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Prejuízo a Compensar (FII/Fiagro)',
-                        currencyFormatter.format(summary.finalFiiLossCarryforward),
+                        formatMoney(summary.finalFiiLossCarryforward),
                         summary.finalFiiLossCarryforward > 0 ? Colors.redAccent : Colors.white70,
                       ),
                     ],
@@ -90,7 +95,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           child: _buildMetric(
                             context,
                             'Total Imposto Devido',
-                            currencyFormatter.format(summary.totalTaxDueYear),
+                            formatMoney(summary.totalTaxDueYear),
                             summary.totalTaxDueYear > 0 ? Colors.amberAccent : AppTheme.accentColor,
                           ),
                         ),
@@ -99,7 +104,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           child: _buildMetric(
                             context,
                             'Volume Total Alienado',
-                            currencyFormatter.format(summary.totalSalesYear),
+                            formatMoney(summary.totalSalesYear),
                             AppTheme.textColor,
                           ),
                         ),
@@ -108,7 +113,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           child: _buildMetric(
                             context,
                             'Lucro Isento de Ações',
-                            currencyFormatter.format(summary.totalExemptProfitYear),
+                            formatMoney(summary.totalExemptProfitYear),
                             AppTheme.accentColor,
                           ),
                         ),
@@ -123,7 +128,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           child: _buildMetric(
                             context,
                             'Lucro Tributável Consolidado',
-                            currencyFormatter.format(summary.totalTaxableProfitYear),
+                            formatMoney(summary.totalTaxableProfitYear),
                             summary.totalTaxableProfitYear > 0 ? Colors.orangeAccent : AppTheme.textColor,
                           ),
                         ),
@@ -132,7 +137,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           child: _buildMetric(
                             context,
                             'Prejuízo a Compensar (Comum)',
-                            currencyFormatter.format(summary.finalCommonLossCarryforward),
+                            formatMoney(summary.finalCommonLossCarryforward),
                             summary.finalCommonLossCarryforward > 0 ? Colors.redAccent : Colors.white70,
                           ),
                         ),
@@ -141,7 +146,7 @@ class MonthlySummaryCard extends StatelessWidget {
                           child: _buildMetric(
                             context,
                             'Prejuízo a Compensar (FII/Fiagro)',
-                            currencyFormatter.format(summary.finalFiiLossCarryforward),
+                            formatMoney(summary.finalFiiLossCarryforward),
                             summary.finalFiiLossCarryforward > 0 ? Colors.redAccent : Colors.white70,
                           ),
                         ),
@@ -158,6 +163,7 @@ class MonthlySummaryCard extends StatelessWidget {
   }
 
   Widget _buildMetric(BuildContext context, String label, String value, Color valueColor) {
+    final isMasked = value == PrivacyProvider.maskedCurrencyValue;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
@@ -170,12 +176,15 @@ class MonthlySummaryCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: valueColor,
-                ),
+          Semantics(
+            label: isMasked ? '$label: ${PrivacyProvider.maskedSemanticsLabel}' : '$label: $value',
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: valueColor,
+                  ),
+            ),
           ),
         ],
       ),

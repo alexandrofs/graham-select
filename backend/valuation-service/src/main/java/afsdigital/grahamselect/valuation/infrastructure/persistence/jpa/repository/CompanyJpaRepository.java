@@ -4,11 +4,15 @@ import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CompanyJpaRepository extends JpaRepository<CompanyEntity, String> {
 
     Optional<CompanyEntity> findByTicker(String ticker);
+
+    List<CompanyEntity> findAllByTickerIn(Collection<String> tickers);
 
 }

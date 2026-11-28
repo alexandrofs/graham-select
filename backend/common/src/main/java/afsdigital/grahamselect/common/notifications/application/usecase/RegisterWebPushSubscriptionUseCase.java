@@ -44,6 +44,7 @@ public class RegisterWebPushSubscriptionUseCase {
         log.info("Registrando assinatura Web Push para userId={}, endpoint={}", userId, maskedEndpoint);
 
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        deactivateOtherUsersForEndpoint(userId, request.endpoint().trim(), now);
         var existingOpt = subscriptionPort.findByEndpointHash(endpointHash);
 
         WebPushSubscription subscription;
@@ -78,6 +79,22 @@ public class RegisterWebPushSubscriptionUseCase {
                 saved.getLastUsedAt(),
                 saved.getCreatedAt()
         );
+    }
+
+    private void deactivateOtherUsersForEndpoint(String activeUserId, String endpoint, OffsetDateTime now) {
+        var existingByEndpoint = subscriptionPort.findByEndpoint(endpoint);
+        if (existingByEndpoint == null || existingByEndpoint.isEmpty()) {
+            return;
+        }
+        for (WebPushSubscription other : existingByEndpoint) {
+            if (other != null && other.isActive() && !activeUserId.equals(other.getUserId())) {
+                log.info("Desativando assinatura Web Push de outro usuário no mesmo endpoint físico: previousUserId={}, newUserId={}",
+                        other.getUserId(), activeUserId);
+                other.setActive(false);
+                other.setUpdatedAt(now);
+                subscriptionPort.save(other);
+            }
+        }
     }
 
     private void validateEndpoint(String endpoint) {

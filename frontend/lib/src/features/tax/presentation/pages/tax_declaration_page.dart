@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../family_holding/presentation/providers/family_profile_provider.dart';
 import '../providers/tax_provider.dart';
@@ -378,12 +379,26 @@ class _TaxDeclarationPageState extends State<TaxDeclarationPage> with SingleTick
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(
-                                      'Subtotal: ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$ ').format(groupSubtotal)}',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                    Builder(
+                                      builder: (context) {
+                                        final isMasked =
+                                            Provider.of<PrivacyProvider?>(context)?.isPrivacyMode ?? false;
+                                        final subtotalText = isMasked
+                                            ? 'Subtotal: ${PrivacyProvider.maskedCurrencyValue}'
+                                            : 'Subtotal: ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$ ').format(groupSubtotal)}';
+                                        return Semantics(
+                                          label: isMasked
+                                              ? 'Subtotal: ${PrivacyProvider.maskedSemanticsLabel}'
+                                              : subtotalText,
+                                          child: Text(
+                                            subtotalText,
+                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
                                           ),
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),

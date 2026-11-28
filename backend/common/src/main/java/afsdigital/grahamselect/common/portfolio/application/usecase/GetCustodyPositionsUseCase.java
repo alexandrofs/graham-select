@@ -264,15 +264,26 @@ public class GetCustodyPositionsUseCase {
             "EURP11", "XINA11", "USAL11", "TECK11", "SHOT11"
     );
 
+    private static final Set<String> BRAZILIAN_EQUITY_ETF_TICKERS = Set.of(
+            "BOVA11", "BOVV11", "BOVB11", "SMAL11", "SMAC11", "IBOV11",
+            "DIVO11", "FIND11", "MATB11", "ISUS11", "ECOO11", "PIBB11",
+            "BRAX11", "GOVE11", "TRIG11", "NDIV11", "NSDV11"
+    );
+
+    private static final Set<String> FIXED_INCOME_ETF_TICKERS = Set.of(
+            "IMAB11", "IRFM11", "FIXA11", "B5P211", "LFTS11", "DEBB11", "LFTB11"
+    );
+
     private String inferAssetClass(String ticker) {
         if (ticker == null || ticker.isBlank()) {
             return "Outros";
         }
         String t = stripFractionalSuffix(ticker).trim().toUpperCase(Locale.ROOT);
 
-        // Renda Fixa
+        // Renda Fixa (inclui ETFs de renda fixa terminados em 11 antes da regra de FIIs)
         if (t.startsWith("TESOURO") || t.startsWith("CDB") || t.startsWith("LCI")
-                || t.startsWith("LCA") || t.contains("DIRETO") || t.contains("DEBENTURE")) {
+                || t.startsWith("LCA") || t.contains("DIRETO") || t.contains("DEBENTURE")
+                || FIXED_INCOME_ETF_TICKERS.contains(t)) {
             return "Renda Fixa";
         }
 
@@ -284,6 +295,11 @@ public class GetCustodyPositionsUseCase {
         // ETFs Internacionais listados na B3 (precedência antes de FIIs *11)
         if (INTERNATIONAL_ETF_TICKERS.contains(t)) {
             return "Internacional";
+        }
+
+        // ETFs de Ações Brasileiras listados na B3 (precedência antes de FIIs *11)
+        if (BRAZILIAN_EQUITY_ETF_TICKERS.contains(t)) {
+            return "Ações";
         }
 
         // FIIs (Imobiliários)

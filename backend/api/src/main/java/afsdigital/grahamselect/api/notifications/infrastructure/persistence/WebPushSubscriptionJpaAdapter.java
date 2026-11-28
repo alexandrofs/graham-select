@@ -28,6 +28,16 @@ public class WebPushSubscriptionJpaAdapter implements WebPushSubscriptionPort {
     }
 
     @Override
+    public List<WebPushSubscription> findByEndpoint(String endpoint) {
+        if (endpoint == null || endpoint.isBlank()) {
+            return List.of();
+        }
+        return repository.findByEndpoint(endpoint).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<WebPushSubscription> findByUserId(String userId) {
         return repository.findByUserId(userId).stream()
                 .map(this::toDomain)

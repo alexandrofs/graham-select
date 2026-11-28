@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/src/core/security/privacy_provider.dart';
 import 'package:frontend/src/features/goals/domain/entities/financial_goal.dart';
 import 'package:frontend/src/features/goals/presentation/widgets/goal_summary_card.dart';
 
@@ -107,6 +109,33 @@ void main() {
       // Assert
       expect(find.text('Meta de Renda Mensal Alvo'), findsOneWidget);
       expect(find.text('Meta: gerar R\$ 5.000,00/mês de renda passiva.'), findsOneWidget);
+    });
+
+    testWidgets('should mask currency values when PrivacyProvider privacy mode is enabled', (tester) async {
+      const goal = FinancialGoal(
+        id: '1',
+        goalType: 'PATRIMONY_TARGET',
+        targetValue: 500000.0,
+        monthlyContribution: 2000.0,
+        estimatedYears: 15,
+      );
+      final privacyProvider = PrivacyProvider(initialPrivacyMode: true);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<PrivacyProvider>.value(
+          value: privacyProvider,
+          child: createWidgetUnderTest(
+            goal: goal,
+            currentPatrimony: 150000.0,
+          ),
+        ),
+      );
+
+      expect(find.text(PrivacyProvider.maskedCurrencyValue), findsNWidgets(2));
+      expect(
+        find.textContaining('Você precisa de ${PrivacyProvider.maskedCurrencyValue} para atingir sua meta.'),
+        findsOneWidget,
+      );
     });
   });
 }

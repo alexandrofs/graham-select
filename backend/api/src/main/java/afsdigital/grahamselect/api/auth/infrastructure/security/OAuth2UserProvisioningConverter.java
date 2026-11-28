@@ -40,6 +40,10 @@ public class OAuth2UserProvisioningConverter implements Converter<Jwt, AbstractA
     public AbstractAuthenticationToken convert(Jwt jwt) {
         log.info("Processing OAuth2 JWT authentication");
         String sub = jwt.getSubject();
+        if (sub == null || sub.isBlank()) {
+            log.error("OAuth2 login rejected: missing sub claim");
+            throw new BadCredentialsException("OAuth2 JWT missing required sub claim");
+        }
         String email = jwt.getClaimAsString("email");
         String name = jwt.getClaimAsString("name");
         boolean jwtHasAdmin = hasAdminClaim(jwt);

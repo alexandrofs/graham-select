@@ -5,16 +5,14 @@ import afsdigital.grahamselect.common.portfolio.application.repository.TradePort
 import afsdigital.grahamselect.common.portfolio.application.repository.ValuationEventPort;
 import afsdigital.grahamselect.common.portfolio.domain.entities.ManualTradeAudit;
 import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
-import afsdigital.grahamselect.common.portfolio.domain.events.ValuationRequestedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CreateManualTradeUseCase {
     private final TradePort tradePort;
@@ -22,7 +20,6 @@ public class CreateManualTradeUseCase {
     private final ValuationEventPort valuationEventPort;
     private final ObjectMapper objectMapper;
 
-    @SneakyThrows
     @Transactional
     public Trade execute(Trade trade) {
         boolean alreadyExists = tradePort.exists(
@@ -49,20 +46,14 @@ public class CreateManualTradeUseCase {
                 .tradeId(savedTrade.getId())
                 .userId(savedTrade.getUserId())
                 .actionType("CREATE")
-                .payloadJson(objectMapper.writeValueAsString(savedTrade))
+                .payloadJson(ManualTradeUseCaseSupport.serializeTradeForAudit(objectMapper, savedTrade, "CREATE", log))
                 .createdAt(savedTrade.getCreatedAt())
                 .build();
         auditPort.save(audit);
 
-        // 3. Request Valuation
-        ValuationRequestedEvent event = ValuationRequestedEvent.builder()
-                .eventId(UUID.randomUUID().toString())
-                .version("v1")
-                .timestamp(OffsetDateTime.now(ZoneOffset.UTC))
-                .userId(savedTrade.getUserId())
-                .ticker(savedTrade.getTicker())
-                .build();
-        valuationEventPort.publishValuationRequest(event);
+        // 3. Request Valuation after commit
+        ManualTradeUseCaseSupport.publishValuationAfterCommit(
+                valuationEventPort, savedTrade.getUserId(), savedTrade.getTicker());
 
         return savedTrade;
     }

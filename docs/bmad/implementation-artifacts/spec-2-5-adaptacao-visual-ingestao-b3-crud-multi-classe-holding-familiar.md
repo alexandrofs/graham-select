@@ -63,6 +63,33 @@ context: []
 
 ## Implementation Notes
 
+### File List
+- `backend/common/src/main/resources/db/changelog/39-add-asset-class-to-trades.yaml`
+- `backend/common/src/main/resources/db/changelog/db.changelog-master.yaml`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaB3FileUploadedConsumer.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/domain/entities/Trade.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/repository/TradePort.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/CreateManualTradeUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/ListManualTradesUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/UpdateManualTradeUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/DeleteManualTradeUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/GetCustodyPositionsUseCase.java`
+- `backend/common/src/main/java/afsdigital/grahamselect/common/portfolio/application/usecase/ManualTradeUseCaseSupport.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/web/TradeManualController.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/jpa/entities/TradeEntity.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/TradeJpaAdapter.java`
+- `backend/api/src/main/java/afsdigital/grahamselect/api/portfolio/infrastructure/persistence/jpa/repositories/JpaTradeRepository.java`
+- `frontend/lib/src/features/portfolio/presentation/widgets/b3_ingestion_crud_sheet.dart`
+- `frontend/lib/src/features/portfolio/presentation/widgets/manual_operation_entry.dart`
+- `frontend/lib/src/features/portfolio/presentation/widgets/financial_data_table.dart`
+- `frontend/lib/src/features/portfolio/presentation/providers/portfolio_provider.dart`
+- `frontend/lib/src/features/portfolio/data/datasources/portfolio_remote_data_source.dart`
+- `frontend/lib/src/features/portfolio/data/repositories/portfolio_repository_impl.dart`
+- `frontend/lib/src/features/portfolio/domain/repositories/portfolio_repository.dart`
+- `frontend/lib/src/features/portfolio/data/models/trade_model.dart`
+- `frontend/lib/src/features/upload/presentation/providers/upload_provider.dart`
+- `frontend/lib/src/features/dashboard/presentation/pages/dashboard_page.dart`
+
 ## Spec Change Log
 
 ## Review Triage Log
