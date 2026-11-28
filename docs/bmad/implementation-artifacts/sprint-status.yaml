@@ -50,8 +50,8 @@ development_status:
   2-5-adaptação-visual-da-ingestão-b3-crud-manual-multi-classe-e-h: review
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: backlog
+  epic-3: in-progress
+  3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: done
   3-2-motor-de-domínio-da-hierarquia-do-cerrado-aritmética-de-meta: backlog
   3-3-api-rest-para-gestão-de-metas-de-macro-classes-e-templates-d: backlog
   3-4-interface-do-diagrama-do-cerrado-seletor-de-templates-e-trav: backlog
@@ -67,7 +67,7 @@ development_status:
   epic-4-retrospective: optional
 
   epic-5: backlog
-  5-1-modelo-de-dados-de-cache-analítico-controle-finops-e-migrati: backlog
+  5-1-modelo-de-dados-de-cache-analítico-controle-finops-e-migrati: ready-for-dev
   5-2-sanitizador-lgpd-de-pii-normalização-canônica-e-validador-pr: backlog
   5-3-adaptador-vertex-ai-gemini-enterprise-zdr-e-validação-determ: backlog
   5-4-interface-do-kerno-ai-cartões-de-diagnóstico-feedback-e-fall: backlog

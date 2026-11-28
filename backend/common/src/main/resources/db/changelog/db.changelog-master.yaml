@@ -74,6 +74,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/38-add-user-terms-accepted-at.yaml
   - include:
-      file: db/changelog/39-add-asset-class-to-trades.yaml
+      file: db/changelog/39-create-cerrado-tables.yaml
+  - include:
+      file: db/changelog/40-add-asset-class-to-trades.yaml
 
 

@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 39-add-asset-class-to-trades
+      id: 40-add-asset-class-to-trades
       author: bmad-dev
       preConditions:
         - onFail: MARK_RAN
