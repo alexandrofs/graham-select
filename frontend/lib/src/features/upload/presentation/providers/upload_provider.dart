@@ -99,6 +99,13 @@ class UploadProvider extends ChangeNotifier {
 
   Future<void> uploadB3File() async {
     if (_selectedFile == null) return;
+    final lowerName = _selectedFile!.name.toLowerCase();
+    if (!lowerName.endsWith('.xlsx') && !lowerName.endsWith('.pdf')) {
+      _errorMessage =
+          'Formato não suportado. Envie apenas planilhas B3 (.xlsx) ou notas SINACOR (.pdf).';
+      _setState(UploadState.error);
+      return;
+    }
 
     _stopPolling();
     _setState(UploadState.uploading);

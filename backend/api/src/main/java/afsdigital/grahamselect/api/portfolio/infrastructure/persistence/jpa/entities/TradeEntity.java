@@ -53,6 +53,9 @@ public class TradeEntity {
     @Column(nullable = false, length = 100)
     private String broker;
 
+    @Column(name = "asset_class", length = 50)
+    private String assetClass;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

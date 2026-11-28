@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/security/privacy_provider.dart';
 import '../providers/portfolio_provider.dart';
+import 'b3_ingestion_crud_sheet.dart';
 import '../../domain/entities/custody_position.dart';
 import '../../../tags/presentation/providers/tag_provider.dart';
 import '../../../tags/presentation/widgets/asset_tag_selector_sheet.dart';
-
-/// Rota de upload centralizada — evita string mágica espalhada no código
-const _kUploadRoute = '/upload';
 
 class FinancialDataTable extends StatelessWidget {
   const FinancialDataTable({super.key});
@@ -634,8 +631,9 @@ class _EmptyStateWidget extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.go(_kUploadRoute),
+              onPressed: () => B3IngestionCrudSheet.show(context),
               style: ElevatedButton.styleFrom(
+                minimumSize: const Size(48, 48),
                 backgroundColor: const Color(0xFF1B2A4A),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -645,7 +643,7 @@ class _EmptyStateWidget extends StatelessWidget {
               ),
               icon: const Icon(Icons.upload_file),
               label: const Text(
-                'Fazer upload do arquivo B3 para começar',
+                'Atualizar Carteira / + Ativo',
                 style: TextStyle(fontFamily: 'DM Sans', fontWeight: FontWeight.bold),
               ),
             ),

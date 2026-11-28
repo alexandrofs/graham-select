@@ -70,10 +70,12 @@ public class GetCustodyPositionsUseCase {
                 userId, tagId, portfolioTagPort, assetTagPort
         );
 
-        // Ordenar trades globais por data cronologicamente de forma robusta
+        // Ordenar trades globais por data cronologicamente de forma determinística
         List<Trade> allTrades = tradePort.findAllByUserId(userId).stream()
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(Trade::getTradeDate, Comparator.nullsLast(Comparator.naturalOrder())))
+                .sorted(Comparator
+                        .comparing(Trade::getTradeDate, Comparator.nullsFirst(Comparator.naturalOrder()))
+                        .thenComparing(Trade::getCreatedAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                 .toList();
 
         List<String> globalActiveTickers = computeActiveTickers(allTrades);
@@ -88,11 +90,16 @@ public class GetCustodyPositionsUseCase {
         Map<String, BigDecimal> quantities = new HashMap<>();
         Map<String, BigDecimal> totalPurchaseAmount = new HashMap<>();
         Map<String, BigDecimal> totalPurchaseQty = new HashMap<>();
+        Map<String, String> tradeAssetClasses = new HashMap<>();
 
         for (Trade trade : trades) {
             String ticker = trade.getTicker();
             BigDecimal quantity = trade.getQuantity();
             BigDecimal price = trade.getPrice();
+
+            if (trade.getAssetClass() != null && !trade.getAssetClass().isBlank()) {
+                tradeAssetClasses.put(ticker, trade.getAssetClass().trim());
+            }
 
             if (TradeSide.COMPRA.name().equals(trade.getSide())) {
                 quantities.merge(ticker, quantity, BigDecimal::add);
@@ -195,9 +202,15 @@ public class GetCustodyPositionsUseCase {
                         .multiply(BigDecimal.valueOf(100));
             }
 
-            String assetClass = (company != null && company.getAssetClass() != null && !company.getAssetClass().isBlank())
-                    ? company.getAssetClass()
-                    : inferAssetClass(ticker);
+            String tradeAssetClass = tradeAssetClasses.get(ticker);
+            String assetClass;
+            if (tradeAssetClass != null && !tradeAssetClass.isBlank()) {
+                assetClass = tradeAssetClass;
+            } else if (company != null && company.getAssetClass() != null && !company.getAssetClass().isBlank()) {
+                assetClass = company.getAssetClass();
+            } else {
+                assetClass = inferAssetClass(ticker);
+            }
 
             result.add(new CustodyPositionDTO(
                     ticker,
@@ -240,16 +253,37 @@ public class GetCustodyPositionsUseCase {
         return PortfolioTagFilterSupport.stripFractionalSuffix(ticker);
     }
 
+    private static final Set<String> CRYPTO_TICKERS = Set.of(
+            "BTC", "ETH", "SOL", "USDT", "USDC", "BNB", "XRP", "ADA", "DOGE",
+            "MATIC", "DOT", "AVAX", "LINK", "LTC", "HASH11", "QBTC11", "BITH11",
+            "ETHE11", "DEFI11", "CRPT11", "WEB311"
+    );
+
+    private static final Set<String> INTERNATIONAL_ETF_TICKERS = Set.of(
+            "IVVB11", "SPXI11", "NASD11", "WRLD11", "ACWI11", "USTK11",
+            "EURP11", "XINA11", "USAL11", "TECK11", "SHOT11"
+    );
+
     private String inferAssetClass(String ticker) {
         if (ticker == null || ticker.isBlank()) {
             return "Outros";
         }
-        String t = stripFractionalSuffix(ticker);
+        String t = stripFractionalSuffix(ticker).trim().toUpperCase(Locale.ROOT);
 
         // Renda Fixa
-        if (t.startsWith("TESOURO") || t.startsWith("CDB") || t.startsWith("LCI") 
+        if (t.startsWith("TESOURO") || t.startsWith("CDB") || t.startsWith("LCI")
                 || t.startsWith("LCA") || t.contains("DIRETO") || t.contains("DEBENTURE")) {
             return "Renda Fixa";
+        }
+
+        // Criptoativos (direto ou ETFs de cripto na B3)
+        if (CRYPTO_TICKERS.contains(t) || t.endsWith("-USD") || t.endsWith("-BRL")) {
+            return "Criptoativos";
+        }
+
+        // ETFs Internacionais listados na B3 (precedência antes de FIIs *11)
+        if (INTERNATIONAL_ETF_TICKERS.contains(t)) {
+            return "Internacional";
         }
 
         // FIIs (Imobiliários)
@@ -265,6 +299,11 @@ public class GetCustodyPositionsUseCase {
         // Ações ordinárias/preferenciais
         if (t.matches("^[A-Z]{4}[34568]$") || (t.length() == 5 && Character.isDigit(t.charAt(4)))) {
             return "Ações";
+        }
+
+        // Ações/ETFs Internacionais diretos (ex.: AAPL, MSFT, VOO, BRK.B)
+        if (t.matches("^[A-Z]{1,5}(\\.[A-Z]{1,2})?$")) {
+            return "Internacional";
         }
 
         return "Outros";

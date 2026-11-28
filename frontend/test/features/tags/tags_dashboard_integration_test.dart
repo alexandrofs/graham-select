@@ -36,6 +36,9 @@ class _FakePortfolioRepository implements PortfolioRepository {
   final _StatefulTagRepository? _tagRepository;
 
   @override
+  Future<List<Trade>> getManualTrades() async => [];
+
+  @override
   Future<Trade> createManualTrade({
     required String ticker,
     required String side,
@@ -43,8 +46,27 @@ class _FakePortfolioRepository implements PortfolioRepository {
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
   }) =>
       throw UnimplementedError();
+
+  @override
+  Future<Trade> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> deleteManualTrade(String id) => throw UnimplementedError();
 
   List<String> _untaggedTickers() {
     if (_tagRepository == null) return const [];

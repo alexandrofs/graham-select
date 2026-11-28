@@ -2,7 +2,8 @@
 title: 'Story 2.5: Adaptação Visual da Ingestão B3 e CRUD Manual Multi-Classe'
 type: 'feature'
 created: '2026-11-27'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: '6c31404719fc4efb8b6115f76487eb717240784a'
 route: 'dispatch'
 review_loop_iteration: 0
 context: []
@@ -50,12 +51,12 @@ context: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `backend/common/src/main/resources/db/changelog/39-add-asset-class-to-trades.yaml` e `db.changelog-master.yaml` -- Criar migration idempotente com `preConditions` para `trades.asset_class` -- Suportar classificação manual sem quebrar dados existentes.
-- [ ] `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaB3FileUploadedConsumer.java` -- Garantir `Files.deleteIfExists(filePath)` no `finally` após o parsing e falha terminal -- Cumprir descarte imediato de PII bruto.
-- [ ] `backend/common/` e `backend/api/` (`TradeManualController.java`, `TradeEntity.java`, `TradeJpaAdapter.java`, `JpaTradeRepository.java`, use cases de `portfolio`) -- Implementar `GET`/`PUT /{id}`/`DELETE /{id}` em `/api/v1/trades/manual` (ownership `404`, `409` duplicidade, auditoria, `ValuationRequestedEvent`, `side` `COMPRA`/`VENDA`), passar `profileId` em `tradePort.exists` e atualizar `GetCustodyPositionsUseCase` (precedência + ETFs `11` + `Internacional`/`Criptoativos`) -- Completar suporte de API ao CRUD Multi-Classe.
-- [ ] `backend/common/src/test/` e `backend/api/src/test/` -- Adicionar testes unitários, `TradeManualControllerIT` e verificação de descarte em `KafkaB3WorkerIT` -- Garantir cobertura completa e zero regressão.
-- [ ] `frontend/lib/src/features/portfolio/`, `upload_provider.dart` e `dashboard_page.dart` -- Criar `B3IngestionCrudSheet` (Upload `.xlsx`/`.pdf` + CRUD Manual 5 Macro Classes), estender `PortfolioRemoteDataSource`/`PortfolioRepository`/`PortfolioProvider` com `GET`/`PUT`/`DELETE` e integrar CTA `"Atualizar Carteira / + Ativo"` + `_EmptyStateWidget` -- Entregar fluxo unificado no Design System.
-- [ ] `frontend/test/` -- Criar/atualizar testes de widget e provider para `B3IngestionCrudSheet`, `DashboardPage`, `FinancialDataTable` e `PortfolioProvider`, executando `flutter analyze` e `flutter test` -- Validar todos os cenários da Matriz I/O.
+- [x] `backend/common/src/main/resources/db/changelog/39-add-asset-class-to-trades.yaml` e `db.changelog-master.yaml` -- Criar migration idempotente com `preConditions` para `trades.asset_class` -- Suportar classificação manual sem quebrar dados existentes.
+- [x] `backend/api/src/main/java/afsdigital/grahamselect/api/upload/infrastructure/messaging/KafkaB3FileUploadedConsumer.java` -- Garantir `Files.deleteIfExists(filePath)` no `finally` após o parsing e falha terminal -- Cumprir descarte imediato de PII bruto.
+- [x] `backend/common/` e `backend/api/` (`TradeManualController.java`, `TradeEntity.java`, `TradeJpaAdapter.java`, `JpaTradeRepository.java`, use cases de `portfolio`) -- Implementar `GET`/`PUT /{id}`/`DELETE /{id}` em `/api/v1/trades/manual` (ownership `404`, `409` duplicidade, auditoria, `ValuationRequestedEvent`, `side` `COMPRA`/`VENDA`), passar `profileId` em `tradePort.exists` e atualizar `GetCustodyPositionsUseCase` (precedência + ETFs `11` + `Internacional`/`Criptoativos`) -- Completar suporte de API ao CRUD Multi-Classe.
+- [x] `backend/common/src/test/` e `backend/api/src/test/` -- Adicionar testes unitários, `TradeManualControllerIT` e verificação de descarte em `KafkaB3WorkerIT` -- Garantir cobertura completa e zero regressão.
+- [x] `frontend/lib/src/features/portfolio/`, `upload_provider.dart` e `dashboard_page.dart` -- Criar `B3IngestionCrudSheet` (Upload `.xlsx`/`.pdf` + CRUD Manual 5 Macro Classes), estender `PortfolioRemoteDataSource`/`PortfolioRepository`/`PortfolioProvider` com `GET`/`PUT`/`DELETE` e integrar CTA `"Atualizar Carteira / + Ativo"` + `_EmptyStateWidget` -- Entregar fluxo unificado no Design System.
+- [x] `frontend/test/` -- Criar/atualizar testes de widget e provider para `B3IngestionCrudSheet`, `DashboardPage`, `FinancialDataTable` e `PortfolioProvider`, executando `flutter analyze` e `flutter test` -- Validar todos os cenários da Matriz I/O.
 
 **Acceptance Criteria:**
 - Given usuário autenticado no `DashboardPage`, when aciona `"Atualizar Carteira / + Ativo"` ou o estado Zero-Blank-Screen, then `B3IngestionCrudSheet` abre em nível único permitindo upload B3 (`.xlsx`/`.pdf`) com descarte do arquivo bruto no backend e CRUD manual completo nas 5 Macro Classes canônicas em `BRL`.
@@ -65,6 +66,29 @@ context: []
 ## Spec Change Log
 
 ## Review Triage Log
+
+| Layer | Location | Verdict | Route | Evidence |
+|-------|----------|---------|-------|----------|
+| blind-hunter, edge-case-hunter | `b3_ingestion_crud_sheet.dart` (`_startEditing`, `_submitManualTrade`) | medium | patch | `_startEditing` não preserva `trade.profileId`, sobrescrevendo `profileId` com `null` no `PUT` (seletor multi-CPF segue fora de escopo). |
+| blind-hunter | `b3_ingestion_crud_sheet.dart` (`_buildManualCrudTab`) | medium | patch | Quando `manualTradesError != null` e `manualTradesLoading == false`, a UI cai no fallback `'Nenhum lançamento encontrado.'` sem exibir erro. |
+| edge-case-hunter | `b3_ingestion_crud_sheet.dart` (`deleteManualTrade`) | medium | patch | Excluir o lançamento atualmente em `_editingTradeId` mantém o formulário em modo edição, causando `PUT` `404` ao salvar. |
+| blind-hunter, edge-case-hunter | `b3_ingestion_crud_sheet.dart` (`_startEditing` price) | medium | patch | `trade.price.toStringAsFixed(2)` arredonda preços cripto/fracionários (`< 0.005` vira `0,00`). |
+| edge-case-hunter | `b3_ingestion_crud_sheet.dart` (`_selectedSide`) | medium | patch | `SegmentedButton` lança `AssertionError` se `trade.side` não for `COMPRA` ou `VENDA`. |
+| edge-case-hunter | `b3_ingestion_crud_sheet.dart` (`_pickDate`) | low | patch | `showDatePicker` exige `firstDate <= initialDate <= lastDate`; clamping evita `AssertionError` em datas antigas/futuras. |
+| blind-hunter, edge-case-hunter, verification-gap | `portfolio_provider.dart` (`createManualTrade`/`updateManualTrade`/`deleteManualTrade`) | medium | patch | Limpar `_manualTrades = []` antes da chamada ao repositório apaga a lista da UI em falhas como `409 Conflict`. |
+| blind-hunter, edge-case-hunter | `TradeManualController.java` (`ManualTradeRequest`) | medium | patch | Faltam `@Size(max = 20)` em `ticker`, `@Size(max = 100)` em `broker` e `@Size(max = 50)` em `assetClass` para retornar `400` em vez de `500`. |
+| blind-hunter | `GetCustodyPositionsUseCase.java` (`tradeAssetClasses`) | medium | patch | `tradeAssetClasses.put` depende da ordem arbitrária do repositório em vez de ordenar por `tradeDate`/`createdAt`. |
+| blind-hunter | `GetCustodyPositionsUseCase.java` (`inferAssetClass` ETFs `BOVA11`/`SMAL11`) | medium | defer | ETFs de ações BR terminados em `11` (`BOVA11`, `SMAL11`) caírem em `FIIs` é comportamento pré-existente fora dos tickers `IVVB11`/`HASH11` desta entrega. |
+| blind-hunter | `GetCustodyPositionsUseCase.java` vs `kCanonicalMacroClasses` (`Ações` vs `Ações BR`) | false | reject | `MacroClassDistributionCard` e `GetCustodyPositionsUseCaseTest` já esperam/normalizam `"Ações"` e `"Renda Fixa"` para compatibilidade brownfield. |
+| blind-hunter | `b3_ingestion_crud_sheet.dart` (confirmação de exclusão) | low | reject | Spec não exige modal de confirmação na exclusão; adicionar diálogo aumentaria complexidade sem defeito funcional. |
+| blind-hunter | `UpdateManualTradeUseCase.java`, `DeleteManualTradeUseCase.java` (`@SneakyThrows` / evento em `@Transactional`) | low | defer | Segue exatamente o padrão pré-existente de `CreateManualTradeUseCase.java`. |
+| blind-hunter | `KafkaB3FileUploadedConsumer.java` (`catch`/`finally`) | false | reject | Não relançar `IOException` após `failProcessing` é restrição explícita da spec; `getAndSet(0)` no `catch` já zera contadores antes do `finally` e `filePath` é sempre não-nulo. |
+| blind-hunter | `spec-2-5` / `sprint-status.yaml` (`in-review` / `File List`) | false | reject | `File List` e sincronização final para `done` são executados na etapa `step-05-present`. |
+| verification-gap | `TradeManualControllerIT.java` (`PUT` `409` com/sem `profileId`) | medium | patch | Falta teste de integração para `PUT /api/v1/trades/manual/{id}` retornando `409 Conflict` com e sem `profileId`. |
+| verification-gap | `KafkaB3WorkerIT.java` / `KafkaB3FileUploadedConsumer` (`IOException` -> `FAILED` + descarte) | medium | patch | Falta teste cobrindo falha terminal/`IOException` no consumidor garantindo status `FAILED` e `Files.notExists(filePath)`. |
+| verification-gap | `portfolio_remote_data_source_test.dart` (`getManualTrades`/`create`/`update`/`delete`) | medium | patch | Faltam testes unitários dos novos métodos HTTP e `TradeModel.fromJson` (`assetClass`/`profileId`). |
+| verification-gap | `portfolio_provider_test.dart` (`loadManualTrades`/`update`/`delete`/refresh) | medium | patch | Faltam testes unitários de `loadManualTrades`, `updateManualTrade`, `deleteManualTrade` e `_refreshAfterManualMutation`. |
+| verification-gap | `b3_ingestion_crud_sheet_test.dart` (`Cotas inteiras`, upload-success, edição/exclusão) | medium | patch | Faltam testes de widget para validação de cotas inteiras, refresh pós-upload e fluxos de edição/exclusão. |
 
 ## Design Notes
 

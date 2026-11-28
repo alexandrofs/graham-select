@@ -119,6 +119,7 @@ public class KafkaB3WorkerIT {
             assertThat(status).isNotNull();
             assertThat(status.status().name()).isEqualTo("COMPLETED");
             assertThat(status.processedRows()).isEqualTo(2);
+            assertThat(Files.notExists(filePath)).isTrue();
         });
     }
 
@@ -185,5 +186,38 @@ public class KafkaB3WorkerIT {
         });
 
         consumer.close();
+    }
+
+    @Test
+    public void shouldMarkFailedAndDeleteFileWhenParsingThrowsIOException() throws Exception {
+        String userId = "user-io-error-123";
+        String correlationId = UUID.randomUUID().toString();
+        String fileName = "corrupted-non-zip.xlsx";
+        Path filePath = Path.of(storagePath).toAbsolutePath().resolve(fileName);
+
+        Files.createDirectories(filePath.getParent());
+        Files.writeString(filePath, "not-a-valid-xlsx-zip-payload");
+
+        importStatusPort.createPending(correlationId, userId, fileName);
+
+        FileUploadedEvent uploadEvent = FileUploadedEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .version("v1")
+                .timestamp(OffsetDateTime.now(ZoneOffset.UTC))
+                .userId(userId)
+                .correlationId(correlationId)
+                .fileName(fileName)
+                .storagePath(filePath.toString())
+                .build();
+
+        kafkaTemplate.send(TopicConstants.B3_UPLOAD_TOPIC, userId, uploadEvent);
+
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() -> {
+            B3ImportStatus status = importStatusPort.findByCorrelationIdAndUserId(correlationId, userId)
+                    .orElse(null);
+            assertThat(status).isNotNull();
+            assertThat(status.status().name()).isEqualTo("FAILED");
+            assertThat(Files.notExists(filePath)).isTrue();
+        });
     }
 }

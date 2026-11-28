@@ -97,14 +97,20 @@ public class KafkaB3FileUploadedConsumer {
                     event,
                     exception.getMessage() == null ? "Falha ao processar arquivo B3." : exception.getMessage()
             );
-            if (exception instanceof IOException ioException) {
-                throw ioException;
-            }
         } finally {
             int remainingSuccess = successCounter.getAndSet(0);
             int remainingFailure = failureCounter.getAndSet(0);
             if (remainingSuccess > 0 || remainingFailure > 0) {
                 processB3FileUseCase.updateProgress(event, remainingSuccess, remainingFailure, lastFailureReason.get());
+            }
+            try {
+                if (Files.deleteIfExists(filePath)) {
+                    log.info("Arquivo bruto descartado após processamento: correlationId={}, fileName={}",
+                            event.correlationId(), event.fileName());
+                }
+            } catch (IOException deleteException) {
+                log.error("Falha ao descartar arquivo bruto após processamento: correlationId={}, fileName={}, error={}",
+                        event.correlationId(), event.fileName(), deleteException.getMessage(), deleteException);
             }
         }
     }

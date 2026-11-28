@@ -46,6 +46,16 @@ class MockPortfolioRepository implements PortfolioRepository {
   Future<PortfolioSummary> Function(String? tagId)? summaryHandler;
   Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})> Function(String? tagId)? custodyHandler;
 
+  List<Trade> manualTradesToReturn = [];
+
+  @override
+  Future<List<Trade>> getManualTrades() async {
+    if (shouldThrow) {
+      throw Exception('Failed to list manual trades');
+    }
+    return manualTradesToReturn;
+  }
+
   @override
   Future<Trade> createManualTrade({
     required String ticker,
@@ -54,6 +64,8 @@ class MockPortfolioRepository implements PortfolioRepository {
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
   }) async {
     if (shouldThrow) {
       throw Exception('Failed to create manual trade');
@@ -61,14 +73,55 @@ class MockPortfolioRepository implements PortfolioRepository {
     return Trade(
       id: '123',
       userId: 'user-123',
+      profileId: profileId,
       ticker: ticker,
       side: side,
       tradeDate: tradeDate,
       quantity: quantity,
       price: price,
       broker: broker,
+      assetClass: assetClass,
       createdAt: DateTime.now(),
     );
+  }
+
+  @override
+  Future<Trade> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+  }) async {
+    if (shouldThrow) {
+      throw Exception('Failed to update manual trade');
+    }
+    return Trade(
+      id: id,
+      userId: 'user-123',
+      profileId: profileId,
+      ticker: ticker,
+      side: side,
+      tradeDate: tradeDate,
+      quantity: quantity,
+      price: price,
+      broker: broker,
+      assetClass: assetClass,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<void> deleteManualTrade(String id) async {
+    if (shouldThrow) {
+      throw Exception('Failed to delete manual trade');
+    }
+    manualTradesToReturn =
+        manualTradesToReturn.where((t) => t.id != id).toList();
   }
 
   @override
@@ -588,6 +641,93 @@ void main() {
         expect(cachedProvider.custodyPositions, isEmpty);
         expect(cachedProvider.isOfflineCache, isFalse);
         expect(cachedProvider.lastSyncedAt, isNull);
+      });
+    });
+
+    group('CRUD Manual Multi-Classe', () {
+      test('loadManualTrades carrega lista e trata erro', () async {
+        mockRepository.manualTradesToReturn = [
+          Trade(
+            id: 't-1',
+            userId: 'u-1',
+            ticker: 'IVVB11',
+            side: 'COMPRA',
+            tradeDate: DateTime(2026, 5, 10),
+            quantity: 10,
+            price: 300,
+            broker: 'Manual',
+            assetClass: 'Internacional',
+            createdAt: DateTime(2026, 5, 10),
+          ),
+        ];
+
+        await provider.loadManualTrades();
+        expect(provider.manualTrades.length, equals(1));
+        expect(provider.manualTradesError, isNull);
+
+        mockRepository.shouldThrow = true;
+        await provider.loadManualTrades();
+        expect(provider.manualTradesError, isNotNull);
+      });
+
+      test('preserva manualTrades quando mutação falha e atualiza após sucesso', () async {
+        mockRepository.manualTradesToReturn = [
+          Trade(
+            id: 't-1',
+            userId: 'u-1',
+            ticker: 'PETR4',
+            side: 'COMPRA',
+            tradeDate: DateTime(2026, 5, 10),
+            quantity: 10,
+            price: 30,
+            broker: 'Manual',
+            assetClass: 'Ações BR',
+            createdAt: DateTime(2026, 5, 10),
+          ),
+        ];
+        await provider.loadManualTrades();
+        expect(provider.manualTrades.length, equals(1));
+
+        // Falha na mutação preserva lista existente
+        mockRepository.shouldThrow = true;
+        final okFail = await provider.updateManualTrade(
+          id: 't-1',
+          ticker: 'PETR4',
+          side: 'COMPRA',
+          tradeDate: DateTime(2026, 5, 10),
+          quantity: 20,
+          price: 31,
+          broker: 'XP',
+        );
+        expect(okFail, isFalse);
+        expect(provider.tradeStatus, equals(TradeStatus.error));
+        expect(provider.manualTrades.length, equals(1));
+
+        // Sucesso na mutação executa refresh
+        mockRepository.shouldThrow = false;
+        mockRepository.summaryToReturn = PortfolioSummary(
+          totalEquity: 1000,
+          grossYieldPercentage: 5,
+          accumulatedDividends: 0,
+          monthlyProjection: 0,
+        );
+        mockRepository.evolutionToReturn = const PortfolioEvolution(monthlyData: []);
+        final okUpdate = await provider.updateManualTrade(
+          id: 't-1',
+          ticker: 'PETR4',
+          side: 'COMPRA',
+          tradeDate: DateTime(2026, 5, 10),
+          quantity: 20,
+          price: 31,
+          broker: 'XP',
+        );
+        expect(okUpdate, isTrue);
+        expect(provider.tradeStatus, equals(TradeStatus.success));
+        expect(mockRepository.summaryTagCalls.length, greaterThanOrEqualTo(1));
+
+        final okDelete = await provider.deleteManualTrade('t-1');
+        expect(okDelete, isTrue);
+        expect(provider.manualTrades, isEmpty);
       });
     });
   });

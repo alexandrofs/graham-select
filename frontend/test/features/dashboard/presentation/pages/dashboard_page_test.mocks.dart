@@ -199,13 +199,15 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
           as _i6.Future<void>);
 
   @override
-  _i6.Future<void> createManualTrade({
+  _i6.Future<bool> createManualTrade({
     required String? ticker,
     required String? side,
     required DateTime? tradeDate,
     required double? quantity,
     required double? price,
     required String? broker,
+    String? assetClass,
+    String? profileId,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#createManualTrade, [], {
@@ -215,11 +217,13 @@ class MockPortfolioProvider extends _i1.Mock implements _i3.PortfolioProvider {
               #quantity: quantity,
               #price: price,
               #broker: broker,
+              #assetClass: assetClass,
+              #profileId: profileId,
             }),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i6.Future<bool>.value(true),
+            returnValueForMissingStub: _i6.Future<bool>.value(true),
           )
-          as _i6.Future<void>);
+          as _i6.Future<bool>);
 
   @override
   void resetStatus() => super.noSuchMethod(

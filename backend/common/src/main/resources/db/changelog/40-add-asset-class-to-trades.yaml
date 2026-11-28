@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 40-add-asset-class-to-trades
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: trades
+                columnName: asset_class
+      changes:
+        - addColumn:
+            tableName: trades
+            columns:
+              - column:
+                  name: asset_class
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropColumn:
+            tableName: trades
+            columnName: asset_class

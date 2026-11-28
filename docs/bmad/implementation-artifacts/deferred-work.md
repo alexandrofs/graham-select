@@ -124,3 +124,10 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
   summary: Implementar filtro global Multi-CPF (`MultiCpfSelector` na `_TopBar`, `profileId` nos endpoints `/api/v1/portfolios/*`), badge `"Pausado no Free — Upgrade Pro"` e consentimento de representação legal para dependentes menores (LGPD Art. 14) em `FamilyProfilesPage` e `FamilyProfileController`, além de validação de expurgo Multi-CPF em `AccountDeletionIT`.
   evidence: Fatiado da Story 2.5 no gate de tokens para manter a spec principal focada em Ingestão B3 (com descarte de PII) e CRUD Manual Multi-Classe dentro do limite de 1600 tokens.
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
+  summary: Classificar ETFs de ações brasileiras terminados em `11` (ex.: `BOVA11`, `SMAL11`) fora de `FIIs` em `GetCustodyPositionsUseCase.inferAssetClass`.
+  evidence: Pré-existente: apenas ETFs internacionais (`IVVB11`, etc.) e cripto (`HASH11`, etc.) estão mapeados antes da regra `t.endsWith("11") -> "FIIs"`.
+- source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
+  summary: Substituir `@SneakyThrows` e publicação de `ValuationRequestedEvent` dentro de `@Transactional` por logging `ERROR` explícito e outbox/after-commit nos use cases de trade manual.
+  evidence: `UpdateManualTradeUseCase` e `DeleteManualTradeUseCase` replicam o padrão pré-existente de `CreateManualTradeUseCase.java:25-68`.
