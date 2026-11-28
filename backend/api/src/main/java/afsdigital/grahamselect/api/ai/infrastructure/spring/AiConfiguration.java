@@ -5,7 +5,11 @@ import afsdigital.grahamselect.common.ai.application.port.AiDiagnosticCachePort;
 import afsdigital.grahamselect.common.ai.application.port.AiUsageCounterPort;
 import afsdigital.grahamselect.common.ai.application.service.AiDiagnosticCacheService;
 import afsdigital.grahamselect.common.ai.application.service.AiFinOpsRateLimitService;
+import afsdigital.grahamselect.common.ai.application.service.AiPayloadValidator;
+import afsdigital.grahamselect.common.ai.application.service.PiiSanitizer;
+import afsdigital.grahamselect.common.ai.application.service.PortfolioStateHashCalculator;
 import afsdigital.grahamselect.common.ai.domain.model.AiFinOpsProperties;
+import afsdigital.grahamselect.common.ai.domain.service.TickerAllowlistCatalog;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +25,26 @@ public class AiConfiguration {
                 config.getMonthlyRateLimit(),
                 config.getCacheTtlHours()
         );
+    }
+
+    @Bean
+    public TickerAllowlistCatalog tickerAllowlistCatalog() {
+        return new TickerAllowlistCatalog();
+    }
+
+    @Bean
+    public PiiSanitizer piiSanitizer(TickerAllowlistCatalog tickerAllowlistCatalog) {
+        return new PiiSanitizer(tickerAllowlistCatalog);
+    }
+
+    @Bean
+    public PortfolioStateHashCalculator portfolioStateHashCalculator(TickerAllowlistCatalog tickerAllowlistCatalog) {
+        return new PortfolioStateHashCalculator(tickerAllowlistCatalog);
+    }
+
+    @Bean
+    public AiPayloadValidator aiPayloadValidator() {
+        return new AiPayloadValidator();
     }
 
     @Bean
