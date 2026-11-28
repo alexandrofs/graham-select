@@ -77,10 +77,14 @@ public class UserDataPurgeAdapter implements UserDataPurgePort {
             deleteQuietly("b3_import_status", "user_id", idStr);
         }
 
+        // 9. Diagrama do Cerrado (Epic 3 - user_id BIGINT FK para users.id)
+        deleteQuietly("tb_cerrado_asset_grade", "user_id", userId);
+        deleteQuietly("tb_cerrado_preferences", "user_id", userId);
+
         log.info("Expurgo definitivo de dados pessoais concluído com sucesso para userId={}", userId);
     }
 
-    private void deleteQuietly(String table, String column, String value) {
+    private void deleteQuietly(String table, String column, Object value) {
         try {
             int rows = jdbcTemplate.update("DELETE FROM " + table + " WHERE " + column + " = ?", value);
             if (rows > 0) {

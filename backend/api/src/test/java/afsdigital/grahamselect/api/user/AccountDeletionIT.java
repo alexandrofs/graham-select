@@ -56,6 +56,8 @@ public class AccountDeletionIT extends BaseRepositoryIT {
 
     @BeforeEach
     void cleanUp() {
+        jdbcTemplate.update("DELETE FROM tb_cerrado_asset_grade");
+        jdbcTemplate.update("DELETE FROM tb_cerrado_preferences");
         jdbcTemplate.update("DELETE FROM web_push_notification_logs");
         jdbcTemplate.update("DELETE FROM web_push_subscriptions");
         jdbcTemplate.update("DELETE FROM web_push_preferences");
@@ -131,6 +133,16 @@ public class AccountDeletionIT extends BaseRepositoryIT {
                         "VALUES (?, ?, 'PATRIMONIO_TOTAL', 10000.00, 500.00, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
                 java.util.UUID.randomUUID().toString(), sub
         );
+        jdbcTemplate.update(
+                "INSERT INTO tb_cerrado_preferences (user_id, target_acoes_br, target_fiis, target_renda_fixa, target_internacional, target_cripto, graham_multiplier, graham_filter_enabled, updated_at) " +
+                        "VALUES (?, 35.00, 25.00, 25.00, 14.00, 1.00, 1.30, true, CURRENT_TIMESTAMP)",
+                user.getId()
+        );
+        jdbcTemplate.update(
+                "INSERT INTO tb_cerrado_asset_grade (user_id, ticker, macro_class, sub_class, quality_grade, quarantine_corporate_event, updated_at) " +
+                        "VALUES (?, 'WEGE3', 'ACOES_BR', 'EQUITY_GROWTH', 9, false, CURRENT_TIMESTAMP)",
+                user.getId()
+        );
 
         Integer waPrefsBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM whatsapp_notification_preferences WHERE user_id = ?", Integer.class, sub);
         assertThat(waPrefsBefore).isEqualTo(1);
@@ -162,6 +174,8 @@ public class AccountDeletionIT extends BaseRepositoryIT {
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM web_push_subscriptions WHERE user_id = ?", Integer.class, sub)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM web_push_notification_logs WHERE user_id = ?", Integer.class, sub)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM financial_goals WHERE user_id = ?", Integer.class, sub)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM tb_cerrado_preferences WHERE user_id = ?", Integer.class, user.getId())).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM tb_cerrado_asset_grade WHERE user_id = ?", Integer.class, user.getId())).isZero();
     }
 
     @Test
