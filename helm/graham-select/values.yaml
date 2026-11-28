@@ -94,6 +94,9 @@ valuation:
     SERVER_PORT: "8081"
     BPL_JVM_THREAD_COUNT: "30"
     JAVA_TOOL_OPTIONS: "-Xss512k -XX:ReservedCodeCacheSize=64M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"
+    AI_VERTEX_PROJECT_ID: ""
+    AI_VERTEX_LOCATION: "us-central1"
+    AI_VERTEX_MODEL_NAME: "gemini-2.5-flash"
 
   resources:
     requests:
@@ -150,6 +153,7 @@ secrets:
   whatsappMetaPhoneNumberId: ""
   webpushVapidPrivateKey: ""
   webpushVapidPublicKey: ""
+  gcpVertexCredentialsJson: ""
 
 # ------------------------------------------------------------------------------
 # Frontend Flutter Web Configuration

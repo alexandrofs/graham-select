@@ -32,3 +32,12 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
+
+app:
+  ai:
+    vertex:
+      project-id: ${AI_VERTEX_PROJECT_ID:}
+      location: ${AI_VERTEX_LOCATION:us-central1}
+      model-name: ${AI_VERTEX_MODEL_NAME:gemini-2.5-flash}
+      timeout: 15s
+      temperature: 0.1
