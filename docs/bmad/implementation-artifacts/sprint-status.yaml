@@ -52,7 +52,7 @@ development_status:
 
   epic-3: in-progress
   3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: done
-  3-2-motor-de-domínio-da-hierarquia-do-cerrado-aritmética-de-meta: review
+  3-2-motor-de-domínio-da-hierarquia-do-cerrado-aritmética-de-meta: done
   3-3-api-rest-para-gestão-de-metas-de-macro-classes-e-templates-d: backlog
   3-4-interface-do-diagrama-do-cerrado-seletor-de-templates-e-trav: backlog
   3-5-gestão-visual-de-notas-de-qualidade-slider-48dp-assistente-d: backlog
