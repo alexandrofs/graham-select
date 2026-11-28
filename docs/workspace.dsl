@@ -14,6 +14,10 @@ workspace {
             description "Serviços de Push dos navegadores (FCM, Mozilla Autopush, Apple Push) via protocolo W3C Web Push e autenticação VAPID (RFC 8291/8292)."
         }
 
+        vertexAi = softwareSystem "Google Cloud Vertex AI (Enterprise ZDR)" {
+            description "API corporativa Vertex AI (gemini-2.5-flash) sob contrato Enterprise Zero Data Retention para diagnósticos percentuais de carteira."
+        }
+
         softwareSystem = softwareSystem "GrahamSelect" {
         
             description "Aplicativo para calcular as 10 empresas mais baratas usando a regra de Benjamin Graham."
@@ -112,7 +116,22 @@ workspace {
                     technology "Kafka Listener"
                     kafka -> consumer
                     consumer -> calculationService
-                }                
+                }
+                postGenerationValidator = component "Post-Generation Validator" {
+                    description "Valida ancoragem numérica (±0.1 / ±0.01 HHI), tickers permitidos e filtro léxico CVM 19/20"
+                    technology "Java Service"
+                }
+                deterministicFallbackGenerator = component "Deterministic Portfolio Fallback Generator" {
+                    description "Gera diagnóstico quantitativo local em 4 blocos quando o LLM falha, excede 15s ou viola CVM/ancoragem"
+                    technology "Java Service"
+                }
+                vertexAiGeminiAdapter = component "Vertex AI Gemini Adapter" {
+                    description "Implementa AiPortfolioAnalyzerPort via RestClient (timeout 15s, OAuth2 ADC, gemini-2.5-flash, ZDR)"
+                    technology "Java Service, RestClient, Google Auth"
+                    vertexAiGeminiAdapter -> vertexAi "Envia snapshot sanitizado (ZDR, gemini-2.5-flash, timeout 15s)"
+                    vertexAiGeminiAdapter -> postGenerationValidator "Valida blocos gerados contra alucinações e CVM 19/20"
+                    vertexAiGeminiAdapter -> deterministicFallbackGenerator "Aciona fallback local sem retry síncrono"
+                }
             }
     
         }
