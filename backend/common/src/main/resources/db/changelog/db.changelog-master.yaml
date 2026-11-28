@@ -73,5 +73,7 @@ databaseChangeLog:
       file: db/changelog/37-create-founder-quota-and-add-user-commercial-plan.yaml
   - include:
       file: db/changelog/38-add-user-terms-accepted-at.yaml
+  - include:
+      file: db/changelog/39-create-cerrado-tables.yaml
 
 

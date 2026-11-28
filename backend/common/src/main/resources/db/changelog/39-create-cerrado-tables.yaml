@@ -1,0 +1,163 @@
+databaseChangeLog:
+  - changeSet:
+      id: 39-create-tb-cerrado-preferences
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tb_cerrado_preferences
+      changes:
+        - createTable:
+            tableName: tb_cerrado_preferences
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_acoes_br
+                  type: DECIMAL(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_fiis
+                  type: DECIMAL(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_renda_fixa
+                  type: DECIMAL(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_internacional
+                  type: DECIMAL(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_cripto
+                  type: DECIMAL(5,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: graham_multiplier
+                  type: DECIMAL(4,2)
+                  defaultValueNumeric: 1.30
+                  constraints:
+                    nullable: false
+              - column:
+                  name: graham_filter_enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: tb_cerrado_preferences
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_cerrado_preferences_user
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: tb_cerrado_preferences
+            columnNames: user_id
+            constraintName: uq_cerrado_preferences_user
+      rollback:
+        - dropTable:
+            tableName: tb_cerrado_preferences
+
+  - changeSet:
+      id: 39-create-tb-cerrado-asset-grade
+      author: bmad-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tb_cerrado_asset_grade
+      changes:
+        - createTable:
+            tableName: tb_cerrado_asset_grade
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ticker
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: macro_class
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sub_class
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quality_grade
+                  type: INT
+                  defaultValueNumeric: 6
+                  constraints:
+                    nullable: false
+              - column:
+                  name: custom_risk_ceiling
+                  type: DECIMAL(5,2)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: quarantine_corporate_event
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: tb_cerrado_asset_grade
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_cerrado_asset_grade_user
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: tb_cerrado_asset_grade
+            columnNames: user_id, ticker
+            constraintName: uq_cerrado_asset_grade_user_ticker
+        - createIndex:
+            tableName: tb_cerrado_asset_grade
+            indexName: idx_cerrado_asset_grade_user_id
+            columns:
+              - column:
+                  name: user_id
+      rollback:
+        - dropTable:
+            tableName: tb_cerrado_asset_grade
