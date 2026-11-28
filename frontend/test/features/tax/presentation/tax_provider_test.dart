@@ -190,5 +190,28 @@ void main() {
       expect(result, isNull);
       expect(provider.isExporting, false);
     });
+
+    test('exportCsv e exportMonthlyCsv devem invocar csvDownloader com filename por ano', () async {
+      final downloads = <Map<String, String>>[];
+      final customProvider = TaxProvider(
+        repository: repository,
+        csvDownloader: ({required String content, required String fileName}) async {
+          downloads.add({'content': content, 'fileName': fileName});
+        },
+      );
+      repository.availableYearsToReturn = [2025];
+      await customProvider.loadAvailableYears();
+
+      final bensCsv = await customProvider.exportCsv();
+      final monthlyCsv = await customProvider.exportMonthlyCsv();
+
+      expect(bensCsv, 'csv content');
+      expect(monthlyCsv, 'monthly csv content');
+      expect(downloads, [
+        {'content': 'csv content', 'fileName': 'bens-e-direitos-2025.csv'},
+        {'content': 'monthly csv content', 'fileName': 'ganhos-capital-mensal-2025.csv'},
+      ]);
+      expect(customProvider.isExporting, false);
+    });
   });
 }

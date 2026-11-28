@@ -42,7 +42,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 - Integração com Agregador Real de Produção vs Mock Sandbox [backend/api/src/main/java/afsdigital/grahamselect/api/openfinance/infrastructure/connector/OpenFinanceConnectorAdapter.java:180] — A integração com agregadores reais (Pluggy, Celcoin ou APIs Bacen FAPI) em modo não-mock requer credenciamento formal e contratação de parceiro de Open Finance, mantendo-se o MockOpenFinanceConnectorAdapter como driver ativo de testes/sandbox.
 - Reconciliação direta de custódia vs derivação por transações de trades [backend/common/src/main/java/afsdigital/grahamselect/common/openfinance/application/usecase/SyncOpenFinanceConnectionUseCase.java:88] — No Graham-Select a custódia consolidada é derivada reativamente do razão de transações de compra/venda pelo valuation-service. A reconciliação forçada de saldo estático fica diferida como evolução de auditoria de custódia.
-- Processamento sequencial em thread única de conexões ativas no Scheduler em alta escala [backend/api/src/main/java/afsdigital/grahamselect/api/openfinance/infrastructure/spring/OpenFinanceSyncScheduler.java:36] — Para a escala atual o agendador sequencial atende com folga dentro da janela do ShedLock. Paginação com pool de workers concorrentes fica adiada para cenário de milhares de conexões ativas.
+- [RESOLVIDO em 2026-11-28] Processamento sequencial em thread única de conexões ativas no Scheduler em alta escala [backend/api/src/main/java/afsdigital/grahamselect/api/openfinance/infrastructure/spring/OpenFinanceSyncScheduler.java] — Processamento concorrente com pool limitado (`MAX_CONCURRENT_SYNCS = 4`), `CompletableFuture.allOf` e contadores atômicos, coberto em `OpenFinanceSyncSchedulerTest.java`.
 
 ## Deferred from: code review of 10-1-relatorio-de-bens-e-direitos-informe-anual.md (2026-11-19)
 
@@ -51,7 +51,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 11-2-web-push-para-zona-de-compra-graham.md (2026-11-20)
 
-- Processamento assíncrono desacoplado para disparo em massa de Web Push na avaliação diária [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/EvaluateGrahamBuyZoneAlertsUseCase.java:82] — Atualmente o agendador executa as notificações de forma síncrona dentro da janela do ShedLock de 15 minutos, satisfazendo a demanda atual. Evoluir para fila assíncrona ou pool de threads quando a base de assinantes crescer.
+- [RESOLVIDO em 2026-11-28] Processamento assíncrono desacoplado para disparo em massa de Web Push na avaliação diária [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/EvaluateGrahamBuyZoneAlertsUseCase.java] — Avaliação e disparo por usuário desacoplados em pool limitado (`MAX_CONCURRENT_DISPATCHES = 4`) via `CompletableFuture.allOf` com isolamento de falhas por usuário, coberto em `EvaluateGrahamBuyZoneAlertsUseCaseTest.java`.
 - [RESOLVIDO em 2026-11-27] Caching de token JWT VAPID assinado por origin [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java] — Implementado cache em `ConcurrentHashMap` por origin com expiração de 12h (margem de renovação de 5 min), coberto em `VapidWebPushGatewayAdapterTest.java`.
 - [RESOLVIDO em 2026-11-27] Validação antecipada do par de chaves VAPID no startup do adapter [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java] — Validação criptográfica ECDSA P-256 entre `publicKey` e `privateKey` no construtor, coberta em `VapidWebPushGatewayAdapterTest.java`.
 - [RESOLVIDO em 2026-11-27] Desativação de assinatura por endpoint físico em caso de troca de usuário no mesmo browser compartilhado [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/RegisterWebPushSubscriptionUseCase.java] — Desativação automática de assinaturas ativas de outros usuários para o mesmo `endpoint`, coberta em `RegisterWebPushSubscriptionUseCaseTest.java`.
@@ -59,7 +59,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 10-2-calculo-de-lucro-realizado-e-isencao.md (2026-11-20)
 
-- Mecanismo de download de arquivos CSV no Flutter Web via launchUrl(dataURI) [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart:140] — O disparo de download via dataURI no Flutter Web/Desktop pode apresentar comportamentos variados entre browsers ou desconsiderar Content-Disposition; padronização com package dedicado de file saver adiada por seguir padrão já existente na Story 10.1.
+- [RESOLVIDO em 2026-11-28] Mecanismo de download de arquivos CSV no Flutter Web via launchUrl(dataURI) [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart] — Extraído `csv_downloader.dart` com implementação Web nativa via `Blob` + `<a download="...">` (`csv_downloader_web.dart` com `dart:js_interop` e BOM UTF-8) e fallback `csv_downloader_stub.dart`, coberto em `tax_provider_test.dart`.
 - [RESOLVIDO em 2026-11-27] Calendário dinâmico de feriados bancários móveis para vencimento de DARF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/domain/utils/DarfDueDateCalculator.java] — Calculados dinamicamente via algoritmo de Páscoa (Segunda/Terça de Carnaval, Sexta-feira Santa e Corpus Christi), coberto em `DarfDueDateCalculatorTest.java`.
 
 ## Deferred from: retrospective of Epic 5 (2026-11-20)
@@ -98,11 +98,11 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   evidence: Configurado e executado automaticamente no job `validate` de `.github/workflows/deploy.yml:40` (`mvn test -pl api "-Dtest=*IT"`).
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-3-landing-page-publica-alta-conversao-programa-founders.md`
-  summary: Add automated DOM/browser test for `landing.html` `/api/v1/founders/slots` state transitions and error fallback.
-  evidence: `frontend/test/kerno_landing_seo_test.dart` only asserts static HTML/JS substrings; live DOM execution requires Playwright or Node DOM harness in CI.
+  summary: [RESOLVIDO em 2026-11-28] Add automated DOM/browser test for `landing.html` `/api/v1/founders/slots` state transitions and error fallback.
+  evidence: Criado `tests/landing-founders-dom.test.mjs` (`node --test`) exercitando o `<script>` real de `landing.html` em VM Node com mock de DOM/fetch para lote ativo, esgotado, inativo, HTTP 500, erro de rede e payload inválido; integrado em `.github/workflows/frontend-ci.yml` e `.github/workflows/deploy.yml`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-3-landing-page-publica-alta-conversao-programa-founders.md`
-  summary: Validate `frontend/nginx.conf` syntax (`nginx -t`) and live HTTP status/X-Robots-Tag headers in Docker/CI.
-  evidence: Local Docker Desktop daemon was not running during Story 1.3 build (`dockerDesktopLinuxEngine` unavailable).
+  summary: [RESOLVIDO em 2026-11-28] Validate `frontend/nginx.conf` syntax (`nginx -t`) and live HTTP status/X-Robots-Tag headers in Docker/CI.
+  evidence: Adicionado step `Validate Nginx Config & Headers` em `.github/workflows/deploy.yml` executando `nginx:alpine` (`nginx -t` e `curl` validando `X-Robots-Tag`, `/healthz` e `/robots.txt`).
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-4-onboarding-google-oauth2-termos-camada-comercial.md`
   summary: [RESOLVIDO em 2026-11-25] Resetar `ProfileProvider` em logout ou troca de usuário no `MultiProvider` raiz (`frontend/lib/main.dart`) para evitar exibição momentânea de perfil anterior.

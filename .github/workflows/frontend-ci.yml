@@ -36,6 +36,9 @@ jobs:
       - name: Run tests
         working-directory: ./frontend
         run: flutter test --coverage
+
+      - name: Run landing.html DOM state tests
+        run: node --test tests/landing-founders-dom.test.mjs
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

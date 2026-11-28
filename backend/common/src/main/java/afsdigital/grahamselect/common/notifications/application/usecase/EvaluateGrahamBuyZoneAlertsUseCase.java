@@ -24,12 +24,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 public class EvaluateGrahamBuyZoneAlertsUseCase {
 
+    private static final int MAX_CONCURRENT_DISPATCHES = 4;
     private static final BigDecimal DEFAULT_MIN_MARGIN = new BigDecimal("20.00");
     public static final BigDecimal MAX_NOTIFICATION_MARGIN_THRESHOLD = new BigDecimal("0.90");
     private static final ZoneId B3_ZONE = ZoneId.of("America/Sao_Paulo");
@@ -94,12 +98,28 @@ public class EvaluateGrahamBuyZoneAlertsUseCase {
         }
 
         LocalDate todaySaoPaulo = LocalDate.now(B3_ZONE);
+        int poolSize = Math.min(MAX_CONCURRENT_DISPATCHES, optedInPreferences.size());
 
-        for (WebPushPreference preference : optedInPreferences) {
-            String userId = preference.getUserId();
+        try (ExecutorService executor = Executors.newFixedThreadPool(poolSize)) {
+            List<CompletableFuture<Void>> futures = optedInPreferences.stream()
+                    .map(preference -> CompletableFuture.runAsync(
+                            () -> evaluateAndDispatchForUser(preference, validCompanies, todaySaoPaulo),
+                            executor))
+                    .toList();
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
+        }
+    }
+
+    private void evaluateAndDispatchForUser(
+            WebPushPreference preference,
+            List<RankedCompany> validCompanies,
+            LocalDate todaySaoPaulo
+    ) {
+        String userId = preference.getUserId();
+        try {
             List<WebPushSubscription> activeSubscriptions = subscriptionPort.findActiveByUserId(userId);
             if (activeSubscriptions.isEmpty()) {
-                continue;
+                return;
             }
 
             Set<String> custodyTickers;
@@ -115,7 +135,7 @@ public class EvaluateGrahamBuyZoneAlertsUseCase {
                             : Collections.emptySet();
                 } catch (Exception e) {
                     log.error("Erro ao obter posições em custódia para Web Push userId={}: {}", userId, e.getMessage(), e);
-                    continue;
+                    return;
                 }
             } else {
                 custodyTickers = Collections.emptySet();
@@ -153,6 +173,8 @@ public class EvaluateGrahamBuyZoneAlertsUseCase {
                     );
                 }
             }
+        } catch (Exception e) {
+            log.error("Erro inesperado ao processar alertas Web Push para userId={}: {}", userId, e.getMessage(), e);
         }
     }
 }

@@ -58,6 +58,7 @@ public class AccountDeletionIT extends BaseRepositoryIT {
     void cleanUp() {
         jdbcTemplate.update("DELETE FROM tb_ai_diagnostic_cache");
         jdbcTemplate.update("DELETE FROM tb_ai_usage_counter");
+        jdbcTemplate.update("DELETE FROM family_profiles");
         jdbcTemplate.update("DELETE FROM tb_cerrado_asset_grade");
         jdbcTemplate.update("DELETE FROM tb_cerrado_preferences");
         jdbcTemplate.update("DELETE FROM web_push_notification_logs");
@@ -155,6 +156,11 @@ public class AccountDeletionIT extends BaseRepositoryIT {
                         "VALUES (?, CURRENT_DATE, 2, CURRENT_TIMESTAMP)",
                 user.getId()
         );
+        jdbcTemplate.update(
+                "INSERT INTO family_profiles (id, master_user_id, cpf_digits, name, relationship, is_active, created_at, updated_at) " +
+                        "VALUES (?, ?, '12345678909', 'Dependente Teste', 'FILHO', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                java.util.UUID.randomUUID().toString(), user.getId().toString()
+        );
 
         Integer waPrefsBefore = jdbcTemplate.queryForObject("SELECT count(*) FROM whatsapp_notification_preferences WHERE user_id = ?", Integer.class, sub);
         assertThat(waPrefsBefore).isEqualTo(1);
@@ -190,6 +196,7 @@ public class AccountDeletionIT extends BaseRepositoryIT {
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM tb_cerrado_asset_grade WHERE user_id = ?", Integer.class, user.getId())).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM tb_ai_diagnostic_cache WHERE user_id = ?", Integer.class, user.getId())).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM tb_ai_usage_counter WHERE user_id = ?", Integer.class, user.getId())).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM family_profiles WHERE master_user_id = ?", Integer.class, user.getId().toString())).isZero();
     }
 
     @Test
