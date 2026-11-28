@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/src/core/security/privacy_provider.dart';
 import 'package:frontend/src/features/portfolio/domain/entities/custody_position.dart';
 import 'package:frontend/src/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:frontend/src/features/portfolio/presentation/widgets/financial_data_table.dart';
@@ -184,5 +185,52 @@ void main() {
 
     expect(provider.sortColumn, equals('ticker'));
     expect(provider.sortAscending, isFalse);
+  });
+
+  testWidgets('Modo Privacidade mascara valores em R\$, oculta Semantics e mantém % visível', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    mockRepository.positionsToReturn = [
+      const CustodyPosition(
+        ticker: 'PETR4',
+        quantity: 100.0,
+        averagePrice: 30.0,
+        currentPrice: 35.0,
+        marketValue: 3500.0,
+        gainLossPercentage: 16.67,
+        priceSource: 'LIVE',
+        assetClass: 'Ações',
+      ),
+    ];
+    await provider.loadCustodyPositions();
+
+    final privacyProvider = PrivacyProvider(initialPrivacyMode: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<PortfolioProvider>.value(value: provider),
+              ChangeNotifierProvider<PrivacyProvider>.value(value: privacyProvider),
+            ],
+            child: const FinancialDataTable(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(PrivacyProvider.maskedCurrencyValue), findsNWidgets(3));
+    expect(find.textContaining('3.500,00'), findsNothing);
+    expect(find.textContaining('16,67%'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(PrivacyProvider.maskedSemanticsLabel),
+      findsNWidgets(3),
+    );
   });
 }

@@ -111,3 +111,12 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-1-fundacao-design-system-intergeracional.md`
   summary: [RESOLVIDO em 2026-11-27] Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
   evidence: Teste implementado em `frontend/test/core/theme/kerno_design_system_test.dart` validando interpolação em t=0, t=1, t=0.5 e fallback para nulo/não-KernoThemeData.
+  summary: Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
+  evidence: verification-gap identificou que KernoThemeData.lerp (kerno_tokens.dart:434-468) não possui chamada direta em frontend/test/.
+
+- source_spec: `docs/bmad/implementation-artifacts/spec-2-4-dashboard-patrimonial-com-modo-privacidade-e-protecao-de-snapshot.md`
+  summary: Aplicar PrivacyProvider (máscara R$ •••••• e Semantics) nas demais rotas autenticadas fora do Dashboard/Portfólio (goals, tax).
+  evidence: PrivacyToggleButton está no _TopBar global, mas telas fora do Dashboard (ex. goal_summary_card.dart, tax_declaration_page.dart) ainda formatam R$ sem consultar PrivacyProvider.
+- source_spec: `docs/bmad/implementation-artifacts/spec-2-4-dashboard-patrimonial-com-modo-privacidade-e-protecao-de-snapshot.md`
+  summary: Adicionar teste E2E/integrado validando wiring raiz de PrivacyProvider.load() em GrahamSelectApp autenticado e preload antes do primeiro frame.
+  evidence: Testes atuais injetam PrivacyProvider diretamente nos widgets; GrahamSelectApp exige harness completo autenticado.

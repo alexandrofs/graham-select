@@ -12,6 +12,7 @@ import 'src/core/api/api_client.dart';
 import 'src/core/security/biometric_auth_service.dart';
 import 'src/core/security/biometric_lock_gate.dart';
 import 'src/core/security/encrypted_portfolio_cache.dart';
+import 'src/core/security/privacy_provider.dart';
 import 'src/features/home/presentation/pages/home_page.dart';
 import 'src/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'src/core/widgets/main_layout.dart';
@@ -156,6 +157,7 @@ class GrahamSelectApp extends StatefulWidget {
   final FlutterSecureStorage? storage;
   final BiometricAuthService? biometricAuthService;
   final EncryptedPortfolioCache? portfolioCache;
+  final PrivacyProvider? privacyProvider;
 
   const GrahamSelectApp({
     super.key,
@@ -164,6 +166,7 @@ class GrahamSelectApp extends StatefulWidget {
     this.storage,
     this.biometricAuthService,
     this.portfolioCache,
+    this.privacyProvider,
   });
 
   @override
@@ -176,6 +179,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
   late final ApiClient effectiveApiClient;
   late final BiometricAuthService effectiveBiometricAuthService;
   late final EncryptedPortfolioCache effectivePortfolioCache;
+  late final PrivacyProvider effectivePrivacyProvider;
   late final AuthRepository effectiveAuthRepository;
 
   late final UploadRemoteDataSource uploadRemoteDataSource;
@@ -250,6 +254,10 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
     effectiveStorage = widget.storage ?? EncryptedPortfolioCache.defaultSecureStorage;
     effectiveBiometricAuthService = widget.biometricAuthService ?? BiometricAuthService();
     effectivePortfolioCache = widget.portfolioCache ?? EncryptedPortfolioCache(storage: effectiveStorage);
+    effectivePrivacyProvider = widget.privacyProvider ?? PrivacyProvider(storage: effectiveStorage);
+    if (widget.privacyProvider == null) {
+      unawaited(effectivePrivacyProvider.load());
+    }
     effectiveApiClient = widget.apiClient ?? ApiClient(baseUrl: apiClientBaseUrl, storage: effectiveStorage);
 
     // Auth Feature DI
@@ -363,6 +371,9 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
 
   @override
   void dispose() {
+    if (widget.privacyProvider == null) {
+      effectivePrivacyProvider.dispose();
+    }
     _profileAuthSubscription?.cancel();
     profileProvider.dispose();
     _tagAuthSubscription?.cancel();
@@ -378,6 +389,7 @@ class _GrahamSelectAppState extends State<GrahamSelectApp> {
       providers: [
         Provider.value(value: effectiveAuthRepository),
         Provider.value(value: effectiveApiClient),
+        ChangeNotifierProvider<PrivacyProvider>.value(value: effectivePrivacyProvider),
         ChangeNotifierProvider(
           create: (_) => UploadProvider(
             uploadFileUseCase: uploadUseCase,
