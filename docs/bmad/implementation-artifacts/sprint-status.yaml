@@ -48,7 +48,7 @@ development_status:
   2-3-shell-de-navegação-multi-superfície-e-fundação-modular-com-f: done
   2-4-dashboard-patrimonial-com-modo-privacidade-e-proteção-de-sna: done
   2-5-adaptação-visual-da-ingestão-b3-crud-manual-multi-classe-e-h: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
   epic-3: in-progress
   3-1-modelo-de-dados-relacional-e-migrations-para-o-diagrama-do-c: done
@@ -137,3 +137,31 @@ action_items:
     owner: "Winston (System Architect)"
     status: done
     ref: "docs/bmad/implementation-artifacts/epic-1-retro-2026-11-25.md"
+  - id: "epic-2-retro-item-10-corrigir-falha-em-kafkab3workerit-should"
+    epic: 2
+    action: "Corrigir falha em KafkaB3WorkerIT.shouldPublishToDlqWhenRowIsCorrupted:177
+      para restaurar 100% de verde na suite *IT"
+    owner: "Amelia (Senior Software Engineer)"
+    status: done
+    ref: "docs/bmad/implementation-artifacts/epic-2-retro-2026-11-28.md"
+  - id: "epic-2-retro-item-11-adicionar-interceptor-x-correlation-id-n"
+    epic: 2
+    action: "Adicionar interceptor X-Correlation-ID no ApiClient (api_client.dart)
+      com teste unitario e alinhar PortfolioRemoteDataSource"
+    owner: "Amelia (Senior Software Engineer)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-2-retro-2026-11-28.md"
+  - id: "epic-2-retro-item-12-criar-historia-dedicada-para-os-itens-mu"
+    epic: 2
+    action: "Criar historia dedicada para os itens Multi-CPF fatiados da Story 2.5
+      (MultiCpfSelector, badge Free/Pro, LGPD Art. 14 e AccountDeletionIT)"
+    owner: "John (Product Manager) / Winston (System Architect)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-2-retro-2026-11-28.md"
+  - id: "epic-2-retro-item-13-executar-smoke-test-em-build-android-e-i"
+    epic: 2
+    action: "Executar smoke test em build Android e iOS validando local_auth, FLAG_SECURE,
+      SceneDelegate e latencia P95"
+    owner: "Murat (Master Test Architect)"
+    status: open
+    ref: "docs/bmad/implementation-artifacts/epic-2-retro-2026-11-28.md"
