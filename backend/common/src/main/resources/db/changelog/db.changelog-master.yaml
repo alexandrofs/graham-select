@@ -76,6 +76,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/39-create-cerrado-tables.yaml
   - include:
-      file: db/changelog/40-create-ai-cache-and-usage-tables.yaml
+      file: db/changelog/40-add-asset-class-to-trades.yaml
+  - include:
+      file: db/changelog/41-create-ai-cache-and-usage-tables.yaml
 
 

@@ -43,6 +43,26 @@ class PortfolioRemoteDataSource {
     }
   }
 
+  Future<List<TradeModel>> getManualTrades({String? token}) async {
+    final uri = Uri.parse('$baseUrl/trades/manual');
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+      return data
+          .map((json) => TradeModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Erro ao listar operações manuais: ${response.statusCode}');
+    }
+  }
+
   Future<TradeModel> createManualTrade({
     required String ticker,
     required String side,
@@ -50,6 +70,8 @@ class PortfolioRemoteDataSource {
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
     String? token,
   }) async {
     final uri = Uri.parse('$baseUrl/trades/manual');
@@ -66,6 +88,10 @@ class PortfolioRemoteDataSource {
         'quantity': quantity,
         'price': price,
         'broker': broker,
+        if (assetClass != null && assetClass.trim().isNotEmpty)
+          'assetClass': assetClass.trim(),
+        if (profileId != null && profileId.trim().isNotEmpty)
+          'profileId': profileId.trim(),
       }),
     );
 
@@ -73,8 +99,76 @@ class PortfolioRemoteDataSource {
       return TradeModel.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 409) {
       throw Exception('Operação duplicada detectada.');
+    } else if (response.statusCode == 404) {
+      throw Exception('Perfil familiar não encontrado.');
     } else {
       throw Exception('Erro ao criar operação manual: ${response.statusCode}');
+    }
+  }
+
+  Future<TradeModel> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+    String? token,
+  }) async {
+    final uri = Uri.parse('$baseUrl/trades/manual/$id');
+    final response = await client.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'ticker': ticker,
+        'side': side,
+        'tradeDate': tradeDate.toIso8601String().split('T')[0],
+        'quantity': quantity,
+        'price': price,
+        'broker': broker,
+        if (assetClass != null && assetClass.trim().isNotEmpty)
+          'assetClass': assetClass.trim(),
+        if (profileId != null && profileId.trim().isNotEmpty)
+          'profileId': profileId.trim(),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return TradeModel.fromJson(jsonDecode(response.body));
+    } else if (response.statusCode == 409) {
+      throw Exception('Operação duplicada detectada.');
+    } else if (response.statusCode == 404) {
+      throw Exception('Operação ou perfil não encontrado.');
+    } else {
+      throw Exception('Erro ao atualizar operação manual: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deleteManualTrade({
+    required String id,
+    String? token,
+  }) async {
+    final uri = Uri.parse('$baseUrl/trades/manual/$id');
+    final response = await client.delete(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 204 || response.statusCode == 200) {
+      return;
+    } else if (response.statusCode == 404) {
+      throw Exception('Operação não encontrada.');
+    } else {
+      throw Exception('Erro ao excluir operação manual: ${response.statusCode}');
     }
   }
 

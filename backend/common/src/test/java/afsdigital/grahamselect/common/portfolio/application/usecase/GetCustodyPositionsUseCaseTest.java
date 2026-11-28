@@ -537,4 +537,51 @@ class GetCustodyPositionsUseCaseTest {
 
         assertThrows(TagNotFoundException.class, () -> tagAware.executeWithMetadata(userId, foreignTagId));
     }
+
+    @Test
+    void shouldClassifyEtfsEndingIn11AndInternationalAndCryptoCorrectly() {
+        String userId = "user-1";
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(
+                Trade.builder().userId(userId).ticker("IVVB11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("300.00")).build(),
+                Trade.builder().userId(userId).ticker("HASH11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("50.00")).build(),
+                Trade.builder().userId(userId).ticker("BTC").side(TradeSide.COMPRA.name())
+                        .quantity(new BigDecimal("0.10")).price(new BigDecimal("350000.00")).build(),
+                Trade.builder().userId(userId).ticker("AAPL").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("1000.00")).build()
+        ));
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Collections.emptyMap());
+
+        Map<String, String> classes = useCase.execute(userId).stream()
+                .collect(Collectors.toMap(CustodyPositionDTO::ticker, CustodyPositionDTO::assetClass));
+
+        assertEquals("Internacional", classes.get("IVVB11"));
+        assertEquals("Criptoativos", classes.get("HASH11"));
+        assertEquals("Criptoativos", classes.get("BTC"));
+        assertEquals("Internacional", classes.get("AAPL"));
+    }
+
+    @Test
+    void shouldPrioritizeTradeAssetClassOverCompanyAndInference() {
+        String userId = "user-1";
+        Company company = Company.builder()
+                .id("comp-1")
+                .ticker("HGLG11")
+                .assetClass("FIIs")
+                .build();
+
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(
+                Trade.builder().userId(userId).ticker("HGLG11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("160.00"))
+                        .assetClass("Internacional").build()
+        ));
+        when(companyRepository.findByTicker("HGLG11")).thenReturn(company);
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Collections.emptyMap());
+
+        List<CustodyPositionDTO> result = useCase.execute(userId);
+
+        assertEquals(1, result.size());
+        assertEquals("Internacional", result.get(0).assetClass());
+    }
 }

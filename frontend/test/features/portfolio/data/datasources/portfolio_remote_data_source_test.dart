@@ -144,5 +144,152 @@ void main() {
         throwsException,
       );
     });
+
+    test('getManualTrades retorna lista de TradeModel mapeando assetClass e profileId', () async {
+      final mockClient = MockHttpClient((request) async {
+        expect(request.method, equals('GET'));
+        expect(request.url.toString(), equals('$tBaseUrl/trades/manual'));
+        expect(request.headers['Authorization'], equals('Bearer tok'));
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 'id-1',
+              'userId': 'u-1',
+              'profileId': 'prof-1',
+              'ticker': 'IVVB11',
+              'side': 'COMPRA',
+              'tradeDate': '2026-05-10',
+              'quantity': 10,
+              'price': 310.5,
+              'broker': 'Manual',
+              'assetClass': 'Internacional',
+              'createdAt': '2026-05-10T10:00:00Z',
+            }
+          ]),
+          200,
+        );
+      });
+
+      final dataSource = PortfolioRemoteDataSource(client: mockClient, baseUrl: tBaseUrl);
+      final trades = await dataSource.getManualTrades(token: 'tok');
+
+      expect(trades.length, equals(1));
+      expect(trades[0].id, equals('id-1'));
+      expect(trades[0].profileId, equals('prof-1'));
+      expect(trades[0].assetClass, equals('Internacional'));
+    });
+
+    test('createManualTrade envia assetClass e profileId e trata 404 e 409', () async {
+      final mockClient = MockHttpClient((request) async {
+        expect(request.method, equals('POST'));
+        expect(request.url.toString(), equals('$tBaseUrl/trades/manual'));
+        final body = jsonDecode((request as http.Request).body) as Map<String, dynamic>;
+        expect(body['assetClass'], equals('Criptoativos'));
+        expect(body['profileId'], equals('prof-1'));
+        return http.Response(
+          jsonEncode({
+            'id': 'id-2',
+            'userId': 'u-1',
+            'profileId': 'prof-1',
+            'ticker': 'BTC',
+            'side': 'COMPRA',
+            'tradeDate': '2026-05-10',
+            'quantity': 0.05,
+            'price': 350000,
+            'broker': 'Manual',
+            'assetClass': 'Criptoativos',
+            'createdAt': '2026-05-10T10:00:00Z',
+          }),
+          201,
+        );
+      });
+
+      final dataSource = PortfolioRemoteDataSource(client: mockClient, baseUrl: tBaseUrl);
+      final created = await dataSource.createManualTrade(
+        ticker: 'BTC',
+        side: 'COMPRA',
+        tradeDate: DateTime(2026, 5, 10),
+        quantity: 0.05,
+        price: 350000,
+        broker: 'Manual',
+        assetClass: 'Criptoativos',
+        profileId: 'prof-1',
+        token: 'tok',
+      );
+      expect(created.assetClass, equals('Criptoativos'));
+
+      final notFoundClient = MockHttpClient((_) async => http.Response('', 404));
+      final notFoundDs = PortfolioRemoteDataSource(client: notFoundClient, baseUrl: tBaseUrl);
+      expect(
+        () => notFoundDs.createManualTrade(
+          ticker: 'BTC',
+          side: 'COMPRA',
+          tradeDate: DateTime(2026, 5, 10),
+          quantity: 1,
+          price: 100,
+          broker: 'Manual',
+          profileId: 'missing',
+        ),
+        throwsException,
+      );
+    });
+
+    test('updateManualTrade e deleteManualTrade enviam PUT e DELETE e tratam 404/409', () async {
+      final putClient = MockHttpClient((request) async {
+        expect(request.method, equals('PUT'));
+        expect(request.url.toString(), equals('$tBaseUrl/trades/manual/id-1'));
+        return http.Response(
+          jsonEncode({
+            'id': 'id-1',
+            'userId': 'u-1',
+            'ticker': 'PETR4',
+            'side': 'COMPRA',
+            'tradeDate': '2026-05-11',
+            'quantity': 20,
+            'price': 32,
+            'broker': 'XP',
+            'assetClass': 'Ações BR',
+            'createdAt': '2026-05-10T10:00:00Z',
+          }),
+          200,
+        );
+      });
+
+      final putDs = PortfolioRemoteDataSource(client: putClient, baseUrl: tBaseUrl);
+      final updated = await putDs.updateManualTrade(
+        id: 'id-1',
+        ticker: 'PETR4',
+        side: 'COMPRA',
+        tradeDate: DateTime(2026, 5, 11),
+        quantity: 20,
+        price: 32,
+        broker: 'XP',
+        assetClass: 'Ações BR',
+      );
+      expect(updated.quantity, equals(20));
+
+      final deleteClient = MockHttpClient((request) async {
+        expect(request.method, equals('DELETE'));
+        expect(request.url.toString(), equals('$tBaseUrl/trades/manual/id-1'));
+        return http.Response('', 204);
+      });
+      final deleteDs = PortfolioRemoteDataSource(client: deleteClient, baseUrl: tBaseUrl);
+      await deleteDs.deleteManualTrade(id: 'id-1');
+
+      final conflictClient = MockHttpClient((_) async => http.Response('', 409));
+      final conflictDs = PortfolioRemoteDataSource(client: conflictClient, baseUrl: tBaseUrl);
+      expect(
+        () => conflictDs.updateManualTrade(
+          id: 'id-1',
+          ticker: 'PETR4',
+          side: 'COMPRA',
+          tradeDate: DateTime(2026, 5, 11),
+          quantity: 20,
+          price: 32,
+          broker: 'XP',
+        ),
+        throwsException,
+      );
+    });
   });
 }

@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 40-create-tb-ai-diagnostic-cache
+      id: 41-create-tb-ai-diagnostic-cache
       author: bmad-dev
       preConditions:
         - onFail: MARK_RAN
@@ -85,7 +85,7 @@ databaseChangeLog:
             tableName: tb_ai_diagnostic_cache
 
   - changeSet:
-      id: 40-create-tb-ai-usage-counter
+      id: 41-create-tb-ai-usage-counter
       author: bmad-dev
       preConditions:
         - onFail: MARK_RAN

@@ -77,6 +77,9 @@ class ManualMockPortfolioRepository implements PortfolioRepository {
   }
 
   @override
+  Future<List<Trade>> getManualTrades() async => [];
+
+  @override
   Future<Trade> createManualTrade({
     required String ticker,
     required String side,
@@ -84,9 +87,28 @@ class ManualMockPortfolioRepository implements PortfolioRepository {
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
   }) async {
     throw UnimplementedError();
   }
+
+  @override
+  Future<Trade> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+  }) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> deleteManualTrade(String id) async => throw UnimplementedError();
 
   @override
   Future<({List<CustodyPosition> positions, DateTime? metaPriceUpdatedAt, int untaggedAssetsCount, List<String> untaggedTickers})>

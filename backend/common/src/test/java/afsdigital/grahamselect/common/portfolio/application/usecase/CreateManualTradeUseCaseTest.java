@@ -56,7 +56,7 @@ class CreateManualTradeUseCaseTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any())).thenReturn(false);
+        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(false);
         when(tradePort.save(any())).thenReturn(trade);
 
         Trade result = useCase.execute(trade);
@@ -64,9 +64,33 @@ class CreateManualTradeUseCaseTest {
         assertNotNull(result);
         assertEquals(trade.getId(), result.getId());
 
+        verify(tradePort).exists("user1", null, "PETR4", trade.getTradeDate(), trade.getQuantity(), trade.getPrice(), "Inter", "COMPRA");
         verify(tradePort).save(trade);
         verify(auditPort).save(any(ManualTradeAudit.class));
         verify(valuationEventPort).publishValuationRequest(any(ValuationRequestedEvent.class));
+    }
+
+    @Test
+    void shouldPassProfileIdWhenCheckingDuplicity() {
+        Trade trade = Trade.builder()
+                .id(UUID.randomUUID())
+                .userId("user1")
+                .profileId("profile-123")
+                .ticker("PETR4")
+                .side("COMPRA")
+                .tradeDate(LocalDate.now())
+                .quantity(new BigDecimal("100"))
+                .price(new BigDecimal("35.50"))
+                .broker("Inter")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(false);
+        when(tradePort.save(any())).thenReturn(trade);
+
+        useCase.execute(trade);
+
+        verify(tradePort).exists("user1", "profile-123", "PETR4", trade.getTradeDate(), trade.getQuantity(), trade.getPrice(), "Inter", "COMPRA");
     }
 
     @Test
@@ -81,7 +105,7 @@ class CreateManualTradeUseCaseTest {
                 .broker("Inter")
                 .build();
 
-        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any())).thenReturn(true);
+        when(tradePort.exists(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(true);
 
         Trade result = useCase.execute(trade);
 
