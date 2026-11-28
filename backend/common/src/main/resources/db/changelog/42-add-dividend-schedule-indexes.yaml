@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 42-add-dividend-schedule-indexes
+      author: kerno-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - indexExists:
+                tableName: dividend_announcements
+                indexName: idx_dividend_announcements_pay_ticker
+      changes:
+        - createIndex:
+            tableName: dividend_announcements
+            indexName: idx_dividend_announcements_pay_ticker
+            columns:
+              - column:
+                  name: payment_date
+              - column:
+                  name: ticker
+  - changeSet:
+      id: 42-add-dividend-schedule-com-index
+      author: kerno-dev
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - indexExists:
+                tableName: dividend_announcements
+                indexName: idx_dividend_announcements_com_ticker
+      changes:
+        - createIndex:
+            tableName: dividend_announcements
+            indexName: idx_dividend_announcements_com_ticker
+            columns:
+              - column:
+                  name: com_date
+              - column:
+                  name: ticker

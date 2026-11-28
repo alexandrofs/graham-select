@@ -7,9 +7,11 @@ import afsdigital.grahamselect.common.dividends.domain.entities.DividendAnnounce
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -104,5 +106,28 @@ class DividendAnnouncementJpaAdapterTest {
         assertThat(result.getPaymentDate()).isEqualTo(newPaymentDate);
         assertThat(result.getStatus()).isEqualTo("PAID");
         assertThat(existingEntity.getPaymentDate()).isEqualTo(newPaymentDate);
+    }
+
+    @Test
+    @DisplayName("Deve passar Pageable limitado ao consultar agenda de dividendos")
+    void shouldPassBoundedPageableToFindSchedule() {
+        when(repository.findSchedule(any(), any(Boolean.class), any(), any(), any(), any(Pageable.class)))
+                .thenReturn(List.of());
+
+        LocalDate start = LocalDate.of(2026, 1, 1);
+        LocalDate end = LocalDate.of(2026, 12, 31);
+        adapter.findByTickersAndDateRange(List.of("PETR4"), start, end, "APPROVED");
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(repository).findSchedule(
+                any(),
+                any(Boolean.class),
+                any(),
+                any(),
+                any(),
+                pageableCaptor.capture()
+        );
+        assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(500);
     }
 }

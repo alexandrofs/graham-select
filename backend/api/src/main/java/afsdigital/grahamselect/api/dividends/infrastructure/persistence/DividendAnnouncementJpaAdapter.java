@@ -7,6 +7,7 @@ import afsdigital.grahamselect.common.dividends.domain.entities.CorporateEventTy
 import afsdigital.grahamselect.common.dividends.domain.entities.DividendAnnouncement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +95,8 @@ public class DividendAnnouncementJpaAdapter implements DividendAnnouncementPort 
         return toDomain(saved);
     }
 
+    private static final int DEFAULT_SCHEDULE_PAGE_SIZE = 500;
+
     @Override
     @Transactional(readOnly = true)
     public List<DividendAnnouncement> findByTickersAndDateRange(
@@ -109,7 +112,8 @@ public class DividendAnnouncementJpaAdapter implements DividendAnnouncementPort 
                 tickersEmpty,
                 startDate,
                 endDate,
-                status
+                status,
+                PageRequest.of(0, DEFAULT_SCHEDULE_PAGE_SIZE)
         );
         return entities.stream().map(this::toDomain).toList();
     }

@@ -1,6 +1,7 @@
 package afsdigital.grahamselect.api.dividends.infrastructure.persistence.jpa.repositories;
 
 import afsdigital.grahamselect.api.dividends.infrastructure.persistence.jpa.entities.DividendAnnouncementEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,8 +32,8 @@ public interface DividendAnnouncementJpaRepository extends JpaRepository<Dividen
             SELECT d FROM DividendAnnouncementEntity d
             WHERE (:tickersEmpty = true OR d.ticker IN :tickers)
               AND (:status IS NULL OR d.status = :status)
-              AND (:startDate IS NULL OR COALESCE(d.paymentDate, d.comDate) >= :startDate)
-              AND (:endDate IS NULL OR COALESCE(d.paymentDate, d.comDate) <= :endDate)
+              AND (:startDate IS NULL OR d.paymentDate >= :startDate OR (d.paymentDate IS NULL AND d.comDate >= :startDate))
+              AND (:endDate IS NULL OR d.paymentDate <= :endDate OR (d.paymentDate IS NULL AND d.comDate <= :endDate))
             ORDER BY COALESCE(d.paymentDate, d.comDate) ASC, d.ticker ASC
             """)
     List<DividendAnnouncementEntity> findSchedule(
@@ -40,6 +41,7 @@ public interface DividendAnnouncementJpaRepository extends JpaRepository<Dividen
             @Param("tickersEmpty") boolean tickersEmpty,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("status") String status
+            @Param("status") String status,
+            Pageable pageable
     );
 }
