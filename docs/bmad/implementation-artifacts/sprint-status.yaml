@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: '2026-06-13'
-last_updated: 11-28-2026 10:38
+last_updated: 11-28-2026 11:28
 project: graham-select
 project_key: NOKEY
 tracking_system: file-system
@@ -69,7 +69,7 @@ development_status:
   epic-5: in-progress
   5-1-modelo-de-dados-de-cache-analítico-controle-finops-e-migrati: done
   5-2-sanitizador-lgpd-de-pii-normalização-canônica-e-validador-pr: done
-  5-3-adaptador-vertex-ai-gemini-enterprise-zdr-e-validação-determ: backlog
+  5-3-adaptador-vertex-ai-gemini-enterprise-zdr-e-validação-determ: done
   5-4-interface-do-kerno-ai-cartões-de-diagnóstico-feedback-e-fall: backlog
   5-5-expurgo-em-cascata-lgpd-direito-ao-esquecimento-e-teste-de-i: backlog
   epic-5-retrospective: optional

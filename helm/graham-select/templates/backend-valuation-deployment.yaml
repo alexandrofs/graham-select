@@ -33,11 +33,27 @@ spec:
           env:
             - name: SERVER_PORT
               value: {{ .Values.valuation.env.SERVER_PORT | quote }}
+            - name: AI_VERTEX_PROJECT_ID
+              value: {{ .Values.valuation.env.AI_VERTEX_PROJECT_ID | default "" | quote }}
+            - name: AI_VERTEX_LOCATION
+              value: {{ .Values.valuation.env.AI_VERTEX_LOCATION | default "us-central1" | quote }}
+            - name: AI_VERTEX_MODEL_NAME
+              value: {{ .Values.valuation.env.AI_VERTEX_MODEL_NAME | default "gemini-2.5-flash" | quote }}
+            {{- if .Values.secrets.gcpVertexCredentialsJson }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/var/secrets/google/credentials.json"
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ include "graham-select.fullname" . }}-config
             - secretRef:
                 name: {{ include "graham-select.fullname" . }}-secret
+          {{- if .Values.secrets.gcpVertexCredentialsJson }}
+          volumeMounts:
+            - name: gcp-vertex-credentials
+              mountPath: /var/secrets/google
+              readOnly: true
+          {{- end }}
           livenessProbe:
             httpGet:
               path: {{ .Values.valuation.probes.liveness.path }}
@@ -56,4 +72,13 @@ spec:
             failureThreshold: {{ .Values.valuation.probes.readiness.failureThreshold }}
           resources:
             {{- toYaml .Values.valuation.resources | nindent 12 }}
+      {{- if .Values.secrets.gcpVertexCredentialsJson }}
+      volumes:
+        - name: gcp-vertex-credentials
+          secret:
+            secretName: {{ include "graham-select.fullname" . }}-secret
+            items:
+              - key: GCP_VERTEX_CREDENTIALS_JSON
+                path: credentials.json
+      {{- end }}
 {{- end }}

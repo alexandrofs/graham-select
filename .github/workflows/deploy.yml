@@ -266,11 +266,15 @@ jobs:
             --set-string secrets.whatsappMetaPhoneNumberId="${{ secrets.WHATSAPP_META_PHONE_NUMBER_ID }}" \
             --set-string secrets.webpushVapidPrivateKey="${{ secrets.WEBPUSH_VAPID_PRIVATE_KEY }}" \
             --set-string secrets.webpushVapidPublicKey="${{ secrets.WEBPUSH_VAPID_PUBLIC_KEY }}" \
+            --set-string secrets.gcpVertexCredentialsJson="${{ secrets.GCP_VERTEX_CREDENTIALS_JSON }}" \
             --set-string api.env.FOUNDER_TOTAL_SLOTS="${{ vars.FOUNDER_TOTAL_SLOTS || '250' }}" \
             --set-string api.env.FOUNDER_PRO_TRIAL_DAYS="${{ vars.FOUNDER_PRO_TRIAL_DAYS || '90' }}" \
             --set-string api.env.AI_DAILY_RATE_LIMIT="${{ vars.AI_DAILY_RATE_LIMIT || '5' }}" \
             --set-string api.env.AI_MONTHLY_RATE_LIMIT="${{ vars.AI_MONTHLY_RATE_LIMIT || '30' }}" \
             --set-string api.env.AI_CACHE_TTL_HOURS="${{ vars.AI_CACHE_TTL_HOURS || '24' }}" \
+            --set-string valuation.env.AI_VERTEX_PROJECT_ID="${{ vars.AI_VERTEX_PROJECT_ID || '' }}" \
+            --set-string valuation.env.AI_VERTEX_LOCATION="${{ vars.AI_VERTEX_LOCATION || 'us-central1' }}" \
+            --set-string valuation.env.AI_VERTEX_MODEL_NAME="${{ vars.AI_VERTEX_MODEL_NAME || 'gemini-2.5-flash' }}" \
             --wait \
             --timeout 10m
 
