@@ -3,6 +3,7 @@ package afsdigital.grahamselect.api.common.web;
 import afsdigital.grahamselect.common.ai.application.service.exceptions.AiFreeTierNotAllowedException;
 import afsdigital.grahamselect.common.ai.application.service.exceptions.AiRateLimitExceededException;
 import afsdigital.grahamselect.common.ai.domain.model.AiDiagnosticCacheEntry;
+import afsdigital.grahamselect.common.cerrado.domain.exceptions.CerradoValidationException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.DuplicateFamilyProfileException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.InvalidCpfException;
@@ -41,6 +42,14 @@ public class GlobalExceptionHandler {
         log.error("Allocation goal validation failed: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setTitle("Allocation Goal Validation Error");
+        return problem;
+    }
+
+    @ExceptionHandler(CerradoValidationException.class)
+    public ProblemDetail handleCerradoValidation(CerradoValidationException ex) {
+        log.error("Cerrado validation failed: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        problem.setTitle("Cerrado Validation Error");
         return problem;
     }
 
