@@ -67,7 +67,7 @@ development_status:
   epic-4-retrospective: optional
 
   epic-5: backlog
-  5-1-modelo-de-dados-de-cache-analítico-controle-finops-e-migrati: backlog
+  5-1-modelo-de-dados-de-cache-analítico-controle-finops-e-migrati: ready-for-dev
   5-2-sanitizador-lgpd-de-pii-normalização-canônica-e-validador-pr: backlog
   5-3-adaptador-vertex-ai-gemini-enterprise-zdr-e-validação-determ: backlog
   5-4-interface-do-kerno-ai-cartões-de-diagnóstico-feedback-e-fall: backlog
