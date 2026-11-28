@@ -28,3 +28,9 @@ replay_pid*
 .env.render
 .env.local
 _bmad-output/
+
+# File uploads
+uploads/
+test-uploads/
+test-uploads-dedup/
+

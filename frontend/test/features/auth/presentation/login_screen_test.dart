@@ -77,6 +77,15 @@ void main() {
 
     expect(find.text('Continuar com Google'), findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Image &&
+            widget.image is AssetImage &&
+            (widget.image as AssetImage).assetName == 'assets/icons/google_logo.png',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Deve exibir links clicáveis para Termos de Uso e Política de Privacidade',

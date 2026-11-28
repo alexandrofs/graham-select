@@ -146,12 +146,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       side: BorderSide(color: Colors.grey.shade300),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.account_circle, color: Colors.blue),
-                        SizedBox(width: 12),
-                        Flexible(
+                        Image.asset(
+                          'assets/icons/google_logo.png',
+                          width: 20,
+                          height: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        const Flexible(
                           child: Text(
                             'Continuar com Google',
                             textAlign: TextAlign.center,

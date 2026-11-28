@@ -18,7 +18,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 4-4-explainable-ai-reasoning-box.md (2026-06-13)
 
-- Risco de Quebra em Tempo de Execução na Desserialização do JSON [frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart:584] — O cast direto do JSON num? as double? pode falhar se o Java serializar como String.
+- [RESOLVIDO em 2026-11-27] Risco de Quebra em Tempo de Execução na Desserialização do JSON [frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart] — Conversão robusta via _parseDouble / _parseNullableDouble suportando num, int, double e String com testes unitários em graham_recommendation_model_test.dart.
 - Rolagem Conflitante no Bottom Sheet [frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart:1] — Conflito potencial de gestos entre o SingleChildScrollView interno e a folha deslizável nativa.
 
 ## Deferred from: code review of 5-1-wealth-income-goal-setup.md (2026-06-13)
@@ -31,7 +31,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - Recuperação de concorrência dentro da mesma transação em `OAuth2UserProvisioningConverter.convert()` [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:72] — Bloco catch pré-existente da Story 1.1 dentro de método anotado com `@Transactional`.
 
 ## Deferred from: code review of 7-1-vinculo-de-novo-cpf-a-conta-matriz (2026-11-13)
-- Implementar `Persistable<UUID>` em `FamilyProfileEntity` (`backend/api/src/main/java/afsdigital/grahamselect/api/family/infrastructure/persistence/jpa/entities/FamilyProfileEntity.java`) para evitar `SELECT` prévio antes de `INSERT` em `FamilyProfileJpaAdapter.save()`.
+- [RESOLVIDO em 2026-11-27] Implementar `Persistable<UUID>` em `FamilyProfileEntity` (`backend/api/src/main/java/afsdigital/grahamselect/api/family/infrastructure/persistence/jpa/entities/FamilyProfileEntity.java`) para evitar `SELECT` prévio antes de `INSERT` em `FamilyProfileJpaAdapter.save()`. Coberto com testes unitários em `FamilyProfileEntityTest.java`.
 
 ## Deferred from: code review of 9-2-web-crawler-de-proventos-e-fatos-relevantes.md (2026-11-15)
 
@@ -69,8 +69,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 ## Deferred from: code review of spec-1-1-identidade-visual-institucional-kerno (2026-11-23)
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Isolar `app.upload.storage-path` em diretório temporário nos testes (`application-test.yml`) e adicionar `uploads/` ao `.gitignore`.
-  evidence: `BrokerageNoteUploadControllerTest` grava PDFs reais em `backend/api/uploads/` porque `application-test.yml` não sobrescreve `app.upload.storage-path: ${STORAGE_PATH:./uploads}` de `application.yml:37` e `.gitignore` não exclui `uploads/`.
+  summary: [RESOLVIDO em 2026-11-27] Isolar `app.upload.storage-path` em diretório temporário nos testes (`application-test.yml`) e adicionar `uploads/` ao `.gitignore`.
+  evidence: `BrokerageNoteUploadControllerTest` isolado com `app.upload.storage-path: ./target/test-uploads` em `application-test.yml` e `uploads/`, `test-uploads/` adicionados a `.gitignore`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
   summary: Exibir marca e logotipo Kerno na barra superior (`_TopBar`) em viewports mobile (`< 900px`) em `frontend/lib/src/core/widgets/main_layout.dart`.
   evidence: Quando `isMobile` é verdadeiro em `main_layout.dart:13-33`, `_Sidebar` é omitido e `_TopBar` (`L260-310`) inicia diretamente com `Spacer()`; o redesenho multi-superfície mobile está previsto na Story 2.3.
@@ -78,14 +78,14 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   summary: Adicionar `mipmap-anydpi-v26/ic_launcher.xml` adaptativo para Android 8+ e `badge` monocromático transparente para Web Push em `frontend/web/push-sw.js:16`.
   evidence: `frontend/android/app/src/main/res/` não possui camada adaptativa XML (gerando quadro branco em torno de `ic_launcher.png` com cantos transparentes) e `push-sw.js:16` referencia `/icons/Icon-192.png` preenchido.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Auditar a permissão incondicional de `http://localhost:*`, `http://127.0.0.1:*` e `http://10.0.2.2:*` em `SecurityConfig.corsConfigurationSource` sob profile `prod`.
-  evidence: `SecurityConfig.java:56-60` registra padrões de origem loopback independentemente do profile ativo junto a `allowCredentials(true)`.
+  summary: [RESOLVIDO em 2026-11-27] Auditar a permissão incondicional de `http://localhost:*`, `http://127.0.0.1:*` e `http://10.0.2.2:*` em `SecurityConfig.corsConfigurationSource` sob profile `prod`.
+  evidence: `SecurityConfig.java` ajustado para utilizar exclusivamente `${app.security.cors.allowed-origins}`, removendo padrões genéricos de loopback hardcoded em runtime.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Espelhar `CRAWLER_USER_AGENT` no chart Helm e remover a string padrão duplicada de `@Value` em `CorporateEventsConfiguration.java:31`.
-  evidence: `application.yml:54` e `CorporateEventsConfiguration.java:31` duplicam o default `KernoCrawler/1.0`, e `CRAWLER_USER_AGENT` não está declarado em `helm/graham-select/values.yaml` nem `templates/configmap.yaml`.
+  summary: [RESOLVIDO em 2026-11-25] Espelhar `CRAWLER_USER_AGENT` no chart Helm e remover a string padrão duplicada de `@Value` em `CorporateEventsConfiguration.java:31`.
+  evidence: Declarado em `helm/graham-select/values.yaml:46` e `helm/graham-select/templates/configmap.yaml:42`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Substituir o placeholder `Icons.account_circle` por `assets/icons/google_logo.png` em `login_screen.dart` e tornar o email do rodapé de `home_page.dart` selecionável ou link `mailto:`.
-  evidence: `login_screen.dart` utiliza `Icons.account_circle` no botão Google (evolução prevista para Story 1.4) e `home_page.dart:775` renderiza `kerno@afsdigital.com.br` como `Text` estático (refatoração pública na Story 1.3).
+  summary: [RESOLVIDO em 2026-11-27] Substituir o placeholder `Icons.account_circle` por `assets/icons/google_logo.png` em `login_screen.dart` e tornar o email do rodapé de `home_page.dart` selecionável ou link `mailto:`.
+  evidence: `login_screen.dart` atualizado para exibir `assets/icons/google_logo.png` e coberto por teste em `login_screen_test.dart`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
   summary: Atualizar ou desativar o workflow legado `.github/workflows/frontend-ci.yml` (`vars.API_BASE_URL` e `RENDER_FRONTEND_DEPLOY_HOOK`).
   evidence: `.github/workflows/frontend-ci.yml:72-121` continua referenciando build Pack e deploy hook legado no Render apesar do deploy oficial em OKE em `.github/workflows/deploy.yml`.
@@ -105,10 +105,12 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   evidence: Local Docker Desktop daemon was not running during Story 1.3 build (`dockerDesktopLinuxEngine` unavailable).
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-4-onboarding-google-oauth2-termos-camada-comercial.md`
-  summary: Resetar `ProfileProvider` em logout ou troca de usuário no `MultiProvider` raiz (`frontend/lib/main.dart`) para evitar exibição momentânea de perfil anterior.
-  evidence: `ProfileProvider` é criado no `MultiProvider` raiz sem listener de `authStateChanges` (ao contrário de `TagProvider` em `frontend/lib/main.dart:288-295`), condição pré-existente à Story 1.4.
+  summary: [RESOLVIDO em 2026-11-25] Resetar `ProfileProvider` em logout ou troca de usuário no `MultiProvider` raiz (`frontend/lib/main.dart`) para evitar exibição momentânea de perfil anterior.
+  evidence: `ProfileProvider.reset()` integrado no listener `authStateChanges` em `frontend/lib/main.dart:289-296`.
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-1-fundacao-design-system-intergeracional.md`
+  summary: [RESOLVIDO em 2026-11-27] Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
+  evidence: Teste implementado em `frontend/test/core/theme/kerno_design_system_test.dart` validando interpolação em t=0, t=1, t=0.5 e fallback para nulo/não-KernoThemeData.
   summary: Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
   evidence: verification-gap identificou que KernoThemeData.lerp (kerno_tokens.dart:434-468) não possui chamada direta em frontend/test/.
 
