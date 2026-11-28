@@ -26,6 +26,10 @@ public class CerradoPreferencesPersistenceAdapter implements CerradoPreferencesP
     @Transactional
     public CerradoPreferences save(CerradoPreferences preferences) {
         CerradoPreferencesEntity entity = toEntity(preferences);
+        if (entity.getId() == null && entity.getUserId() != null) {
+            jpaRepository.findByUserId(entity.getUserId())
+                    .ifPresent(existing -> entity.setId(existing.getId()));
+        }
         CerradoPreferencesEntity saved = jpaRepository.saveAndFlush(entity);
         return toDomain(saved);
     }

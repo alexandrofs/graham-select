@@ -3,6 +3,7 @@ package afsdigital.grahamselect.api.common.web;
 import afsdigital.grahamselect.common.ai.application.service.exceptions.AiFreeTierNotAllowedException;
 import afsdigital.grahamselect.common.ai.application.service.exceptions.AiRateLimitExceededException;
 import afsdigital.grahamselect.common.ai.domain.model.AiDiagnosticCacheEntry;
+import afsdigital.grahamselect.common.cerrado.application.service.exceptions.CerradoPreferencesNotFoundException;
 import afsdigital.grahamselect.common.cerrado.domain.exceptions.CerradoValidationException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.DuplicateFamilyProfileException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
@@ -50,6 +51,14 @@ public class GlobalExceptionHandler {
         log.error("Cerrado validation failed: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
         problem.setTitle("Cerrado Validation Error");
+        return problem;
+    }
+
+    @ExceptionHandler(CerradoPreferencesNotFoundException.class)
+    public ProblemDetail handleCerradoPreferencesNotFound(CerradoPreferencesNotFoundException ex) {
+        log.error("Cerrado preferences not found: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Cerrado Preferences Not Found");
         return problem;
     }
 

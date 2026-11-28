@@ -35,6 +35,7 @@ public class CerradoAllocationEngine {
     private static final BigDecimal ZERO_4 = BigDecimal.ZERO.setScale(INTERMEDIATE_SCALE, ROUNDING);
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100.00");
     private static final BigDecimal ONE_CENT = new BigDecimal("0.01");
+    private static final BigDecimal MAX_GRAHAM_MULTIPLIER = new BigDecimal("99.99");
 
     private static final BigDecimal CEILING_HIGH_GRADE = new BigDecimal("10.00");
     private static final BigDecimal CEILING_MID_GRADE = new BigDecimal("6.00");
@@ -386,22 +387,48 @@ public class CerradoAllocationEngine {
         return asset.qualityGrade() >= HIGH_GRADE_THRESHOLD ? CEILING_HIGH_GRADE : CEILING_MID_GRADE;
     }
 
-    private void validatePreferences(CerradoPreferences preferences) {
+    /**
+     * Valida todas as preferencias do Cerrado, garantindo metas das 5 Macro Classes
+     * com soma exata de 100.00% e multiplicador de Graham valido.
+     */
+    public void validatePreferences(CerradoPreferences preferences) {
         if (preferences == null) {
             throw new CerradoValidationException("Preferencias do Cerrado nao podem ser nulas.");
         }
 
-        validateTarget(preferences.getTargetAcoesBr(), "targetAcoesBr");
-        validateTarget(preferences.getTargetFiis(), "targetFiis");
-        validateTarget(preferences.getTargetRendaFixa(), "targetRendaFixa");
-        validateTarget(preferences.getTargetInternacional(), "targetInternacional");
-        validateTarget(preferences.getTargetCripto(), "targetCripto");
+        validateTargetValues(
+                preferences.getTargetAcoesBr(),
+                preferences.getTargetFiis(),
+                preferences.getTargetRendaFixa(),
+                preferences.getTargetInternacional(),
+                preferences.getTargetCripto(),
+                preferences.getGrahamMultiplier()
+        );
+    }
 
-        BigDecimal sum = preferences.getTargetAcoesBr()
-                .add(preferences.getTargetFiis())
-                .add(preferences.getTargetRendaFixa())
-                .add(preferences.getTargetInternacional())
-                .add(preferences.getTargetCripto());
+    /**
+     * Valida os valores brutos das metas das 5 Macro Classes e o multiplicador de Graham
+     * antes da construcao da entidade de dominio.
+     */
+    public void validateTargetValues(
+            BigDecimal targetAcoesBr,
+            BigDecimal targetFiis,
+            BigDecimal targetRendaFixa,
+            BigDecimal targetInternacional,
+            BigDecimal targetCripto,
+            BigDecimal grahamMultiplier
+    ) {
+        validateTarget(targetAcoesBr, "targetAcoesBr");
+        validateTarget(targetFiis, "targetFiis");
+        validateTarget(targetRendaFixa, "targetRendaFixa");
+        validateTarget(targetInternacional, "targetInternacional");
+        validateTarget(targetCripto, "targetCripto");
+
+        BigDecimal sum = targetAcoesBr
+                .add(targetFiis)
+                .add(targetRendaFixa)
+                .add(targetInternacional)
+                .add(targetCripto);
 
         if (sum.compareTo(ONE_HUNDRED) != 0) {
             throw new CerradoValidationException(
@@ -410,9 +437,15 @@ public class CerradoAllocationEngine {
             );
         }
 
-        if (preferences.getGrahamMultiplier() == null
-                || preferences.getGrahamMultiplier().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new CerradoValidationException("grahamMultiplier deve ser maior que zero.");
+        if (grahamMultiplier == null
+                || grahamMultiplier.compareTo(BigDecimal.ZERO) <= 0
+                || grahamMultiplier.compareTo(MAX_GRAHAM_MULTIPLIER) > 0) {
+            throw new CerradoValidationException(
+                    "grahamMultiplier deve estar no intervalo (0.00, 99.99]."
+            );
+        }
+        if (grahamMultiplier.stripTrailingZeros().scale() > OUTPUT_SCALE) {
+            throw new CerradoValidationException("grahamMultiplier deve ter no maximo 2 casas decimais.");
         }
     }
 
