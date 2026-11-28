@@ -43,6 +43,11 @@ app:
     trial-days: ${FOUNDER_PRO_TRIAL_DAYS:90}
   features:
     enable-expenses-module: ${ENABLE_EXPENSES_MODULE:false}
+  ai:
+    finops:
+      daily-rate-limit: ${AI_DAILY_RATE_LIMIT:5}
+      monthly-rate-limit: ${AI_MONTHLY_RATE_LIMIT:30}
+      cache-ttl-hours: ${AI_CACHE_TTL_HOURS:24}
 
 brapi:
   token: ${BRAPI_TOKEN:}

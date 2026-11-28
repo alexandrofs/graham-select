@@ -81,10 +81,22 @@ public class UserDataPurgeAdapter implements UserDataPurgePort {
         deleteQuietly("tb_cerrado_asset_grade", "user_id", userId);
         deleteQuietly("tb_cerrado_preferences", "user_id", userId);
 
+        // 10. Kerno AI (Epic 5 - user_id BIGINT FK para users.id)
+        deleteQuietly("tb_ai_diagnostic_cache", "user_id", userId);
+        deleteQuietly("tb_ai_usage_counter", "user_id", userId);
+
         log.info("Expurgo definitivo de dados pessoais concluído com sucesso para userId={}", userId);
     }
 
-    private void deleteQuietly(String table, String column, Object value) {
+    private void deleteQuietly(String table, String column, String value) {
+        deleteQuietlyInternal(table, column, value);
+    }
+
+    private void deleteQuietly(String table, String column, Long value) {
+        deleteQuietlyInternal(table, column, value);
+    }
+
+    private void deleteQuietlyInternal(String table, String column, Object value) {
         try {
             int rows = jdbcTemplate.update("DELETE FROM " + table + " WHERE " + column + " = ?", value);
             if (rows > 0) {

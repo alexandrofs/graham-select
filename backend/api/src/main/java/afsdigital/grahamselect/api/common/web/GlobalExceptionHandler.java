@@ -1,5 +1,8 @@
 package afsdigital.grahamselect.api.common.web;
 
+import afsdigital.grahamselect.common.ai.application.service.exceptions.AiFreeTierNotAllowedException;
+import afsdigital.grahamselect.common.ai.application.service.exceptions.AiRateLimitExceededException;
+import afsdigital.grahamselect.common.ai.domain.model.AiDiagnosticCacheEntry;
 import afsdigital.grahamselect.common.family.application.service.exceptions.DuplicateFamilyProfileException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.FamilyProfileNotFoundException;
 import afsdigital.grahamselect.common.family.application.service.exceptions.InvalidCpfException;
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -194,5 +199,41 @@ public class GlobalExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Web Push Subscription Not Found");
         return problem;
+    }
+
+    @ExceptionHandler(AiRateLimitExceededException.class)
+    public ProblemDetail handleAiRateLimitExceeded(AiRateLimitExceededException ex) {
+        log.error("AI FinOps rate limit exceeded: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+        problem.setTitle("AI Rate Limit Exceeded");
+        problem.setProperty("latestDiagnostic", sanitizeDiagnostic(ex.getLatestDiagnostic()));
+        problem.setProperty("dailyCallsUsed", ex.getDailyCallsUsed());
+        problem.setProperty("dailyLimit", ex.getDailyLimit());
+        problem.setProperty("monthlyCallsUsed", ex.getMonthlyCallsUsed());
+        problem.setProperty("monthlyLimit", ex.getMonthlyLimit());
+        return problem;
+    }
+
+    @ExceptionHandler(AiFreeTierNotAllowedException.class)
+    public ProblemDetail handleAiFreeTierNotAllowed(AiFreeTierNotAllowedException ex) {
+        log.error("AI LLM access denied for FREE tier: {}", ex.getMessage(), ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+        problem.setTitle("AI Free Tier Not Allowed");
+        return problem;
+    }
+
+    private static Map<String, Object> sanitizeDiagnostic(AiDiagnosticCacheEntry entry) {
+        if (entry == null) {
+            return null;
+        }
+        Map<String, Object> sanitized = new LinkedHashMap<>();
+        sanitized.put("id", entry.id());
+        sanitized.put("portfolioStateHash", entry.portfolioStateHash());
+        sanitized.put("modelVersion", entry.modelVersion());
+        sanitized.put("promptVersion", entry.promptVersion());
+        sanitized.put("jsonPayload", entry.jsonPayload());
+        sanitized.put("createdAt", entry.createdAt());
+        sanitized.put("expiresAt", entry.expiresAt());
+        return sanitized;
     }
 }

@@ -39,4 +39,7 @@ data:
   FOUNDER_TOTAL_SLOTS: {{ .Values.api.env.FOUNDER_TOTAL_SLOTS | default "250" | quote }}
   FOUNDER_PRO_TRIAL_DAYS: {{ .Values.api.env.FOUNDER_PRO_TRIAL_DAYS | default "90" | quote }}
   ENABLE_EXPENSES_MODULE: {{ .Values.api.env.ENABLE_EXPENSES_MODULE | default "false" | quote }}
+  AI_DAILY_RATE_LIMIT: {{ .Values.api.env.AI_DAILY_RATE_LIMIT | default "5" | quote }}
+  AI_MONTHLY_RATE_LIMIT: {{ .Values.api.env.AI_MONTHLY_RATE_LIMIT | default "30" | quote }}
+  AI_CACHE_TTL_HOURS: {{ .Values.api.env.AI_CACHE_TTL_HOURS | default "24" | quote }}
   CRAWLER_USER_AGENT: {{ .Values.api.env.CRAWLER_USER_AGENT | default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 KernoCrawler/1.0" | quote }}

@@ -244,6 +244,9 @@ jobs:
             --set-string secrets.webpushVapidPublicKey="${{ secrets.WEBPUSH_VAPID_PUBLIC_KEY }}" \
             --set-string api.env.FOUNDER_TOTAL_SLOTS="${{ vars.FOUNDER_TOTAL_SLOTS || '250' }}" \
             --set-string api.env.FOUNDER_PRO_TRIAL_DAYS="${{ vars.FOUNDER_PRO_TRIAL_DAYS || '90' }}" \
+            --set-string api.env.AI_DAILY_RATE_LIMIT="${{ vars.AI_DAILY_RATE_LIMIT || '5' }}" \
+            --set-string api.env.AI_MONTHLY_RATE_LIMIT="${{ vars.AI_MONTHLY_RATE_LIMIT || '30' }}" \
+            --set-string api.env.AI_CACHE_TTL_HOURS="${{ vars.AI_CACHE_TTL_HOURS || '24' }}" \
             --wait \
             --timeout 10m
 
