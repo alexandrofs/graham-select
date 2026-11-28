@@ -1,14 +1,19 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/utils/csv_downloader.dart';
 import '../../domain/entities/annual_tax_summary.dart';
 import '../../domain/entities/tax_declaration_report.dart';
 import '../../domain/repositories/tax_repository.dart';
+
+typedef CsvDownloader = Future<void> Function({
+  required String content,
+  required String fileName,
+});
 
 enum TaxTab { bensEDireitos, apuracaoMensal }
 
 class TaxProvider extends ChangeNotifier {
   final TaxRepository repository;
+  final CsvDownloader _csvDownloader;
 
   TaxTab _activeTab = TaxTab.bensEDireitos;
   TaxDeclarationReport? _report;
@@ -21,7 +26,10 @@ class TaxProvider extends ChangeNotifier {
   bool _isExporting = false;
   String? _errorMessage;
 
-  TaxProvider({required this.repository});
+  TaxProvider({
+    required this.repository,
+    CsvDownloader? csvDownloader,
+  }) : _csvDownloader = csvDownloader ?? downloadCsvFile;
 
   TaxTab get activeTab => _activeTab;
   TaxDeclarationReport? get report => _report;
@@ -129,46 +137,38 @@ class TaxProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> exportCsv() async {
-    _isExporting = true;
-    notifyListeners();
-
-    try {
-      final csv = await repository.exportBensEDireitosCsv(
+  Future<String?> exportCsv() {
+    final yearSuffix = _selectedYear?.toString() ?? 'atual';
+    return _exportCsvWith(
+      () => repository.exportBensEDireitosCsv(
         year: _selectedYear,
         profileId: _selectedProfileId,
-      );
-      final uri = Uri.dataFromString(
-        csv,
-        mimeType: 'text/csv',
-        encoding: utf8,
-      );
-      await launchUrl(uri);
-      _isExporting = false;
-      notifyListeners();
-      return csv;
-    } catch (e) {
-      _isExporting = false;
-      notifyListeners();
-      return null;
-    }
+      ),
+      'bens-e-direitos-$yearSuffix.csv',
+    );
   }
 
-  Future<String?> exportMonthlyCsv() async {
+  Future<String?> exportMonthlyCsv() {
+    final yearSuffix = _selectedYear?.toString() ?? 'atual';
+    return _exportCsvWith(
+      () => repository.exportMonthlyCapitalGainsCsv(
+        year: _selectedYear,
+        profileId: _selectedProfileId,
+      ),
+      'ganhos-capital-mensal-$yearSuffix.csv',
+    );
+  }
+
+  Future<String?> _exportCsvWith(
+    Future<String> Function() fetcher,
+    String fileName,
+  ) async {
     _isExporting = true;
     notifyListeners();
 
     try {
-      final csv = await repository.exportMonthlyCapitalGainsCsv(
-        year: _selectedYear,
-        profileId: _selectedProfileId,
-      );
-      final uri = Uri.dataFromString(
-        csv,
-        mimeType: 'text/csv',
-        encoding: utf8,
-      );
-      await launchUrl(uri);
+      final csv = await fetcher();
+      await _csvDownloader(content: csv, fileName: fileName);
       _isExporting = false;
       notifyListeners();
       return csv;

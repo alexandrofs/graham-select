@@ -163,4 +163,44 @@ class EvaluateGrahamBuyZoneAlertsUseCaseTest {
                 eq("/graham-recommendations")
         );
     }
+
+    @Test
+    void shouldDispatchAlertsConcurrentlyAndIsolateUserFailures() {
+        LocalDate todayUtc = LocalDate.now(ZoneOffset.UTC);
+
+        WebPushPreference prefFail = WebPushPreference.builder()
+                .id(UUID.randomUUID())
+                .userId("user-fail")
+                .optedIn(true)
+                .minMarginOfSafetyPct(new BigDecimal("20.00"))
+                .onlyCustodyTickers(false)
+                .build();
+
+        WebPushPreference prefOk = WebPushPreference.builder()
+                .id(UUID.randomUUID())
+                .userId("user-ok")
+                .optedIn(true)
+                .minMarginOfSafetyPct(new BigDecimal("20.00"))
+                .onlyCustodyTickers(false)
+                .build();
+
+        WebPushSubscription subOk = buildSubscription("user-ok");
+
+        when(preferencePort.findAllOptedIn()).thenReturn(List.of(prefFail, prefOk));
+        when(subscriptionPort.findActiveByUserId("user-fail")).thenThrow(new RuntimeException("DB error"));
+        when(subscriptionPort.findActiveByUserId("user-ok")).thenReturn(List.of(subOk));
+
+        RankedCompany c1 = buildCompany("ITUB4", new BigDecimal("0.30"), todayUtc, new BigDecimal("28.00"), new BigDecimal("40.00"));
+        when(rankingRepository.findTop20BestRanked()).thenReturn(List.of(c1));
+
+        useCase.execute();
+
+        verify(sendWebPushAlertUseCase).sendAlert(
+                eq("user-ok"), eq(subOk), eq("ITUB4"), eq(WebPushAlertType.GRAHAM_BUY_ZONE),
+                contains("graham-buy-zone:user-ok:ITUB4:"),
+                contains("ITUB4"),
+                contains("30.00%"),
+                eq("/graham-recommendations")
+        );
+    }
 }
