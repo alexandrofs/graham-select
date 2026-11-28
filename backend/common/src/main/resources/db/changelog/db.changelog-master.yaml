@@ -79,5 +79,7 @@ databaseChangeLog:
       file: db/changelog/40-add-asset-class-to-trades.yaml
   - include:
       file: db/changelog/41-create-ai-cache-and-usage-tables.yaml
+  - include:
+      file: db/changelog/42-add-dividend-schedule-indexes.yaml
 
 

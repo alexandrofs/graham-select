@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -54,6 +55,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
   String _goalType = 'PATRIMONY_TARGET';
   bool _initialized = false;
   bool _isSubmitting = false;
+  Timer? _formDebounceTimer;
   late GoalsProvider _goalsProvider;
   late AnimationController _shimmerController;
   late Animation<double> _shimmerAnimation;
@@ -94,6 +96,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
 
   @override
   void dispose() {
+    _formDebounceTimer?.cancel();
     _shimmerController.dispose();
     _goalsProvider.removeListener(_onGoalsProviderChanged);
     _targetValueController.dispose();
@@ -123,6 +126,20 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
     final cleanText = text.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return 0.0;
     return double.parse(cleanText) / 100.0;
+  }
+
+  void _onFormInputChanged() {
+    _formDebounceTimer?.cancel();
+    _formDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      final portfolioProvider = context.read<PortfolioProvider>();
+      if (_goalsProvider.currentGoal != null && portfolioProvider.summary != null) {
+        _goalsProvider.recalculateLocalProjection(
+          currentEquity: portfolioProvider.summary!.totalEquity,
+          grossYieldPercentage: portfolioProvider.summary!.grossYieldPercentage,
+        );
+      }
+    });
   }
 
   Future<void> _submitForm() async {
@@ -270,6 +287,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                       // Valor Alvo
                       TextFormField(
                         controller: _targetValueController,
+                        onChanged: (_) => _onFormInputChanged(),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
@@ -295,6 +313,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                       // Aporte Mensal Pretendido
                       TextFormField(
                         controller: _contributionController,
+                        onChanged: (_) => _onFormInputChanged(),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
@@ -320,6 +339,7 @@ class _GoalsPageState extends State<GoalsPage> with SingleTickerProviderStateMix
                       // Prazo Estimado
                       TextFormField(
                         controller: _yearsController,
+                        onChanged: (_) => _onFormInputChanged(),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,

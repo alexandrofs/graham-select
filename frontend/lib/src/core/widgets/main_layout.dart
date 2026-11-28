@@ -774,57 +774,86 @@ class _TopBar extends StatelessWidget {
       ),
       child: SafeArea(
         bottom: false,
-        child: SizedBox(
-          width: double.infinity,
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: KernoSpacing.s2,
-            runSpacing: KernoSpacing.s2,
-            children: <Widget>[
-              if (profile != null) CommercialPlanBadge(profile: profile),
-              const PrivacyToggleButton(),
-              if (isAdmin)
-                TextButton.icon(
-                  key: const Key('admin_dashboard_nav_button'),
-                  onPressed: () => context.go('/admin/dashboard'),
-                  icon: Icon(
-                    Icons.admin_panel_settings_outlined,
-                    size: 18,
-                    color: tokens.emerald,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (isCompact) ...[
+              Row(
+                key: const Key('topbar_mobile_brand'),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(KernoRadius.sm),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 28,
+                      height: 28,
+                      excludeFromSemantics: true,
+                    ),
                   ),
-                  label: Text(
-                    'Painel Admin',
-                    style: KernoTypography.bodySm(
-                      color: tokens.emerald,
-                    ).copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              if (!simplifyTopBar)
-                IconButton(
-                  onPressed: () => context.go('/notifications/web-push'),
-                  tooltip: 'Notificações',
-                  icon: Icon(
-                    Icons.notifications_outlined,
-                    color: tokens.textPrimary,
-                  ),
-                ),
-              IconButton(
-                key: const Key('topbar_profile_button'),
-                onPressed: () => context.go('/profile'),
-                tooltip: 'Meu Perfil',
-                icon: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: tokens.brandPrimary,
-                  child: Icon(
-                    Icons.person,
-                    size: 20,
-                    color: tokens.textOnPrimary,
-                  ),
-                ),
+                  if (!simplifyTopBar) ...[
+                    const SizedBox(width: KernoSpacing.s2),
+                    Text(
+                      'Kerno',
+                      style: KernoTypography.heading3(color: tokens.brandPrimary),
+                    ),
+                  ],
+                ],
               ),
+              const SizedBox(width: KernoSpacing.s2),
             ],
-          ),
+            Expanded(
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: KernoSpacing.s2,
+                runSpacing: KernoSpacing.s2,
+                children: <Widget>[
+                  if (profile != null) CommercialPlanBadge(profile: profile),
+                  const PrivacyToggleButton(),
+                  if (isAdmin)
+                    TextButton.icon(
+                      key: const Key('admin_dashboard_nav_button'),
+                      onPressed: () => context.go('/admin/dashboard'),
+                      icon: Icon(
+                        Icons.admin_panel_settings_outlined,
+                        size: 18,
+                        color: tokens.emerald,
+                      ),
+                      label: Text(
+                        'Painel Admin',
+                        style: KernoTypography.bodySm(
+                          color: tokens.emerald,
+                        ).copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  if (!simplifyTopBar)
+                    IconButton(
+                      onPressed: () => context.go('/notifications/web-push'),
+                      tooltip: 'Notificações',
+                      icon: Icon(
+                        Icons.notifications_outlined,
+                        color: tokens.textPrimary,
+                      ),
+                    ),
+                  IconButton(
+                    key: const Key('topbar_profile_button'),
+                    onPressed: () => context.go('/profile'),
+                    tooltip: 'Meu Perfil',
+                    icon: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: tokens.brandPrimary,
+                      child: Icon(
+                        Icons.person,
+                        size: 20,
+                        color: tokens.textOnPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

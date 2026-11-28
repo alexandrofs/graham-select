@@ -36,7 +36,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 ## Deferred from: code review of 9-2-web-crawler-de-proventos-e-fatos-relevantes.md (2026-11-15)
 
 - Endpoints Ideais e Protocolo Rad/ENET da CVM [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/crawler/CvmOfficialCrawlerAdapter.java:467] — A extração avançada de formulários e autenticação na sessão do sistema CVM Rad/ENET requer engenharia reversa de protocolo governamental além do escopo da história 9.2, onde Brapi opera como fonte primária robusta.
-- Consulta de Agenda com Expressão COALESCE Sem Índice Funcional e Sem Paginação [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/persistence/jpa/repositories/DividendAnnouncementJpaRepository.java:1131] — Em grande escala de dados, `COALESCE(paymentDate, comDate)` impede uso de índices B-Tree padrão e ausência de `Pageable` pode onerar memória.
+- [RESOLVIDO em 2026-11-28] Consulta de Agenda com Expressão COALESCE Sem Índice Funcional e Sem Paginação [backend/api/src/main/java/afsdigital/grahamselect/api/dividends/infrastructure/persistence/jpa/repositories/DividendAnnouncementJpaRepository.java] — Reescrita cláusula de data sem `COALESCE` no `WHERE` para uso de índices B-Tree, adicionada migration `42-add-dividend-schedule-indexes.yaml` e paginação limitada (`PageRequest.of(0, 500)`) em `DividendAnnouncementJpaAdapter` com cobertura em `DividendAnnouncementJpaAdapterTest.java`.
 
 ## Deferred from: code review of 9-3-conector-open-finance.md (2026-11-17)
 
@@ -46,7 +46,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 10-1-relatorio-de-bens-e-direitos-informe-anual.md (2026-11-19)
 
-- Redesenho de navegação inferior móvel com mais de 5 destinos [frontend/lib/src/core/widgets/main_layout.dart:237] — A barra inferior de navegação (`_BottomNavBar`) possui 10 destinos, ultrapassando a recomendação de 3-5 do Material Design. Deve ser abordado em um refator dedicado de UX (ex: menu 'Mais'/Drawer).
+- [RESOLVIDO em 2026-11-28] Redesenho de navegação inferior móvel com mais de 5 destinos [frontend/lib/src/core/widgets/main_layout.dart] — `_BottomNavBar` consolidado para 4 destinos principais (5 com feature flag de Gastos) via `StatefulNavigationShell` na Story 2.3.
 - [RESOLVIDO em 2026-11-27] Otimização de consulta em lote para CNPJs de empresas no relatório de IRPF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java] — Adicionado `CompanyRepository.findAllByTickerIn` (implementado em `CompanyJpaAdapter` e `CompanyRepositoryImpl`) e consulta em lote única antes do loop.
 
 ## Deferred from: code review of 11-2-web-push-para-zona-de-compra-graham.md (2026-11-20)
@@ -64,7 +64,7 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: retrospective of Epic 5 (2026-11-20)
 
-- Debounce do formulário de metas financeiras [frontend/lib/src/features/goals/presentation/] — Defer da Story 5.1 sem dono; **Dono: Elena (Junior Dev)**. Prioridade baixa; registrado no backlog para tratamento em refator de UX.
+- [RESOLVIDO em 2026-11-28] Debounce do formulário de metas financeiras [frontend/lib/src/features/goals/presentation/pages/goals_page.dart] — Adicionado debounce de 300ms (`_formDebounceTimer`) nos campos do formulário de metas com cancelamento em `dispose()`.
 
 ## Deferred from: code review of spec-1-1-identidade-visual-institucional-kerno (2026-11-23)
 
@@ -72,11 +72,11 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   summary: [RESOLVIDO em 2026-11-27] Isolar `app.upload.storage-path` em diretório temporário nos testes (`application-test.yml`) e adicionar `uploads/` ao `.gitignore`.
   evidence: `BrokerageNoteUploadControllerTest` isolado com `app.upload.storage-path: ./target/test-uploads` em `application-test.yml` e `uploads/`, `test-uploads/` adicionados a `.gitignore`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Exibir marca e logotipo Kerno na barra superior (`_TopBar`) em viewports mobile (`< 900px`) em `frontend/lib/src/core/widgets/main_layout.dart`.
-  evidence: Quando `isMobile` é verdadeiro em `main_layout.dart:13-33`, `_Sidebar` é omitido e `_TopBar` (`L260-310`) inicia diretamente com `Spacer()`; o redesenho multi-superfície mobile está previsto na Story 2.3.
+  summary: [RESOLVIDO em 2026-11-28] Exibir marca e logotipo Kerno na barra superior (`_TopBar`) em viewports mobile (`< 900px`) em `frontend/lib/src/core/widgets/main_layout.dart`.
+  evidence: `_TopBar` exibe `topbar_mobile_brand` com `assets/images/logo.png` e texto `Kerno` quando `isCompact` é verdadeiro, coberto em `frontend/test/core/widgets/main_layout_test.dart`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Adicionar `mipmap-anydpi-v26/ic_launcher.xml` adaptativo para Android 8+ e `badge` monocromático transparente para Web Push em `frontend/web/push-sw.js:16`.
-  evidence: `frontend/android/app/src/main/res/` não possui camada adaptativa XML (gerando quadro branco em torno de `ic_launcher.png` com cantos transparentes) e `push-sw.js:16` referencia `/icons/Icon-192.png` preenchido.
+  summary: [RESOLVIDO em 2026-11-28] Adicionar `mipmap-anydpi-v26/ic_launcher.xml` adaptativo para Android 8+ e `badge` monocromático transparente para Web Push em `frontend/web/push-sw.js:17`.
+  evidence: Criados `frontend/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`, `values/ic_launcher_background.xml` e `frontend/web/icons/badge-monochrome.png` referenciado em `push-sw.js` e validado em `privacy_root_wiring_test.dart`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
   summary: [RESOLVIDO em 2026-11-27] Auditar a permissão incondicional de `http://localhost:*`, `http://127.0.0.1:*` e `http://10.0.2.2:*` em `SecurityConfig.corsConfigurationSource` sob profile `prod`.
   evidence: `SecurityConfig.java` ajustado para utilizar exclusivamente `${app.security.cors.allowed-origins}`, removendo padrões genéricos de loopback hardcoded em runtime.
@@ -87,15 +87,15 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   summary: [RESOLVIDO em 2026-11-27] Substituir o placeholder `Icons.account_circle` por `assets/icons/google_logo.png` em `login_screen.dart` e tornar o email do rodapé de `home_page.dart` selecionável ou link `mailto:`.
   evidence: `login_screen.dart` atualizado para exibir `assets/icons/google_logo.png` e coberto por teste em `login_screen_test.dart`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Atualizar ou desativar o workflow legado `.github/workflows/frontend-ci.yml` (`vars.API_BASE_URL` e `RENDER_FRONTEND_DEPLOY_HOOK`).
-  evidence: `.github/workflows/frontend-ci.yml:72-121` continua referenciando build Pack e deploy hook legado no Render apesar do deploy oficial em OKE em `.github/workflows/deploy.yml`.
+  summary: [RESOLVIDO em 2026-11-28] Atualizar ou desativar o workflow legado `.github/workflows/frontend-ci.yml` (`vars.API_BASE_URL` e `RENDER_FRONTEND_DEPLOY_HOOK`).
+  evidence: Job legado `build-web` (Pack + `RENDER_FRONTEND_DEPLOY_HOOK`) removido de `.github/workflows/frontend-ci.yml`, mantendo apenas validação `flutter analyze` e `flutter test --coverage`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-1-identidade-visual-institucional-kerno.md`
-  summary: Executar `helm lint helm/graham-select` e `helm template test-graham helm/graham-select --debug` em ambiente Linux/CI com `helm` instalado.
-  evidence: Achado `maybe-false` (`medium` potencial): o CLI `helm` e o daemon Docker não estão disponíveis neste ambiente Windows; a execução em Linux/CI encerrará a verificação de sintaxe Helm/Go templates.
+  summary: [RESOLVIDO em 2026-11-28] Executar `helm lint helm/graham-select` e `helm template test-graham helm/graham-select --debug` em ambiente Linux/CI com `helm` instalado.
+  evidence: Configurado e executado automaticamente no job `validate` de `.github/workflows/deploy.yml:58-63`.
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-2-infraestrutura-de-controle-transacional-do-lote-de-membros-founders.md`
-  summary: Configurar execução automática dos testes de integração H2 (`*IT.java`) no pipeline de CI (`.github/workflows/deploy.yml` / `maven-failsafe-plugin`).
-  evidence: Lacuna pré-existente do repositório confirmada pelo `verification-gap` (`mvn clean test` executa apenas `*Test.java` e pula os 30 `*IT.java`).
+  summary: [RESOLVIDO em 2026-11-28] Configurar execução automática dos testes de integração H2 (`*IT.java`) no pipeline de CI (`.github/workflows/deploy.yml`).
+  evidence: Configurado e executado automaticamente no job `validate` de `.github/workflows/deploy.yml:40` (`mvn test -pl api "-Dtest=*IT"`).
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-1-3-landing-page-publica-alta-conversao-programa-founders.md`
   summary: Add automated DOM/browser test for `landing.html` `/api/v1/founders/slots` state transitions and error fallback.
@@ -116,8 +116,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   summary: [RESOLVIDO em 2026-11-27] Aplicar PrivacyProvider (máscara R$ •••••• e Semantics) nas demais rotas autenticadas fora do Dashboard/Portfólio (goals, tax).
   evidence: `PrivacyProvider` integrado em `goal_summary_card.dart`, `what_if_simulator_card.dart`, `tax_declaration_page.dart`, `tax_item_card.dart`, `tax_summary_card.dart` e `monthly_summary_card.dart`, com teste em `goal_summary_card_test.dart`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-4-dashboard-patrimonial-com-modo-privacidade-e-protecao-de-snapshot.md`
-  summary: Adicionar teste E2E/integrado validando wiring raiz de PrivacyProvider.load() em GrahamSelectApp autenticado e preload antes do primeiro frame.
-  evidence: Testes atuais injetam PrivacyProvider diretamente nos widgets; GrahamSelectApp exige harness completo autenticado.
+  summary: [RESOLVIDO em 2026-11-28] Adicionar teste E2E/integrado validando wiring raiz de PrivacyProvider.load() em GrahamSelectApp autenticado e preload antes do primeiro frame.
+  evidence: Coberto em `frontend/test/core/security/privacy_root_wiring_test.dart` validando `GrahamSelectApp` com `FlutterSecureStorage` pré-populado.
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
   summary: Implementar filtro global Multi-CPF (`MultiCpfSelector` na `_TopBar`, `profileId` nos endpoints `/api/v1/portfolios/*`), badge `"Pausado no Free — Upgrade Pro"` e consentimento de representação legal para dependentes menores (LGPD Art. 14) em `FamilyProfilesPage` e `FamilyProfileController`, além de validação de expurgo Multi-CPF em `AccountDeletionIT`.

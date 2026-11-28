@@ -320,4 +320,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(privacyProvider.isPrivacyMode, isTrue);
   });
+
+  testWidgets('Exibe marca e logotipo Kerno no _TopBar em viewport mobile (< 600px)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final router = GoRouter(
+      initialLocation: '/dashboard',
+      routes: [
+        ShellRoute(
+          builder: (context, state, child) => MainLayout(child: child),
+          routes: [
+            GoRoute(path: '/dashboard', builder: (_, _) => const SizedBox()),
+            GoRoute(path: '/gps-aporte', builder: (_, _) => const SizedBox()),
+            GoRoute(path: '/kerno-ai', builder: (_, _) => const SizedBox()),
+            GoRoute(path: '/allocation-strategy', builder: (_, _) => const SizedBox()),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ProfileProvider>(
+            create: (_) => ProfileProvider(_StubProfileRepository()),
+          ),
+          ChangeNotifierProvider<PrivacyProvider>(
+            create: (_) => PrivacyProvider(),
+          ),
+        ],
+        child: MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('topbar_mobile_brand')), findsOneWidget);
+    expect(find.text('Kerno'), findsOneWidget);
+  });
 }
