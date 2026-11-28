@@ -12,3 +12,7 @@ spring:
     consumer:
       group-id: test-group
       auto-offset-reset: earliest
+
+app:
+  upload:
+    storage-path: ./target/test-uploads

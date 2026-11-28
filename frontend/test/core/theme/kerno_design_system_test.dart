@@ -493,5 +493,33 @@ void main() {
       expect(app.darkTheme?.brightness, Brightness.dark);
       expect(app.themeMode, ThemeMode.system);
     });
+
+    test('KernoThemeData.lerp interpola corretamente entre temas Light e Dark', () {
+      const light = KernoThemeData.light;
+      const dark = KernoThemeData.dark;
+
+      // Fallback para non-KernoThemeData ou nulo retorna this
+      final fallbackResult = light.lerp(null, 0.5);
+      expect(identical(fallbackResult, light), isTrue);
+
+      // t = 0.0 retorna valores idênticos ao light
+      final atZero = light.lerp(dark, 0.0);
+      expect(atZero.surfaceBase, light.surfaceBase);
+      expect(atZero.textPrimary, light.textPrimary);
+      expect(atZero.brandPrimary, light.brandPrimary);
+
+      // t = 1.0 retorna valores idênticos ao dark
+      final atOne = light.lerp(dark, 1.0);
+      expect(atOne.surfaceBase, dark.surfaceBase);
+      expect(atOne.textPrimary, dark.textPrimary);
+      expect(atOne.brandPrimary, dark.brandPrimary);
+
+      // t = 0.5 calcula ponto médio
+      final atHalf = light.lerp(dark, 0.5);
+      expect(atHalf.surfaceBase, Color.lerp(light.surfaceBase, dark.surfaceBase, 0.5));
+      expect(atHalf.textPrimary, Color.lerp(light.textPrimary, dark.textPrimary, 0.5));
+      expect(atHalf.brandPrimary, Color.lerp(light.brandPrimary, dark.brandPrimary, 0.5));
+      expect(atHalf.founderGold, Color.lerp(light.founderGold, dark.founderGold, 0.5));
+    });
   });
 }

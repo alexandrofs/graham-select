@@ -30,6 +30,7 @@ public class FamilyProfileJpaAdapter implements FamilyProfilePort {
                 .active(profile.isActive())
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(profile.getUpdatedAt())
+                .isNew(profile.getUpdatedAt() == null)
                 .build();
 
         try {
