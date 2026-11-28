@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface SpringDataWebPushSubscriptionRepository extends JpaRepository<WebPushSubscriptionEntity, UUID> {
     Optional<WebPushSubscriptionEntity> findByEndpointHash(String endpointHash);
+    List<WebPushSubscriptionEntity> findByEndpoint(String endpoint);
     List<WebPushSubscriptionEntity> findByUserId(String userId);
     List<WebPushSubscriptionEntity> findByUserIdAndActiveTrue(String userId);
 }

@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../domain/entities/financial_goal.dart';
 import '../../domain/entities/goal_projection.dart';
 import '../../domain/entities/goal_simulation_result.dart';
@@ -81,9 +83,12 @@ class _WhatIfSimulatorCardState extends State<WhatIfSimulatorCard> {
       simulatedAnnualYieldPercentage: clampedYield,
     );
 
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isMasked = privacyProvider?.isPrivacyMode ?? false;
     final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    final String formattedSimulatedContribution =
-        'Simulado: ${currencyFormat.format(clampedContribution)}/mês';
+    final String formattedSimulatedContribution = isMasked
+        ? 'Simulado: ${PrivacyProvider.maskedCurrencyValue}/mês'
+        : 'Simulado: ${currencyFormat.format(clampedContribution)}/mês';
     final String formattedSimulatedYield =
         'Simulado: ${clampedYield.toStringAsFixed(1).replaceAll('.', ',')}% a.a.';
 

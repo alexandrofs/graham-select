@@ -584,4 +584,28 @@ class GetCustodyPositionsUseCaseTest {
         assertEquals(1, result.size());
         assertEquals("Internacional", result.get(0).assetClass());
     }
+
+    @Test
+    void shouldClassifyBrazilianEquityAndFixedIncomeEtfsEndingIn11OutsideFiis() {
+        String userId = "user-1";
+        when(tradePort.findAllByUserId(userId)).thenReturn(List.of(
+                Trade.builder().userId(userId).ticker("BOVA11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("120.00")).build(),
+                Trade.builder().userId(userId).ticker("SMAL11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("100.00")).build(),
+                Trade.builder().userId(userId).ticker("IMAB11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("95.00")).build(),
+                Trade.builder().userId(userId).ticker("MXRF11").side(TradeSide.COMPRA.name())
+                        .quantity(BigDecimal.TEN).price(new BigDecimal("10.00")).build()
+        ));
+        when(stockPricePort.findLatestByCompanyIds(anyList())).thenReturn(Collections.emptyMap());
+
+        Map<String, String> classes = useCase.execute(userId).stream()
+                .collect(Collectors.toMap(CustodyPositionDTO::ticker, CustodyPositionDTO::assetClass));
+
+        assertEquals("Ações", classes.get("BOVA11"));
+        assertEquals("Ações", classes.get("SMAL11"));
+        assertEquals("Renda Fixa", classes.get("IMAB11"));
+        assertEquals("FIIs", classes.get("MXRF11"));
+    }
 }

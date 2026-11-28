@@ -3,7 +3,7 @@ package afsdigital.grahamselect.valuation.application.usecase;
 import afsdigital.grahamselect.common.tags.application.repository.PortfolioTagPort;
 import afsdigital.grahamselect.common.tags.application.service.exceptions.TagNotFoundException;
 import afsdigital.grahamselect.valuation.application.dto.GrahamRecommendationDto;
-import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationPort;
+import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationReadPort;
 import afsdigital.grahamselect.valuation.domain.entities.GrahamRecommendation;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,15 +13,15 @@ import java.util.UUID;
 @Slf4j
 public class GetGrahamRecommendationsUseCase {
 
-    private final GrahamRecommendationPort grahamRecommendationPort;
+    private final GrahamRecommendationReadPort grahamRecommendationPort;
     private final PortfolioTagPort portfolioTagPort;
 
-    public GetGrahamRecommendationsUseCase(GrahamRecommendationPort grahamRecommendationPort) {
+    public GetGrahamRecommendationsUseCase(GrahamRecommendationReadPort grahamRecommendationPort) {
         this(grahamRecommendationPort, null);
     }
 
     public GetGrahamRecommendationsUseCase(
-            GrahamRecommendationPort grahamRecommendationPort,
+            GrahamRecommendationReadPort grahamRecommendationPort,
             PortfolioTagPort portfolioTagPort
     ) {
         this.grahamRecommendationPort = grahamRecommendationPort;

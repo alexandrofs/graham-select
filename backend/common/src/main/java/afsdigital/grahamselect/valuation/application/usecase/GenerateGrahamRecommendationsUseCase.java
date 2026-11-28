@@ -8,6 +8,7 @@ import afsdigital.grahamselect.valuation.application.repository.AllocationGoalPo
 import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationPort;
 import afsdigital.grahamselect.valuation.application.repository.PortfolioSnapshotPort;
 import afsdigital.grahamselect.valuation.application.repository.RankingRepository;
+import afsdigital.grahamselect.valuation.domain.AllocationGoalType;
 import afsdigital.grahamselect.valuation.domain.entities.GrahamRecommendation;
 import afsdigital.grahamselect.valuation.domain.entities.RankedCompany;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +62,7 @@ public class GenerateGrahamRecommendationsUseCase {
         if (hasGoals) {
             goalsByTicker = userGoals.stream()
                     .filter(g -> g != null && g.targetKey() != null && g.targetPercentage() != null)
-                    .filter(g -> "TICKER".equals(g.goalType()))
+                    .filter(g -> AllocationGoalType.TICKER.matches(g.goalType()))
                     .collect(Collectors.toMap(
                             g -> g.targetKey().trim().toUpperCase(),
                             AllocationGoalDto::targetPercentage,
@@ -70,7 +71,7 @@ public class GenerateGrahamRecommendationsUseCase {
 
             goalsByClass = userGoals.stream()
                     .filter(g -> g != null && g.targetKey() != null && g.targetPercentage() != null)
-                    .filter(g -> "ASSET_CLASS".equals(g.goalType()))
+                    .filter(g -> AllocationGoalType.ASSET_CLASS.matches(g.goalType()))
                     .collect(Collectors.toMap(
                             g -> normalizeAssetClassKey(g.targetKey()),
                             AllocationGoalDto::targetPercentage,

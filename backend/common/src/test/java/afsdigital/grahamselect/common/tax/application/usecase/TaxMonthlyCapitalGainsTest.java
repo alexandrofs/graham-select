@@ -291,10 +291,9 @@ class TaxMonthlyCapitalGainsTest {
     @Test
     @DisplayName("Cenário J: Vencimento do DARF no último dia útil do mês subsequente")
     void scenarioJ_darfDueDateCalculation() {
-        // Fevereiro de 2024 (ano bissexto): próximo mês é Março/2024. 31/03/2024 foi domingo -> recua para 28/03/2024 (29/03 é sexta-feira santa, mas feriado fixo: 31 é domingo, 30 é sábado, 29 é dia 29)
+        // Fevereiro de 2024 (ano bissexto): próximo mês é Março/2024. 31/03/2024 foi domingo, 30/03 sábado, 29/03 Sexta-feira Santa -> recua para 28/03/2024
         LocalDate dueDate = DarfDueDateCalculator.calculateDueDate(YearMonth.of(2024, 2));
-        // Março 2024: dia 31 é domingo, dia 30 é sábado -> dia 29/03/2024 (sexta-feira)
-        assertThat(dueDate).isEqualTo(LocalDate.of(2024, 3, 29));
+        assertThat(dueDate).isEqualTo(LocalDate.of(2024, 3, 28));
 
         // Outubro de 2025: próximo mês é Novembro/2025. 30/11/2025 é domingo, 29/11 é sábado, 28/11 é sexta-feira
         LocalDate dueNov = DarfDueDateCalculator.calculateDueDate(YearMonth.of(2025, 10));

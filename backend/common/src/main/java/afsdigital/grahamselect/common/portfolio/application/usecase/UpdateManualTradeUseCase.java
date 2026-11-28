@@ -5,14 +5,12 @@ import afsdigital.grahamselect.common.portfolio.application.repository.TradePort
 import afsdigital.grahamselect.common.portfolio.application.repository.ValuationEventPort;
 import afsdigital.grahamselect.common.portfolio.domain.entities.ManualTradeAudit;
 import afsdigital.grahamselect.common.portfolio.domain.entities.Trade;
-import afsdigital.grahamselect.common.portfolio.domain.events.ValuationRequestedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,6 +18,7 @@ import java.util.UUID;
 /**
  * Updates an existing trade owned by the user, recording an audit entry and requesting valuation.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class UpdateManualTradeUseCase {
 
@@ -37,7 +36,6 @@ public class UpdateManualTradeUseCase {
     private final ValuationEventPort valuationEventPort;
     private final ObjectMapper objectMapper;
 
-    @SneakyThrows
     @Transactional
     public UpdateResult execute(UUID tradeId, String userId, Trade updatedFields) {
         Optional<Trade> existingOpt = tradePort.findByIdAndUserId(tradeId, userId);
@@ -82,27 +80,16 @@ public class UpdateManualTradeUseCase {
                 .tradeId(savedTrade.getId())
                 .userId(userId)
                 .actionType("UPDATE")
-                .payloadJson(objectMapper.writeValueAsString(savedTrade))
+                .payloadJson(ManualTradeUseCaseSupport.serializeTradeForAudit(objectMapper, savedTrade, "UPDATE", log))
                 .createdAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
         auditPort.save(audit);
 
-        publishValuation(userId, savedTrade.getTicker());
+        ManualTradeUseCaseSupport.publishValuationAfterCommit(valuationEventPort, userId, savedTrade.getTicker());
         if (existing.getTicker() != null && !existing.getTicker().equalsIgnoreCase(savedTrade.getTicker())) {
-            publishValuation(userId, existing.getTicker());
+            ManualTradeUseCaseSupport.publishValuationAfterCommit(valuationEventPort, userId, existing.getTicker());
         }
 
         return new UpdateResult(UpdateStatus.UPDATED, savedTrade);
-    }
-
-    private void publishValuation(String userId, String ticker) {
-        ValuationRequestedEvent event = ValuationRequestedEvent.builder()
-                .eventId(UUID.randomUUID().toString())
-                .version("v1")
-                .timestamp(OffsetDateTime.now(ZoneOffset.UTC))
-                .userId(userId)
-                .ticker(ticker)
-                .build();
-        valuationEventPort.publishValuationRequest(event);
     }
 }

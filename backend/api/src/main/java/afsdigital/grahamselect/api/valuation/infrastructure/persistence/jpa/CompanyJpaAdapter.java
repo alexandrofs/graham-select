@@ -7,6 +7,7 @@ import afsdigital.grahamselect.common.domain.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,24 @@ public class CompanyJpaAdapter implements CompanyRepository {
         return repository.findByTicker(ticker.trim())
                 .map(this::toDomain)
                 .orElse(null);
+    }
+
+    @Override
+    public List<Company> findAllByTickerIn(Collection<String> tickers) {
+        if (tickers == null || tickers.isEmpty()) {
+            return List.of();
+        }
+        List<String> normalized = tickers.stream()
+                .filter(t -> t != null && !t.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+        if (normalized.isEmpty()) {
+            return List.of();
+        }
+        return repository.findAllByTickerIn(normalized).stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     @Override

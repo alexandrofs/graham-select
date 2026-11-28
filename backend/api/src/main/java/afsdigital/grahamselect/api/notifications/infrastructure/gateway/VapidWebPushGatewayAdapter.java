@@ -17,10 +17,14 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
@@ -28,6 +32,11 @@ import java.util.Map;
 public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
 
     private static final String PROVIDER = "VAPID";
+    private static final long JWT_CACHE_EXPIRY_SECONDS = 12L * 3600L;
+    private static final long JWT_REFRESH_BUFFER_SECONDS = 300L;
+
+    private record CachedJwt(String token, long expiresAtEpochSeconds) {
+    }
 
     private final String publicKey;
     private final String privateKeyRaw;
@@ -35,6 +44,7 @@ public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
     private final ECPrivateKey privateKey;
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
+    private final ConcurrentHashMap<String, CachedJwt> jwtCache = new ConcurrentHashMap<>();
 
     public VapidWebPushGatewayAdapter(
             @Value("${webpush.vapid.public-key:}") String publicKey,
@@ -61,6 +71,9 @@ public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
 
         byte[] privBytes = WebPushCryptoUtils.decodeBase64Url(this.privateKeyRaw);
         this.privateKey = WebPushCryptoUtils.decodePrivateKey(privBytes);
+        byte[] pubBytes = WebPushCryptoUtils.decodeBase64Url(this.publicKey);
+        ECPublicKey ecPublicKey = WebPushCryptoUtils.decodePublicKey(pubBytes);
+        validateKeyPair(this.privateKey, ecPublicKey);
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(Duration.ofMillis(connectTimeoutMs));
@@ -84,7 +97,7 @@ public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
 
         try {
             String origin = WebPushCryptoUtils.extractOrigin(endpoint);
-            String vapidJwt = WebPushCryptoUtils.createVapidJwt(origin, this.subject, this.privateKey);
+            String vapidJwt = getOrCreateVapidJwt(origin);
 
             Map<String, String> payloadMap = new HashMap<>();
             payloadMap.put("title", (title != null && !title.isBlank()) ? title : "Kerno");
@@ -133,6 +146,38 @@ public class VapidWebPushGatewayAdapter implements WebPushGatewayPort {
         } catch (Exception e) {
             log.error("Falha ao cifrar ou despachar Web Push para endpoint={}: {}", maskedEndpoint, e.getMessage(), e);
             return new WebPushSendResult(false, false, 500, PROVIDER, e.getMessage());
+        }
+    }
+
+    private String getOrCreateVapidJwt(String origin) {
+        long now = Instant.now().getEpochSecond();
+        CachedJwt cached = jwtCache.get(origin);
+        if (cached != null && (cached.expiresAtEpochSeconds() - now) > JWT_REFRESH_BUFFER_SECONDS) {
+            return cached.token();
+        }
+        String freshToken = WebPushCryptoUtils.createVapidJwt(origin, this.subject, this.privateKey);
+        jwtCache.put(origin, new CachedJwt(freshToken, now + JWT_CACHE_EXPIRY_SECONDS));
+        return freshToken;
+    }
+
+    private static void validateKeyPair(ECPrivateKey privateKey, ECPublicKey publicKey) {
+        try {
+            byte[] probe = "kerno-vapid-keypair-check".getBytes(StandardCharsets.UTF_8);
+            Signature signer = Signature.getInstance("SHA256withECDSA");
+            signer.initSign(privateKey);
+            signer.update(probe);
+            byte[] signature = signer.sign();
+
+            Signature verifier = Signature.getInstance("SHA256withECDSA");
+            verifier.initVerify(publicKey);
+            verifier.update(probe);
+            if (!verifier.verify(signature)) {
+                throw new IllegalArgumentException("VAPID public key does not match private key");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to validate VAPID key pair: " + e.getMessage(), e);
         }
     }
 

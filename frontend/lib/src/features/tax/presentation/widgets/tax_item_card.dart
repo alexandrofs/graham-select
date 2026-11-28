@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/tax_declaration_item.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class TaxItemCard extends StatelessWidget {
@@ -18,8 +20,11 @@ class TaxItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMasked = Provider.of<PrivacyProvider?>(context)?.isPrivacyMode ?? false;
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final quantityFormatter = NumberFormat('#,##0.####', 'pt_BR');
+    String formatMoney(double value) =>
+        isMasked ? PrivacyProvider.maskedCurrencyValue : currencyFormatter.format(value);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -127,7 +132,7 @@ class TaxItemCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        currencyFormatter.format(item.previousYearValue),
+                        formatMoney(item.previousYearValue),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ],
@@ -143,7 +148,7 @@ class TaxItemCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        currencyFormatter.format(item.currentYearValue),
+                        formatMoney(item.currentYearValue),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -164,7 +169,7 @@ class TaxItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${quantityFormatter.format(item.quantity)} • ${currencyFormatter.format(item.averagePrice)}',
+                          '${quantityFormatter.format(item.quantity)} • ${formatMoney(item.averagePrice)}',
                           style: const TextStyle(fontSize: 13, color: Colors.white70),
                         ),
                       ],

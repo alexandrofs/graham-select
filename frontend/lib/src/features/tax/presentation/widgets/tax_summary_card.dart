@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/tax_declaration_report.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class TaxSummaryCard extends StatelessWidget {
@@ -10,9 +12,15 @@ class TaxSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMasked = Provider.of<PrivacyProvider?>(context)?.isPrivacyMode ?? false;
     final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    String formatMoney(double value) =>
+        isMasked ? PrivacyProvider.maskedCurrencyValue : currencyFormatter.format(value);
     final isPositive = report.netVariation >= 0;
     final variationColor = isPositive ? AppTheme.accentColor : Colors.redAccent;
+    final variationText = isMasked
+        ? PrivacyProvider.maskedCurrencyValue
+        : '${isPositive ? '+' : ''}${currencyFormatter.format(report.netVariation)} (${report.percentageVariation.toStringAsFixed(2)}%)';
 
     return Card(
       child: Padding(
@@ -42,21 +50,21 @@ class TaxSummaryCard extends StatelessWidget {
                       _buildMetric(
                         context,
                         'Situação em 31/12/${report.previousYear}',
-                        currencyFormatter.format(report.previousYearTotal),
+                        formatMoney(report.previousYearTotal),
                         Colors.white70,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Situação em 31/12/${report.year}',
-                        currencyFormatter.format(report.currentYearTotal),
+                        formatMoney(report.currentYearTotal),
                         AppTheme.textColor,
                       ),
                       const SizedBox(height: 12),
                       _buildMetric(
                         context,
                         'Variação Patrimonial',
-                        '${isPositive ? '+' : ''}${currencyFormatter.format(report.netVariation)} (${report.percentageVariation.toStringAsFixed(2)}%)',
+                        variationText,
                         variationColor,
                       ),
                     ],
@@ -70,7 +78,7 @@ class TaxSummaryCard extends StatelessWidget {
                       child: _buildMetric(
                         context,
                         'Situação em 31/12/${report.previousYear}',
-                        currencyFormatter.format(report.previousYearTotal),
+                        formatMoney(report.previousYearTotal),
                         Colors.white70,
                       ),
                     ),
@@ -83,7 +91,7 @@ class TaxSummaryCard extends StatelessWidget {
                       child: _buildMetric(
                         context,
                         'Situação em 31/12/${report.year}',
-                        currencyFormatter.format(report.currentYearTotal),
+                        formatMoney(report.currentYearTotal),
                         AppTheme.textColor,
                       ),
                     ),
@@ -96,7 +104,7 @@ class TaxSummaryCard extends StatelessWidget {
                       child: _buildMetric(
                         context,
                         'Variação Patrimonial',
-                        '${isPositive ? '+' : ''}${currencyFormatter.format(report.netVariation)} (${report.percentageVariation.toStringAsFixed(2)}%)',
+                        variationText,
                         variationColor,
                       ),
                     ),
@@ -111,6 +119,7 @@ class TaxSummaryCard extends StatelessWidget {
   }
 
   Widget _buildMetric(BuildContext context, String label, String value, Color valueColor) {
+    final isMasked = value == PrivacyProvider.maskedCurrencyValue;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
@@ -123,12 +132,15 @@ class TaxSummaryCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: valueColor,
-                ),
+          Semantics(
+            label: isMasked ? '$label: ${PrivacyProvider.maskedSemanticsLabel}' : '$label: $value',
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: valueColor,
+                  ),
+            ),
           ),
         ],
       ),

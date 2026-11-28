@@ -12,14 +12,14 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 4-3-graham-valuation-engine.md (2026-06-12)
 
-- Quebra de ISP na GrahamRecommendationPort [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/repository/GrahamRecommendationPort.java:1] — A interface unifica leitura e escrita, obrigando adapters de leitura a lançar UnsupportedOperationException nos métodos de escrita.
-- Uso de Strings Mágicas em Filtros de Regra de Negócio [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCase.java:1] — Utiliza a String "TICKER" hardcoded no usecase em vez de um enum de tipo de meta.
+- [RESOLVIDO em 2026-11-27] Quebra de ISP na GrahamRecommendationPort [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/repository/GrahamRecommendationPort.java] — Segregada em `GrahamRecommendationReadPort` e `GrahamRecommendationWritePort`; `GrahamRecommendationReadAdapter` implementa apenas `GrahamRecommendationReadPort` sem lançar `UnsupportedOperationException`.
+- [RESOLVIDO em 2026-11-27] Uso de Strings Mágicas em Filtros de Regra de Negócio [backend/common/src/main/java/afsdigital/grahamselect/valuation/application/usecase/GenerateGrahamRecommendationsUseCase.java] — Substituído pelo enum `AllocationGoalType` (`TICKER`, `ASSET_CLASS`).
 - Mapeamento de Datas como String em Eventos [backend/common/src/main/java/afsdigital/grahamselect/common/domain/entities/TopicConstants.java:1] — Os eventos do Kafka de recomendação usam String para trafegar timestamps de solicitação e conclusão em vez de tipos temporais nativos, conforme instruído na especificação.
 
 ## Deferred from: code review of 4-4-explainable-ai-reasoning-box.md (2026-06-13)
 
 - [RESOLVIDO em 2026-11-27] Risco de Quebra em Tempo de Execução na Desserialização do JSON [frontend/lib/src/features/ranking/data/models/graham_recommendation_model.dart] — Conversão robusta via _parseDouble / _parseNullableDouble suportando num, int, double e String com testes unitários em graham_recommendation_model_test.dart.
-- Rolagem Conflitante no Bottom Sheet [frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart:1] — Conflito potencial de gestos entre o SingleChildScrollView interno e a folha deslizável nativa.
+- [RESOLVIDO em 2026-11-27] Rolagem Conflitante no Bottom Sheet [frontend/lib/src/features/ranking/presentation/pages/graham_recommendations_page.dart:350] — Definido `enableDrag: false` no `showModalBottomSheet` para evitar competição de gesto com o `DraggableScrollableSheet` interno.
 
 ## Deferred from: code review of 5-1-wealth-income-goal-setup.md (2026-06-13)
 
@@ -27,8 +27,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 
 ## Deferred from: code review of 6-1-admin-observability-dashboard.md (2026-10-25)
 
-- Validação de `sub` e `email` nulos na conversão OAuth2 [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:34] — Comportamento pré-existente da Story 1.1 na extração de claims do JWT.
-- Recuperação de concorrência dentro da mesma transação em `OAuth2UserProvisioningConverter.convert()` [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java:72] — Bloco catch pré-existente da Story 1.1 dentro de método anotado com `@Transactional`.
+- [RESOLVIDO em 2026-11-27] Validação de `sub` e `email` nulos na conversão OAuth2 [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java] — Adicionada validação explícita de `sub` nulo/vazio lançando `BadCredentialsException` (com cobertura em `OAuth2UserProvisioningConverterTest.java`), além da validação pré-existente de `email`.
+- [RESOLVIDO em 2026-11-27] Recuperação de concorrência dentro da mesma transação em `OAuth2UserProvisioningConverter.convert()` [backend/api/src/main/java/afsdigital/grahamselect/api/auth/infrastructure/security/OAuth2UserProvisioningConverter.java] — `convert()` utiliza `TransactionTemplate(PROPAGATION_REQUIRES_NEW)` isolado sem `@Transactional` externo.
 
 ## Deferred from: code review of 7-1-vinculo-de-novo-cpf-a-conta-matriz (2026-11-13)
 - [RESOLVIDO em 2026-11-27] Implementar `Persistable<UUID>` em `FamilyProfileEntity` (`backend/api/src/main/java/afsdigital/grahamselect/api/family/infrastructure/persistence/jpa/entities/FamilyProfileEntity.java`) para evitar `SELECT` prévio antes de `INSERT` em `FamilyProfileJpaAdapter.save()`. Coberto com testes unitários em `FamilyProfileEntityTest.java`.
@@ -47,20 +47,20 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 ## Deferred from: code review of 10-1-relatorio-de-bens-e-direitos-informe-anual.md (2026-11-19)
 
 - Redesenho de navegação inferior móvel com mais de 5 destinos [frontend/lib/src/core/widgets/main_layout.dart:237] — A barra inferior de navegação (`_BottomNavBar`) possui 10 destinos, ultrapassando a recomendação de 3-5 do Material Design. Deve ser abordado em um refator dedicado de UX (ex: menu 'Mais'/Drawer).
-- Otimização de consulta em lote para CNPJs de empresas no relatório de IRPF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java:72] — A busca de dados de empresas utiliza cache em memória por ticker único; substituição por `findAllByTickerIn` pode ser implementada futuramente caso a carteira contenha centenas de ativos distintos.
+- [RESOLVIDO em 2026-11-27] Otimização de consulta em lote para CNPJs de empresas no relatório de IRPF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/application/usecase/GetTaxAssetDeclarationReportUseCase.java] — Adicionado `CompanyRepository.findAllByTickerIn` (implementado em `CompanyJpaAdapter` e `CompanyRepositoryImpl`) e consulta em lote única antes do loop.
 
 ## Deferred from: code review of 11-2-web-push-para-zona-de-compra-graham.md (2026-11-20)
 
 - Processamento assíncrono desacoplado para disparo em massa de Web Push na avaliação diária [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/EvaluateGrahamBuyZoneAlertsUseCase.java:82] — Atualmente o agendador executa as notificações de forma síncrona dentro da janela do ShedLock de 15 minutos, satisfazendo a demanda atual. Evoluir para fila assíncrona ou pool de threads quando a base de assinantes crescer.
-- Caching de token JWT VAPID assinado por origin [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java:80] — O token VAPID é recalculado a cada envio; adicionar cache por origin com expiração de 12h reduz overhead computacional de assinatura ECDSA em execuções de lote volumosas.
-- Validação antecipada do par de chaves VAPID no startup do adapter [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java:45] — Validar matematicamente a compatibilidade entre chave pública e privada P-256 durante a inicialização do bean evita falhas silenciosas 401 em runtime.
-- Desativação de assinatura por endpoint físico em caso de troca de usuário no mesmo browser compartilhado [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/RegisterWebPushSubscriptionUseCase.java:40] — O hash é calculado por `userId + "|" + endpoint` conforme AC 2. Em máquinas compartilhadas onde múltiplos usuários usam o mesmo perfil de navegador, considerar desativar registros de outros usuários vinculados ao mesmo endpoint na nova subscrição.
-- Suporte a atributo tag para agrupamento no Service Worker push-sw.js [frontend/web/push-sw.js:20] — Adicionar atributo `tag` com base no ticker no payload de notificação para agrupar e evitar acúmulo de múltiplos popups na bandeja do sistema operacional.
+- [RESOLVIDO em 2026-11-27] Caching de token JWT VAPID assinado por origin [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java] — Implementado cache em `ConcurrentHashMap` por origin com expiração de 12h (margem de renovação de 5 min), coberto em `VapidWebPushGatewayAdapterTest.java`.
+- [RESOLVIDO em 2026-11-27] Validação antecipada do par de chaves VAPID no startup do adapter [backend/api/src/main/java/afsdigital/grahamselect/api/notifications/infrastructure/gateway/VapidWebPushGatewayAdapter.java] — Validação criptográfica ECDSA P-256 entre `publicKey` e `privateKey` no construtor, coberta em `VapidWebPushGatewayAdapterTest.java`.
+- [RESOLVIDO em 2026-11-27] Desativação de assinatura por endpoint físico em caso de troca de usuário no mesmo browser compartilhado [backend/common/src/main/java/afsdigital/grahamselect/common/notifications/application/usecase/RegisterWebPushSubscriptionUseCase.java] — Desativação automática de assinaturas ativas de outros usuários para o mesmo `endpoint`, coberta em `RegisterWebPushSubscriptionUseCaseTest.java`.
+- [RESOLVIDO em 2026-11-27] Suporte a atributo tag para agrupamento no Service Worker push-sw.js [frontend/web/push-sw.js] — Adicionado `tag` por `data.tag` / `data.ticker` com `renotify: true`.
 
 ## Deferred from: code review of 10-2-calculo-de-lucro-realizado-e-isencao.md (2026-11-20)
 
 - Mecanismo de download de arquivos CSV no Flutter Web via launchUrl(dataURI) [frontend/lib/src/features/tax/presentation/providers/tax_provider.dart:140] — O disparo de download via dataURI no Flutter Web/Desktop pode apresentar comportamentos variados entre browsers ou desconsiderar Content-Disposition; padronização com package dedicado de file saver adiada por seguir padrão já existente na Story 10.1.
-- Calendário dinâmico de feriados bancários móveis para vencimento de DARF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/domain/utils/DarfDueDateCalculator.java:11] — Feriados móveis (Sexta-feira Santa, Carnaval, Corpus Christi) diferidos para implementação em serviço compartilhado de calendário fiscal/bancário; 31/12 incluído como feriado bancário fixo (Resolução CMN/Bacen 4.880/2020).
+- [RESOLVIDO em 2026-11-27] Calendário dinâmico de feriados bancários móveis para vencimento de DARF [backend/common/src/main/java/afsdigital/grahamselect/common/tax/domain/utils/DarfDueDateCalculator.java] — Calculados dinamicamente via algoritmo de Páscoa (Segunda/Terça de Carnaval, Sexta-feira Santa e Corpus Christi), coberto em `DarfDueDateCalculatorTest.java`.
 
 ## Deferred from: retrospective of Epic 5 (2026-11-20)
 
@@ -111,12 +111,10 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-1-fundacao-design-system-intergeracional.md`
   summary: [RESOLVIDO em 2026-11-27] Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
   evidence: Teste implementado em `frontend/test/core/theme/kerno_design_system_test.dart` validando interpolação em t=0, t=1, t=0.5 e fallback para nulo/não-KernoThemeData.
-  summary: Adicionar teste unitário cobrindo KernoThemeData.lerp entre tema Light e Dark e fallback não-KernoThemeData.
-  evidence: verification-gap identificou que KernoThemeData.lerp (kerno_tokens.dart:434-468) não possui chamada direta em frontend/test/.
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-4-dashboard-patrimonial-com-modo-privacidade-e-protecao-de-snapshot.md`
-  summary: Aplicar PrivacyProvider (máscara R$ •••••• e Semantics) nas demais rotas autenticadas fora do Dashboard/Portfólio (goals, tax).
-  evidence: PrivacyToggleButton está no _TopBar global, mas telas fora do Dashboard (ex. goal_summary_card.dart, tax_declaration_page.dart) ainda formatam R$ sem consultar PrivacyProvider.
+  summary: [RESOLVIDO em 2026-11-27] Aplicar PrivacyProvider (máscara R$ •••••• e Semantics) nas demais rotas autenticadas fora do Dashboard/Portfólio (goals, tax).
+  evidence: `PrivacyProvider` integrado em `goal_summary_card.dart`, `what_if_simulator_card.dart`, `tax_declaration_page.dart`, `tax_item_card.dart`, `tax_summary_card.dart` e `monthly_summary_card.dart`, com teste em `goal_summary_card_test.dart`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-4-dashboard-patrimonial-com-modo-privacidade-e-protecao-de-snapshot.md`
   summary: Adicionar teste E2E/integrado validando wiring raiz de PrivacyProvider.load() em GrahamSelectApp autenticado e preload antes do primeiro frame.
   evidence: Testes atuais injetam PrivacyProvider diretamente nos widgets; GrahamSelectApp exige harness completo autenticado.
@@ -126,8 +124,8 @@ Este arquivo registra itens de dívida técnica ou melhorias adiadas durante as 
   evidence: Fatiado da Story 2.5 no gate de tokens para manter a spec principal focada em Ingestão B3 (com descarte de PII) e CRUD Manual Multi-Classe dentro do limite de 1600 tokens.
 
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
-  summary: Classificar ETFs de ações brasileiras terminados em `11` (ex.: `BOVA11`, `SMAL11`) fora de `FIIs` em `GetCustodyPositionsUseCase.inferAssetClass`.
-  evidence: Pré-existente: apenas ETFs internacionais (`IVVB11`, etc.) e cripto (`HASH11`, etc.) estão mapeados antes da regra `t.endsWith("11") -> "FIIs"`.
+  summary: [RESOLVIDO em 2026-11-27] Classificar ETFs de ações brasileiras terminados em `11` (ex.: `BOVA11`, `SMAL11`) fora de `FIIs` em `GetCustodyPositionsUseCase.inferAssetClass`.
+  evidence: Adicionados `BRAZILIAN_EQUITY_ETF_TICKERS` (`Ações`) e `FIXED_INCOME_ETF_TICKERS` (`Renda Fixa`) antes da regra `t.endsWith("11") -> "FIIs"`, coberto em `GetCustodyPositionsUseCaseTest.java`.
 - source_spec: `docs/bmad/implementation-artifacts/spec-2-5-adaptacao-visual-ingestao-b3-crud-multi-classe-holding-familiar.md`
-  summary: Substituir `@SneakyThrows` e publicação de `ValuationRequestedEvent` dentro de `@Transactional` por logging `ERROR` explícito e outbox/after-commit nos use cases de trade manual.
-  evidence: `UpdateManualTradeUseCase` e `DeleteManualTradeUseCase` replicam o padrão pré-existente de `CreateManualTradeUseCase.java:25-68`.
+  summary: [RESOLVIDO em 2026-11-27] Substituir `@SneakyThrows` e publicação de `ValuationRequestedEvent` dentro de `@Transactional` por logging `ERROR` explícito e outbox/after-commit nos use cases de trade manual.
+  evidence: Extraído `ManualTradeUseCaseSupport` com logging `ERROR` explícito em falha de serialização e `TransactionSynchronization.afterCommit()` nos use cases `CreateManualTradeUseCase`, `UpdateManualTradeUseCase` e `DeleteManualTradeUseCase`.

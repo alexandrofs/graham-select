@@ -350,6 +350,7 @@ class _GrahamRecommendationsPageState extends State<GrahamRecommendationsPage>
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
+                      enableDrag: false,
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                       ),

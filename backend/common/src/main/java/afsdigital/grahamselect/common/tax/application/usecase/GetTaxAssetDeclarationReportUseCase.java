@@ -71,7 +71,24 @@ public class GetTaxAssetDeclarationReportUseCase {
             tracker.processTrade(trade, cutoffPreviousYear);
         }
 
+        List<String> activeTickers = trackers.values().stream()
+                .filter(t -> t.currentYearState.quantity.compareTo(BigDecimal.ZERO) > 0
+                        || t.prevYearState.quantity.compareTo(BigDecimal.ZERO) > 0)
+                .map(t -> t.ticker)
+                .distinct()
+                .toList();
+
         Map<String, Company> companyCache = new HashMap<>();
+        if (!activeTickers.isEmpty()) {
+            List<Company> batchCompanies = companyRepository.findAllByTickerIn(activeTickers);
+            if (batchCompanies != null) {
+                for (Company c : batchCompanies) {
+                    if (c != null && c.getTicker() != null) {
+                        companyCache.putIfAbsent(c.getTicker().trim().toUpperCase(Locale.ROOT), c);
+                    }
+                }
+            }
+        }
         List<TaxAssetDeclarationItemDTO> items = new ArrayList<>();
 
         for (PositionTracker tracker : trackers.values()) {
@@ -89,13 +106,7 @@ public class GetTaxAssetDeclarationReportUseCase {
             boolean liquidated = hadPositionPrev && !hasPositionCurrent;
 
             String ticker = tracker.ticker;
-            Company company = companyCache.computeIfAbsent(ticker, t -> {
-                Company c = companyRepository.findByTicker(t);
-                if (c == null) {
-                    c = companyRepository.findByTicker(ticker);
-                }
-                return c;
-            });
+            Company company = companyCache.get(ticker.trim().toUpperCase(Locale.ROOT));
 
             String companyName = (company != null && company.getName() != null && !company.getName().isBlank())
                     ? company.getName()

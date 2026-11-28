@@ -10,10 +10,13 @@ self.addEventListener('push', (event) => {
   }
 
   const title = data.title || 'Zona de Compra Graham';
+  const tag = data.tag || (data.ticker ? `kerno-${data.ticker}` : 'kerno-graham-alert');
   const options = {
     body: data.body || 'Nova oportunidade identificada!',
     icon: '/icons/Icon-192.png',
     badge: '/icons/Icon-192.png',
+    tag: tag,
+    renotify: true,
     data: {
       url: data.url || '/graham-recommendations'
     }

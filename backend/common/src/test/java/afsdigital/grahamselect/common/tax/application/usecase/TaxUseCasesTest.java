@@ -18,10 +18,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +46,16 @@ class TaxUseCasesTest {
     void setUp() {
         reportUseCase = new GetTaxAssetDeclarationReportUseCase(tradePort, companyRepository);
         availableYearsUseCase = new GetTaxAvailableYearsUseCase(tradePort);
+        lenient().when(companyRepository.findAllByTickerIn(any())).thenAnswer(inv -> {
+            Collection<String> tickers = inv.getArgument(0);
+            if (tickers == null) {
+                return List.of();
+            }
+            return tickers.stream()
+                    .map(companyRepository::findByTicker)
+                    .filter(Objects::nonNull)
+                    .toList();
+        });
     }
 
     private Trade createTrade(

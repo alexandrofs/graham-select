@@ -288,4 +288,42 @@ class VapidWebPushGatewayAdapterTest {
         assertThatThrownBy(() -> new VapidWebPushGatewayAdapter(publicKeyBase64, privateKeyBase64, "", 1000, 1000, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void shouldRejectMismatchedVapidKeyPairOnStartup() {
+        KeyPair otherKeyPair = WebPushCryptoUtils.generateKeyPair();
+        String otherPublicKey = WebPushCryptoUtils.encodeBase64Url(
+                WebPushCryptoUtils.encodePublicKey((ECPublicKey) otherKeyPair.getPublic())
+        );
+
+        assertThatThrownBy(() -> new VapidWebPushGatewayAdapter(
+                otherPublicKey, privateKeyBase64, "mailto:kerno@afsdigital.com.br", 1000, 1000, null
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("does not match");
+    }
+
+    @Test
+    void shouldCacheVapidJwtPerOriginAcrossSends() {
+        String endpoint1 = "https://fcm.googleapis.com/fcm/send/token-1";
+        String endpoint2 = "https://fcm.googleapis.com/fcm/send/token-2";
+        AtomicReference<String> auth1 = new AtomicReference<>();
+        AtomicReference<String> auth2 = new AtomicReference<>();
+
+        mockServer.expect(requestTo(endpoint1))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(request -> auth1.set(request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION)))
+                .andRespond(withSuccess());
+        mockServer.expect(requestTo(endpoint2))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(request -> auth2.set(request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION)))
+                .andRespond(withSuccess());
+
+        adapter.sendNotification(createSubscription(endpoint1), "T1", "B1", "/");
+        adapter.sendNotification(createSubscription(endpoint2), "T2", "B2", "/");
+
+        assertThat(auth1.get()).isNotBlank();
+        assertThat(auth2.get()).isEqualTo(auth1.get());
+        mockServer.verify();
+    }
 }

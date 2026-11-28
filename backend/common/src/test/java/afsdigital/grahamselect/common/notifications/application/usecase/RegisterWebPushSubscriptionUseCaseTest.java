@@ -154,4 +154,33 @@ class RegisterWebPushSubscriptionUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Endpoint URL must specify a valid host");
     }
+
+    @Test
+    void shouldDeactivateOtherUsersActiveSubscriptionForSamePhysicalEndpoint() {
+        String endpoint = "https://fcm.googleapis.com/fcm/send/shared-browser-token";
+        WebPushSubscription previousUserSub = WebPushSubscription.builder()
+                .id(UUID.randomUUID())
+                .userId("user-old")
+                .endpoint(endpoint)
+                .endpointHash(WebPushMaskingUtils.endpointHash("user-old", endpoint))
+                .p256dhKey("old_k")
+                .authKey("old_a")
+                .active(true)
+                .createdAt(OffsetDateTime.now(ZoneOffset.UTC).minusDays(2))
+                .updatedAt(OffsetDateTime.now(ZoneOffset.UTC).minusDays(2))
+                .build();
+
+        when(subscriptionPort.findByEndpoint(endpoint)).thenReturn(java.util.List.of(previousUserSub));
+        when(subscriptionPort.findByEndpointHash(WebPushMaskingUtils.endpointHash("user-new", endpoint)))
+                .thenReturn(Optional.empty());
+        when(subscriptionPort.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        RegisterWebPushSubscriptionRequest request = new RegisterWebPushSubscriptionRequest(
+                endpoint, "new_k", "new_a", "Shared Browser"
+        );
+        WebPushSubscriptionDto result = useCase.execute("user-new", request);
+
+        assertThat(result.active()).isTrue();
+        assertThat(previousUserSub.isActive()).isFalse();
+    }
 }

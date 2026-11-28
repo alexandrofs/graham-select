@@ -2,7 +2,7 @@ package afsdigital.grahamselect.api.valuation.infrastructure.persistence;
 
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.entities.GrahamRecommendationEntity;
 import afsdigital.grahamselect.api.valuation.infrastructure.persistence.jpa.repository.GrahamRecommendationJpaRepository;
-import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationPort;
+import afsdigital.grahamselect.valuation.application.repository.GrahamRecommendationReadPort;
 import afsdigital.grahamselect.valuation.domain.AllocationScope;
 import afsdigital.grahamselect.valuation.domain.entities.GrahamRecommendation;
 import lombok.RequiredArgsConstructor;
@@ -11,14 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class GrahamRecommendationReadAdapter implements GrahamRecommendationPort {
+public class GrahamRecommendationReadAdapter implements GrahamRecommendationReadPort {
 
     private final GrahamRecommendationJpaRepository repository;
-
-    @Override
-    public void saveRecommendations(String userId, List<GrahamRecommendation> recommendations) {
-        throw new UnsupportedOperationException("api module is read-only for Graham recommendations");
-    }
 
     @Override
     public List<GrahamRecommendation> findByUserId(String userId) {
@@ -32,11 +27,6 @@ public class GrahamRecommendationReadAdapter implements GrahamRecommendationPort
         return entities.stream()
                 .map(this::toDomain)
                 .toList();
-    }
-
-    @Override
-    public List<GrahamRecommendation> findAllOrderedByScore() {
-        throw new UnsupportedOperationException("api module does not support global ranking retrieval");
     }
 
     private GrahamRecommendation toDomain(GrahamRecommendationEntity entity) {

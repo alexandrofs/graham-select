@@ -6,6 +6,7 @@ import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.entities
 import afsdigital.grahamselect.valuation.infrastructure.persistence.jpa.repository.CompanyJpaRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +24,24 @@ public class CompanyRepositoryImpl implements CompanyRepository {
         return companyJpaRepository.findByTicker(ticker)
                 .map(this::toDomain)
                 .orElse(null);
+    }
+
+    @Override
+    public List<Company> findAllByTickerIn(Collection<String> tickers) {
+        if (tickers == null || tickers.isEmpty()) {
+            return List.of();
+        }
+        List<String> normalized = tickers.stream()
+                .filter(t -> t != null && !t.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+        if (normalized.isEmpty()) {
+            return List.of();
+        }
+        return companyJpaRepository.findAllByTickerIn(normalized).stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     @Override

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/security/privacy_provider.dart';
 import '../../domain/entities/financial_goal.dart';
 
 class GoalSummaryCard extends StatelessWidget {
@@ -19,11 +21,17 @@ class GoalSummaryCard extends StatelessWidget {
     const Color kEmerald = Color(0xFF10B981);
     const Color kAmberGold = Color(0xFFF59E0B);
 
+    final privacyProvider = Provider.of<PrivacyProvider?>(context);
+    final isMasked = privacyProvider?.isPrivacyMode ?? false;
     final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final isPatrimony = goal.goalType == 'PATRIMONY_TARGET';
 
-    final targetValueFormatted = currencyFormat.format(goal.targetValue);
-    final contributionFormatted = currencyFormat.format(goal.monthlyContribution);
+    final targetValueFormatted = isMasked
+        ? PrivacyProvider.maskedCurrencyValue
+        : currencyFormat.format(goal.targetValue);
+    final contributionFormatted = isMasked
+        ? PrivacyProvider.maskedCurrencyValue
+        : currencyFormat.format(goal.monthlyContribution);
 
     final double remainingValue = goal.targetValue - currentPatrimony;
     final bool goalAchieved = remainingValue <= 0;
@@ -36,7 +44,9 @@ class GoalSummaryCard extends StatelessWidget {
         motivationalText = '🎉 Parabéns! Você já atingiu sua meta de patrimônio!';
         highlightColor = kEmerald;
       } else {
-        final remainingFormatted = currencyFormat.format(remainingValue);
+        final remainingFormatted = isMasked
+            ? PrivacyProvider.maskedCurrencyValue
+            : currencyFormat.format(remainingValue);
         motivationalText = 'Você precisa de $remainingFormatted para atingir sua meta.';
         highlightColor = kAmberGold;
       }
