@@ -20,5 +20,6 @@ public class Trade {
     private BigDecimal quantity;
     private BigDecimal price;
     private String broker;
+    private String assetClass;
     private LocalDateTime createdAt;
 }

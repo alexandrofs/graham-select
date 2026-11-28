@@ -5,6 +5,7 @@ import '../../data/datasources/notification_service.dart';
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/entities/custody_position.dart';
 import '../../domain/entities/monthly_evolution.dart';
+import '../../domain/entities/trade.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 
 enum PortfolioStatus { initial, loading, success, error }
@@ -29,12 +30,21 @@ class PortfolioProvider extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  // --- Estados independentes para criação de trade manual ---
+  // --- Estados independentes para criação/edição/exclusão de trade manual ---
   TradeStatus _tradeStatus = TradeStatus.initial;
   TradeStatus get tradeStatus => _tradeStatus;
 
   String? _tradeError;
   String? get tradeError => _tradeError;
+
+  List<Trade> _manualTrades = [];
+  List<Trade> get manualTrades => List.unmodifiable(_manualTrades);
+
+  bool _manualTradesLoading = false;
+  bool get manualTradesLoading => _manualTradesLoading;
+
+  String? _manualTradesError;
+  String? get manualTradesError => _manualTradesError;
 
   PortfolioSummary? _summary;
   PortfolioSummary? get summary => _summary;
@@ -122,13 +132,30 @@ class PortfolioProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createManualTrade({
+  Future<void> loadManualTrades() async {
+    _manualTradesLoading = true;
+    _manualTradesError = null;
+    notifyListeners();
+
+    try {
+      _manualTrades = await repository.getManualTrades();
+    } catch (e) {
+      _manualTradesError = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _manualTradesLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> createManualTrade({
     required String ticker,
     required String side,
     required DateTime tradeDate,
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
   }) async {
     _tradeStatus = TradeStatus.loading;
     _tradeError = null;
@@ -142,13 +169,86 @@ class PortfolioProvider extends ChangeNotifier {
         quantity: quantity,
         price: price,
         broker: broker,
+        assetClass: assetClass,
+        profileId: profileId,
       );
       _tradeStatus = TradeStatus.success;
+      await _refreshAfterManualMutation();
+      notifyListeners();
+      return true;
     } catch (e) {
       _tradeStatus = TradeStatus.error;
       _tradeError = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
     }
+  }
+
+  Future<bool> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+  }) async {
+    _tradeStatus = TradeStatus.loading;
+    _tradeError = null;
     notifyListeners();
+
+    try {
+      await repository.updateManualTrade(
+        id: id,
+        ticker: ticker,
+        side: side,
+        tradeDate: tradeDate,
+        quantity: quantity,
+        price: price,
+        broker: broker,
+        assetClass: assetClass,
+        profileId: profileId,
+      );
+      _tradeStatus = TradeStatus.success;
+      await _refreshAfterManualMutation();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _tradeStatus = TradeStatus.error;
+      _tradeError = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteManualTrade(String id) async {
+    _tradeStatus = TradeStatus.loading;
+    _tradeError = null;
+    notifyListeners();
+
+    try {
+      await repository.deleteManualTrade(id);
+      _tradeStatus = TradeStatus.success;
+      await _refreshAfterManualMutation();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _tradeStatus = TradeStatus.error;
+      _tradeError = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> _refreshAfterManualMutation() async {
+    await Future.wait([
+      loadManualTrades(),
+      loadSummary(tagId: _activeTagId),
+      loadCustodyPositions(tagId: _activeTagId),
+      loadEvolutionData(tagId: _activeTagId),
+    ]);
   }
 
   void resetStatus() {
@@ -160,6 +260,9 @@ class PortfolioProvider extends ChangeNotifier {
   void resetTradeStatus() {
     _tradeStatus = TradeStatus.initial;
     _tradeError = null;
+    _manualTrades = [];
+    _manualTradesLoading = false;
+    _manualTradesError = null;
     notifyListeners();
   }
 
@@ -408,6 +511,9 @@ class PortfolioProvider extends ChangeNotifier {
     _custodyError = null;
     _evolutionError = null;
     _tradeError = null;
+    _manualTrades = [];
+    _manualTradesLoading = false;
+    _manualTradesError = null;
     _isOfflineCache = false;
     _lastSyncedAt = null;
     _activeTagId = null;

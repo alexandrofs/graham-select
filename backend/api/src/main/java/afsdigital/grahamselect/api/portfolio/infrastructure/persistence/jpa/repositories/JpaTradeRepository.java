@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -32,6 +33,33 @@ public interface JpaTradeRepository extends JpaRepository<TradeEntity, UUID> {
             String broker,
             String side
     );
+
+    boolean existsByIdNotAndUserIdAndProfileIdIsNullAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+            UUID id,
+            String userId,
+            String ticker,
+            LocalDate tradeDate,
+            BigDecimal quantity,
+            BigDecimal price,
+            String broker,
+            String side
+    );
+
+    boolean existsByIdNotAndUserIdAndProfileIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+            UUID id,
+            String userId,
+            String profileId,
+            String ticker,
+            LocalDate tradeDate,
+            BigDecimal quantity,
+            BigDecimal price,
+            String broker,
+            String side
+    );
+
+    Optional<TradeEntity> findByIdAndUserId(UUID id, String userId);
+
+    void deleteByIdAndUserId(UUID id, String userId);
 
     List<TradeEntity> findAllByUserId(String userId);
 

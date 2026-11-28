@@ -8,7 +8,7 @@ import '../../../goals/presentation/providers/goals_provider.dart';
 import '../../../goals/presentation/widgets/goal_health_checklist_card.dart';
 import '../../../goals/presentation/widgets/motivational_clock_card.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
-import '../../../portfolio/presentation/widgets/manual_operation_entry.dart';
+import '../../../portfolio/presentation/widgets/b3_ingestion_crud_sheet.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../portfolio/presentation/widgets/portfolio_kpi_card.dart';
 import '../../../portfolio/presentation/widgets/financial_data_table.dart';
@@ -67,19 +67,6 @@ class _DashboardPageState extends State<DashboardPage>
     final tagProvider = Provider.of<TagProvider?>(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) => const ManualOperationEntry(),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Nova Operação'),
-        backgroundColor: AppTheme.accentColor,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Consumer<PortfolioProvider>(
@@ -138,6 +125,15 @@ class _DashboardPageState extends State<DashboardPage>
                         padding: EdgeInsets.only(left: 16.0),
                         child: LiveUpdatesBadge(),
                       ),
+                    const SizedBox(width: 12),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                      ),
+                      onPressed: () => B3IngestionCrudSheet.show(context),
+                      icon: const Icon(Icons.add_chart),
+                      label: const Text('Atualizar Carteira / + Ativo'),
+                    ),
                   ],
                 ),
                 if (provider.isOfflineCache && provider.lastSyncedAt != null) ...[

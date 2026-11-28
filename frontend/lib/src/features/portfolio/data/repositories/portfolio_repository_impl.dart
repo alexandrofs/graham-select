@@ -13,6 +13,12 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   PortfolioRepositoryImpl(this.remoteDataSource, this.authRepository);
 
   @override
+  Future<List<Trade>> getManualTrades() async {
+    final token = await authRepository.getPersistedToken();
+    return remoteDataSource.getManualTrades(token: token);
+  }
+
+  @override
   Future<PortfolioSummary> getSummary({String? tagId}) async {
     final token = await authRepository.getPersistedToken();
     return remoteDataSource.getSummary(token: token, tagId: tagId);
@@ -26,6 +32,8 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
   }) async {
     final token = await authRepository.getPersistedToken();
     return remoteDataSource.createManualTrade(
@@ -35,8 +43,43 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       quantity: quantity,
       price: price,
       broker: broker,
+      assetClass: assetClass,
+      profileId: profileId,
       token: token,
     );
+  }
+
+  @override
+  Future<Trade> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+  }) async {
+    final token = await authRepository.getPersistedToken();
+    return remoteDataSource.updateManualTrade(
+      id: id,
+      ticker: ticker,
+      side: side,
+      tradeDate: tradeDate,
+      quantity: quantity,
+      price: price,
+      broker: broker,
+      assetClass: assetClass,
+      profileId: profileId,
+      token: token,
+    );
+  }
+
+  @override
+  Future<void> deleteManualTrade(String id) async {
+    final token = await authRepository.getPersistedToken();
+    return remoteDataSource.deleteManualTrade(id: id, token: token);
   }
 
   @override

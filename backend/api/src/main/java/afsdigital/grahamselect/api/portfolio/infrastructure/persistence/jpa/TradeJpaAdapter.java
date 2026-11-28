@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -19,9 +21,8 @@ public class TradeJpaAdapter implements TradePort {
 
     @Override
     public Trade save(Trade trade) {
-        String normalizedProfileId = (trade.getProfileId() == null || trade.getProfileId().isBlank())
-                ? null
-                : trade.getProfileId().trim();
+        String normalizedProfileId = normalizeBlankToNull(trade.getProfileId());
+        String normalizedAssetClass = normalizeBlankToNull(trade.getAssetClass());
         TradeEntity entity = TradeEntity.builder()
                 .id(trade.getId())
                 .userId(trade.getUserId())
@@ -32,23 +33,11 @@ public class TradeJpaAdapter implements TradePort {
                 .quantity(trade.getQuantity())
                 .price(trade.getPrice())
                 .broker(trade.getBroker())
+                .assetClass(normalizedAssetClass)
                 .createdAt(trade.getCreatedAt())
                 .build();
 
-        TradeEntity saved = repository.save(entity);
-
-        return Trade.builder()
-                .id(saved.getId())
-                .userId(saved.getUserId())
-                .profileId(saved.getProfileId())
-                .ticker(saved.getTicker())
-                .side(saved.getSide())
-                .tradeDate(saved.getTradeDate())
-                .quantity(saved.getQuantity())
-                .price(saved.getPrice())
-                .broker(saved.getBroker())
-                .createdAt(saved.getCreatedAt())
-                .build();
+        return toDomain(repository.save(entity));
     }
 
     @Override
@@ -73,20 +62,61 @@ public class TradeJpaAdapter implements TradePort {
     }
 
     @Override
+    public boolean existsOtherWithSameSignature(
+            UUID excludeId,
+            String userId,
+            String profileId,
+            String ticker,
+            LocalDate tradeDate,
+            BigDecimal quantity,
+            BigDecimal price,
+            String broker,
+            String side
+    ) {
+        if (profileId == null || profileId.isBlank()) {
+            return repository.existsByIdNotAndUserIdAndProfileIdIsNullAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+                    excludeId, userId, ticker, tradeDate, quantity, price, broker, side
+            );
+        }
+        return repository.existsByIdNotAndUserIdAndProfileIdAndTickerAndTradeDateAndQuantityAndPriceAndBrokerAndSide(
+                excludeId, userId, profileId, ticker, tradeDate, quantity, price, broker, side
+        );
+    }
+
+    @Override
+    public Optional<Trade> findByIdAndUserId(UUID id, String userId) {
+        return repository.findByIdAndUserId(id, userId).map(this::toDomain);
+    }
+
+    @Override
+    public void deleteByIdAndUserId(UUID id, String userId) {
+        repository.deleteByIdAndUserId(id, userId);
+    }
+
+    @Override
     public List<Trade> findAllByUserId(String userId) {
         return repository.findAllByUserId(userId).stream()
-                .map(saved -> Trade.builder()
-                        .id(saved.getId())
-                        .userId(saved.getUserId())
-                        .profileId(saved.getProfileId())
-                        .ticker(saved.getTicker())
-                        .side(saved.getSide())
-                        .tradeDate(saved.getTradeDate())
-                        .quantity(saved.getQuantity())
-                        .price(saved.getPrice())
-                        .broker(saved.getBroker())
-                        .createdAt(saved.getCreatedAt())
-                        .build())
+                .map(this::toDomain)
                 .toList();
+    }
+
+    private Trade toDomain(TradeEntity saved) {
+        return Trade.builder()
+                .id(saved.getId())
+                .userId(saved.getUserId())
+                .profileId(saved.getProfileId())
+                .ticker(saved.getTicker())
+                .side(saved.getSide())
+                .tradeDate(saved.getTradeDate())
+                .quantity(saved.getQuantity())
+                .price(saved.getPrice())
+                .broker(saved.getBroker())
+                .assetClass(saved.getAssetClass())
+                .createdAt(saved.getCreatedAt())
+                .build();
+    }
+
+    private String normalizeBlankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 }

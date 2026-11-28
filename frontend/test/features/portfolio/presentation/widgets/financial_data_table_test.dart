@@ -17,6 +17,9 @@ class MockPortfolioRepository implements PortfolioRepository {
   DateTime? metaPriceUpdatedAtToReturn;
 
   @override
+  Future<List<Trade>> getManualTrades() async => [];
+
+  @override
   Future<Trade> createManualTrade({
     required String ticker,
     required String side,
@@ -24,7 +27,25 @@ class MockPortfolioRepository implements PortfolioRepository {
     required double quantity,
     required double price,
     required String broker,
+    String? assetClass,
+    String? profileId,
   }) async => throw UnimplementedError();
+
+  @override
+  Future<Trade> updateManualTrade({
+    required String id,
+    required String ticker,
+    required String side,
+    required DateTime tradeDate,
+    required double quantity,
+    required double price,
+    required String broker,
+    String? assetClass,
+    String? profileId,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<void> deleteManualTrade(String id) async => throw UnimplementedError();
 
   @override
   Future<PortfolioSummary> getSummary({String? tagId}) async => throw UnimplementedError();
@@ -107,7 +128,7 @@ void main() {
 
     expect(find.text('Nenhum ativo encontrado'), findsOneWidget);
     expect(find.textContaining('Sua carteira de investimentos está vazia'), findsOneWidget);
-    expect(find.text('Fazer upload do arquivo B3 para começar'), findsOneWidget);
+    expect(find.text('Atualizar Carteira / + Ativo'), findsOneWidget);
   });
 
   testWidgets('deve renderizar a tabela com dados no estado success com posições', (tester) async {
